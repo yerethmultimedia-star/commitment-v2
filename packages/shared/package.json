@@ -1,0 +1,20 @@
+{
+  "name": "@commitment/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint \"src/**/*.ts\" --fix"
+  },
+  "devDependencies": {
+    "@commitment/config": "workspace:*",
+    "typescript": "^5.0.0"
+  }
+}

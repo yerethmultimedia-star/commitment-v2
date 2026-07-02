@@ -1,129 +1,117 @@
-# Plan de Implementación: Sprint 0 — Foundation
+# Plan de Implementación: Creación de Paquetes Compartidos en el Monorepo (Sprint 1)
 
-Este plan establece los cimientos para el desarrollo de **Commitment v2** según las directrices operativas y la arquitectura definida. El objetivo del Sprint 0 es configurar el Monorepo, inicializar los proyectos de NestJS y Flutter, configurar la infraestructura local en Docker Compose (incluyendo telemetría) y establecer la estructura oficial de documentación.
+Este plan detalla la creación e inicialización de la infraestructura compartida en el directorio `/packages` de acuerdo con las directivas del **Sprint 1 — Core Platform** y las reglas inviolables de Commitment v2.
 
----
+## Justificación e Impacto Arquitectónico
 
-## User Review Required
-
-> [!IMPORTANT]
-> **Flexibilidad Tecnológica y ADRs:**  
-> Como sugeriste, actualizaremos las directivas arquitectónicas para indicar que herramientas como **Drizzle** y **NATS** son las **tecnologías preferidas** y no definitivas. Cualquier cambio futuro requerirá de un _Architecture Decision Record (ADR)_ con su debida justificación técnica.
-
-> [!NOTE]
-> **Estructura del Monorepo:**  
-> Usaremos una estructura basada en `pnpm` y `Turborepo` con la siguiente organización:
->
-> - `apps/backend/` - Servidor NestJS
-> - `apps/mobile/` - Aplicación Flutter
-> - `packages/` - Configuraciones compartidas (tsconfig, eslint, etc.)
-
----
-
-## Open Questions
-
-1. **Entorno Supabase Local:**  
-   ¿Prefieres que configuremos el entorno local de Supabase utilizando la herramienta oficial `supabase-cli` (que corre mediante docker internamente y maneja migraciones de forma automática) o prefieres un contenedor PostgreSQL con extensiones configuradas directamente en nuestro `docker-compose.yml`? _(Recomendamos `supabase-cli` por su fidelidad con producción)._
-2. **Versión de Flutter:**  
-   ¿Hay alguna versión específica de Flutter (o canal de SDK) que desees utilizar para inicializar la app móvil, o procedemos con el SDK de Flutter instalado por defecto en tu máquina?
+- **Por qué se hace:** La **Regla #2 (Infrastructure First)** y la **Regla #13 (Si no es reutilizable no existe)** mandan crear infraestructura compartida antes que cualquier funcionalidad. Crear paquetes compartidos permite un desacoplamiento riguroso y promueve la reutilización de código (p. ej., reglas de dominio puro, contratos de API, tokens de diseño).
+- **Riesgos y Mitigación:** Colisiones de dependencias entre espacios de trabajo. (Mitigación: Pinned dependencies y uso riguroso de referencias de workspace `workspace:*` en `package.json` locales).
 
 ---
 
 ## Proposed Changes
 
-### 1. Reestructuración de Documentación
+Crearemos la carpeta `packages/` con la siguiente estructura de paquetes:
 
-Moveremos la documentación actual para cumplir con el estándar definido de tener la carpeta `docs` en la raíz del repositorio.
-
-#### [NEW] [docs/](file:///Users/yereth/Desktop/Commitment-v2/docs)
-
-Creación de la estructura oficial:
-
-- `docs/01-product/`: Moveremos `Documentation/docs/01-product/*` y los documentos de UX/filosofía.
-- `docs/02-domain/`: Moveremos `Documentation/docs/02-domain/*`.
-- `docs/03-architecture/`: Creación de directrices de flexibilidad tecnológica (ADR-011) y patrones arquitectónicos.
-- `docs/04-backend/`: Estándares de backend (NestJS, Zod, CQRS).
-- `docs/05-mobile/`: Estándares móviles (Flutter, Riverpod, Drift).
-- `docs/06-devops/`: Configuración de docker-compose, CI/CD, telemetría.
-- `docs/07-quality/`: Estrategias de QA y DoD.
-- `docs/08-operations/`: Documentación de onboarding y guías para desarrolladores.
-
-#### [DELETE] [Documentation/](file:///Users/yereth/Desktop/Commitment-v2/Documentation)
-
-Eliminación de la carpeta temporal una vez reubicados y organizados los archivos.
-
----
-
-### 2. Configuración del Monorepo (pnpm + Turborepo)
-
-#### [NEW] [pnpm-workspace.yaml](file:///Users/yereth/Desktop/Commitment-v2/pnpm-workspace.yaml)
-
-Definición de espacios de trabajo:
-
-```yaml
-packages:
-  - 'apps/*'
-  - 'packages/*'
+```text
+packages/
+├── config/             # Configuración compartida de TypeScript y linters
+├── shared/             # Utilidades, tipos helper y abstracciones comunes de software
+├── domain/             # Dominio puro (Event Sourcing y CQRS Core) sin frameworks
+├── api-contracts/      # Esquemas de entrada/salida y validaciones Zod compartidas
+└── design-system/      # Tokens de diseño calmo (colores HSL, curvas de movimiento, fuentes)
 ```
 
-#### [MODIFY] [package.json](file:///Users/yereth/Desktop/Commitment-v2/package.json)
+Cada paquete contará con:
 
-Agregar scripts para Turbo:
-
-- Configurar turbo como dependencia de desarrollo en la raíz.
-- Agregar pipelines para `build`, `lint`, `test` y `dev`.
-
-#### [NEW] [turbo.json](file:///Users/yereth/Desktop/Commitment-v2/turbo.json)
-
-Configuración de tareas de Turborepo para orquestar la compilación y pruebas de `apps/backend` y otros paquetes compartidos.
+1. `package.json` configurado como módulo ES y exports definidos.
+2. `tsconfig.json` extendiendo la configuración base compartida.
+3. Build script usando `tsc` o bundles ligeros.
+4. Archivo `README.md` documentando su propósito técnico.
+5. Setup de pruebas Jest.
+6. Código inicial de infraestructura (sin lógica de negocio).
 
 ---
 
-### 3. Backend Foundation (NestJS)
+### 1. Config Package (`@commitment/config`)
 
-#### [NEW] [apps/backend/](file:///Users/yereth/Desktop/Commitment-v2/apps/backend)
+#### [NEW] [package.json](file:///Users/yereth/Desktop/Commitment-v2/packages/config/package.json)
 
-Inicialización de la aplicación de NestJS:
+#### [NEW] [tsconfig.base.json](file:///Users/yereth/Desktop/Commitment-v2/packages/config/tsconfig.base.json)
 
-- Integración del módulo `@nestjs/cqrs` para arquitectura CQRS.
-- Configuración de Zod para la validación del esquema de variables de entorno al iniciar.
-- Configuración de Swagger para generación automática de OpenAPI.
-- Configuración del SDK de OpenTelemetry para tracing y métricas de Prometheus.
+Configuración de TypeScript estricta reutilizable por los demás paquetes y aplicaciones.
 
----
-
-### 4. Mobile Foundation (Flutter)
-
-#### [NEW] [apps/mobile/](file:///Users/yereth/Desktop/Commitment-v2/apps/mobile)
-
-Inicialización del proyecto Flutter:
-
-- Configuración de dependencias en `pubspec.yaml` (flutter_riverpod, go_router, drift, sqlcipher_flutter_libs).
-- Configuración del theme Material 3 base y esquema de navegación inicial con GoRouter.
+#### [NEW] [README.md](file:///Users/yereth/Desktop/Commitment-v2/packages/config/README.md)
 
 ---
 
-### 5. Infraestructura Local & Observabilidad (Docker Compose)
+### 2. Shared Utilities Package (`@commitment/shared`)
 
-#### [NEW] [docker-compose.yml](file:///Users/yereth/Desktop/Commitment-v2/docker-compose.yml)
+#### [NEW] [package.json](file:///Users/yereth/Desktop/Commitment-v2/packages/shared/package.json)
 
-Configuración de servicios de soporte:
+#### [NEW] [tsconfig.json](file:///Users/yereth/Desktop/Commitment-v2/packages/shared/tsconfig.json)
 
-- **Redis:** Caché y almacén temporal.
-- **NATS:** Servidor de mensajería ligero.
-- **OTel Collector:** Recepción de trazas y métricas.
-- **Prometheus:** Almacenamiento de métricas.
-- **Grafana / Loki / Tempo:** Visualización de logs, trazas y métricas.
+#### [NEW] [README.md](file:///Users/yereth/Desktop/Commitment-v2/packages/shared/README.md)
+
+#### [NEW] [index.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/shared/src/index.ts)
+
+Exportará tipos comunes (p. ej. `Nullable`, `Optional`).
 
 ---
 
-### 6. Integración Continua (GitHub Actions)
+### 3. Domain Infrastructure Package (`@commitment/domain`)
 
-#### [NEW] [.github/workflows/ci.yml](file:///Users/yereth/Desktop/Commitment-v2/.github/workflows/ci.yml)
+#### [NEW] [package.json](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/package.json)
 
-Configuración de CI básica:
+#### [NEW] [tsconfig.json](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/tsconfig.json)
 
-- Validación de sintaxis, linting y compilación automática del Backend y del Frontend en cada Pull Request a `main`.
+#### [NEW] [README.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/README.md)
+
+#### [NEW] [index.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/src/index.ts)
+
+#### [NEW] [domain-event.interface.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/src/core/domain-event.interface.ts)
+
+Contrato del envelope del evento de dominio según `event_catalog.md`.
+
+#### [NEW] [aggregate-root.base.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/src/core/aggregate-root.base.ts)
+
+Clase abstracta base de agregado para Event Sourcing.
+
+#### [NEW] [event-store.interface.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/src/core/event-store.interface.ts)
+
+Contrato abstracto para el Event Store.
+
+#### [NEW] [cqrs.interface.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/src/core/cqrs.interface.ts)
+
+Abstracciones para Command, Query y Handlers agnósticos.
+
+---
+
+### 4. API Contracts Package (`@commitment/api-contracts`)
+
+#### [NEW] [package.json](file:///Users/yereth/Desktop/Commitment-v2/packages/api-contracts/package.json)
+
+#### [NEW] [tsconfig.json](file:///Users/yereth/Desktop/Commitment-v2/packages/api-contracts/tsconfig.json)
+
+#### [NEW] [README.md](file:///Users/yereth/Desktop/Commitment-v2/packages/api-contracts/README.md)
+
+#### [NEW] [index.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/api-contracts/src/index.ts)
+
+---
+
+### 5. Design System Tokens Package (`@commitment/design-system`)
+
+#### [NEW] [package.json](file:///Users/yereth/Desktop/Commitment-v2/packages/design-system/package.json)
+
+#### [NEW] [tsconfig.json](file:///Users/yereth/Desktop/Commitment-v2/packages/design-system/tsconfig.json)
+
+#### [NEW] [README.md](file:///Users/yereth/Desktop/Commitment-v2/packages/design-system/README.md)
+
+#### [NEW] [index.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/design-system/src/index.ts)
+
+#### [NEW] [colors.ts](file:///Users/yereth/Desktop/Commitment-v2/packages/design-system/src/tokens/colors.ts)
+
+Definición de tokens de paleta de colores calm HSL para ser usados o traducidos por Flutter/Tailwind.
 
 ---
 
@@ -131,14 +119,10 @@ Configuración de CI básica:
 
 ### Automated Tests
 
-- Validar que `pnpm run build` y `pnpm run lint` pasen con éxito en todo el monorepo.
-- Validar el inicio correcto del backend de NestJS con validación estricta de variables de entorno.
-- Validar que la compilación de la app Flutter (`flutter build` o análisis estático `flutter analyze`) se ejecute sin errores.
+- Ejecutar compilación de todos los paquetes usando `pnpm run build` en el root (vía Turborepo).
+- Ejecutar linters globales `pnpm run lint` y verificar que pasen con 0 errores.
+- Escribir pruebas unitarias en `packages/domain/src/core/__tests__/aggregate-root.spec.ts` para verificar la acumulación e hidratación de eventos.
 
 ### Manual Verification
 
-- Levantar la infraestructura mediante `docker-compose up -d`.
-- Verificar acceso a los paneles:
-  - Grafana: `http://localhost:3000`
-  - Prometheus: `http://localhost:9090`
-  - Swagger UI: `http://localhost:4000/api/docs`
+- Comprobar que no existan dependencias cruzadas incorrectas o referencias de frameworks en `/packages`.
