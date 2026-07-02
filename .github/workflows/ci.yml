@@ -1,0 +1,76 @@
+name: CI - Commitment v2
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-ci:
+    name: Backend Lint, Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10.34.4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint Backend
+        run: pnpm --filter backend run lint
+
+      - name: Build Backend
+        run: pnpm --filter backend run build
+
+      - name: Test Backend
+        run: pnpm --filter backend run test
+
+  mobile-ci:
+    name: Flutter Lint, Build & Test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Read Flutter Version
+        id: get-version
+        run: |
+          # Extraer versión de Flutter de la configuración de FVM
+          VERSION=$(node -e "const fs = require('fs'); try { const config = JSON.parse(fs.readFileSync('.fvm/fvm_config.json')); console.log(config.flutterSdkVersion); } catch(e) { console.log('3.24.5'); }")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.get-version.outputs.version }}
+          channel: 'stable'
+
+      - name: Install Dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Analyze Flutter
+        working-directory: apps/mobile
+        run: flutter analyze
+
+      - name: Test Flutter
+        working-directory: apps/mobile
+        run: flutter test

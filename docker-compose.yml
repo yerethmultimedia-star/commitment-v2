@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: commitment-redis
+    ports:
+      - '6379:6379'
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: commitment-otel-collector
+    volumes:
+      - ./docker/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ['--config=/etc/otel-collector-config.yaml']
+    ports:
+      - '4317:4317' # OTLP gRPC receiver
+      - '4318:4318' # OTLP HTTP receiver
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: commitment-prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - '9090:9090'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    depends_on:
+      - otel-collector
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: commitment-grafana
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - '3000:3000'
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped

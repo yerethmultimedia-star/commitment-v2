@@ -41,7 +41,6 @@ Thumbs.db
 .settings/
 
 # Flutter/Dart specific
-.fvm/flutter_sdk
 .flutter-plugins
 .flutter-plugins-dependencies
 ios/.symlinks/
@@ -66,3 +65,6 @@ macos/.symlinks/
 # Supabase local files
 .supabase/
 supabase/.temp/
+
+# FVM Version Cache
+.fvm/
