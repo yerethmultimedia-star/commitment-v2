@@ -1,0 +1,68 @@
+# Dependency directories
+node_modules/
+.pnpm-store/
+
+# Build and cache outputs
+dist/
+build/
+bin/
+out/
+.next/
+.turbo/
+.dart_tool/
+.packages
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.classpath
+.project
+.settings/
+
+# Flutter/Dart specific
+.fvm/flutter_sdk
+.flutter-plugins
+.flutter-plugins-dependencies
+ios/.symlinks/
+macos/.symlinks/
+.metadata
+*.fsproj
+*.pydevproject
+.pub-cache/
+.pub/
+
+# Secrets and environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.env.*.local
+*.env
+*.env.*
+!*.env.example
+
+# Supabase local files
+.supabase/
+supabase/.temp/
