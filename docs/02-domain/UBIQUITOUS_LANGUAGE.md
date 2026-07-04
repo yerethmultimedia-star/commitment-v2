@@ -1,6 +1,6 @@
 # Ubiquitous Language Glossary (Lenguaje Ubicuo)
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-04
@@ -22,32 +22,32 @@ This document represents the official and single source of truth for terms and d
 
 ### 2. Commitment (Compromiso)
 
-- **Definition:** A solemn promise of personal transformation tied to the user's core identity and values. It is the root entity of the Commitment Lifecycle context.
+- **Definition:** A solemn promise of personal transformation bound to the user's core identity and values. It is the root entity of the Commitment Lifecycle context.
 - **Aggregates:** `Commitment` (Aggregate Root).
 - **Identifier:** `CommitmentId`.
 - **Prohibited Synonyms:** Task, Todo, Project, Habit Tracker, Goal (when used as synonym).
 
 ### 3. Identity Anchor (Ancla de Identidad)
 
-- **Definition:** The deep-seated motivation or statement of personal value associated with a specific commitment.
+- **Definition:** The deep-seated motivation or statement of personal value associated with a specific commitment. (Deferred from strict aggregate invariants).
 - **Value Object:** `IdentityAnchor`.
 - **Prohibited Synonyms:** Description, Category, Tag.
 
 ### 4. Goal (Objetivo)
 
 - **Definition:** A tactical, measurable checkpoint that breaks down a commitment into achievable execution phases.
-- **Entities:** `Goal`.
+- **Entities/Aggregates:** `Goal` (Aggregate Candidate).
 - **Prohibited Synonyms:** Task, Milestone.
 
 ### 5. Microaction (Microacción)
 
 - **Definition:** The daily, atomic unit of execution (duration < 30 minutes) designed to fit the present context.
-- **Entities:** `Microaction`.
+- **Entities/Aggregates:** `Microaction` (Aggregate Candidate).
 - **Prohibited Synonyms:** Task, Subtask, To-Do item.
 
 ### 6. Pause (Pausa Consciente)
 
-- **Definition:** A planned temporary suspension of micro-actions and notifications declared by the user without penalty.
+- **Definition:** A planned temporary suspension of actions and notifications declared by the user without penalty.
 - **Prohibited Synonyms:** Cancellation, Inactivity.
 
 ### 7. Rescue (Rescate Resiliente)
@@ -76,6 +76,19 @@ This document represents the official and single source of truth for terms and d
 
 ---
 
+## 🔄 Commitment States (Finite State Machine)
+
+- **Draft:** Initial status before activation.
+- **Active:** Standard execution state where daily micro-actions are scheduled.
+- **Paused:** Conscientious pause declared by the user.
+- **InFriction:** Triggered automatically upon 48 hours of inactivity.
+- **Recovering:** Transitional state following a rescue action.
+- **Completed:** Reached when all goals and milestones are completed.
+- **Archived:** Final state where learning capsules are immortalized and updates are locked.
+
+---
+
 ## 📜 Change History
 
+- **v1.1.0 (2026-07-04):** Integrated FSM state definitions and English domain terms.
 - **v1.0.0 (2026-07-04):** Initial Ubiquitous Language glossary definition.

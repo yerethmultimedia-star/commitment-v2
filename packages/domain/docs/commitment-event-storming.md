@@ -1,13 +1,13 @@
 # Commitment Event Storming Specification
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-04
 
 ---
 
-This document represents the Domain Event Storming model for the **Commitment Bounded Context** timeline using Mermaid diagrams and workflow sequences.
+This document represents the Domain Event Storming model for the **Commitment Bounded Context** timeline in English using Mermaid diagrams and workflow sequences.
 
 ---
 
@@ -23,47 +23,47 @@ sequenceDiagram
     participant W as Wisdom Bounded Context
 
     %% Phase 1: Conception
-    User->>C: Command: ConcebirCompromiso
-    Note over C: Invariants Check:<br/>IdentityAnchor must be valid
-    C-->>User: Event: CompromisoConcebido (State: Borrador)
+    User->>C: Command: RegisterCommitment
+    Note over C: Invariants Check:<br/>IdentityId must be valid
+    C-->>User: Event: CommitmentRegistered (State: Draft)
 
     %% Phase 2: Activation
-    User->>C: Command: ActivarCompromiso
+    User->>C: Command: ActivateCommitment
     Note over C: Invariants Check:<br/>Initial Microaction Scheduled
-    C-->>User: Event: PactoActivado (State: Activo)
+    C-->>User: Event: CommitmentActivated (State: Active)
 
     %% Phase 3: Friction Detection
     Note over S: Inactivity > 48 Hours
-    S->>C: Command: RegistrarFriccion
-    C-->>User: Event: FriccionDetectada (State: EnFriccion)
+    S->>C: Command: RecordFriction
+    C-->>User: Event: FrictionDetected (State: InFriction)
 
     %% Phase 4: Resilience Recovery
-    alt Option A: Aceptar Rescate
-        User->>C: Command: AceptarRescate
-        C-->>User: Event: VictoriaDeRegresoRegistrada (State: Recuperandose)
-        User->>C: Command: RegistrarMicroaccion (3 consecutive days)
-        C-->>User: Event: ConsistenciaRecuperada (State: Activo)
-    else Option B: Adaptar Plan
-        User->>C: Command: AdaptarCompromiso
-        C-->>User: Event: VelocidadAdaptada (State: EnAdaptacion)
-        User->>C: Command: AprobarPlanAdaptado
-        C-->>User: Event: PlanAdaptadoAprobado (State: Activo)
+    alt Option A: Accept Rescue
+        User->>C: Command: AcceptRescue
+        C-->>User: Event: VictoryOfReturnRecorded (State: Recovering)
+        User->>C: Command: RecordMicroaction (3 consecutive days)
+        C-->>User: Event: ConsistencyRecovered (State: Active)
+    else Option B: Adapt Plan
+        User->>C: Command: AdaptCommitment
+        C-->>User: Event: VelocityAdapted (State: InAdaptation)
+        User->>C: Command: ApproveAdaptedPlan
+        C-->>User: Event: AdaptedPlanApproved (State: Active)
     end
 
     %% Phase 5: Pausing
-    User->>C: Command: DeclararPausa
-    C-->>User: Event: PausaConscienteDeclarada (State: EnPausa)
-    User->>C: Command: ReanudarCompromiso
-    C-->>User: Event: CompromisoReanudo (State: Activo)
+    User->>C: Command: PauseCommitment
+    C-->>User: Event: ConsciousPauseDeclared (State: Paused)
+    User->>C: Command: ResumeCommitment
+    C-->>User: Event: CommitmentResumed (State: Active)
 
     %% Phase 6: Completion
-    User->>C: Command: CompletarCompromiso
-    C-->>User: Event: CompromisoCompletado (State: Completado)
+    User->>C: Command: CompleteCommitment
+    C-->>User: Event: CommitmentCompleted (State: Completed)
 
     %% Phase 7: Archiving
-    User->>C: Command: RegistrarReflexion
-    C-->>User: Event: CapsulaInmortalizada (State: Archivado)
-    C->>W: Integration Event: CapsulaInmortalizada (Hydrates Life Library)
+    User->>C: Command: RecordReflection
+    C-->>User: Event: LearningCapsuleImmortalized (State: Archived)
+    C->>W: Integration Event: LearningCapsuleImmortalized (Hydrates Life Library)
 ```
 
 ---
@@ -72,29 +72,30 @@ sequenceDiagram
 
 Event streams project changes to the following UI read models:
 
-1. **`TableroCompromisosView` (Dashboard Projections):**
-   - _Feeds on:_ `CompromisoConcebido`, `PactoActivado`, `CompromisoCompletado`, `CompromisoCanceladoConsciente`.
+1. **`CommitmentDashboardView` (Dashboard Projections):**
+   - _Feeds on:_ `CommitmentRegistered`, `CommitmentActivated`, `CommitmentCompleted`, `CommitmentCancelledConscious`.
    - _Presents:_ List of active, draft, and completed commitments for the home page dashboard.
-2. **`PresenteView` (Today's Microactions List):**
-   - _Feeds on:_ `PactoActivado`, `ConsistenciaRecuperada`, `PausaConscienteDeclarada`.
-   - _Presents:_ Atomic micro-actions (duration <30 mins) requiring immediate execution.
-3. **`BibliotecaDeVidaView` (Wisdom Learning Repository):**
-   - _Feeds on:_ `CapsulaInmortalizada`.
-   - _Presents:_ Permanent archive of user reflections, learnings, and personal values.
+2. **`TodayView` (Today's Action List):**
+   - _Feeds on:_ `CommitmentActivated`, `ConsistencyRecovered`, `ConsciousPauseDeclared`.
+   - _Presents:_ Action list requiring immediate execution.
+3. **`LifeLibraryView` (Wisdom Learning Repository):**
+   - _Feeds on:_ `LearningCapsuleImmortalized`.
+   - _Presents:_ Permanent archive of user reflections and learnings.
 
 ---
 
 ## 🛡️ 3. Policies & Automated Rules
 
 - **Inactivity Policy:**
-  - _Trigger:_ Inactivity timer detects that 48 hours have elapsed without any registered micro-action executions.
-  - _Effect:_ Emits a system command `RegistrarFriccion` to transition state to `EnFriccion`.
+  - _Trigger:_ Inactivity timer detects that 48 hours have elapsed without any registered micro-actions.
+  - _Effect:_ Emits a system command `RecordFriction` to transition state to `InFriction`.
 - **Rescued Consistency Policy:**
-  - _Trigger:_ Three consecutive days of successful micro-actions are recorded on a recovering aggregate.
-  - _Effect:_ Emits `ConsistenciaRecuperada` to return state from `Recuperandose` to `Activo`.
+  - _Trigger:_ Three consecutive days of successful actions are recorded on a recovering aggregate.
+  - _Effect:_ Emits `ConsistencyRecovered` to return state from `Recovering` to `Active`.
 
 ---
 
 ## 📜 Change History
 
+- **v1.1.0 (2026-07-04):** English translation of states, events, and commands.
 - **v1.0.0 (2026-07-04):** Initial Event Storming model specification.

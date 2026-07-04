@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.3.0
+Version: 1.4.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -214,10 +214,21 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > - estado derivado.
 >   Solo la información necesaria para entender el hecho del negocio.
 
+### Rule #72 — Domain Concepts Before Code
+
+> **Antes de implementar cualquier concepto importante del negocio:**
+>
+> - debe estar definido;
+> - debe pertenecer al lenguaje ubicuo;
+> - debe tener significado claro;
+> - debe ser independiente de la implementación.
+>   Esto evita que el código termine definiendo el negocio.
+
 ---
 
 ## 📜 Change History
 
+- **v1.4.0 (2026-07-04):** Integrated Rule #72 (Domain Concepts Before Code) as approved by the Board.
 - **v1.3.0 (2026-07-04):** Integrated Rule #70 (Events Describe Facts) as approved by the Board.
 - **v1.2.0 (2026-07-04):** Integrated Rule #67 (Shared Kernel Is Sacred) as approved by the Board.
 - **v1.1.0 (2026-07-04):** Expanded system prompt into a comprehensive, self-contained AI Operating Constitution.
