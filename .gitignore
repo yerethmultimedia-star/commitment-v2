@@ -68,3 +68,15 @@ supabase/.temp/
 
 # FVM Version Cache
 .fvm/
+
+# Generated zip artifacts
+docs/*.zip
+*.zip
+
+# iCloud sync files
+*.icloud
+
+# Coverage directories
+coverage/
+*/coverage/
+**/coverage/
