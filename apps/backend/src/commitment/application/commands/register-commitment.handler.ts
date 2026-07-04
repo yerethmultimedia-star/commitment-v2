@@ -1,18 +1,18 @@
 import {
-  Commitment,
   CommitmentId,
   CommitmentTitle,
   CommitmentDescription,
-  CommitmentRepository,
+  Commitment,
   IdentityId,
 } from '@commitment/domain';
 import { RegisterCommitmentCommand } from './register-commitment.command';
 import { RegisterCommitmentResult } from './register-commitment.result';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
+import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
 
 export class RegisterCommitmentCommandHandlerCore {
   constructor(
-    private readonly commitmentRepository: CommitmentRepository,
+    private readonly commitmentRepository: VersionedCommitmentRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
   ) {}
 
@@ -23,8 +23,9 @@ export class RegisterCommitmentCommandHandlerCore {
     const id = new CommitmentId(command.id);
     const existing = await this.commitmentRepository.findById(id);
     if (existing) {
-      // Return existing details idempotently
-      return new RegisterCommitmentResult(existing.id.value, 1);
+      // Return existing details idempotently — version does NOT increment (Rule #87)
+      const version = await this.commitmentRepository.save(existing);
+      return new RegisterCommitmentResult(existing.id.value, version);
     }
 
     // 2. Translate Primitives into Domain Value Objects
@@ -35,16 +36,21 @@ export class RegisterCommitmentCommandHandlerCore {
       : null;
 
     // 3. Invoke Domain Aggregate Behavior
-    const commitment = Commitment.register(id, identityId, title, description);
+    const commitment: Commitment = Commitment.register(
+      id,
+      identityId,
+      title,
+      description,
+    );
 
-    // 4. Save to Repository
-    await this.commitmentRepository.save(commitment);
+    // 4. Save to Repository — receive actual version
+    const version = await this.commitmentRepository.save(commitment);
 
     // 5. Dispatch Primary Events & Clear Event Buffer
     const events = commitment.getUncommittedEvents();
     await this.eventDispatcher.dispatch(events);
     commitment.clearUncommittedEvents();
 
-    return new RegisterCommitmentResult(commitment.id.value, 1);
+    return new RegisterCommitmentResult(commitment.id.value, version);
   }
 }

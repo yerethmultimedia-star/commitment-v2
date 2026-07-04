@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.10.0
+Version: 1.15.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -280,10 +280,72 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > - la sincronización offline depende de este identificador único y estable;
 > - el identificador del agregado nunca cambia tras su creación.
 
+### Rule #83 — Vertical Slice Independence
+
+> **Cada Vertical Slice debe poder:**
+>
+> - desarrollarse de forma independiente, sin depender de un slice que todavía no existe;
+> - probarse de forma aislada con sus propios unit tests, integration tests y E2E tests;
+> - desplegarse sin requerir que otro slice esté completo;
+> - revisarse arquitectónicamente como una unidad cohesiva y autónoma.
+>
+> Un slice que no puede funcionar por sí solo no es un slice; es un fragmento.
+
+### Rule #84 — Infrastructure Is Replaceable
+
+> **Toda infraestructura debe poder reemplazarse sin modificar el Domain ni el Application Layer:**
+>
+> - el repositorio es un contrato; su implementación es reemplazable (InMemory → SQLite → PostgreSQL → Supabase);
+> - el dispatcher de eventos es un contrato; su implementación es reemplazable (NoOp → EventBus → Outbox);
+> - ningún componente del Domain o Application Layer importa clases de infraestructura directamente;
+> - la regla aplica a: bases de datos, event stores, message brokers, servicios externos, caché y cualquier dependencia de IO.
+
+### Rule #85 — Repository Implements Persistence Only
+
+> **Los repositorios son puertos de persistencia, no servicios de negocio:**
+>
+> - no contienen reglas de negocio;
+> - no validan el estado del agregado;
+> - no toman decisiones sobre si guardar o no;
+> - no lanzan excepciones de dominio;
+> - solo persisten y recuperan agregados por su identidad.
+>
+> Toda lógica que no sea persistencia pura pertenece al Application Handler o al Aggregate.
+
+### Rule #86 — Commands Are Intentions
+
+> **Commands express what the client wants to happen:**
+>
+> - commands never contain business logic;
+> - commands never validate business invariants;
+> - commands are immutable data structures;
+> - commands are handled exactly once;
+> - business validation belongs to the Domain;
+> - the Application Layer coordinates execution;
+> - Infrastructure delivers commands to the Application.
+>
+> The Command represents intention.
+> The Aggregate decides whether the intention is valid.
+
+### Rule #87 — Version Changes Only With Meaningful State Changes
+
+> **Aggregate versions increase only when a meaningful business change occurs:**
+>
+> - validation failures do not increment the version;
+> - repeated idempotent requests do not increment the version;
+> - only Domain Events that represent a real business fact increment the version.
+>
+> This rule is fundamental for Offline First synchronization and Optimistic Concurrency.
+
 ---
 
 ## 📜 Change History
 
+- **v1.15.0 (2026-07-04):** Integrated Rule #87 (Version Changes Only With Meaningful State Changes) as approved by the Board.
+- **v1.14.0 (2026-07-04):** Integrated Rule #86 (Commands Are Intentions) as approved by the Board.
+- **v1.13.0 (2026-07-04):** Integrated Rule #85 (Repository Implements Persistence Only) as approved by the Board.
+- **v1.12.0 (2026-07-04):** Integrated Rule #84 (Infrastructure Is Replaceable) as approved by the Board.
+- **v1.11.0 (2026-07-04):** Integrated Rule #83 (Vertical Slice Independence) as approved by the Board.
 - **v1.10.0 (2026-07-04):** Integrated Rule #82 (Client Owns Aggregate Identity) as approved by the Board.
 - **v1.9.0 (2026-07-04):** Integrated Rule #81 (Every Increment Must Deliver Value) as approved by the Board.
 - **v1.8.0 (2026-07-04):** Integrated Rule #77 (No Meaningless Events) as approved by the Board.

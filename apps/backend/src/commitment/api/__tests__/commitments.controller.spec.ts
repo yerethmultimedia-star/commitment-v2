@@ -3,73 +3,121 @@ import { CommitmentsController } from '../commitments.controller';
 import { CommandBus } from '@nestjs/cqrs';
 import { RegisterCommitmentDto } from '../dtos/register-commitment.dto';
 import { RegisterCommitmentResult } from '../../application/commands/register-commitment.result';
-import { BadRequestException } from '@nestjs/common';
+import { ActivateCommitmentResult } from '../../application/commands/activate-commitment.result';
+import {
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import {
+  CommitmentNotFoundError,
+  CommitmentStateConflictError,
+  CommitmentStateTransitionError,
+} from '../../application/commands/activate-commitment.handler';
+
+const VALID_ID = '018f6b5c-42e1-7000-8000-999999999999';
+const VALID_IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
 
 describe('CommitmentsController', () => {
   let controller: CommitmentsController;
   let commandBus: CommandBus;
 
   beforeEach(async () => {
-    const mockCommandBus = {
-      execute: jest.fn(),
-    };
+    const mockCommandBus = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommitmentsController],
-      providers: [
-        {
-          provide: CommandBus,
-          useValue: mockCommandBus,
-        },
-      ],
+      providers: [{ provide: CommandBus, useValue: mockCommandBus }],
     }).compile();
 
     controller = module.get<CommitmentsController>(CommitmentsController);
     commandBus = module.get<CommandBus>(CommandBus);
   });
 
-  it('should validate inputs, execute command, and return commitment details', async () => {
-    const dto: RegisterCommitmentDto = {
-      id: '018f6b5c-42e1-7000-8000-999999999999',
-      identityId: '018f6b5c-42e1-7000-8000-111111111111',
-      title: 'Practice clean architecture',
-      description: 'Follow guidelines',
-    };
+  // ─── register ───────────────────────────────────────────────────────────
 
-    const expectedResult = new RegisterCommitmentResult(dto.id, 1);
+  it('register: should execute command and return commitmentId + version', async () => {
+    const dto: RegisterCommitmentDto = {
+      id: VALID_ID,
+      identityId: VALID_IDENTITY_ID,
+      title: 'Practice clean architecture',
+    };
     const executeSpy = jest
       .spyOn(commandBus, 'execute')
-      .mockResolvedValue(expectedResult);
+      .mockResolvedValue(new RegisterCommitmentResult(dto.id, 1));
 
     const result = await controller.register(dto);
-    expect(result).toEqual({
-      commitmentId: dto.id,
-      version: 1,
-    });
+    expect(result).toEqual({ commitmentId: dto.id, version: 1 });
     expect(executeSpy).toHaveBeenCalled();
   });
 
-  it('should throw BadRequestException on input validation failure', async () => {
+  it('register: should throw BadRequestException on invalid UUID', async () => {
     const dto: RegisterCommitmentDto = {
-      id: 'invalid-id',
-      identityId: 'invalid-identity-id',
-      title: '',
+      id: 'bad-id',
+      identityId: VALID_IDENTITY_ID,
+      title: 'X',
     };
-
     await expect(controller.register(dto)).rejects.toThrow(BadRequestException);
   });
 
-  it('should map domain handler exceptions into BadRequestExceptions', async () => {
+  it('register: should map domain errors to BadRequestException', async () => {
     const dto: RegisterCommitmentDto = {
-      id: '018f6b5c-42e1-7000-8000-999999999999',
-      identityId: '018f6b5c-42e1-7000-8000-111111111111',
-      title: 'Valid Title',
+      id: VALID_ID,
+      identityId: VALID_IDENTITY_ID,
+      title: 'X',
     };
-
     jest
       .spyOn(commandBus, 'execute')
-      .mockRejectedValue(new Error('Domain violation'));
-
+      .mockRejectedValue(new Error('domain error'));
     await expect(controller.register(dto)).rejects.toThrow(BadRequestException);
+  });
+
+  // ─── activate ───────────────────────────────────────────────────────────
+
+  it('activate: should return commitmentId, state, version on success', async () => {
+    jest
+      .spyOn(commandBus, 'execute')
+      .mockResolvedValue(new ActivateCommitmentResult(VALID_ID, 'Active', 2));
+
+    const result = await controller.activate(VALID_ID);
+    expect(result).toEqual({
+      commitmentId: VALID_ID,
+      state: 'Active',
+      version: 2,
+    });
+  });
+
+  it('activate: should throw BadRequestException on invalid UUID', async () => {
+    await expect(controller.activate('not-a-uuid')).rejects.toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('activate: should throw NotFoundException when commitment not found', async () => {
+    jest
+      .spyOn(commandBus, 'execute')
+      .mockRejectedValue(new CommitmentNotFoundError(VALID_ID));
+    await expect(controller.activate(VALID_ID)).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('activate: should throw ConflictException on terminal state', async () => {
+    jest
+      .spyOn(commandBus, 'execute')
+      .mockRejectedValue(new CommitmentStateConflictError('cancelled'));
+    await expect(controller.activate(VALID_ID)).rejects.toThrow(
+      ConflictException,
+    );
+  });
+
+  it('activate: should throw UnprocessableEntityException on invalid transition', async () => {
+    jest
+      .spyOn(commandBus, 'execute')
+      .mockRejectedValue(new CommitmentStateTransitionError('paused'));
+    await expect(controller.activate(VALID_ID)).rejects.toThrow(
+      UnprocessableEntityException,
+    );
   });
 });

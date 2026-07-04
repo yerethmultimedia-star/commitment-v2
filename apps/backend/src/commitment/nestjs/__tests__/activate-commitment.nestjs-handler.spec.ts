@@ -1,0 +1,41 @@
+import { ActivateCommitmentNestjsHandler } from '../activate-commitment.nestjs-handler';
+import { ActivateCommitmentCommand } from '../../application/commands/activate-commitment.command';
+import { InMemoryCommitmentRepository } from '../../infrastructure/in-memory-commitment.repository';
+import { NoOpDomainEventDispatcher } from '../../infrastructure/noop-event-dispatcher';
+import {
+  Commitment,
+  CommitmentId,
+  CommitmentTitle,
+  IdentityId,
+} from '@commitment/domain';
+
+describe('ActivateCommitmentNestjsHandler', () => {
+  it('should delegate to core handler and return ActivateCommitmentResult', async () => {
+    const repository = new InMemoryCommitmentRepository();
+    const dispatcher = new NoOpDomainEventDispatcher();
+    const handler = new ActivateCommitmentNestjsHandler(repository, dispatcher);
+
+    // Pre-seed a commitment
+    const id = '018f6b5c-42e1-7000-8000-999999999999';
+    const commitment = Commitment.register(
+      new CommitmentId(id),
+      new IdentityId('018f6b5c-42e1-7000-8000-111111111111'),
+      new CommitmentTitle('Test'),
+      null,
+    );
+    await repository.save(commitment);
+    commitment.clearUncommittedEvents();
+
+    const result = (await handler.execute(
+      new ActivateCommitmentCommand(id),
+    )) as {
+      commitmentId: string;
+      state: string;
+      version: number;
+    };
+
+    expect(result.commitmentId).toBe(id);
+    expect(result.state).toBe('Active');
+    expect(result.version).toBe(2); // register event (1) + activate event (1) = 2
+  });
+});
