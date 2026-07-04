@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-04
@@ -9,18 +9,18 @@ Last Updated: 2026-07-04
 
 ## Current Phase
 
-Sprint G0 — Engineering Handbook
+Vertical Slice Phase
 
 ## Current Sprint
 
-G0.2 — Project Backbone
+VS-001 — Register Commitment Vertical Slice
 
 ## Overall Status
 
 - Product: Complete
-- Domain: Complete
+- Domain: Skeletons Ready (Identity & Commitment)
 - Architecture: Complete
-- Backend: Foundation
+- Backend: Vertical Slice integration
 - Mobile: Foundation
 - Documentation: In Progress
 
@@ -36,4 +36,5 @@ G0.2 — Project Backbone
 
 ## 📜 Change History
 
+- **v1.1.0 (2026-07-04):** Updated to reflect transition to the Vertical Slice Phase and VS-001 sprint.
 - **v1.0.0 (2026-07-04):** Integrated as the official project status baseline at the root level.

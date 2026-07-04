@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.8.0
+Version: 1.10.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -262,10 +262,30 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > - intentar activar un compromiso ya activo (debe fallar con un error, no emitir un evento).
 >   Esta regla mantiene el historial de eventos limpio y significativo.
 
+### Rule #81 — Every Increment Must Deliver Value
+
+> **A partir de la Vertical Slice Phase:**
+>
+> - cada tarea debe entregar una capacidad funcional completa;
+> - evitar implementar capas aisladas sin un flujo que las utilice;
+> - el dominio seguirá evolucionando, pero impulsado por necesidades reales de los slices;
+> - la documentación continuará evolucionando junto con el producto, no por adelantado.
+
+### Rule #82 — Client Owns Aggregate Identity
+
+> **Para soportar Offline First:**
+>
+> - el cliente genera el identificador del agregado (`CommitmentId`);
+> - el servidor valida pero nunca reemplaza el identificador generado por el cliente;
+> - la sincronización offline depende de este identificador único y estable;
+> - el identificador del agregado nunca cambia tras su creación.
+
 ---
 
 ## 📜 Change History
 
+- **v1.10.0 (2026-07-04):** Integrated Rule #82 (Client Owns Aggregate Identity) as approved by the Board.
+- **v1.9.0 (2026-07-04):** Integrated Rule #81 (Every Increment Must Deliver Value) as approved by the Board.
 - **v1.8.0 (2026-07-04):** Integrated Rule #77 (No Meaningless Events) as approved by the Board.
 - **v1.7.0 (2026-07-04):** Integrated Rule #76 (One Behavior, One Primary Event) as approved by the Board.
 - **v1.6.0 (2026-07-04):** Integrated Rule #75 (Events Drive State) as approved by the Board.

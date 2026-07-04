@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MetricsController } from './metrics.controller';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+import { CommitmentModule } from './commitment/commitment.module';
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, CommitmentModule],
   controllers: [AppController, MetricsController],
   providers: [AppService],
 })

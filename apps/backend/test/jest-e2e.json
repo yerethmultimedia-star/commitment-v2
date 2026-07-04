@@ -1,9 +1,25 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
+  "roots": ["<rootDir>", "<rootDir>/../../../packages/domain/src"],
+  "testPathIgnorePatterns": ["/node_modules/", "/packages/domain/"],
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "module": "commonjs",
+          "moduleResolution": "node16",
+          "resolvePackageJsonExports": false
+        }
+      }
+    ]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!@commitment/)"],
+  "moduleNameMapper": {
+    "^(\\.\\.?/.*)\\.js$": "$1",
+    "^@commitment/domain$": "<rootDir>/../../../packages/domain/src/index"
   }
 }
