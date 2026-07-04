@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.4.0
+Version: 1.6.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -224,10 +224,32 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > - debe ser independiente de la implementación.
 >   Esto evita que el código termine definiendo el negocio.
 
+### Rule #74 — Behavior Over Setters
+
+> **Aggregates represent business behavior.**
+> Aggregates MUST NOT expose generic setters such as `setTitle()`, `setState()`, `setDescription()`, or a generic `update()`.
+> Instead, Aggregates expose business actions such as `register()`, `activate()`, `pause()`, `resume()`, `complete()`, `cancel()`, `archive()`, or `rename()`.
+>
+> - Every public method must represent a business intention.
+> - Every business action must protect Aggregate invariants.
+> - Every business action may emit Domain Events.
+> - Behavior is part of the Ubiquitous Language.
+> - Never expose mutable state.
+> - Never mutate Aggregates from outside.
+
+### Rule #75 — Events Drive State
+
+> **Los agregados no cambian de estado directamente.**
+> Todo cambio significativo del estado debe originarse a partir de un **Domain Event**.
+> El agregado puede aplicar ese evento internamente, pero el evento representa la fuente de verdad del cambio.
+> Aunque Event Sourcing se implemente más adelante, todos los agregados deben diseñarse con esta filosofía desde el inicio.
+
 ---
 
 ## 📜 Change History
 
+- **v1.6.0 (2026-07-04):** Integrated Rule #75 (Events Drive State) as approved by the Board.
+- **v1.5.0 (2026-07-04):** Integrated Rule #74 (Behavior Over Setters) as approved by the Board.
 - **v1.4.0 (2026-07-04):** Integrated Rule #72 (Domain Concepts Before Code) as approved by the Board.
 - **v1.3.0 (2026-07-04):** Integrated Rule #70 (Events Describe Facts) as approved by the Board.
 - **v1.2.0 (2026-07-04):** Integrated Rule #67 (Shared Kernel Is Sacred) as approved by the Board.

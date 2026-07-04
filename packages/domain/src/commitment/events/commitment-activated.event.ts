@@ -1,0 +1,32 @@
+import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interface.js';
+
+export class CommitmentActivatedEvent implements DomainEvent {
+  public readonly name = 'commitment.activated';
+  public readonly metadata: DomainEventMetadata;
+  public readonly payload: {
+    readonly commitmentId: string;
+  };
+
+  constructor(
+    aggregateId: string,
+    payload: {
+      commitmentId: string;
+    },
+    occurredAt: string
+  ) {
+    this.payload = payload;
+    this.metadata = {
+      eventId: '',
+      aggregateId,
+      aggregateVersion: 0,
+      eventVersion: 1,
+      occurredAt,
+      recordedAt: occurredAt,
+      actorType: 'SYSTEM',
+      actorId: '',
+      correlationId: '',
+      causationId: '',
+      tenantId: null
+    };
+  }
+}

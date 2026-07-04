@@ -15,17 +15,17 @@ Core pure Domain infrastructure and abstractions for Commitment v2 (Event Sourci
   - Minimal outcome `Result` monad and base domain exceptions
   - Placeholder stubs for domain primitives (`Email`, `Percentage`, etc.)
   - Nominal typing utilities (`Brand<T, B>`, `Nullable<T>`, etc.)
-- `identity/`: Identity Bounded Context:
-  - Core `Identity` aggregate root.
-  - Self-validating value objects (`Email`, `DisplayName`, etc.).
-  - Domain events `IdentityCreatedEvent` and `IdentityUpdatedEvent`.
-  - Repository interfaces.
+- `identity/`: Identity Bounded Context.
+- `commitment/`: Commitment Bounded Context.
 
 ## Documentation
 
 - [docs/shared-kernel.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/shared-kernel.md) — Shared Kernel design patterns
 - [docs/shared-api.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/shared-api.md) — Shared Kernel public API reference
 - [docs/identity.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/identity.md) — Identity Context specifications
+- [docs/commitment-model.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/commitment-model.md) — Commitment Bounded Context Domain Model
+- [docs/commitment-event-storming.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/commitment-event-storming.md) — Commitment Bounded Context Event Storming Diagram
+- [docs/commitment.md](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/docs/commitment.md) — Commitment Aggregate Specification
 
 ## Installation
 
