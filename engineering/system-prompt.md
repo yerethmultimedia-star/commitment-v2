@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.2.0
+Version: 1.3.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -203,10 +203,22 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > - Nuevas pruebas
 >   No se aceptarán cambios rápidos en esta capa.
 
+### Rule #70 — Events Describe Facts
+
+> **Un Domain Event debe describir únicamente un hecho ocurrido.**
+> Nunca debe contener:
+>
+> - lógica;
+> - referencias a infraestructura;
+> - datos redundantes;
+> - estado derivado.
+>   Solo la información necesaria para entender el hecho del negocio.
+
 ---
 
 ## 📜 Change History
 
+- **v1.3.0 (2026-07-04):** Integrated Rule #70 (Events Describe Facts) as approved by the Board.
 - **v1.2.0 (2026-07-04):** Integrated Rule #67 (Shared Kernel Is Sacred) as approved by the Board.
 - **v1.1.0 (2026-07-04):** Expanded system prompt into a comprehensive, self-contained AI Operating Constitution.
 - **v1.0.0 (2026-07-02):** Initial system prompt definition.
