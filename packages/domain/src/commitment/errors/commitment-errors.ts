@@ -42,3 +42,66 @@ export class InvalidCommitmentStateTransitionError extends Error {
     Object.freeze(this);
   }
 }
+
+export class CommitmentAlreadyCompletedError extends Error {
+  public readonly code = 'COMMITMENT_ALREADY_COMPLETED';
+  constructor() {
+    super('Commitment is already completed.');
+    this.name = 'CommitmentAlreadyCompletedError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentAlreadyCancelledError extends Error {
+  public readonly code = 'COMMITMENT_ALREADY_CANCELLED';
+  constructor() {
+    super('Commitment is already cancelled.');
+    this.name = 'CommitmentAlreadyCancelledError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentCannotBePausedError extends Error {
+  public readonly code = 'COMMITMENT_CANNOT_BE_PAUSED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentCannotBePausedError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentCannotBeResumedError extends Error {
+  public readonly code = 'COMMITMENT_CANNOT_BE_RESUMED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentCannotBeResumedError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentCannotBeCompletedError extends Error {
+  public readonly code = 'COMMITMENT_CANNOT_BE_COMPLETED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentCannotBeCompletedError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentCannotBeRenamedError extends Error {
+  public readonly code = 'COMMITMENT_CANNOT_BE_RENAMED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentCannotBeRenamedError';
+    Object.freeze(this);
+  }
+}
+
+export class CommitmentCannotBeDescriptionUpdatedError extends Error {
+  public readonly code = 'COMMITMENT_CANNOT_BE_DESCRIPTION_UPDATED';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentCannotBeDescriptionUpdatedError';
+    Object.freeze(this);
+  }
+}

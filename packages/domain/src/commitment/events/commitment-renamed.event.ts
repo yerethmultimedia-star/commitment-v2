@@ -1,22 +1,18 @@
 import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interface.js';
 
-export class CommitmentRegisteredEvent implements DomainEvent {
-  public readonly name = 'commitment.registered';
+export class CommitmentRenamedEvent implements DomainEvent {
+  public readonly name = 'commitment.renamed';
   public readonly metadata: DomainEventMetadata;
   public readonly payload: {
     readonly commitmentId: string;
-    readonly identityId: string;
     readonly title: string;
-    readonly description: string;
   };
 
   constructor(
     aggregateId: string,
     payload: {
       commitmentId: string;
-      identityId: string;
       title: string;
-      description: string;
     },
     occurredAt?: string
   ) {

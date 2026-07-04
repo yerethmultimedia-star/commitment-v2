@@ -6,14 +6,29 @@ import { CommitmentDescription } from '../value-objects/commitment-description.j
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { CommitmentRegisteredEvent } from '../events/commitment-registered.event.js';
 import { CommitmentActivatedEvent } from '../events/commitment-activated.event.js';
+import { CommitmentPausedEvent } from '../events/commitment-paused.event.js';
+import { CommitmentResumedEvent } from '../events/commitment-resumed.event.js';
+import { CommitmentCancelledEvent } from '../events/commitment-cancelled.event.js';
+import { CommitmentCompletedEvent } from '../events/commitment-completed.event.js';
+import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
+import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
 import {
   CommitmentAlreadyActiveError,
-  CommitmentRequiresIdentityError
+  CommitmentRequiresIdentityError,
+  CommitmentAlreadyCompletedError,
+  CommitmentAlreadyCancelledError,
+  CommitmentCannotBePausedError,
+  CommitmentCannotBeResumedError,
+  CommitmentCannotBeCompletedError,
+  InvalidCommitmentStateTransitionError
 } from '../errors/commitment-errors.js';
 
 export enum CommitmentState {
-  Draft = 'Draft',
-  Active = 'Active'
+  Draft,
+  Active,
+  Paused,
+  Completed,
+  Cancelled
 }
 
 export class Commitment extends AggregateRoot<CommitmentId> {
@@ -46,8 +61,7 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     id: CommitmentId,
     identityId: IdentityId,
     title: CommitmentTitle,
-    description: CommitmentDescription | null,
-    occurredAt: Date
+    description: CommitmentDescription | null
   ): Commitment {
     if (!identityId) {
       throw new CommitmentRequiresIdentityError();
@@ -60,25 +74,121 @@ export class Commitment extends AggregateRoot<CommitmentId> {
         identityId: identityId.value,
         title: title.value,
         description: description ? description.value : ''
-      },
-      occurredAt.toISOString()
+      }
     );
     commitment.recordEvent(event);
     return commitment;
   }
 
-  public activate(occurredAt: Date): void {
-    if (this._state === CommitmentState.Active) {
-      throw new CommitmentAlreadyActiveError();
+  public activate(): void {
+    if (this._state !== CommitmentState.Draft) {
+      if (this._state === CommitmentState.Active) {
+        throw new CommitmentAlreadyActiveError();
+      }
+      this.ensureNotImmutable();
+      throw new InvalidCommitmentStateTransitionError(`Cannot activate commitment from state: ${CommitmentState[this._state]}`);
     }
     const event = new CommitmentActivatedEvent(
       this.id.value,
       {
         commitmentId: this.id.value
-      },
-      occurredAt.toISOString()
+      }
     );
     this.recordEvent(event);
+  }
+
+  public pause(): void {
+    if (this._state !== CommitmentState.Active) {
+      this.ensureNotImmutable();
+      throw new CommitmentCannotBePausedError(`Cannot pause commitment from state: ${CommitmentState[this._state]}`);
+    }
+    const event = new CommitmentPausedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  public resume(): void {
+    if (this._state !== CommitmentState.Paused) {
+      this.ensureNotImmutable();
+      throw new CommitmentCannotBeResumedError(`Cannot resume commitment from state: ${CommitmentState[this._state]}`);
+    }
+    const event = new CommitmentResumedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  public cancel(): void {
+    this.ensureNotImmutable();
+    const event = new CommitmentCancelledEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  public complete(): void {
+    if (this._state !== CommitmentState.Active) {
+      this.ensureNotImmutable();
+      throw new CommitmentCannotBeCompletedError(`Cannot complete commitment from state: ${CommitmentState[this._state]}`);
+    }
+    const event = new CommitmentCompletedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  public rename(newTitle: CommitmentTitle): void {
+    this.ensureNotImmutable();
+    if (newTitle.value === this._title.value) {
+      return; // Rule #77 — No Meaningless Events
+    }
+    const event = new CommitmentRenamedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value,
+        title: newTitle.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  public updateDescription(newDescription: CommitmentDescription | null): void {
+    this.ensureNotImmutable();
+    const currentVal = this._description ? this._description.value : '';
+    const newVal = newDescription ? newDescription.value : '';
+    if (currentVal === newVal) {
+      return; // Rule #77 — No Meaningless Events
+    }
+    const event = new CommitmentDescriptionUpdatedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value,
+        description: newVal
+      }
+    );
+    this.recordEvent(event);
+  }
+
+  private ensureNotImmutable(): void {
+    if (this._state === CommitmentState.Completed) {
+      throw new CommitmentAlreadyCompletedError();
+    }
+    if (this._state === CommitmentState.Cancelled) {
+      throw new CommitmentAlreadyCancelledError();
+    }
   }
 
   protected applyEvent(event: DomainEvent): void {
@@ -90,6 +200,20 @@ export class Commitment extends AggregateRoot<CommitmentId> {
       this._state = CommitmentState.Draft;
     } else if (event.name === 'commitment.activated') {
       this._state = CommitmentState.Active;
+    } else if (event.name === 'commitment.paused') {
+      this._state = CommitmentState.Paused;
+    } else if (event.name === 'commitment.resumed') {
+      this._state = CommitmentState.Active;
+    } else if (event.name === 'commitment.cancelled') {
+      this._state = CommitmentState.Cancelled;
+    } else if (event.name === 'commitment.completed') {
+      this._state = CommitmentState.Completed;
+    } else if (event.name === 'commitment.renamed') {
+      const payload = (event as CommitmentRenamedEvent).payload;
+      this._title = new CommitmentTitle(payload.title);
+    } else if (event.name === 'commitment.description_updated') {
+      const payload = (event as CommitmentDescriptionUpdatedEvent).payload;
+      this._description = payload.description ? new CommitmentDescription(payload.description) : null;
     }
   }
 }

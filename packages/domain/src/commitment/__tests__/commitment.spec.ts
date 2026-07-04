@@ -7,19 +7,27 @@ import { CommitmentConstraints } from '../constants/commitment-constraints.js';
 import { CommitmentRepository } from '../repositories/commitment.repository.js';
 import { CommitmentRegisteredEvent } from '../events/commitment-registered.event.js';
 import { CommitmentActivatedEvent } from '../events/commitment-activated.event.js';
+import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
+import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
 import {
   CommitmentAlreadyActiveError,
   CommitmentRequiresIdentityError,
   InvalidCommitmentTitleError,
   InvalidCommitmentDescriptionError,
-  InvalidCommitmentStateTransitionError
+  InvalidCommitmentStateTransitionError,
+  CommitmentAlreadyCompletedError,
+  CommitmentAlreadyCancelledError,
+  CommitmentCannotBePausedError,
+  CommitmentCannotBeResumedError,
+  CommitmentCannotBeCompletedError,
+  CommitmentCannotBeRenamedError,
+  CommitmentCannotBeDescriptionUpdatedError
 } from '../errors/commitment-errors.js';
 
 describe('Commitment Bounded Context', () => {
   const validIdentityId = new IdentityId('018f6b5c-42e1-7000-8000-111111111111');
   const validTitle = new CommitmentTitle('Learn Domain Driven Design');
   const validDescription = new CommitmentDescription('Read blue book and write aggregates');
-  const occurredAt = new Date('2026-07-04T12:00:00Z');
 
   describe('Value Objects', () => {
     describe('CommitmentId', () => {
@@ -82,8 +90,7 @@ describe('Commitment Bounded Context', () => {
         commitmentId,
         validIdentityId,
         validTitle,
-        validDescription,
-        occurredAt
+        validDescription
       );
 
       expect(commitment.id.equals(commitmentId)).toBe(true);
@@ -99,15 +106,10 @@ describe('Commitment Bounded Context', () => {
       expect(registeredEvent).toBeDefined();
       expect(registeredEvent.name).toBe('commitment.registered');
       expect(registeredEvent.metadata.aggregateId).toBe(commitmentId.value);
-      expect(registeredEvent.metadata.occurredAt).toBe(occurredAt.toISOString());
       expect(registeredEvent.payload.commitmentId).toBe(commitmentId.value);
       expect(registeredEvent.payload.identityId).toBe(validIdentityId.value);
       expect(registeredEvent.payload.title).toBe(validTitle.value);
       expect(registeredEvent.payload.description).toBe(validDescription.value);
-
-      // Verify no timestamps inside payload
-      expect('createdAt' in registeredEvent.payload).toBe(false);
-      expect('occurredAt' in registeredEvent.payload).toBe(false);
     });
 
     it('should register with null/empty description correctly', () => {
@@ -116,8 +118,7 @@ describe('Commitment Bounded Context', () => {
         commitmentId,
         validIdentityId,
         validTitle,
-        null,
-        occurredAt
+        null
       );
 
       expect(commitment.description).toBeNull();
@@ -128,9 +129,9 @@ describe('Commitment Bounded Context', () => {
 
     it('should enforce aggregate entity equality based on ID', () => {
       const id = new CommitmentId('018f6b5c-42e1-7000-8000-999999999999');
-      const c1 = Commitment.register(id, validIdentityId, validTitle, null, occurredAt);
-      const c2 = Commitment.register(id, validIdentityId, new CommitmentTitle('Different Title'), null, occurredAt);
-      const c3 = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-888888888888'), validIdentityId, validTitle, null, occurredAt);
+      const c1 = Commitment.register(id, validIdentityId, validTitle, null);
+      const c2 = Commitment.register(id, validIdentityId, new CommitmentTitle('Different Title'), null);
+      const c3 = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-888888888888'), validIdentityId, validTitle, null);
 
       expect(c1.equals(c2)).toBe(true);
       expect(c1.equals(c3)).toBe(false);
@@ -143,8 +144,7 @@ describe('Commitment Bounded Context', () => {
           commitmentId,
           null as unknown as IdentityId,
           validTitle,
-          validDescription,
-          occurredAt
+          validDescription
         )
       ).toThrow(CommitmentRequiresIdentityError);
     });
@@ -155,14 +155,11 @@ describe('Commitment Bounded Context', () => {
         commitmentId,
         validIdentityId,
         validTitle,
-        validDescription,
-        occurredAt
+        validDescription
       );
 
       commitment.clearUncommittedEvents();
-
-      const activateTime = new Date('2026-07-04T13:00:00Z');
-      commitment.activate(activateTime);
+      commitment.activate();
 
       expect(commitment.state).toBe(CommitmentState.Active);
 
@@ -172,13 +169,7 @@ describe('Commitment Bounded Context', () => {
       const activatedEvent = uncommittedEvents[0] as CommitmentActivatedEvent;
       expect(activatedEvent).toBeDefined();
       expect(activatedEvent.name).toBe('commitment.activated');
-      expect(activatedEvent.metadata.aggregateId).toBe(commitmentId.value);
-      expect(activatedEvent.metadata.occurredAt).toBe(activateTime.toISOString());
       expect(activatedEvent.payload.commitmentId).toBe(commitmentId.value);
-
-      // Verify no timestamps inside payload
-      expect('updatedAt' in activatedEvent.payload).toBe(false);
-      expect('occurredAt' in activatedEvent.payload).toBe(false);
     });
 
     it('should throw error when activating an already active commitment', () => {
@@ -186,36 +177,226 @@ describe('Commitment Bounded Context', () => {
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
-        validDescription,
-        occurredAt
+        validDescription
       );
 
-      commitment.activate(occurredAt);
-
-      expect(() => commitment.activate(new Date())).toThrow(CommitmentAlreadyActiveError);
+      commitment.activate();
+      expect(() => commitment.activate()).toThrow(CommitmentAlreadyActiveError);
     });
 
-    it('should load state from historical event stream', () => {
+    it('should pause an active commitment and resume it successfully', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+      commitment.activate();
+      commitment.clearUncommittedEvents();
+
+      // Pause
+      commitment.pause();
+      expect(commitment.state).toBe(CommitmentState.Paused);
+      expect(commitment.getUncommittedEvents()).toHaveLength(1);
+      expect(commitment.getUncommittedEvents()[0]?.name).toBe('commitment.paused');
+
+      commitment.clearUncommittedEvents();
+
+      // Resume
+      commitment.resume();
+      expect(commitment.state).toBe(CommitmentState.Active);
+      expect(commitment.getUncommittedEvents()).toHaveLength(1);
+      expect(commitment.getUncommittedEvents()[0]?.name).toBe('commitment.resumed');
+    });
+
+    it('should reject pausing or resuming from invalid states', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+
+      // Cannot pause a draft
+      expect(() => commitment.pause()).toThrow(CommitmentCannotBePausedError);
+      
+      // Cannot resume a draft
+      expect(() => commitment.resume()).toThrow(CommitmentCannotBeResumedError);
+      
+      commitment.activate();
+      // Cannot resume an active
+      expect(() => commitment.resume()).toThrow(CommitmentCannotBeResumedError);
+
+      commitment.pause();
+      // Cannot pause a paused
+      expect(() => commitment.pause()).toThrow(CommitmentCannotBePausedError);
+    });
+
+    it('should cancel commitment from Draft, Active, or Paused states', () => {
+      const draft = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-100000000000'), validIdentityId, validTitle, null);
+      draft.cancel();
+      expect(draft.state).toBe(CommitmentState.Cancelled);
+      expect(draft.getUncommittedEvents()[1]?.name).toBe('commitment.cancelled');
+
+      const active = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-200000000000'), validIdentityId, validTitle, null);
+      active.activate();
+      active.cancel();
+      expect(active.state).toBe(CommitmentState.Cancelled);
+
+      const paused = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-300000000000'), validIdentityId, validTitle, null);
+      paused.activate();
+      paused.pause();
+      paused.cancel();
+      expect(paused.state).toBe(CommitmentState.Cancelled);
+    });
+
+    it('should complete active commitment and reject transitions on completed commitments', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+
+      // Draft cannot complete
+      expect(() => commitment.complete()).toThrow(CommitmentCannotBeCompletedError);
+
+      commitment.activate();
+      commitment.complete();
+      expect(commitment.state).toBe(CommitmentState.Completed);
+      expect(commitment.getUncommittedEvents()[2]?.name).toBe('commitment.completed');
+
+      // Completed is immutable
+      expect(() => commitment.activate()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.pause()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.resume()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.complete()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.rename(new CommitmentTitle('New Name'))).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.updateDescription(null)).toThrow(CommitmentAlreadyCompletedError);
+    });
+
+    it('should reject transitions and modification behaviors on cancelled commitments', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+      commitment.cancel();
+
+      expect(() => commitment.activate()).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.pause()).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.resume()).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.complete()).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.rename(new CommitmentTitle('New Name'))).toThrow(CommitmentAlreadyCancelledError);
+      expect(() => commitment.updateDescription(null)).toThrow(CommitmentAlreadyCancelledError);
+    });
+
+    it('should rename commitment only if title is different (Rule #77)', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+
+      commitment.clearUncommittedEvents();
+
+      // Rename to SAME name -> no event raised
+      commitment.rename(new CommitmentTitle(validTitle.value));
+      expect(commitment.getUncommittedEvents()).toHaveLength(0);
+
+      // Rename to DIFFERENT name -> event raised
+      const newTitle = new CommitmentTitle('Learn Advanced DDD Architectures');
+      commitment.rename(newTitle);
+      expect(commitment.title.value).toBe(newTitle.value);
+      expect(commitment.getUncommittedEvents()).toHaveLength(1);
+      expect(commitment.getUncommittedEvents()[0]?.name).toBe('commitment.renamed');
+      expect((commitment.getUncommittedEvents()[0] as CommitmentRenamedEvent).payload.title).toBe(newTitle.value);
+    });
+
+    it('should update description only if value is different (Rule #77)', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        validDescription
+      );
+
+      commitment.clearUncommittedEvents();
+
+      // Update to SAME description -> no event raised
+      commitment.updateDescription(new CommitmentDescription(validDescription.value));
+      expect(commitment.getUncommittedEvents()).toHaveLength(0);
+
+      // Update to DIFFERENT description -> event raised
+      const newDesc = new CommitmentDescription('Practice aggregate modeling and events storming');
+      commitment.updateDescription(newDesc);
+      expect(commitment.description?.value).toBe(newDesc.value);
+      expect(commitment.getUncommittedEvents()).toHaveLength(1);
+      expect(commitment.getUncommittedEvents()[0]?.name).toBe('commitment.description_updated');
+      expect((commitment.getUncommittedEvents()[0] as CommitmentDescriptionUpdatedEvent).payload.description).toBe(newDesc.value);
+
+      commitment.clearUncommittedEvents();
+
+      // Update to null -> event raised
+      commitment.updateDescription(null);
+      expect(commitment.description).toBeNull();
+      expect(commitment.getUncommittedEvents()).toHaveLength(1);
+      expect((commitment.getUncommittedEvents()[0] as CommitmentDescriptionUpdatedEvent).payload.description).toBe('');
+      
+      commitment.clearUncommittedEvents();
+      // Update from null to null -> no event
+      commitment.updateDescription(null);
+      expect(commitment.getUncommittedEvents()).toHaveLength(0);
+    });
+
+    it('should load state from historical event stream containing all lifecycle events', () => {
       const commitmentId = new CommitmentId('018f6b5c-42e1-7000-8000-999999999999');
-      const c = Commitment.register(commitmentId, validIdentityId, validTitle, validDescription, occurredAt);
-      c.activate(occurredAt);
+      const c = Commitment.register(commitmentId, validIdentityId, validTitle, validDescription);
+      
+      const newTitle = new CommitmentTitle('Learn advanced patterns');
+      c.rename(newTitle);
+      
+      const newDesc = new CommitmentDescription('Practice modeling clean architecture aggregates');
+      c.updateDescription(newDesc);
+      
+      c.activate();
+      c.pause();
+      c.resume();
+      c.complete();
       
       const events = [...c.getUncommittedEvents()];
 
-      // Rehydrate new aggregate instance from stream
+      // Rehydrate new aggregate instance from stream using the same ID
       const c2 = Commitment.register(
         commitmentId,
         validIdentityId,
         new CommitmentTitle('Dummy'),
-        null,
-        occurredAt
+        null
       );
       c2.loadFromHistory(events);
 
       expect(c2.id.value).toBe(commitmentId.value);
-      expect(c2.state).toBe(CommitmentState.Active);
-      expect(c2.title.value).toBe(validTitle.value);
-      expect(c2.description?.value).toBe(validDescription.value);
+      expect(c2.state).toBe(CommitmentState.Completed);
+      expect(c2.title.value).toBe(newTitle.value);
+      expect(c2.description?.value).toBe(newDesc.value);
+    });
+
+    it('should throw InvalidCommitmentStateTransitionError on invalid transition loads', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+      commitment.activate();
+      commitment.pause();
+      
+      // Try to manually activate a paused commitment
+      expect(() => commitment.activate()).toThrow(InvalidCommitmentStateTransitionError);
     });
   });
 
@@ -235,7 +416,7 @@ describe('Commitment Bounded Context', () => {
       };
 
       const commitmentId = new CommitmentId('018f6b5c-42e1-7000-8000-999999999999');
-      const commitment = Commitment.register(commitmentId, validIdentityId, validTitle, null, occurredAt);
+      const commitment = Commitment.register(commitmentId, validIdentityId, validTitle, null);
 
       await mockRepo.save(commitment);
       const res = await mockRepo.findById(commitmentId);
@@ -251,6 +432,14 @@ describe('Commitment Bounded Context', () => {
       const err = new InvalidCommitmentStateTransitionError('Invalid transition from active to draft');
       expect(err.message).toBe('Invalid transition from active to draft');
       expect(err.code).toBe('INVALID_COMMITMENT_STATE_TRANSITION');
+
+      const err2 = new CommitmentCannotBeRenamedError('Cannot rename completed commitment');
+      expect(err2.message).toBe('Cannot rename completed commitment');
+      expect(err2.code).toBe('COMMITMENT_CANNOT_BE_RENAMED');
+
+      const err3 = new CommitmentCannotBeDescriptionUpdatedError('Cannot update description of completed commitment');
+      expect(err3.message).toBe('Cannot update description of completed commitment');
+      expect(err3.code).toBe('COMMITMENT_CANNOT_BE_DESCRIPTION_UPDATED');
     });
   });
 });

@@ -12,16 +12,17 @@ export class CommitmentActivatedEvent implements DomainEvent {
     payload: {
       commitmentId: string;
     },
-    occurredAt: string
+    occurredAt?: string
   ) {
     this.payload = payload;
+    const time = occurredAt || new Date().toISOString();
     this.metadata = {
       eventId: '',
       aggregateId,
       aggregateVersion: 0,
       eventVersion: 1,
-      occurredAt,
-      recordedAt: occurredAt,
+      occurredAt: time,
+      recordedAt: time,
       actorType: 'SYSTEM',
       actorId: '',
       correlationId: '',

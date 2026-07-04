@@ -1,6 +1,6 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.6.0
+Version: 1.8.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
@@ -244,10 +244,30 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 > El agregado puede aplicar ese evento internamente, pero el evento representa la fuente de verdad del cambio.
 > Aunque Event Sourcing se implemente más adelante, todos los agregados deben diseñarse con esta filosofía desde el inicio.
 
+### Rule #76 — One Behavior, One Primary Event
+
+> **Every business behavior that changes Aggregate state must emit exactly one primary Domain Event.**
+>
+> - Business Intention ──► Business Behavior ──► Primary Domain Event ──► State Transition.
+> - Secondary or integration events must NOT be emitted directly from the Aggregate (those belong to the Application Layer).
+> - Never emit multiple primary events for a single business action unless an ADR explicitly approves the exception.
+
+### Rule #77 — No Meaningless Events
+
+> **No debe emitirse un Domain Event cuando el estado observable del Aggregate no cambia.**
+> Ejemplos:
+>
+> - renombrar con el mismo título;
+> - actualizar la descripción con el mismo contenido;
+> - intentar activar un compromiso ya activo (debe fallar con un error, no emitir un evento).
+>   Esta regla mantiene el historial de eventos limpio y significativo.
+
 ---
 
 ## 📜 Change History
 
+- **v1.8.0 (2026-07-04):** Integrated Rule #77 (No Meaningless Events) as approved by the Board.
+- **v1.7.0 (2026-07-04):** Integrated Rule #76 (One Behavior, One Primary Event) as approved by the Board.
 - **v1.6.0 (2026-07-04):** Integrated Rule #75 (Events Drive State) as approved by the Board.
 - **v1.5.0 (2026-07-04):** Integrated Rule #74 (Behavior Over Setters) as approved by the Board.
 - **v1.4.0 (2026-07-04):** Integrated Rule #72 (Domain Concepts Before Code) as approved by the Board.
