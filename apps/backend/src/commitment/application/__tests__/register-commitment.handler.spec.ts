@@ -1,4 +1,5 @@
 import { RegisterCommitmentCommandHandlerCore } from '../commands/register-commitment.handler';
+import { CommitmentId } from '@commitment/domain';
 import { RegisterCommitmentCommand } from '../commands/register-commitment.command';
 import { InMemoryCommitmentRepository } from '../../infrastructure/in-memory-commitment.repository';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
@@ -37,9 +38,7 @@ describe('RegisterCommitmentCommandHandlerCore', () => {
     expect(result.commitmentId).toBe(id);
     expect(result.version).toBe(1);
 
-    const saved = await repository.findById(
-      new (await import('@commitment/domain')).CommitmentId(id),
-    );
+    const saved = await repository.findById(new CommitmentId(id));
     expect(saved).toBeDefined();
     expect(saved?.title.value).toBe('Practice Clean Architecture');
     expect(saved?.description?.value).toBe(
@@ -81,9 +80,7 @@ describe('RegisterCommitmentCommandHandlerCore', () => {
     expect(result2.version).toBe(1);
     expect(dispatchedEvents).toHaveLength(0);
 
-    const saved = await repository.findById(
-      new (await import('@commitment/domain')).CommitmentId(id),
-    );
+    const saved = await repository.findById(new CommitmentId(id));
     expect(saved?.title.value).toBe('First Title'); // Remains unmodified
   });
 
