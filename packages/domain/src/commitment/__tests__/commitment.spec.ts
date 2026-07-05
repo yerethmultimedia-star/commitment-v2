@@ -7,10 +7,11 @@ import { CommitmentConstraints } from '../constants/commitment-constraints.js';
 import { CommitmentRepository } from '../repositories/commitment.repository.js';
 import { CommitmentRegisteredEvent } from '../events/commitment-registered.event.js';
 import { CommitmentActivatedEvent } from '../events/commitment-activated.event.js';
+import { CommitmentPausedEvent } from '../events/commitment-paused.event.js';
 import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
 import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
 import {
-  CommitmentAlreadyActiveError,
+
   CommitmentRequiresIdentityError,
   InvalidCommitmentTitleError,
   InvalidCommitmentDescriptionError,
@@ -172,7 +173,7 @@ describe('Commitment Bounded Context', () => {
       expect(activatedEvent.payload.commitmentId).toBe(commitmentId.value);
     });
 
-    it('should throw error when activating an already active commitment', () => {
+    it('activating an already active commitment is idempotent', () => {
       const commitment = Commitment.register(
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
@@ -181,7 +182,12 @@ describe('Commitment Bounded Context', () => {
       );
 
       commitment.activate();
-      expect(() => commitment.activate()).toThrow(CommitmentAlreadyActiveError);
+      // Second activation should not throw and not produce a new event
+      expect(() => commitment.activate()).not.toThrow();
+      const events = commitment.getUncommittedEvents();
+      // Only one Activated event should exist
+      const activatedEvents = events.filter(e => e.name === 'commitment.activated');
+      expect(activatedEvents).toHaveLength(1);
     });
 
     it('should pause an active commitment and resume it successfully', () => {
@@ -209,6 +215,75 @@ describe('Commitment Bounded Context', () => {
       expect(commitment.getUncommittedEvents()[0]?.name).toBe('commitment.resumed');
     });
 
+describe('pause()', () => {
+  it('pauses an active commitment and emits event', () => {
+    const commitment = Commitment.register(
+      new CommitmentId('018f6c00-0000-0000-0000-000000000001'),
+      validIdentityId,
+      validTitle,
+      null
+    );
+    commitment.activate();
+    commitment.clearUncommittedEvents();
+
+    commitment.pause();
+
+    expect(commitment.state).toBe(CommitmentState.Paused);
+    const events = commitment.getUncommittedEvents();
+    expect(events).toHaveLength(1);
+    const pausedEvent = events[0] as CommitmentPausedEvent;
+    expect(pausedEvent).toBeDefined();
+    expect(pausedEvent.name).toBe('commitment.paused');
+    expect(pausedEvent.payload.commitmentId).toBe(commitment.id.value);
+    // version should have incremented once per event: register(1) + activate(2) + pause(3)
+    expect(commitment.version).toBe(3);
+  });
+
+  it('is idempotent when already paused', () => {
+    const commitment = Commitment.register(
+      new CommitmentId('018f6c00-0000-0000-0000-000000000002'),
+      validIdentityId,
+      validTitle,
+      null
+    );
+    commitment.activate();
+    commitment.pause();
+    const versionAfterFirstPause = commitment.version;
+    commitment.clearUncommittedEvents();
+
+    commitment.pause();
+
+    expect(commitment.state).toBe(CommitmentState.Paused);
+    expect(commitment.version).toBe(versionAfterFirstPause);
+    expect(commitment.getUncommittedEvents()).toHaveLength(0);
+  });
+
+  it('cannot pause a completed commitment', () => {
+    const commitment = Commitment.register(
+      new CommitmentId('018f6c00-0000-0000-0000-000000000003'),
+      validIdentityId,
+      validTitle,
+      null
+    );
+    commitment.activate();
+    commitment.complete();
+
+    expect(() => commitment.pause()).toThrow(CommitmentAlreadyCompletedError);
+  });
+
+  it('cannot pause a cancelled commitment', () => {
+    const commitment = Commitment.register(
+      new CommitmentId('018f6c00-0000-0000-0000-000000000004'),
+      validIdentityId,
+      validTitle,
+      null
+    );
+    commitment.cancel();
+
+    expect(() => commitment.pause()).toThrow(CommitmentAlreadyCancelledError);
+  });
+});
+
     it('should reject pausing or resuming from invalid states', () => {
       const commitment = Commitment.register(
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
@@ -224,12 +299,15 @@ describe('Commitment Bounded Context', () => {
       expect(() => commitment.resume()).toThrow(CommitmentCannotBeResumedError);
       
       commitment.activate();
-      // Cannot resume an active
-      expect(() => commitment.resume()).toThrow(CommitmentCannotBeResumedError);
+      // Resuming an active commitment is idempotent: no error, no new event
+      commitment.clearUncommittedEvents();
+      expect(() => commitment.resume()).not.toThrow();
+      expect(commitment.getUncommittedEvents()).toHaveLength(0);
 
       commitment.pause();
-      // Cannot pause a paused
-      expect(() => commitment.pause()).toThrow(CommitmentCannotBePausedError);
+      // Pausing an already-paused commitment is idempotent: no error, no new event
+      expect(() => commitment.pause()).not.toThrow();
+      expect(commitment.getUncommittedEvents().filter(e => e.name === 'commitment.paused')).toHaveLength(1);
     });
 
     it('should cancel commitment from Draft, Active, or Paused states', () => {

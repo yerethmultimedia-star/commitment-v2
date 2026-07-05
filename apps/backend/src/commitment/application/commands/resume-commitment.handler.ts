@@ -1,12 +1,11 @@
 import {
   CommitmentId,
-  CommitmentState,
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
-  InvalidCommitmentStateTransitionError,
+  CommitmentCannotBeResumedError,
 } from '@commitment/domain';
-import { ActivateCommitmentCommand } from './activate-commitment.command';
-import { ActivateCommitmentResult } from './activate-commitment.result';
+import { ResumeCommitmentCommand } from './resume-commitment.command';
+import { ResumeCommitmentResult } from './resume-commitment.result';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
 import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
 
@@ -32,36 +31,26 @@ export class CommitmentStateTransitionError extends Error {
   }
 }
 
-export class ActivateCommitmentCommandHandlerCore {
+export class ResumeCommitmentCommandHandlerCore {
   constructor(
     private readonly commitmentRepository: VersionedCommitmentRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
   ) {}
 
   public async handle(
-    command: ActivateCommitmentCommand,
-  ): Promise<ActivateCommitmentResult> {
+    command: ResumeCommitmentCommand,
+  ): Promise<ResumeCommitmentResult> {
     const id = new CommitmentId(command.commitmentId);
 
-    // 1. Load aggregate — 404 if not found
+    // 1. Load aggregate – 404 if not found
     const commitment = await this.commitmentRepository.findById(id);
     if (!commitment) {
       throw new CommitmentNotFoundError(command.commitmentId);
     }
 
-    // 2. Idempotency — already Active: return current state (Rule #77, Rule #87)
-    if (commitment.state === CommitmentState.Active) {
-      const currentVersion = await this.commitmentRepository.save(commitment);
-      return new ActivateCommitmentResult(
-        commitment.id.value,
-        'Active',
-        currentVersion,
-      );
-    }
-
-    // 3. Invoke domain behavior — let the Aggregate decide validity (Rule #86)
+    // 2. Invoke domain behavior – let the Aggregate decide validity
     try {
-      commitment.activate();
+      commitment.resume();
     } catch (error: unknown) {
       if (
         error instanceof CommitmentAlreadyCompletedError ||
@@ -73,7 +62,7 @@ export class ActivateCommitmentCommandHandlerCore {
             : 'Commitment is in a terminal state',
         );
       }
-      if (error instanceof InvalidCommitmentStateTransitionError) {
+      if (error instanceof CommitmentCannotBeResumedError) {
         throw new CommitmentStateTransitionError(
           error instanceof Error ? error.message : 'Invalid state transition',
         );
@@ -81,14 +70,17 @@ export class ActivateCommitmentCommandHandlerCore {
       throw error;
     }
 
-    // 4. Persist (Rule #85 — Repository Implements Persistence Only)
+    // 3. Persist – version is returned by repository
     const version = await this.commitmentRepository.save(commitment);
 
-    // 5. Dispatch primary event and clear buffer
+    // 4. Dispatch events and clear buffer
     const events = commitment.getUncommittedEvents();
-    await this.eventDispatcher.dispatch(events);
-    commitment.clearUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventDispatcher.dispatch(events);
+      commitment.clearUncommittedEvents();
+    }
 
-    return new ActivateCommitmentResult(commitment.id.value, 'Active', version);
+    // 5. Return DTO built from aggregate (source of truth)
+    return new ResumeCommitmentResult(commitment.id.value, 'Active', version);
   }
 }

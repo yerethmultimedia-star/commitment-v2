@@ -13,7 +13,6 @@ import { CommitmentCompletedEvent } from '../events/commitment-completed.event.j
 import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
 import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
 import {
-  CommitmentAlreadyActiveError,
   CommitmentRequiresIdentityError,
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
@@ -81,10 +80,11 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   }
 
   public activate(): void {
+    if (this._state === CommitmentState.Active) {
+      // Idempotent: already active, no state change or event
+      return;
+    }
     if (this._state !== CommitmentState.Draft) {
-      if (this._state === CommitmentState.Active) {
-        throw new CommitmentAlreadyActiveError();
-      }
       this.ensureNotImmutable();
       throw new InvalidCommitmentStateTransitionError(`Cannot activate commitment from state: ${CommitmentState[this._state]}`);
     }
@@ -98,6 +98,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   }
 
   public pause(): void {
+    if (this._state === CommitmentState.Paused) {
+      // Idempotent: already paused, no state change or event
+      return;
+    }
     if (this._state !== CommitmentState.Active) {
       this.ensureNotImmutable();
       throw new CommitmentCannotBePausedError(`Cannot pause commitment from state: ${CommitmentState[this._state]}`);
@@ -112,6 +116,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   }
 
   public resume(): void {
+    if (this._state === CommitmentState.Active) {
+      // Idempotent: already active, no state change or event
+      return;
+    }
     if (this._state !== CommitmentState.Paused) {
       this.ensureNotImmutable();
       throw new CommitmentCannotBeResumedError(`Cannot resume commitment from state: ${CommitmentState[this._state]}`);

@@ -3,14 +3,14 @@ import {
   CommitmentState,
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
-  InvalidCommitmentStateTransitionError,
+  CommitmentCannotBePausedError,
 } from '@commitment/domain';
-import { ActivateCommitmentCommand } from './activate-commitment.command';
-import { ActivateCommitmentResult } from './activate-commitment.result';
+import { PauseCommitmentCommand } from './pause-commitment.command';
+import { PauseCommitmentResult } from '../results/pause-commitment.result';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
 import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
 
-// Application-layer exceptions (framework-agnostic)
+// Application-layer exceptions (framework‑agnostic)
 export class CommitmentNotFoundError extends Error {
   constructor(id: string) {
     super(`Commitment not found: ${id}`);
@@ -32,36 +32,36 @@ export class CommitmentStateTransitionError extends Error {
   }
 }
 
-export class ActivateCommitmentCommandHandlerCore {
+export class PauseCommitmentCommandHandlerCore {
   constructor(
     private readonly commitmentRepository: VersionedCommitmentRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
   ) {}
 
   public async handle(
-    command: ActivateCommitmentCommand,
-  ): Promise<ActivateCommitmentResult> {
+    command: PauseCommitmentCommand,
+  ): Promise<PauseCommitmentResult> {
     const id = new CommitmentId(command.commitmentId);
 
-    // 1. Load aggregate — 404 if not found
+    // 1. Load aggregate – 404 if not found
     const commitment = await this.commitmentRepository.findById(id);
     if (!commitment) {
       throw new CommitmentNotFoundError(command.commitmentId);
     }
 
-    // 2. Idempotency — already Active: return current state (Rule #77, Rule #87)
-    if (commitment.state === CommitmentState.Active) {
+    // 2. Idempotent – already Paused: return current version/state
+    if (commitment.state === CommitmentState.Paused) {
       const currentVersion = await this.commitmentRepository.save(commitment);
-      return new ActivateCommitmentResult(
+      return new PauseCommitmentResult(
         commitment.id.value,
-        'Active',
+        'Paused',
         currentVersion,
       );
     }
 
-    // 3. Invoke domain behavior — let the Aggregate decide validity (Rule #86)
+    // 3. Invoke domain behavior – let the Aggregate decide validity
     try {
-      commitment.activate();
+      commitment.pause();
     } catch (error: unknown) {
       if (
         error instanceof CommitmentAlreadyCompletedError ||
@@ -73,7 +73,7 @@ export class ActivateCommitmentCommandHandlerCore {
             : 'Commitment is in a terminal state',
         );
       }
-      if (error instanceof InvalidCommitmentStateTransitionError) {
+      if (error instanceof CommitmentCannotBePausedError) {
         throw new CommitmentStateTransitionError(
           error instanceof Error ? error.message : 'Invalid state transition',
         );
@@ -81,14 +81,15 @@ export class ActivateCommitmentCommandHandlerCore {
       throw error;
     }
 
-    // 4. Persist (Rule #85 — Repository Implements Persistence Only)
+    // 4. Persist – version is returned by repository
     const version = await this.commitmentRepository.save(commitment);
 
-    // 5. Dispatch primary event and clear buffer
+    // 5. Dispatch events and clear buffer
     const events = commitment.getUncommittedEvents();
     await this.eventDispatcher.dispatch(events);
     commitment.clearUncommittedEvents();
 
-    return new ActivateCommitmentResult(commitment.id.value, 'Active', version);
+    // 6. Return DTO built from aggregate (source of truth)
+    return new PauseCommitmentResult(commitment.id.value, 'Paused', version);
   }
 }

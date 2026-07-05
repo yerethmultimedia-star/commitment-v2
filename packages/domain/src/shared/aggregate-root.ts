@@ -3,7 +3,18 @@ import { UniqueEntityId } from './unique-entity-id.js';
 import { DomainEvent } from '../core/domain-event.interface.js';
 
 export abstract class AggregateRoot<IdType = UniqueEntityId> extends Entity<IdType> {
+
+
+
+
+
+
+
+  public get version(): number {
+    return this._version;
+  }
   private _uncommittedEvents: DomainEvent[] = [];
+  private _version: number = 0;
 
   protected constructor(id: IdType) {
     super(id);
@@ -20,11 +31,17 @@ export abstract class AggregateRoot<IdType = UniqueEntityId> extends Entity<IdTy
   public loadFromHistory(events: readonly DomainEvent[]): void {
     for (const event of events) {
       this.applyEvent(event);
+      this._version = event.metadata.aggregateVersion;
     }
   }
 
   protected recordEvent(event: DomainEvent): void {
+    // Every event increments the version: version represents the aggregate's position
+    // in the event stream, not solely the number of state transitions.
+    this._version += 1;
+    // Apply the event to mutate state.
     this.applyEvent(event);
+    // Record the event for later publishing.
     this._uncommittedEvents.push(event);
   }
 
