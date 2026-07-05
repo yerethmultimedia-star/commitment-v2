@@ -18,19 +18,41 @@
 
 ## Lessons Learned
 
-_(Add concise lessons learned here)_
+- Establishing engineering governance early reduced architectural drift.
+- Vertical Slices proved more effective than layer-by-layer implementation.
+- Domain-Driven Design should evolve from business capabilities rather than speculative modeling.
+- Offline First and internationalization are architectural qualities that must be designed from the beginning, even if implemented later.
+- Automating verification (`pnpm verify`) is more reliable than documenting manual workflows.
 
 ## Architectural Decisions
 
-_(Summarize key architectural decisions made during the foundation phase)_
+- Domain-Driven Design adopted as the primary architectural style.
+- Clean Architecture with explicit separation between Domain, Application, Infrastructure and Presentation.
+- Vertical Slice Architecture selected for feature delivery.
+- Client-generated Aggregate IDs to support Offline First synchronization.
+- Aggregates evolve through Domain Events and protect their own invariants.
+- Shared packages are compiled before applications.
+- Engineering Foundation frozen after completion of the Foundation Phase.
 
 ## Known Technical Debt
 
-_(List any technical debt identified but deferred)_
+- Persistence layer still uses in-memory implementations.
+- Event Dispatcher is currently a NoOp implementation.
+- Event Store has not been introduced.
+- Read Models have not been implemented.
+- Offline synchronization engine is deferred.
+- Optimistic concurrency control is not yet implemented.
 
 ## Deferred Decisions
 
-_(Document decisions postponed to later phases)_
+- PostgreSQL / Supabase integration.
+- Outbox Pattern.
+- Event Store.
+- CQRS Read Models.
+- Offline synchronization engine.
+- Push notification infrastructure.
+- AI Coaching services.
+- Analytics platform.
 
 ## Entry Criteria for Product Development Phase
 
@@ -39,6 +61,7 @@ _(Document decisions postponed to later phases)_
 - ADR process operational
 - Engineering freeze in place
 - All foundation vertical slices implemented and verified
+- Product development prioritized over framework evolution
 
 ## Approved by
 
