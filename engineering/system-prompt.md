@@ -339,6 +339,40 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 
 ---
 
+### Rule #92 — Architecture Decision Records Are Mandatory
+
+Every architectural decision that changes the direction of the project must be documented as an ADR.
+
+An ADR must include:
+
+- Context
+- Decision
+- Alternatives Considered
+- Consequences
+- Status
+
+Architecture evolves through documented decisions, not through implicit code changes.
+
+---
+
+### Rule #93 — Engineering Foundation Freeze
+
+Status: ACTIVE
+
+Scope:
+
+- Engineering rules
+- Governance
+- Repository structure
+- Monorepo layout
+- Build pipeline
+
+Changes allowed only when:
+
+1. A real limitation is discovered.
+2. An ADR approves the change.
+3. The change benefits the entire project.
+
 ## 📜 Change History
 
 - **v1.15.0 (2026-07-04):** Integrated Rule #87 (Version Changes Only With Meaningful State Changes) as approved by the Board.
