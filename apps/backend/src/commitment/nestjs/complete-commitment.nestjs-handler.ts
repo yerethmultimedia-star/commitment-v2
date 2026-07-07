@@ -3,8 +3,8 @@ import { Inject } from '@nestjs/common';
 import { CompleteCommitmentCommand } from '../application/commands/complete-commitment.command';
 import { CompleteCommitmentResult } from '../application/commands/complete-commitment.result';
 import { CompleteCommitmentCommandHandlerCore } from '../application/commands/complete-commitment.handler';
-import { VersionedCommitmentRepository } from '../application/ports/versioned-commitment-repository.port';
-import { DomainEventDispatcher } from '../application/ports/domain-event-dispatcher.port';
+import type { VersionedCommitmentRepository } from '../application/ports/versioned-commitment-repository.port';
+import type { DomainEventDispatcher } from '../application/ports/domain-event-dispatcher.port';
 
 @CommandHandler(CompleteCommitmentCommand)
 export class CompleteCommitmentNestjsHandler implements ICommandHandler<

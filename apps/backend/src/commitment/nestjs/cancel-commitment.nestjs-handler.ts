@@ -3,8 +3,8 @@ import { Inject } from '@nestjs/common';
 import { CancelCommitmentCommand } from '../application/commands/cancel-commitment.command';
 import { CancelCommitmentResult } from '../application/commands/cancel-commitment.result';
 import { CancelCommitmentCommandHandlerCore } from '../application/commands/cancel-commitment.handler';
-import { VersionedCommitmentRepository } from '../application/ports/versioned-commitment-repository.port';
-import { DomainEventDispatcher } from '../application/ports/domain-event-dispatcher.port';
+import type { VersionedCommitmentRepository } from '../application/ports/versioned-commitment-repository.port';
+import type { DomainEventDispatcher } from '../application/ports/domain-event-dispatcher.port';
 
 @CommandHandler(CancelCommitmentCommand)
 export class CancelCommitmentNestjsHandler implements ICommandHandler<
