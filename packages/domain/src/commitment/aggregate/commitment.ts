@@ -145,7 +145,11 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   }
 
   public complete(): void {
-    if (this._state !== CommitmentState.Active) {
+    if (this._state === CommitmentState.Completed) {
+      // Idempotent: already completed, no state change or event
+      return;
+    }
+    if (this._state !== CommitmentState.Active && this._state !== CommitmentState.Paused) {
       this.ensureNotImmutable();
       throw new CommitmentCannotBeCompletedError(`Cannot complete commitment from state: ${CommitmentState[this._state]}`);
     }

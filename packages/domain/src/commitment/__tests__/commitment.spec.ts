@@ -349,9 +349,29 @@ describe('pause()', () => {
       expect(() => commitment.pause()).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.resume()).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCompletedError);
-      expect(() => commitment.complete()).toThrow(CommitmentAlreadyCompletedError);
+      
+      // Completing an already-completed commitment is idempotent
+      commitment.clearUncommittedEvents();
+      expect(() => commitment.complete()).not.toThrow();
+      expect(commitment.getUncommittedEvents()).toHaveLength(0);
+
       expect(() => commitment.rename(new CommitmentTitle('New Name'))).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.updateDescription(null)).toThrow(CommitmentAlreadyCompletedError);
+    });
+
+    it('should complete paused commitment', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+      commitment.activate();
+      commitment.pause();
+      
+      expect(() => commitment.complete()).not.toThrow();
+      expect(commitment.state).toBe(CommitmentState.Completed);
+      expect(commitment.getUncommittedEvents().find(e => e.name === 'commitment.completed')).toBeDefined();
     });
 
     it('should reject transitions and modification behaviors on cancelled commitments', () => {

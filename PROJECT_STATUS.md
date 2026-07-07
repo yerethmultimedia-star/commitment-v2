@@ -13,7 +13,7 @@ Vertical Slice Phase
 
 ## Current Sprint
 
-VS-005 — (Next capability pending specification)
+VS-006 — Cancel Commitment
 
 ## Overall Status
 
@@ -36,6 +36,7 @@ VS-005 — (Next capability pending specification)
 
 ## 📜 Change History
 
+- **v1.3.0 (2026-07-07):** Marked VS-005 as complete (Complete capability delivered). Advancing to VS-006 (Cancel).
 - **v1.2.0 (2026-07-05):** Marked VS-003 and VS-004 as complete (Pause and Resume capabilities delivered). Advancing to VS-005.
 - **v1.1.0 (2026-07-04):** Updated to reflect transition to the Vertical Slice Phase and VS-001 sprint.
 - **v1.0.0 (2026-07-04):** Integrated as the official project status baseline at the root level.

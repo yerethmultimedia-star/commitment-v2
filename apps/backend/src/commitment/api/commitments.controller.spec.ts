@@ -21,6 +21,11 @@ import {
   ConflictException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import {
+  CommitmentNotFoundError as CompleteCommitmentNotFoundError,
+  CommitmentStateConflictError as CompleteCommitmentStateConflictError,
+  CommitmentStateTransitionError as CompleteCommitmentStateTransitionError,
+} from '../application/commands/complete-commitment.handler';
 
 const VALID_ID = '018f6b5c-42e1-7000-8000-999999999999';
 
@@ -154,6 +159,64 @@ describe('CommitmentsController - pause and resume endpoints', () => {
         new ResumeCommitmentStateTransitionError('invalid'),
       );
       await expect(controller.resume(VALID_ID)).rejects.toBeInstanceOf(
+        UnprocessableEntityException,
+      );
+      expect(commandBus.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('complete()', () => {
+    it('should return 200/201 (success) on valid command', async () => {
+      commandBus.execute.mockResolvedValue({
+        commitmentId: VALID_ID,
+        state: 'Completed',
+        version: 3,
+      });
+
+      const result = await controller.complete(VALID_ID);
+
+      expect(commandBus.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitmentId: VALID_ID,
+        }),
+      );
+      expect(result.commitmentId).toBe(VALID_ID);
+      expect(result.state).toBe('Completed');
+      expect(result.version).toBe(3);
+    });
+
+    it('should return 400 on invalid UUID', async () => {
+      await expect(controller.complete('not-a-uuid')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(commandBus.execute).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when commitment is missing', async () => {
+      commandBus.execute.mockRejectedValue(
+        new CompleteCommitmentNotFoundError('missing'),
+      );
+      await expect(controller.complete(VALID_ID)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(commandBus.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return 409 when already completed or cancelled (terminal)', async () => {
+      commandBus.execute.mockRejectedValue(
+        new CompleteCommitmentStateConflictError('terminal'),
+      );
+      await expect(controller.complete(VALID_ID)).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(commandBus.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return 422 on invalid state transition (e.g. Draft)', async () => {
+      commandBus.execute.mockRejectedValue(
+        new CompleteCommitmentStateTransitionError('invalid'),
+      );
+      await expect(controller.complete(VALID_ID)).rejects.toBeInstanceOf(
         UnprocessableEntityException,
       );
       expect(commandBus.execute).toHaveBeenCalledTimes(1);

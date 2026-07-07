@@ -31,12 +31,19 @@ import {
   CommitmentStateTransitionError as PauseCommitmentStateTransitionError,
 } from '../application/commands/pause-commitment.handler';
 import { ResumeCommitmentCommand } from '../application/commands/resume-commitment.command';
+import { CompleteCommitmentCommand } from '../application/commands/complete-commitment.command';
 import { ResumeCommitmentResult } from '../application/commands/resume-commitment.result';
+import { CompleteCommitmentResult } from '../application/commands/complete-commitment.result';
 import {
   CommitmentNotFoundError as ResumeCommitmentNotFoundError,
   CommitmentStateConflictError as ResumeCommitmentStateConflictError,
   CommitmentStateTransitionError as ResumeCommitmentStateTransitionError,
 } from '../application/commands/resume-commitment.handler';
+import {
+  CommitmentNotFoundError as CompleteCommitmentNotFoundError,
+  CommitmentStateConflictError as CompleteCommitmentStateConflictError,
+  CommitmentStateTransitionError as CompleteCommitmentStateTransitionError,
+} from '../application/commands/complete-commitment.handler';
 
 const registerSchema = z.object({
   id: z.string().uuid('Invalid commitment id UUID format'),
@@ -229,6 +236,38 @@ export class CommitmentsController {
         throw new ConflictException(error.message);
       }
       if (error instanceof ResumeCommitmentStateTransitionError) {
+        throw new UnprocessableEntityException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  @Post(':id/complete')
+  async complete(@Param('id') id: string) {
+    const result = uuidSchema.safeParse(id);
+    if (!result.success) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+
+    try {
+      const command = new CompleteCommitmentCommand(id);
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as CompleteCommitmentResult;
+      return {
+        commitmentId: result.commitmentId,
+        state: result.state,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof CompleteCommitmentNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof CompleteCommitmentStateConflictError) {
+        throw new ConflictException(error.message);
+      }
+      if (error instanceof CompleteCommitmentStateTransitionError) {
         throw new UnprocessableEntityException(error.message);
       }
       const message = error instanceof Error ? error.message : 'Unknown error';
