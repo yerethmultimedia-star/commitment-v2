@@ -7,7 +7,7 @@ This is the standard execution pattern for developing and delivering a new verti
 - Define the business value, goal, and scope of the slice.
 - Define what constitutes "done" functionally.
 
-## 2. Technical Design
+## 2. Architecture Sketch (5 minutos)
 
 - Propose the domain model additions or changes.
 - Propose CQRS models (Commands, Results, DTOs).
