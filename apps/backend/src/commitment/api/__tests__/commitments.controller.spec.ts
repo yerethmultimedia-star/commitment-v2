@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommitmentsController } from '../commitments.controller';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { RegisterCommitmentDto } from '../dtos/register-commitment.dto';
 import { RegisterCommitmentResult } from '../../application/commands/register-commitment.result';
 import { ActivateCommitmentResult } from '../../application/commands/activate-commitment.result';
@@ -28,7 +28,10 @@ describe('CommitmentsController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CommitmentsController],
-      providers: [{ provide: CommandBus, useValue: mockCommandBus }],
+      providers: [
+        { provide: CommandBus, useValue: mockCommandBus },
+        { provide: QueryBus, useValue: { execute: jest.fn() } },
+      ],
     }).compile();
 
     controller = module.get<CommitmentsController>(CommitmentsController);

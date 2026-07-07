@@ -7,8 +7,13 @@ import { PauseCommitmentNestjsHandler } from './nestjs/pause-commitment.nestjs-h
 import { ResumeCommitmentNestjsHandler } from './nestjs/resume-commitment.nestjs-handler';
 import { CompleteCommitmentNestjsHandler } from './nestjs/complete-commitment.nestjs-handler';
 import { CancelCommitmentNestjsHandler } from './nestjs/cancel-commitment.nestjs-handler';
+import { GetCommitmentByIdNestjsHandler } from './nestjs/get-commitment-by-id.nestjs-handler';
+import { ListCommitmentsNestjsHandler } from './nestjs/list-commitments.nestjs-handler';
 import { InMemoryCommitmentRepository } from './infrastructure/in-memory-commitment.repository';
-import { NoOpDomainEventDispatcher } from './infrastructure/noop-event-dispatcher';
+import { NestEventBusDispatcher } from './infrastructure/nest-event-bus.dispatcher';
+import { InMemoryCommitmentProjectionStore } from './infrastructure/in-memory-commitment-projection.store';
+import { InMemoryCommitmentQueryService } from './infrastructure/in-memory-commitment.query-service';
+import { CommitmentProjectors } from './application/projectors/commitment.projectors';
 
 @Module({
   imports: [CqrsModule],
@@ -20,13 +25,24 @@ import { NoOpDomainEventDispatcher } from './infrastructure/noop-event-dispatche
     ResumeCommitmentNestjsHandler,
     CompleteCommitmentNestjsHandler,
     CancelCommitmentNestjsHandler,
+    GetCommitmentByIdNestjsHandler,
+    ListCommitmentsNestjsHandler,
+    ...CommitmentProjectors,
     {
       provide: 'CommitmentRepository',
       useClass: InMemoryCommitmentRepository,
     },
     {
       provide: 'DomainEventDispatcher',
-      useClass: NoOpDomainEventDispatcher,
+      useClass: NestEventBusDispatcher,
+    },
+    {
+      provide: 'CommitmentProjectionStore',
+      useClass: InMemoryCommitmentProjectionStore,
+    },
+    {
+      provide: 'CommitmentQueryService',
+      useClass: InMemoryCommitmentQueryService,
     },
   ],
   exports: ['CommitmentRepository', 'DomainEventDispatcher'],

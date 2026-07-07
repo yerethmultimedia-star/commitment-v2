@@ -3,6 +3,8 @@ import {
   Post,
   Body,
   Param,
+  Get,
+  Query,
   BadRequestException,
   NotFoundException,
   ConflictException,
@@ -10,7 +12,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { z } from 'zod';
 import { RegisterCommitmentDto } from './dtos/register-commitment.dto';
@@ -50,6 +52,13 @@ import {
   CommitmentNotFoundError as CancelCommitmentNotFoundError,
   CommitmentStateConflictError as CancelCommitmentStateConflictError,
 } from '../application/commands/cancel-commitment.handler';
+import { GetCommitmentByIdQuery } from '../application/queries/get-commitment-by-id.query';
+import { CommitmentNotFoundQueryError } from '../application/queries/get-commitment-by-id.handler';
+import { ListCommitmentsQuery } from '../application/queries/list-commitments.query';
+import {
+  CommitmentView,
+  PaginatedCommitments,
+} from '../application/queries/commitment-view.dto';
 
 const registerSchema = z.object({
   id: z.string().uuid('Invalid commitment id UUID format'),
@@ -63,7 +72,39 @@ const uuidSchema = z.string().uuid('Invalid UUID format');
 @ApiTags('Commitments')
 @Controller('commitments')
 export class CommitmentsController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  @Get()
+  async list(
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,
+  ): Promise<PaginatedCommitments> {
+    const query = new ListCommitmentsQuery(status, search, sortBy);
+    return this.queryBus.execute(query);
+  }
+
+  @Get(':id')
+  async getById(@Param('id') id: string): Promise<CommitmentView> {
+    const result = uuidSchema.safeParse(id);
+    if (!result.success) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+
+    try {
+      const query = new GetCommitmentByIdQuery(id);
+      return await this.queryBus.execute(query);
+    } catch (error: unknown) {
+      if (error instanceof CommitmentNotFoundQueryError) {
+        throw new NotFoundException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
 
   // ─── Register ─────────────────────────────────────────────────────────────
 

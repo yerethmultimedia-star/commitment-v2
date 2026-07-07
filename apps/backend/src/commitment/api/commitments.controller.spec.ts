@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommitmentsController } from './commitments.controller';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { PauseCommitmentCommand } from '../application/commands/pause-commitment.command';
 import { PauseCommitmentResult } from '../application/commands/pause-commitment.result';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -43,6 +43,10 @@ describe('CommitmentsController - pause and resume endpoints', () => {
       providers: [
         {
           provide: CommandBus,
+          useValue: { execute: jest.fn() },
+        },
+        {
+          provide: QueryBus,
           useValue: { execute: jest.fn() },
         },
       ],
