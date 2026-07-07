@@ -44,6 +44,12 @@ import {
   CommitmentStateConflictError as CompleteCommitmentStateConflictError,
   CommitmentStateTransitionError as CompleteCommitmentStateTransitionError,
 } from '../application/commands/complete-commitment.handler';
+import { CancelCommitmentCommand } from '../application/commands/cancel-commitment.command';
+import { CancelCommitmentResult } from '../application/commands/cancel-commitment.result';
+import {
+  CommitmentNotFoundError as CancelCommitmentNotFoundError,
+  CommitmentStateConflictError as CancelCommitmentStateConflictError,
+} from '../application/commands/cancel-commitment.handler';
 
 const registerSchema = z.object({
   id: z.string().uuid('Invalid commitment id UUID format'),
@@ -269,6 +275,35 @@ export class CommitmentsController {
       }
       if (error instanceof CompleteCommitmentStateTransitionError) {
         throw new UnprocessableEntityException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  @Post(':id/cancel')
+  async cancel(@Param('id') id: string) {
+    const result = uuidSchema.safeParse(id);
+    if (!result.success) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+
+    try {
+      const command = new CancelCommitmentCommand(id);
+      const output = (await this.commandBus.execute(
+        command,
+      )) as unknown as CancelCommitmentResult;
+      return {
+        commitmentId: output.commitmentId,
+        state: output.state,
+        version: output.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof CancelCommitmentNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof CancelCommitmentStateConflictError) {
+        throw new ConflictException(error.message);
       }
       const message = error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(message);

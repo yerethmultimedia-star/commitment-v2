@@ -374,22 +374,80 @@ describe('pause()', () => {
       expect(commitment.getUncommittedEvents().find(e => e.name === 'commitment.completed')).toBeDefined();
     });
 
-    it('should reject transitions and modification behaviors on cancelled commitments', () => {
-      const commitment = Commitment.register(
-        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
-        validIdentityId,
-        validTitle,
-        null
-      );
-      commitment.cancel();
+    describe('cancel()', () => {
+      it('should cancel from Draft, Active, and Paused states', () => {
+        // Draft
+        const draft = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-111111111111'),
+          validIdentityId, validTitle, null
+        );
+        draft.clearUncommittedEvents();
+        draft.cancel();
+        expect(draft.state).toBe(CommitmentState.Cancelled);
+        expect(draft.getUncommittedEvents()).toHaveLength(1);
+        expect(draft.getUncommittedEvents()[0]?.name).toBe('commitment.cancelled');
 
-      expect(() => commitment.activate()).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.pause()).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.resume()).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.complete()).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.rename(new CommitmentTitle('New Name'))).toThrow(CommitmentAlreadyCancelledError);
-      expect(() => commitment.updateDescription(null)).toThrow(CommitmentAlreadyCancelledError);
+        // Active
+        const active = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-222222222222'),
+          validIdentityId, validTitle, null
+        );
+        active.activate();
+        active.clearUncommittedEvents();
+        active.cancel();
+        expect(active.state).toBe(CommitmentState.Cancelled);
+        expect(active.getUncommittedEvents()).toHaveLength(1);
+
+        // Paused
+        const paused = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-333333333333'),
+          validIdentityId, validTitle, null
+        );
+        paused.activate();
+        paused.pause();
+        paused.clearUncommittedEvents();
+        paused.cancel();
+        expect(paused.state).toBe(CommitmentState.Cancelled);
+        expect(paused.getUncommittedEvents()).toHaveLength(1);
+      });
+
+      it('should enforce idempotency by emitting zero events when already cancelled', () => {
+        const commitment = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+          validIdentityId, validTitle, null
+        );
+        commitment.cancel();
+        commitment.clearUncommittedEvents();
+
+        expect(() => commitment.cancel()).not.toThrow();
+        expect(commitment.getUncommittedEvents()).toHaveLength(0);
+      });
+
+      it('should block cancellation if already completed', () => {
+        const commitment = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+          validIdentityId, validTitle, null
+        );
+        commitment.activate();
+        commitment.complete();
+        
+        expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCompletedError);
+      });
+
+      it('should reject transitions and modification behaviors on cancelled commitments', () => {
+        const commitment = Commitment.register(
+          new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+          validIdentityId, validTitle, null
+        );
+        commitment.cancel();
+
+        expect(() => commitment.activate()).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.pause()).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.resume()).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.complete()).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.rename(new CommitmentTitle('New Name'))).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.updateDescription(null)).toThrow(CommitmentAlreadyCancelledError);
+      });
     });
 
     it('should rename commitment only if title is different (Rule #77)', () => {

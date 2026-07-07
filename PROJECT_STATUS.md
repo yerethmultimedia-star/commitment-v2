@@ -13,7 +13,7 @@ Vertical Slice Phase
 
 ## Current Sprint
 
-VS-006 — Cancel Commitment
+Phase: Lifecycle Management Complete. Awaiting next vertical slice definitions.
 
 ## Overall Status
 
@@ -36,6 +36,7 @@ VS-006 — Cancel Commitment
 
 ## 📜 Change History
 
+- **v1.4.0 (2026-07-07):** Marked VS-006 as complete (Cancel capability delivered). Lifecycle Management capabilities fully implemented.
 - **v1.3.0 (2026-07-07):** Marked VS-005 as complete (Complete capability delivered). Advancing to VS-006 (Cancel).
 - **v1.2.0 (2026-07-05):** Marked VS-003 and VS-004 as complete (Pause and Resume capabilities delivered). Advancing to VS-005.
 - **v1.1.0 (2026-07-04):** Updated to reflect transition to the Vertical Slice Phase and VS-001 sprint.

@@ -6,6 +6,7 @@ import { ActivateCommitmentNestjsHandler } from './nestjs/activate-commitment.ne
 import { PauseCommitmentNestjsHandler } from './nestjs/pause-commitment.nestjs-handler';
 import { ResumeCommitmentNestjsHandler } from './nestjs/resume-commitment.nestjs-handler';
 import { CompleteCommitmentNestjsHandler } from './nestjs/complete-commitment.nestjs-handler';
+import { CancelCommitmentNestjsHandler } from './nestjs/cancel-commitment.nestjs-handler';
 import { InMemoryCommitmentRepository } from './infrastructure/in-memory-commitment.repository';
 import { NoOpDomainEventDispatcher } from './infrastructure/noop-event-dispatcher';
 
@@ -18,6 +19,7 @@ import { NoOpDomainEventDispatcher } from './infrastructure/noop-event-dispatche
     PauseCommitmentNestjsHandler,
     ResumeCommitmentNestjsHandler,
     CompleteCommitmentNestjsHandler,
+    CancelCommitmentNestjsHandler,
     {
       provide: 'CommitmentRepository',
       useClass: InMemoryCommitmentRepository,

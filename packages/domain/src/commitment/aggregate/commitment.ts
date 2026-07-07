@@ -134,6 +134,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   }
 
   public cancel(): void {
+    if (this._state === CommitmentState.Cancelled) {
+      // Idempotent: already cancelled, no state change or event
+      return;
+    }
     this.ensureNotImmutable();
     const event = new CommitmentCancelledEvent(
       this.id.value,

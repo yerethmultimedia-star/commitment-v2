@@ -26,6 +26,10 @@ import {
   CommitmentStateConflictError as CompleteCommitmentStateConflictError,
   CommitmentStateTransitionError as CompleteCommitmentStateTransitionError,
 } from '../application/commands/complete-commitment.handler';
+import {
+  CommitmentNotFoundError as CancelCommitmentNotFoundError,
+  CommitmentStateConflictError as CancelCommitmentStateConflictError,
+} from '../application/commands/cancel-commitment.handler';
 
 const VALID_ID = '018f6b5c-42e1-7000-8000-999999999999';
 
@@ -218,6 +222,54 @@ describe('CommitmentsController - pause and resume endpoints', () => {
       );
       await expect(controller.complete(VALID_ID)).rejects.toBeInstanceOf(
         UnprocessableEntityException,
+      );
+      expect(commandBus.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('cancel()', () => {
+    it('should return 200/201 (success) on valid command', async () => {
+      commandBus.execute.mockResolvedValue({
+        commitmentId: VALID_ID,
+        state: 'Cancelled',
+        version: 3,
+      });
+
+      const result = await controller.cancel(VALID_ID);
+
+      expect(commandBus.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          commitmentId: VALID_ID,
+        }),
+      );
+      expect(result.commitmentId).toBe(VALID_ID);
+      expect(result.state).toBe('Cancelled');
+      expect(result.version).toBe(3);
+    });
+
+    it('should return 400 on invalid UUID', async () => {
+      await expect(controller.cancel('not-a-uuid')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(commandBus.execute).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when commitment is missing', async () => {
+      commandBus.execute.mockRejectedValue(
+        new CancelCommitmentNotFoundError('missing'),
+      );
+      await expect(controller.cancel(VALID_ID)).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(commandBus.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return 409 when already completed (conflict)', async () => {
+      commandBus.execute.mockRejectedValue(
+        new CancelCommitmentStateConflictError('completed'),
+      );
+      await expect(controller.cancel(VALID_ID)).rejects.toBeInstanceOf(
+        ConflictException,
       );
       expect(commandBus.execute).toHaveBeenCalledTimes(1);
     });
