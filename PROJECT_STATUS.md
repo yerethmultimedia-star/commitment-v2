@@ -13,7 +13,17 @@ Vertical Slice Phase
 
 ## Current Sprint
 
-Phase: Lifecycle Management Complete. Awaiting next vertical slice definitions.
+**Phase: Lifecycle Management Complete.** (VS-001 to VS-006 successfully closed).
+
+The aggregate core is architecturally stable. Upcoming EPICs candidates for next slices:
+
+- Read Model / Projections (Queries)
+- Event History and Auditing
+- Reminders and Scheduling
+- Notifications
+- Commitment Recurrence
+- Calendar Integration
+- Policies and Automations
 
 ## Overall Status
 
