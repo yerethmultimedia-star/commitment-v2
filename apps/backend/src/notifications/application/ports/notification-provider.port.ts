@@ -1,3 +1,11 @@
+export interface NotificationMessage {
+  identityId: string;
+  pushToken: string;
+  title: string;
+  body: string;
+  metadata: Record<string, string>;
+}
+
 export interface NotificationProvider {
-  send(reminderId: string, context: Record<string, unknown>): Promise<void>;
+  send(notification: NotificationMessage): Promise<void>;
 }

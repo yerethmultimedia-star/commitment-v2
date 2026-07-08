@@ -1,6 +1,10 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { ReminderRepository } from '../ports/reminder.repository.port';
-import type { NotificationProvider } from '../ports/notification-provider.port';
+import type {
+  NotificationProvider,
+  NotificationMessage,
+} from '../ports/notification-provider.port';
+import type { NotificationDeviceProjectionRepository } from '../ports/notification-device-projection.repository';
 
 @Injectable()
 export class ReminderWorkerService {
@@ -11,6 +15,8 @@ export class ReminderWorkerService {
     private readonly repository: ReminderRepository,
     @Inject('NotificationProvider')
     private readonly notificationProvider: NotificationProvider,
+    @Inject('NotificationDeviceProjectionRepository')
+    private readonly deviceProjectionRepository: NotificationDeviceProjectionRepository,
   ) {}
 
   public async process(reminderId: string): Promise<void> {
@@ -25,10 +31,32 @@ export class ReminderWorkerService {
       reminder.markProcessing();
       await this.repository.save(reminder);
 
-      await this.notificationProvider.send(reminder.id, {
-        commitmentId: reminder.commitmentId,
+      const device = await this.deviceProjectionRepository.findByIdentityId(
+        reminder.identityId,
+      );
+
+      if (!device) {
+        this.logger.warn(
+          `No device projection found for identity ${reminder.identityId}. Skipping notification.`,
+        );
+        // We consider it completed since we can't do anything else.
+        reminder.complete();
+        await this.repository.save(reminder);
+        return;
+      }
+
+      const message: NotificationMessage = {
         identityId: reminder.identityId,
-      });
+        pushToken: device.pushToken,
+        title: 'Commitment Reminder',
+        body: 'It is time for your commitment!', // We might want to look up commitment details, but Reminder aggregate doesn't have it right now.
+        metadata: {
+          reminderId: reminder.id,
+          commitmentId: reminder.commitmentId,
+        },
+      };
+
+      await this.notificationProvider.send(message);
 
       reminder.complete();
       await this.repository.save(reminder);

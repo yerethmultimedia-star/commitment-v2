@@ -6,6 +6,7 @@ import { MetricsController } from './metrics.controller';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { CommitmentModule } from './commitment/commitment.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { DevicesModule } from './devices/devices.module';
 
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bullmq';
@@ -15,6 +16,7 @@ import { BullModule } from '@nestjs/bullmq';
     CqrsModule,
     CommitmentModule,
     NotificationsModule,
+    DevicesModule,
     ScheduleModule.forRoot(),
     BullModule.forRoot({
       connection: {

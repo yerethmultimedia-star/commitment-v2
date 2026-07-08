@@ -14,7 +14,11 @@ import { ReminderDispatcher } from './application/services/reminder-dispatcher.s
 import { ReminderWorkerService } from './application/services/reminder-worker.service';
 import { BullMQExecutionEngine } from './infrastructure/bullmq-execution-engine';
 import { ConsoleNotificationProvider } from './infrastructure/console-notification-provider';
+import { ExpoNotificationProvider } from './infrastructure/expo-notification-provider';
 import { ReminderProcessor } from './infrastructure/reminder.processor';
+import { InMemoryNotificationDeviceProjectionRepository } from './infrastructure/in-memory-notification-device-projection.repository';
+import { UpdateDeviceProjectionOnRegisteredHandler } from './application/handlers/update-device-projection-on-registered.handler';
+import { UpdateDeviceProjectionOnUpdatedHandler } from './application/handlers/update-device-projection-on-updated.handler';
 
 @Module({
   imports: [
@@ -32,6 +36,8 @@ import { ReminderProcessor } from './infrastructure/reminder.processor';
     ReminderDispatcher,
     ReminderWorkerService,
     ReminderProcessor,
+    UpdateDeviceProjectionOnRegisteredHandler,
+    UpdateDeviceProjectionOnUpdatedHandler,
     {
       provide: 'ReminderRepository',
       useClass: InMemoryReminderRepository,
@@ -42,11 +48,20 @@ import { ReminderProcessor } from './infrastructure/reminder.processor';
     },
     {
       provide: 'NotificationProvider',
-      useClass: ConsoleNotificationProvider,
+      useFactory: () => {
+        if (process.env.NOTIFICATION_PROVIDER === 'expo') {
+          return new ExpoNotificationProvider();
+        }
+        return new ConsoleNotificationProvider();
+      },
     },
     {
       provide: 'ReminderSchedulerPort',
       useClass: InMemoryReminderScheduler,
+    },
+    {
+      provide: 'NotificationDeviceProjectionRepository',
+      useClass: InMemoryNotificationDeviceProjectionRepository,
     },
   ],
 })
