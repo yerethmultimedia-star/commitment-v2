@@ -7,5 +7,6 @@
 - [ ] **Event Integrity:** Exactly one Domain Event is emitted per real state transition.
 - [ ] **CQRS Read Model:** Query Handlers never reconstruct a view from aggregates; they always read from a projection (eventually consistent).
 - [ ] **Inter-Module Integration:** Event-consuming modules (Notifications, Analytics, etc.) never invoke aggregates or repositories from other modules directly. Integration is strictly via Domain Events or explicit contracts.
+- [ ] **Agnostic Execution Engines:** Execution Engines never contain business rules. Their only responsibility is to transport work to a Worker.
 - [ ] **Dependency Injection:** Handlers rely on abstract types/interfaces (`import type`).
 - [ ] **Pipeline:** Lint, build, and tests are completely green.

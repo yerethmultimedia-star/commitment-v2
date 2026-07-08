@@ -7,8 +7,24 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { CommitmentModule } from './commitment/commitment.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
+import { ScheduleModule } from '@nestjs/schedule';
+import { BullModule } from '@nestjs/bullmq';
+
 @Module({
-  imports: [CqrsModule, CommitmentModule, NotificationsModule],
+  imports: [
+    CqrsModule,
+    CommitmentModule,
+    NotificationsModule,
+    ScheduleModule.forRoot(),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: process.env.REDIS_PORT
+          ? parseInt(process.env.REDIS_PORT, 10)
+          : 6379,
+      },
+    }),
+  ],
   controllers: [AppController, MetricsController],
   providers: [AppService],
 })

@@ -1,8 +1,11 @@
 export enum ReminderStatus {
   Scheduled = 'Scheduled',
+  Queued = 'Queued',
+  Processing = 'Processing',
   Suspended = 'Suspended',
   Cancelled = 'Cancelled',
   Completed = 'Completed',
+  Failed = 'Failed',
 }
 
 export class Reminder {
@@ -127,6 +130,27 @@ export class Reminder {
     }
     this._status = ReminderStatus.Completed;
     this._updatedAt = new Date();
+  }
+
+  public markQueued(): void {
+    if (this._status !== ReminderStatus.Scheduled) {
+      return;
+    }
+    this._status = ReminderStatus.Queued;
+    this._updatedAt = new Date();
+  }
+
+  public markProcessing(): void {
+    if (this._status !== ReminderStatus.Queued) {
+      return;
+    }
+    this._status = ReminderStatus.Processing;
+    this._updatedAt = new Date();
+  }
+
+  public fail(errorMessage: string): void {
+    this._status = ReminderStatus.Failed;
+    this.recordAttempt(this._provider || 'unknown', errorMessage);
   }
 
   public recordAttempt(provider: string, errorMessage?: string): void {

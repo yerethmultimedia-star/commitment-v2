@@ -20,12 +20,14 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@commitment/domain": "workspace:*",
+    "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/cqrs": "^11.0.3",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^6.1.3",
     "@nestjs/swagger": "^11.4.5",
-    "@commitment/domain": "workspace:*",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-prometheus": "^0.219.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.219.0",
@@ -36,6 +38,7 @@
     "@opentelemetry/resources": "^2.8.0",
     "@opentelemetry/sdk-node": "^0.219.0",
     "@opentelemetry/semantic-conventions": "^1.41.1",
+    "bullmq": "^5.79.3",
     "dotenv": "^17.4.2",
     "prom-client": "^15.1.3",
     "reflect-metadata": "^0.2.2",
