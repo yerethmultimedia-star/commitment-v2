@@ -53,6 +53,21 @@ export class InMemoryOutboxRepository implements OutboxRepository {
     return Promise.resolve();
   }
 
+  findById(id: string): Promise<IntegrationMessage | null> {
+    const message = this.messages.get(id);
+    return Promise.resolve(message ? this.cloneMessage(message) : null);
+  }
+
+  getDeadLetterMessages(): Promise<IntegrationMessage[]> {
+    const deadLetterMessages: IntegrationMessage[] = [];
+    for (const message of this.messages.values()) {
+      if (message.status === OutboxStatus.DeadLetter) {
+        deadLetterMessages.push(this.cloneMessage(message));
+      }
+    }
+    return Promise.resolve(deadLetterMessages);
+  }
+
   private cloneMessage(message: IntegrationMessage): IntegrationMessage {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const cloned = Object.assign(

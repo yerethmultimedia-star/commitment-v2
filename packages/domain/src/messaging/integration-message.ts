@@ -7,6 +7,7 @@ export enum OutboxStatus {
   Publishing = 'Publishing',
   Published = 'Published',
   Failed = 'Failed',
+  DeadLetter = 'DeadLetter',
 }
 
 export enum ProcessedMessageStatus {

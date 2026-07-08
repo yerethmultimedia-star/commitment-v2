@@ -10,6 +10,7 @@ import { OutboxStatus } from '@commitment/domain';
 export class OutboxPublisherService {
   private readonly logger = new Logger(OutboxPublisherService.name);
   private isPublishing = false;
+  private readonly MAX_RETRIES = 5;
 
   constructor(
     @Inject(OUTBOX_REPOSITORY_TOKEN)
@@ -52,11 +53,20 @@ export class OutboxPublisherService {
             `Failed to publish message ${msg.messageId}:`,
             error,
           );
-          msg.status = OutboxStatus.Failed;
-          // Exponential backoff for retries (e.g. 2^retryCount * 5 seconds)
-          msg.nextAttempt = new Date(
-            Date.now() + Math.pow(2, msg.retryCount) * 5000,
-          );
+
+          if (msg.retryCount >= this.MAX_RETRIES) {
+            this.logger.warn(
+              `Message ${msg.messageId} reached MAX_RETRIES (${this.MAX_RETRIES}). Moving to DeadLetter queue.`,
+            );
+            msg.status = OutboxStatus.DeadLetter;
+            msg.nextAttempt = undefined; // Do not retry automatically
+          } else {
+            msg.status = OutboxStatus.Failed;
+            // Exponential backoff for retries (e.g. 2^retryCount * 5 seconds)
+            msg.nextAttempt = new Date(
+              Date.now() + Math.pow(2, msg.retryCount) * 5000,
+            );
+          }
         }
       }
 

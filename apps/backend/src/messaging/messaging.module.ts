@@ -8,9 +8,11 @@ import { InMemoryOutboxRepository } from './infrastructure/in-memory-outbox.repo
 import { InMemoryMessageBroker } from './infrastructure/in-memory-message.broker';
 import { InMemoryProcessedMessageRepository } from './infrastructure/in-memory-processed-message.repository';
 import { OutboxPublisherService } from './application/services/outbox-publisher.service';
+import { MessagingController } from './api/messaging.controller';
 
 @Module({
-  imports: [CqrsModule, ScheduleModule.forRoot()],
+  imports: [ScheduleModule.forRoot(), CqrsModule],
+  controllers: [MessagingController],
   providers: [
     {
       provide: OUTBOX_REPOSITORY_TOKEN,
