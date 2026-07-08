@@ -7,6 +7,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { CommitmentModule } from './commitment/commitment.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DevicesModule } from './devices/devices.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bullmq';
@@ -17,6 +18,7 @@ import { BullModule } from '@nestjs/bullmq';
     CommitmentModule,
     NotificationsModule,
     DevicesModule,
+    MessagingModule,
     ScheduleModule.forRoot(),
     BullModule.forRoot({
       connection: {

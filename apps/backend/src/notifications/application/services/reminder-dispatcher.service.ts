@@ -1,7 +1,10 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import type { ReminderRepository } from '../ports/reminder.repository.port';
-import type { ReminderExecutionEngine } from '../ports/reminder-execution-engine.port';
+import { OUTBOX_REPOSITORY_TOKEN } from '../../../messaging/application/ports/outbox.repository.port';
+import type { OutboxRepository } from '../../../messaging/application/ports/outbox.repository.port';
+import { ReminderQueuedMessageMapper } from '../mappers/reminder-queued-message.mapper';
+import { ReminderQueuedEvent } from '@commitment/domain';
 
 @Injectable()
 export class ReminderDispatcher {
@@ -10,8 +13,9 @@ export class ReminderDispatcher {
   constructor(
     @Inject('ReminderRepository')
     private readonly repository: ReminderRepository,
-    @Inject('ReminderExecutionEngine')
-    private readonly engine: ReminderExecutionEngine,
+    @Inject(OUTBOX_REPOSITORY_TOKEN)
+    private readonly outboxRepository: OutboxRepository,
+    private readonly mapper: ReminderQueuedMessageMapper,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -22,11 +26,25 @@ export class ReminderDispatcher {
     for (const reminder of readyReminders) {
       try {
         this.logger.debug(`Dispatching reminder ${reminder.id}`);
-        // Known Limitation: We enqueue before save. To be fixed with Outbox in VS-013.
-        await this.engine.enqueue(reminder.id);
 
         reminder.markQueued();
+
+        // Map domain events to integration messages
+        const events = reminder.getUncommittedEvents();
+        const messages = events
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          .filter((e: any) => e.name === 'reminder.queued')
+          .map((e: any) =>
+            this.mapper.mapToIntegrationMessage(e as ReminderQueuedEvent),
+          );
+
+        // Persist transactionally
         await this.repository.save(reminder);
+        if (messages.length > 0) {
+          await this.outboxRepository.append(messages);
+        }
+
+        reminder.clearUncommittedEvents();
       } catch (error) {
         this.logger.error(`Failed to dispatch reminder ${reminder.id}`, error);
       }

@@ -1,3 +1,7 @@
+import { DomainEvent } from '../../core/domain-event.interface.js';
+import { ReminderQueuedEvent } from '../events/reminder-queued.event.js';
+import { AggregateRoot } from '../../shared/aggregate-root.js';
+
 export enum ReminderStatus {
   Scheduled = 'Scheduled',
   Queued = 'Queued',
@@ -8,49 +12,23 @@ export enum ReminderStatus {
   Failed = 'Failed',
 }
 
-export class Reminder {
-  private _id: string;
-  private _commitmentId: string;
-  private _identityId: string;
-  private _scheduledFor: Date;
-  private _status: ReminderStatus;
-  private _attempts: number;
-  private _provider: string | null;
-  private _lastAttemptAt: Date | null;
-  private _nextAttemptAt: Date | null;
-  private _errorMessage: string | null;
-  private _createdAt: Date;
-  private _updatedAt: Date;
+export class Reminder extends AggregateRoot<string> {
+  private _commitmentId!: string;
+  private _identityId!: string;
+  private _scheduledFor!: Date;
+  private _status!: ReminderStatus;
+  private _attempts!: number;
+  private _provider!: string | null;
+  private _lastAttemptAt: Date | null = null;
+  private _nextAttemptAt: Date | null = null;
+  private _errorMessage: string | null = null;
+  private _createdAt!: Date;
+  private _updatedAt!: Date;
 
-  private constructor(
-    id: string,
-    commitmentId: string,
-    identityId: string,
-    scheduledFor: Date,
-    status: ReminderStatus,
-    attempts: number,
-    provider: string | null,
-    lastAttemptAt: Date | null,
-    nextAttemptAt: Date | null,
-    errorMessage: string | null,
-    createdAt: Date,
-    updatedAt: Date
-  ) {
-    this._id = id;
-    this._commitmentId = commitmentId;
-    this._identityId = identityId;
-    this._scheduledFor = scheduledFor;
-    this._status = status;
-    this._attempts = attempts;
-    this._provider = provider;
-    this._lastAttemptAt = lastAttemptAt;
-    this._nextAttemptAt = nextAttemptAt;
-    this._errorMessage = errorMessage;
-    this._createdAt = createdAt;
-    this._updatedAt = updatedAt;
+  private constructor(id: string) {
+    super(id);
   }
 
-  public get id(): string { return this._id; }
   public get commitmentId(): string { return this._commitmentId; }
   public get identityId(): string { return this._identityId; }
   public get scheduledFor(): Date { return this._scheduledFor; }
@@ -70,21 +48,30 @@ export class Reminder {
     identityId: string,
     scheduledFor: Date,
   ): Reminder {
-    const now = new Date();
-    return new Reminder(
-      id,
-      commitmentId,
-      identityId,
-      scheduledFor,
-      ReminderStatus.Scheduled,
-      0,
-      null,
-      null,
-      null,
-      null,
-      now,
-      now
+    const reminder = new Reminder(id);
+    reminder.recordEvent(
+      new ReminderQueuedEvent(id, {
+        reminderId: id,
+        commitmentId,
+        identityId,
+        scheduledFor: scheduledFor.toISOString(),
+      })
     );
+    return reminder;
+  }
+
+  protected applyEvent(event: DomainEvent): void {
+    if (event.name === 'reminder.queued') {
+      const payload = (event as ReminderQueuedEvent).payload;
+      this._commitmentId = payload.commitmentId;
+      this._identityId = payload.identityId;
+      this._scheduledFor = new Date(payload.scheduledFor);
+      this._status = ReminderStatus.Queued;
+      this._attempts = 0;
+      this._provider = null;
+      this._createdAt = new Date(event.metadata.occurredAt);
+      this._updatedAt = new Date(event.metadata.occurredAt);
+    }
   }
 
   // Lifecycle Methods
@@ -138,6 +125,14 @@ export class Reminder {
     }
     this._status = ReminderStatus.Queued;
     this._updatedAt = new Date();
+    this.recordEvent(
+      new ReminderQueuedEvent(this.id, {
+        reminderId: this.id,
+        commitmentId: this.commitmentId,
+        identityId: this.identityId,
+        scheduledFor: this.scheduledFor.toISOString(),
+      })
+    );
   }
 
   public markProcessing(): void {
@@ -186,19 +181,18 @@ export class Reminder {
     createdAt: Date;
     updatedAt: Date;
   }): Reminder {
-    return new Reminder(
-      props.id,
-      props.commitmentId,
-      props.identityId,
-      props.scheduledFor,
-      props.status,
-      props.attempts,
-      props.provider,
-      props.lastAttemptAt,
-      props.nextAttemptAt,
-      props.errorMessage,
-      props.createdAt,
-      props.updatedAt
-    );
+    const reminder = new Reminder(props.id);
+    reminder._commitmentId = props.commitmentId;
+    reminder._identityId = props.identityId;
+    reminder._scheduledFor = props.scheduledFor;
+    reminder._status = props.status;
+    reminder._attempts = props.attempts;
+    reminder._provider = props.provider;
+    reminder._lastAttemptAt = props.lastAttemptAt;
+    reminder._nextAttemptAt = props.nextAttemptAt;
+    reminder._errorMessage = props.errorMessage;
+    reminder._createdAt = props.createdAt;
+    reminder._updatedAt = props.updatedAt;
+    return reminder;
   }
 }

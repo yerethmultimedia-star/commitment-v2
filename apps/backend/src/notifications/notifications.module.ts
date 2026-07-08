@@ -17,12 +17,16 @@ import { ConsoleNotificationProvider } from './infrastructure/console-notificati
 import { ExpoNotificationProvider } from './infrastructure/expo-notification-provider';
 import { ReminderProcessor } from './infrastructure/reminder.processor';
 import { InMemoryNotificationDeviceProjectionRepository } from './infrastructure/in-memory-notification-device-projection.repository';
+import { ScheduleReminderOnQueuedHandler } from './application/handlers/schedule-reminder-on-queued.handler';
+import { ReminderQueuedMessageMapper } from './application/mappers/reminder-queued-message.mapper';
 import { UpdateDeviceProjectionOnRegisteredHandler } from './application/handlers/update-device-projection-on-registered.handler';
 import { UpdateDeviceProjectionOnUpdatedHandler } from './application/handlers/update-device-projection-on-updated.handler';
+import { MessagingModule } from '../messaging/messaging.module';
 
 @Module({
   imports: [
     CqrsModule,
+    MessagingModule,
     BullModule.registerQueue({
       name: 'reminders',
     }),
@@ -38,6 +42,8 @@ import { UpdateDeviceProjectionOnUpdatedHandler } from './application/handlers/u
     ReminderProcessor,
     UpdateDeviceProjectionOnRegisteredHandler,
     UpdateDeviceProjectionOnUpdatedHandler,
+    ScheduleReminderOnQueuedHandler,
+    ReminderQueuedMessageMapper,
     {
       provide: 'ReminderRepository',
       useClass: InMemoryReminderRepository,
