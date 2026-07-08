@@ -1,58 +1,97 @@
 import { ReminderSchedulerPort } from '../application/ports/reminder-scheduler.port';
+import type { ReminderRepository } from '../application/ports/reminder.repository.port';
+import { Reminder, ReminderStatus } from '@commitment/domain';
+import { randomUUID } from 'crypto';
+import { Injectable, Inject } from '@nestjs/common';
 
+@Injectable()
 export class InMemoryReminderScheduler implements ReminderSchedulerPort {
-  private readonly scheduled = new Set<string>();
-  private readonly suspended = new Set<string>();
+  constructor(
+    @Inject('ReminderRepository')
+    private readonly repository: ReminderRepository,
+  ) {}
 
-  public schedule(commitmentId: string): Promise<void> {
-    this.scheduled.add(commitmentId);
-    this.suspended.delete(commitmentId);
+  public async schedule(
+    commitmentId: string,
+    identityId: string,
+    targetDateStr?: string,
+  ): Promise<void> {
+    if (!targetDateStr) {
+      console.log(
+        `[InMemoryReminderScheduler] No target date provided, skipping reminder for ${commitmentId}`,
+      );
+      return;
+    }
+
+    let reminder = await this.repository.findByCommitmentId(commitmentId);
+    const targetDate = new Date(targetDateStr);
+
+    if (!reminder) {
+      reminder = Reminder.create(
+        randomUUID(),
+        commitmentId,
+        identityId,
+        targetDate,
+      );
+    } else {
+      reminder.schedule(targetDate);
+    }
+
+    await this.repository.save(reminder);
     console.log(
-      `[InMemoryReminderScheduler] Scheduled reminder for ${commitmentId}`,
+      `[InMemoryReminderScheduler] Scheduled reminder for ${commitmentId} at ${targetDateStr}`,
     );
-    return Promise.resolve();
   }
 
-  public suspend(commitmentId: string): Promise<void> {
-    if (this.scheduled.has(commitmentId)) {
-      this.suspended.add(commitmentId);
+  public async suspend(commitmentId: string): Promise<void> {
+    const reminder = await this.repository.findByCommitmentId(commitmentId);
+    if (reminder) {
+      reminder.suspend();
+      await this.repository.save(reminder);
       console.log(
         `[InMemoryReminderScheduler] Suspended reminder for ${commitmentId}`,
       );
     }
-    return Promise.resolve();
   }
 
-  public reschedule(commitmentId: string): Promise<void> {
-    if (this.suspended.has(commitmentId)) {
-      this.suspended.delete(commitmentId);
+  public async reschedule(
+    commitmentId: string,
+    targetDateStr?: string,
+  ): Promise<void> {
+    const reminder = await this.repository.findByCommitmentId(commitmentId);
+    if (reminder) {
+      const targetDate = targetDateStr ? new Date(targetDateStr) : undefined;
+      reminder.resume(targetDate);
+      await this.repository.save(reminder);
       console.log(
         `[InMemoryReminderScheduler] Rescheduled reminder for ${commitmentId}`,
       );
     } else {
-      // If it wasn't suspended but we are asked to reschedule, ensure it's in the scheduled state.
-      this.schedule(commitmentId);
+      console.warn(
+        `[InMemoryReminderScheduler] Cannot reschedule unknown reminder for ${commitmentId}`,
+      );
     }
-    return Promise.resolve();
   }
 
-  public cancel(commitmentId: string): Promise<void> {
-    this.scheduled.delete(commitmentId);
-    this.suspended.delete(commitmentId);
-    console.log(
-      `[InMemoryReminderScheduler] Cancelled reminder for ${commitmentId}`,
-    );
-    return Promise.resolve();
+  public async cancel(commitmentId: string): Promise<void> {
+    const reminder = await this.repository.findByCommitmentId(commitmentId);
+    if (reminder) {
+      reminder.cancel();
+      await this.repository.save(reminder);
+      console.log(
+        `[InMemoryReminderScheduler] Cancelled reminder for ${commitmentId}`,
+      );
+    }
   }
 
   // Exposed for testing
-  public isScheduled(commitmentId: string): boolean {
-    return (
-      this.scheduled.has(commitmentId) && !this.suspended.has(commitmentId)
-    );
+  public async isScheduled(commitmentId: string): Promise<boolean> {
+    const reminder = await this.repository.findByCommitmentId(commitmentId);
+    return reminder?.status === ReminderStatus.Scheduled;
   }
 
-  public isSuspended(commitmentId: string): boolean {
-    return this.suspended.has(commitmentId);
+  public async isSuspended(commitmentId: string): Promise<boolean> {
+    const reminder = await this.repository.findByCommitmentId(commitmentId);
+    return reminder?.status === ReminderStatus.Suspended;
   }
 }

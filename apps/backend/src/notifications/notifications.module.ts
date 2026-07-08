@@ -8,6 +8,7 @@ import {
   CancelReminderOnCancelledHandler,
 } from './application/handlers/cancel-reminder-on-terminal-state.handler';
 import { InMemoryReminderScheduler } from './infrastructure/in-memory-reminder-scheduler';
+import { InMemoryReminderRepository } from './infrastructure/in-memory-reminder.repository';
 
 @Module({
   imports: [CqrsModule],
@@ -17,6 +18,10 @@ import { InMemoryReminderScheduler } from './infrastructure/in-memory-reminder-s
     RescheduleReminderOnResumeHandler,
     CancelReminderOnCompletedHandler,
     CancelReminderOnCancelledHandler,
+    {
+      provide: 'ReminderRepository',
+      useClass: InMemoryReminderRepository,
+    },
     {
       provide: 'ReminderSchedulerPort',
       useClass: InMemoryReminderScheduler,

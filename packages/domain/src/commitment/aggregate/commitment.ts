@@ -119,7 +119,11 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     const event = new CommitmentActivatedEvent(
       this.id.value,
       {
-        commitmentId: this.id.value
+        commitmentId: this.id.value,
+        identityId: this._identityId.value,
+        targetDate: this._targetDate ? this._targetDate.toISOString() : undefined,
+        seriesId: this._seriesId.value,
+        recurrencePattern: this._recurrencePattern.type
       }
     );
     this.recordEvent(event);
@@ -155,7 +159,8 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     const event = new CommitmentResumedEvent(
       this.id.value,
       {
-        commitmentId: this.id.value
+        commitmentId: this.id.value,
+        targetDate: this._targetDate ? this._targetDate.toISOString() : undefined,
       }
     );
     this.recordEvent(event);

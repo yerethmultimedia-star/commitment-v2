@@ -11,6 +11,19 @@ export class ScheduleReminderOnActivationHandler implements IEventHandler<Commit
   ) {}
 
   public async handle(event: CommitmentActivatedEvent): Promise<void> {
-    await this.scheduler.schedule(event.payload.commitmentId);
+    const {
+      commitmentId,
+      identityId,
+      targetDate,
+      seriesId,
+      recurrencePattern,
+    } = event.payload;
+    await this.scheduler.schedule(
+      commitmentId,
+      identityId,
+      targetDate,
+      seriesId,
+      recurrencePattern,
+    );
   }
 }
