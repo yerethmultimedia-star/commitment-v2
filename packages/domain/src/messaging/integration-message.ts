@@ -9,6 +9,12 @@ export enum OutboxStatus {
   Failed = 'Failed',
 }
 
+export enum ProcessedMessageStatus {
+  Processing = 'Processing',
+  Completed = 'Completed',
+  Failed = 'Failed',
+}
+
 export class IntegrationMessage {
   constructor(
     public readonly messageId: string,
