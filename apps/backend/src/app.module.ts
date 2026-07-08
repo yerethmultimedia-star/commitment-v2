@@ -5,9 +5,10 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { MetricsController } from './metrics.controller';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { CommitmentModule } from './commitment/commitment.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
-  imports: [CqrsModule, CommitmentModule],
+  imports: [CqrsModule, CommitmentModule, NotificationsModule],
   controllers: [AppController, MetricsController],
   providers: [AppService],
 })
