@@ -4,6 +4,10 @@ import {
   CommitmentDescription,
   Commitment,
   IdentityId,
+  RecurrencePattern,
+  RecurrenceType,
+  SeriesId,
+  TargetDate,
 } from '@commitment/domain';
 import { RegisterCommitmentCommand } from './register-commitment.command';
 import { RegisterCommitmentResult } from './register-commitment.result';
@@ -34,6 +38,15 @@ export class RegisterCommitmentCommandHandlerCore {
     const description = command.description
       ? new CommitmentDescription(command.description)
       : null;
+    const pattern = command.recurrencePattern
+      ? RecurrencePattern.create(command.recurrencePattern as RecurrenceType)
+      : undefined;
+    const targetDate = command.targetDate
+      ? TargetDate.create(command.targetDate)
+      : undefined;
+    const seriesId = command.seriesId
+      ? SeriesId.create(command.seriesId)
+      : undefined;
 
     // 3. Invoke Domain Aggregate Behavior
     const commitment: Commitment = Commitment.register(
@@ -41,6 +54,9 @@ export class RegisterCommitmentCommandHandlerCore {
       identityId,
       title,
       description,
+      pattern,
+      targetDate,
+      seriesId,
     );
 
     // 4. Save to Repository — receive actual version

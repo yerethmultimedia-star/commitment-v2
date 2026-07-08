@@ -5,6 +5,9 @@ export type CommitmentView = {
   description: string | null;
   state: string;
   version: number;
+  recurrencePattern: string;
+  targetDate?: string;
+  seriesId: string;
 };
 
 export type PaginatedCommitments = {

@@ -27,6 +27,9 @@ export class CommitmentRegisteredProjector implements IEventHandler<CommitmentRe
       description: event.payload.description,
       state: 'Draft',
       version: 1,
+      recurrencePattern: event.payload.recurrencePattern,
+      targetDate: event.payload.targetDate,
+      seriesId: event.payload.seriesId,
     });
   }
 }

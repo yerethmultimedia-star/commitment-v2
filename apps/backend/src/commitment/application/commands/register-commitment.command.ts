@@ -4,5 +4,8 @@ export class RegisterCommitmentCommand {
     public readonly identityId: string,
     public readonly title: string,
     public readonly description?: string,
+    public readonly recurrencePattern?: string,
+    public readonly targetDate?: string,
+    public readonly seriesId?: string,
   ) {}
 }

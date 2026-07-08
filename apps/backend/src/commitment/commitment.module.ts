@@ -14,6 +14,7 @@ import { NestEventBusDispatcher } from './infrastructure/nest-event-bus.dispatch
 import { InMemoryCommitmentProjectionStore } from './infrastructure/in-memory-commitment-projection.store';
 import { InMemoryCommitmentQueryService } from './infrastructure/in-memory-commitment.query-service';
 import { CommitmentProjectors } from './application/projectors/commitment.projectors';
+import { RecurringCommitmentSaga } from './application/sagas/recurring-commitment.saga';
 
 @Module({
   imports: [CqrsModule],
@@ -27,6 +28,7 @@ import { CommitmentProjectors } from './application/projectors/commitment.projec
     CancelCommitmentNestjsHandler,
     GetCommitmentByIdNestjsHandler,
     ListCommitmentsNestjsHandler,
+    RecurringCommitmentSaga,
     ...CommitmentProjectors,
     {
       provide: 'CommitmentRepository',

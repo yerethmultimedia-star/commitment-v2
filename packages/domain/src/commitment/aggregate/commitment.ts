@@ -3,6 +3,9 @@ import { CommitmentId } from '../value-objects/commitment-id.js';
 import { IdentityId } from '../../identity/value-objects/identity-id.js';
 import { CommitmentTitle } from '../value-objects/commitment-title.js';
 import { CommitmentDescription } from '../value-objects/commitment-description.js';
+import { RecurrencePattern, RecurrenceType } from '../value-objects/recurrence-pattern.js';
+import { SeriesId } from '../value-objects/series-id.js';
+import { TargetDate } from '../value-objects/target-date.js';
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { CommitmentRegisteredEvent } from '../events/commitment-registered.event.js';
 import { CommitmentActivatedEvent } from '../events/commitment-activated.event.js';
@@ -35,6 +38,9 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   private _title!: CommitmentTitle;
   private _description!: CommitmentDescription | null;
   private _state!: CommitmentState;
+  private _recurrencePattern!: RecurrencePattern;
+  private _targetDate!: TargetDate | null;
+  private _seriesId!: SeriesId;
 
   private constructor(id: CommitmentId) {
     super(id);
@@ -56,15 +62,34 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     return this._state;
   }
 
+  public get recurrencePattern(): RecurrencePattern {
+    return this._recurrencePattern;
+  }
+
+  public get targetDate(): TargetDate | null {
+    return this._targetDate;
+  }
+
+  public get seriesId(): SeriesId {
+    return this._seriesId;
+  }
+
   public static register(
     id: CommitmentId,
     identityId: IdentityId,
     title: CommitmentTitle,
-    description: CommitmentDescription | null
+    description: CommitmentDescription | null,
+    recurrencePattern?: RecurrencePattern,
+    targetDate?: TargetDate | null,
+    seriesId?: SeriesId
   ): Commitment {
     if (!identityId) {
       throw new CommitmentRequiresIdentityError();
     }
+    const pattern = recurrencePattern ?? RecurrencePattern.create(RecurrenceType.None);
+    const sId = seriesId ?? SeriesId.create(id.value);
+    const tDate = targetDate ?? null;
+
     const commitment = new Commitment(id);
     const event = new CommitmentRegisteredEvent(
       id.value,
@@ -72,7 +97,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
         commitmentId: id.value,
         identityId: identityId.value,
         title: title.value,
-        description: description ? description.value : ''
+        description: description ? description.value : '',
+        recurrencePattern: pattern.type,
+        targetDate: tDate ? tDate.toISOString() : undefined,
+        seriesId: sId.value
       }
     );
     commitment.recordEvent(event);
@@ -160,7 +188,13 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     const event = new CommitmentCompletedEvent(
       this.id.value,
       {
-        commitmentId: this.id.value
+        commitmentId: this.id.value,
+        identityId: this._identityId.value,
+        title: this._title.value,
+        description: this._description ? this._description.value : '',
+        recurrencePattern: this._recurrencePattern.type,
+        targetDate: this._targetDate ? this._targetDate.toISOString() : undefined,
+        seriesId: this._seriesId.value
       }
     );
     this.recordEvent(event);
@@ -214,6 +248,9 @@ export class Commitment extends AggregateRoot<CommitmentId> {
       this._title = new CommitmentTitle(payload.title);
       this._description = payload.description ? new CommitmentDescription(payload.description) : null;
       this._state = CommitmentState.Draft;
+      this._recurrencePattern = RecurrencePattern.create(payload.recurrencePattern as RecurrenceType);
+      this._targetDate = payload.targetDate ? TargetDate.create(payload.targetDate) : null;
+      this._seriesId = SeriesId.create(payload.seriesId);
     } else if (event.name === 'commitment.activated') {
       this._state = CommitmentState.Active;
     } else if (event.name === 'commitment.paused') {

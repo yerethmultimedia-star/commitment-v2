@@ -65,6 +65,9 @@ const registerSchema = z.object({
   identityId: z.string().uuid('Invalid identity id UUID format'),
   title: z.string().min(1, 'Title cannot be empty'),
   description: z.string().optional(),
+  recurrencePattern: z.string().optional(),
+  targetDate: z.string().optional(),
+  seriesId: z.string().uuid('Invalid series id UUID format').optional(),
 });
 
 const uuidSchema = z.string().uuid('Invalid UUID format');
@@ -134,6 +137,9 @@ export class CommitmentsController {
         dto.identityId,
         dto.title,
         dto.description,
+        dto.recurrencePattern,
+        dto.targetDate,
+        dto.seriesId,
       );
 
       const result = (await this.commandBus.execute(
