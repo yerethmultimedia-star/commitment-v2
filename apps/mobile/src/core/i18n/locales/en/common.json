@@ -1,0 +1,10 @@
+{
+  "profile": {
+    "title": "Profile",
+    "identityId": "Identity ID",
+    "version": "Version",
+    "environment": "Environment",
+    "logout": "Log out",
+    "copied": "Copied to clipboard"
+  }
+}

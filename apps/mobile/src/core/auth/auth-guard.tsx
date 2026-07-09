@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, usePathname } from 'expo-router';
 import { useSession } from './use-session';
 
 /**
@@ -21,23 +21,32 @@ export function useAuthGuard() {
     // Rule 1: Always show onboarding first if not seen
     const segmentsList = segments as string[];
     const currentScreen = segmentsList.length > 1 ? segmentsList[1] : undefined;
+    const pathname = usePathname();
+
+    // Prevent navigation loops: don't navigate if already there
+    const replace = (path: string) => {
+      if (pathname !== path) {
+        router.replace(path);
+      }
+    };
+
     if (!hasSeenOnboarding && currentScreen !== 'onboarding') {
       console.log('🛡️ AuthGuard: Redirecting to onboarding');
-      // router.replace('/(auth)/onboarding'); // TODO: VS-019
+      replace('/(auth)/onboarding');
       return;
     }
 
     // Rule 2: If onboarding is complete but user is anonymous, enforce login
     if (hasSeenOnboarding && sessionStatus === 'Anonymous' && !inAuthGroup) {
       console.log('🛡️ AuthGuard: Redirecting to login');
-      // router.replace('/(auth)/login'); // TODO: VS-019
+      replace('/(auth)/login');
       return;
     }
 
     // Rule 3: If authenticated but trying to access auth screens (login/onboarding), send to main app
     if (sessionStatus === 'Authenticated' && inAuthGroup) {
       console.log('🛡️ AuthGuard: Redirecting to (tabs)');
-      // router.replace('/(tabs)'); // TODO: VS-019
+      replace('/(tabs)');
       return;
     }
   }, [isHydrated, sessionStatus, hasSeenOnboarding, segments, router]);

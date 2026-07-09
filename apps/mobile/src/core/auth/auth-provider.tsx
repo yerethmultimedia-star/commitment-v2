@@ -1,7 +1,8 @@
 import { PropsWithChildren } from 'react';
 import { useAuthGuard } from './auth-guard';
 import { useSession } from './use-session';
-import { View, ActivityIndicator } from 'react-native';
+import { Spinner } from 'tamagui';
+import { FullScreenCenter } from '@/components/FullScreenCenter';
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const { isHydrated } = useSession();
@@ -12,9 +13,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   // Show a blank loading screen while Zustand hydrates from SecureStore
   if (!isHydrated) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
+      <FullScreenCenter>
+        <Spinner size="large" color="$blue10" />
+      </FullScreenCenter>
     );
   }
 

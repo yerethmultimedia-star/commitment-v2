@@ -2,6 +2,7 @@ import ky from 'ky';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../auth/auth.store';
+import i18next from 'i18next';
 
 // Dynamically determine the API base URL.
 // If running on local simulator/emulator, use correct localhost IPs.
@@ -45,6 +46,12 @@ export const apiClient = ky.create({
         if (sessionStatus === 'Authenticated' && identityId) {
           // @ts-expect-error request typing
           request.headers.set('x-identity-id', identityId);
+        }
+        
+        // Inject current language
+        if (i18next.language) {
+          // @ts-expect-error request typing
+          request.headers.set('Accept-Language', i18next.language);
         }
       },
     ],

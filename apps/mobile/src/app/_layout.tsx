@@ -10,6 +10,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../core/query/query-client';
 import { AuthProvider } from '@/core/auth/auth-provider';
 import { StatusBar } from 'expo-status-bar';
+import '@/core/i18n'; // Initialize i18n
 
 SplashScreen.preventAutoHideAsync();
 
