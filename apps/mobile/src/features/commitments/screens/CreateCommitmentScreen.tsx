@@ -13,17 +13,14 @@ export function CreateCommitmentScreen() {
 
   const handleSubmit = async (values: CommitmentFormValues) => {
     try {
-      // Optimistic navigation
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace('/(tabs)');
-      }
+      // Deterministic navigation: never depend on history stack.
+      // This ensures correct behavior with deep links, notifications, and universal links.
+      router.replace('/(tabs)');
       
-      // Fire mutation in background (already wrapped with try/catch inside React Query for state,
-      // but if we await we can catch network errors if we want to show a Toast later)
+      // Fire mutation in background — optimistic update already applied in
+      // useCreateCommitment onMutate; onError reverts on failure.
       mutateAsync(values).catch(() => {
-        // We could show a toast here in the future
+        // A toast will be shown here in VS-025 (offline/feedback layer)
       });
     } catch (error) {
       console.error(error);

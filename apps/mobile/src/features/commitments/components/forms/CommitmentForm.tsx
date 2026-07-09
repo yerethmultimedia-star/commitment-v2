@@ -1,5 +1,5 @@
 import { useForm, FieldValues } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@/shared/forms/zodResolver';
 import { YStack, Button, Text } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 import { createCommitmentSchema, CommitmentFormValues } from '../../models/commitment.schema';
@@ -19,10 +19,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
   const schema = createCommitmentSchema(t);
   
   const control = useForm<CommitmentFormValues>({
-    // Cast to any: @hookform/resolvers@5.4 has a type-level constraint for
-    // Zod v4.0.x minor === 0, but we use v4.4.x which is runtime-compatible.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(schema as any),
+    resolver: zodResolver<CommitmentFormValues>(schema),
     defaultValues: {
       title: initialValues?.title || '',
       description: initialValues?.description || '',
