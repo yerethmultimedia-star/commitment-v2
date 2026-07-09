@@ -40,6 +40,9 @@ Thumbs.db
 .project
 .settings/
 
+# TypeScript
+*.tsbuildinfo
+
 # Flutter/Dart specific
 .flutter-plugins
 .flutter-plugins-dependencies
