@@ -2,10 +2,12 @@ import { ReminderSchedulerPort } from '../application/ports/reminder-scheduler.p
 import type { ReminderRepository } from '../application/ports/reminder.repository.port';
 import { Reminder, ReminderStatus } from '@commitment/domain';
 import { randomUUID } from 'crypto';
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 
 @Injectable()
 export class InMemoryReminderScheduler implements ReminderSchedulerPort {
+  private readonly logger = new Logger(InMemoryReminderScheduler.name);
+
   constructor(
     @Inject('ReminderRepository')
     private readonly repository: ReminderRepository,
@@ -17,8 +19,8 @@ export class InMemoryReminderScheduler implements ReminderSchedulerPort {
     targetDateStr?: string,
   ): Promise<void> {
     if (!targetDateStr) {
-      console.log(
-        `[InMemoryReminderScheduler] No target date provided, skipping reminder for ${commitmentId}`,
+      this.logger.debug(
+        `No target date provided, skipping reminder for ${commitmentId}`,
       );
       return;
     }
@@ -38,8 +40,8 @@ export class InMemoryReminderScheduler implements ReminderSchedulerPort {
     }
 
     await this.repository.save(reminder);
-    console.log(
-      `[InMemoryReminderScheduler] Scheduled reminder for ${commitmentId} at ${targetDateStr}`,
+    this.logger.log(
+      `Scheduled reminder for ${commitmentId} at ${targetDateStr}`,
     );
   }
 
@@ -48,9 +50,7 @@ export class InMemoryReminderScheduler implements ReminderSchedulerPort {
     if (reminder) {
       reminder.suspend();
       await this.repository.save(reminder);
-      console.log(
-        `[InMemoryReminderScheduler] Suspended reminder for ${commitmentId}`,
-      );
+      this.logger.log(`Suspended reminder for ${commitmentId}`);
     }
   }
 
@@ -63,12 +63,10 @@ export class InMemoryReminderScheduler implements ReminderSchedulerPort {
       const targetDate = targetDateStr ? new Date(targetDateStr) : undefined;
       reminder.resume(targetDate);
       await this.repository.save(reminder);
-      console.log(
-        `[InMemoryReminderScheduler] Rescheduled reminder for ${commitmentId}`,
-      );
+      this.logger.log(`Rescheduled reminder for ${commitmentId}`);
     } else {
-      console.warn(
-        `[InMemoryReminderScheduler] Cannot reschedule unknown reminder for ${commitmentId}`,
+      this.logger.warn(
+        `Cannot reschedule unknown reminder for ${commitmentId}`,
       );
     }
   }
@@ -78,9 +76,7 @@ export class InMemoryReminderScheduler implements ReminderSchedulerPort {
     if (reminder) {
       reminder.cancel();
       await this.repository.save(reminder);
-      console.log(
-        `[InMemoryReminderScheduler] Cancelled reminder for ${commitmentId}`,
-      );
+      this.logger.log(`Cancelled reminder for ${commitmentId}`);
     }
   }
 

@@ -22,6 +22,7 @@ const metricExporter = new PrometheusExporter(
     port: 9464,
   },
   () => {
+    // eslint-disable-next-line no-console
     console.log('📈 Prometheus metrics server started on port 9464');
   },
 );
@@ -44,8 +45,9 @@ process.on('SIGTERM', () => {
   otelSDK
     .shutdown()
     .then(
+      // eslint-disable-next-line no-console
       () => console.log('SDK de OpenTelemetry apagado exitosamente'),
-
+      // eslint-disable-next-line no-console
       (err) => console.error('Error apagando SDK de OpenTelemetry', err),
     )
     .finally(() => process.exit(0));

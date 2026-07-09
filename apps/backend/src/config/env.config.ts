@@ -33,8 +33,9 @@ export function validateEnv(): Env {
 
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
+    // eslint-disable-next-line no-console
     console.error('❌ Error de validación en variables de entorno:');
-
+    // eslint-disable-next-line no-console
     console.error(JSON.stringify(parsed.error.format(), null, 2));
     process.exit(1);
   }
