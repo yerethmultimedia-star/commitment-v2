@@ -24,6 +24,7 @@ const baseUrl = getBaseUrl();
  * Interceptors can be added here for JWT and request-ids.
  */
 export const apiClient = ky.create({
+  // @ts-expect-error Ky typings might differ
   prefixUrl: `${baseUrl}/v1`,
   timeout: 10000,
   retry: {
@@ -35,6 +36,7 @@ export const apiClient = ky.create({
     beforeRequest: [
       (request) => {
         // Automatically attach x-request-id for observability (VS-016)
+        // @ts-expect-error request typing in beforeRequest hook
         request.headers.set('x-request-id', crypto.randomUUID());
       },
     ],
