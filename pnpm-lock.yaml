@@ -260,6 +260,9 @@ importers:
       expo-router:
         specifier: ~57.0.4
         version: 57.0.4(2a65daf3c909213facf431583c17dc0c)
+      expo-secure-store:
+        specifier: ~57.0.0
+        version: 57.0.0(expo@57.0.4)
       expo-splash-screen:
         specifier: ~57.0.2
         version: 57.0.2(expo@57.0.4)(typescript@6.0.3)
@@ -311,6 +314,9 @@ importers:
       tamagui:
         specifier: ^2.4.2
         version: 2.4.2(react-dom@19.2.3(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)
+      uuid:
+        specifier: ^14.0.1
+        version: 14.0.1
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -321,6 +327,9 @@ importers:
       '@types/react':
         specifier: ~19.2.2
         version: 19.2.17
+      '@types/uuid':
+        specifier: ^11.0.0
+        version: 11.0.0
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
@@ -4834,6 +4843,13 @@ packages:
         integrity: sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw==,
       }
 
+  '@types/uuid@11.0.0':
+    resolution:
+      {
+        integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==,
+      }
+    deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
+
   '@types/yargs-parser@21.0.3':
     resolution:
       {
@@ -7031,6 +7047,14 @@ packages:
         optional: true
       react-server-dom-webpack:
         optional: true
+
+  expo-secure-store@57.0.0:
+    resolution:
+      {
+        integrity: sha512-vkP16rhW7b4bljW5BC4kKXBpNxQ0O1E9SpI5NIfh2biZnszLTpI/gUF4oBsvOY2nvkh7oXS2ERuUoA8cuS8FWQ==,
+      }
+    peerDependencies:
+      expo: '*'
 
   expo-server-sdk@6.1.0:
     resolution:
@@ -11530,6 +11554,13 @@ packages:
       }
     engines: { node: '>= 0.4.0' }
 
+  uuid@14.0.1:
+    resolution:
+      {
+        integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==,
+      }
+    hasBin: true
+
   uuid@7.0.3:
     resolution:
       {
@@ -14398,7 +14429,9 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-color@2.1.0': {}
 
@@ -15838,6 +15871,10 @@ snapshots:
     dependencies:
       '@types/methods': 1.1.4
       '@types/superagent': 8.1.10
+
+  '@types/uuid@11.0.0':
+    dependencies:
+      uuid: 14.0.1
 
   '@types/yargs-parser@21.0.3': {}
 
@@ -17412,6 +17449,10 @@ snapshots:
       - expo-font
       - react-native-worklets
       - supports-color
+
+  expo-secure-store@57.0.0(expo@57.0.4):
+    dependencies:
+      expo: 57.0.4(@babel/core@7.29.7)(@expo/dom-webview@57.0.0)(@expo/metro-runtime@57.0.3)(expo-router@57.0.4)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3))(react-native@0.86.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.0(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
 
   expo-server-sdk@6.1.0:
     dependencies:
@@ -20357,6 +20398,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   utils-merge@1.0.1: {}
+
+  uuid@14.0.1: {}
 
   uuid@7.0.3: {}
 
