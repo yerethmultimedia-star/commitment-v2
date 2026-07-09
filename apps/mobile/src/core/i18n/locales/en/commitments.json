@@ -1,0 +1,30 @@
+{
+  "list": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "summary": {
+      "active": "Active"
+    },
+    "empty": {
+      "title": "No commitments yet",
+      "description": "Create your first commitment and start building consistency."
+    },
+    "error": {
+      "title": "Failed to load commitments",
+      "retry": "Try again"
+    },
+    "fab": {
+      "create": "Create commitment"
+    }
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft",
+    "paused": "Paused",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  }
+}

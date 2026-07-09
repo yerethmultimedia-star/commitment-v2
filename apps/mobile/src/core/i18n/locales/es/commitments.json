@@ -1,0 +1,30 @@
+{
+  "list": {
+    "greeting": {
+      "morning": "Buenos días",
+      "afternoon": "Buenas tardes",
+      "evening": "Buenas noches"
+    },
+    "summary": {
+      "active": "Activos"
+    },
+    "empty": {
+      "title": "Aún no hay compromisos",
+      "description": "Crea tu primer compromiso y empieza a construir constancia."
+    },
+    "error": {
+      "title": "Error al cargar compromisos",
+      "retry": "Reintentar"
+    },
+    "fab": {
+      "create": "Crear compromiso"
+    }
+  },
+  "status": {
+    "active": "Activo",
+    "draft": "Borrador",
+    "paused": "Pausado",
+    "completed": "Completado",
+    "cancelled": "Cancelado"
+  }
+}
