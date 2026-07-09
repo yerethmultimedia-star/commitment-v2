@@ -24,3 +24,7 @@ export { Stack, Inline, Surface, Container, Section, SafeArea } from './layout/i
 export type { StackProps, InlineProps, SurfaceProps, ContainerProps, SectionProps, SafeAreaProps } from './layout/index.js';
 export * from './screens/index.js';
 export * from './scroll/index.js';
+export { ModalPrimitive, BottomSheet, ConfirmationDialog, ActionSheet, Dialog } from './modal/index.js';
+export type { ModalPrimitiveProps, BottomSheetProps, ConfirmationDialogProps, ActionSheetProps, DialogProps } from './modal/index.js';
+export { Portal, PortalProvider, usePortalContext } from './portal/index.js';
+export type { PortalProps, PortalProviderProps } from './portal/index.js';

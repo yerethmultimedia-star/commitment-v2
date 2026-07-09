@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, ScrollView, Text, Button } from 'tamagui';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { Stack as RouterStack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, Inline, Title, Body, Button, AppScreen, ConfirmationDialog } from '@commitment/design-system';
 import { useCommitment } from '../hooks/useCommitment';
 import { useCommitmentActions } from '../hooks/useCommitmentActions';
 import { getAllowedActions, isEditable, type ActionConfig } from '@/shared/domain/commitmentActions';
@@ -9,7 +9,6 @@ import { CommitmentStatusBadge } from '../components/CommitmentStatusBadge';
 import { CommitmentActionBar } from '../components/CommitmentActionBar';
 import { CommitmentMetadata } from '../components/CommitmentMetadata';
 import { CommitmentHistory } from '../components/history';
-import { ConfirmationDialog } from '@/shared/ui/ConfirmationDialog';
 import { LoadingState } from '@/shared/ui/feedback/LoadingState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
 
@@ -56,80 +55,73 @@ export function CommitmentWorkspaceScreen() {
   };
 
   return (
-    <YStack flex={1} backgroundColor="$background">
-      <Stack.Screen
+    <AppScreen scrollable={false}>
+      <RouterStack.Screen
         options={{
           title: commitment.title,
-          headerBackTitle: t('common.back', { ns: 'common' }),
+          headerBackTitle: t('common:back'),
           headerRight: isEditable(commitment.status)
             ? () => (
                 <Button
-                  size="$2"
-                  chromeless
+                  i18nKey="commitments:edit.headerButton"
+                  variant="ghost"
+                  size="small"
                   onPress={() => router.push(`/commitments/${id}/edit` as any)}
-                  accessibilityLabel={t('edit.headerButton', { ns: 'commitments' })}
-                >
-                  <Text color="$blue10" fontWeight="600">
-                    {t('edit.headerButton', { ns: 'commitments' })}
-                  </Text>
-                </Button>
+                />
               )
             : undefined,
         }}
       />
 
-      <ScrollView flex={1}>
-        <YStack padding="$4" gap="$5">
-          {/* Header */}
-          <YStack gap="$3">
-            <Text fontSize="$8" fontWeight="bold" color="$text">
-              {commitment.title}
-            </Text>
-            <CommitmentStatusBadge status={commitment.status} />
-          </YStack>
+      <Stack padding="$md" gap="$lg">
+        {/* Header */}
+        <Stack gap="$sm">
+          <Title>{commitment.title}</Title>
+          <CommitmentStatusBadge status={commitment.status} />
+        </Stack>
 
-          {/* Metadata section */}
-          <CommitmentMetadata commitment={commitment} />
+        {/* Metadata section */}
+        <CommitmentMetadata commitment={commitment} />
 
-          {/* Action Bar */}
-          {allowedActions.length > 0 && (
-            <YStack gap="$2">
-              <Text fontSize="$3" color="$textSecondary" fontWeight="bold" textTransform="uppercase">
-                {t('workspace.actions.label', { ns: 'commitments' })}
-              </Text>
-              <CommitmentActionBar
-                actions={allowedActions}
-                onAction={handleAction}
-                pendingAction={actions.pendingAction}
-              />
-            </YStack>
-          )}
+        {/* Action Bar */}
+        {allowedActions.length > 0 && (
+          <Stack gap="$xs">
+            <Body fontWeight="bold" tone="secondary" style={{ textTransform: 'uppercase' as any }}>
+              {t('workspace.actions.label', { ns: 'commitments' })}
+            </Body>
+            <CommitmentActionBar
+              actions={allowedActions}
+              onAction={handleAction}
+              pendingAction={actions.pendingAction}
+            />
+          </Stack>
+        )}
 
-          {/* History */}
-          <YStack gap="$2" marginTop="$4">
-            <Text fontSize="$3" color="$textSecondary" fontWeight="bold" textTransform="uppercase">
-              {t('activity.title', { ns: 'commitments' })}
-            </Text>
-            <CommitmentHistory commitmentId={commitment.id} />
-          </YStack>
-        </YStack>
-      </ScrollView>
+        {/* History */}
+        <Stack gap="$xs" marginTop="$md">
+          <Body fontWeight="bold" tone="secondary" style={{ textTransform: 'uppercase' as any }}>
+            {t('activity.title', { ns: 'commitments' })}
+          </Body>
+          <CommitmentHistory commitmentId={commitment.id} />
+        </Stack>
+      </Stack>
 
       {/* Confirmation Dialog */}
       {confirmingAction && (
         <ConfirmationDialog
-          title={t(`workspace.confirm.${confirmingAction.id}.title`, { ns: 'commitments' })}
-          description={t(`workspace.confirm.${confirmingAction.id}.description`, {
-            ns: 'commitments',
-            title: commitment.title,
-          })}
-          confirmLabel={t(confirmingAction.labelKey, { ns: 'commitments' })}
-          cancelLabel={t('common.cancel', { ns: 'common' })}
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setConfirmingAction(null);
+          }}
+          titleI18nKey={`commitments:workspace.confirm.${confirmingAction.id}.title`}
+          descriptionI18nKey={`commitments:workspace.confirm.${confirmingAction.id}.description`}
+          descriptionI18nParams={{ title: commitment.title }}
+          confirmI18nKey={`commitments:${confirmingAction.labelKey}`}
+          cancelI18nKey="common:cancel"
           destructive={confirmingAction.destructive}
           onConfirm={() => executeAction(confirmingAction)}
-          onCancel={() => setConfirmingAction(null)}
         />
       )}
-    </YStack>
+    </AppScreen>
   );
 }
