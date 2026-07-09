@@ -58,8 +58,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Shared Packages
-        run: pnpm --filter @commitment/shared --filter @commitment/api-contracts --filter @commitment/theme-engine --filter @commitment/domain --filter @commitment/design-system run build
+      - name: Build Packages
+        run: pnpm run build
 
       - name: Typecheck Mobile
         run: pnpm --filter mobile exec tsc --noEmit
