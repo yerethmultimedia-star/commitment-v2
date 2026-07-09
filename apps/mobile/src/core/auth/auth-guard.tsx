@@ -26,7 +26,7 @@ export function useAuthGuard() {
     // Prevent navigation loops: don't navigate if already there
     const replace = (path: string) => {
       if (pathname !== path) {
-        router.replace(path);
+        router.replace(path as any);
       }
     };
 

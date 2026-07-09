@@ -20,7 +20,7 @@ export const TodayWidget = React.memo(function TodayWidget({ commitments, onComm
 
   return (
     <Card variant="elevated" interactive={false}>
-      <YStack space="$3">
+      <YStack gap="$3">
         <XStack justifyContent="space-between" alignItems="center">
           <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
             {t('dashboard.todayCommitments', 'Compromisos de hoy')}
@@ -30,7 +30,7 @@ export const TodayWidget = React.memo(function TodayWidget({ commitments, onComm
           </Text>
         </XStack>
 
-        <YStack space="$2">
+        <YStack gap="$2">
           {activeCommitments.length === 0 ? (
             <Text color="$contentSecondary" fontSize="$3">
               {t('dashboard.allCompleted', '¡Todo completado por hoy!')}

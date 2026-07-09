@@ -19,17 +19,17 @@ export const QuickActionsWidget = React.memo(function QuickActionsWidget({ actio
 
   return (
     <Card variant="flat" backgroundColor="transparent" borderWidth={0} padding="$0">
-      <YStack space="$3">
+      <YStack gap="$3">
         <Text fontSize="$4" fontWeight="600" color="$contentPrimary" marginLeft="$2">
           {t('dashboard.quickActions', 'Acciones Rápidas')}
         </Text>
         
-        <XStack space="$3" flexWrap="wrap">
+        <XStack gap="$3" flexWrap="wrap">
           {actions.map((action) => (
             <YStack
               key={action.id}
               alignItems="center"
-              space="$2"
+              gap="$2"
               flex={1}
               minWidth={70}
               onPress={action.onPress}

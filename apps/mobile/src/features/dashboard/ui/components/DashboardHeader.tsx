@@ -34,9 +34,9 @@ export const DashboardHeader = React.memo(function DashboardHeader({ commitments
   }, []);
 
   return (
-    <YStack space="$2" paddingBottom="$4">
+    <YStack gap="$2" paddingBottom="$4">
       <XStack justifyContent="space-between" alignItems="flex-start">
-        <YStack space="$1" flex={1}>
+        <YStack gap="$1" flex={1}>
           <Text fontSize="$7" fontWeight="bold" color="$contentPrimary" letterSpacing={-0.5}>
             {t(headerData.greetingKey, 'Buenos días')}
           </Text>

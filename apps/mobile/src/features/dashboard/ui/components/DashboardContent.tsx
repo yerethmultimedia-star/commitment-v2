@@ -32,10 +32,10 @@ export const DashboardContent = React.memo(function DashboardContent({
       contentContainerStyle={{ padding: '$4', paddingBottom: '$8' }}
       showsVerticalScrollIndicator={false}
     >
-      <YStack space="$6">
+      <YStack gap="$6">
         <DashboardHeader commitmentsCount={commitments.filter(c => c.status === 'active').length} />
         
-        <YStack space="$4">
+        <YStack gap="$4">
           <TodayWidget commitments={commitments} onCommitmentPress={onCommitmentPress} />
           <WeeklyProgressWidget completed={weeklyCompleted} target={weeklyTarget} />
           <QuickActionsWidget actions={quickActions} />
