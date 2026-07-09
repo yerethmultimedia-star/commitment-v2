@@ -6,5 +6,7 @@
     "environment": "Environment",
     "logout": "Log out",
     "copied": "Copied to clipboard"
-  }
+  },
+  "back": "Back",
+  "cancel": "Cancel"
 }

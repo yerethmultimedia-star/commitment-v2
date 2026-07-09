@@ -6,5 +6,7 @@
     "environment": "Entorno",
     "logout": "Cerrar sesión",
     "copied": "Copiado al portapapeles"
-  }
+  },
+  "back": "Atrás",
+  "cancel": "Cancelar"
 }

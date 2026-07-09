@@ -59,5 +59,34 @@
       "titleTooShort": "Title must be at least 3 characters",
       "invalidDate": "Please select a valid date"
     }
+  },
+  "actions": {
+    "activate": "Activate",
+    "pause": "Pause",
+    "resume": "Resume",
+    "complete": "Complete",
+    "cancel": "Cancel"
+  },
+  "workspace": {
+    "error": "Could not load commitment",
+    "actions": {
+      "label": "Actions"
+    },
+    "metadata": {
+      "targetDate": "Target Date",
+      "recurrence": "Recurrence",
+      "reminder": "Reminder",
+      "empty": "No details added yet"
+    },
+    "confirm": {
+      "complete": {
+        "title": "Complete commitment?",
+        "description": "Mark \"{{title}}\" as completed. This action cannot be undone."
+      },
+      "cancel": {
+        "title": "Cancel commitment?",
+        "description": "Cancel \"{{title}}\". You will not be able to reactivate it."
+      }
+    }
   }
 }

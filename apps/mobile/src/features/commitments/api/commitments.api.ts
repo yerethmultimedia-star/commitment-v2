@@ -7,11 +7,35 @@ interface CreateCommitmentPayload {
   recurrencePattern?: string;
 }
 
+interface TransitionResult {
+  commitmentId: string;
+  state: string;
+  version: number;
+}
+
 export const commitmentsApi = {
   list: async (signal?: AbortSignal) => {
     return apiClient.get('commitments', { signal }).json<{ items: any[]; total: number }>();
   },
+  getById: async (id: string, signal?: AbortSignal) => {
+    return apiClient.get(`commitments/${id}`, { signal }).json<any>();
+  },
   create: async (payload: CreateCommitmentPayload) => {
     return apiClient.post('commitments', { json: payload }).json<{ commitmentId: string }>();
+  },
+  activate: async (id: string) => {
+    return apiClient.post(`commitments/${id}/activate`).json<TransitionResult>();
+  },
+  pause: async (id: string) => {
+    return apiClient.post(`commitments/${id}/pause`).json<TransitionResult>();
+  },
+  resume: async (id: string) => {
+    return apiClient.post(`commitments/${id}/resume`).json<TransitionResult>();
+  },
+  complete: async (id: string) => {
+    return apiClient.post(`commitments/${id}/complete`).json<TransitionResult>();
+  },
+  cancel: async (id: string) => {
+    return apiClient.post(`commitments/${id}/cancel`).json<TransitionResult>();
   },
 };

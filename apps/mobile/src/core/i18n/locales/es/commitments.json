@@ -59,5 +59,34 @@
       "titleTooShort": "El título debe tener al menos 3 caracteres",
       "invalidDate": "Por favor selecciona una fecha válida"
     }
+  },
+  "actions": {
+    "activate": "Activar",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "complete": "Completar",
+    "cancel": "Cancelar"
+  },
+  "workspace": {
+    "error": "No se pudo cargar el compromiso",
+    "actions": {
+      "label": "Acciones"
+    },
+    "metadata": {
+      "targetDate": "Fecha objetivo",
+      "recurrence": "Repetición",
+      "reminder": "Recordatorio",
+      "empty": "Aún no hay detalles"
+    },
+    "confirm": {
+      "complete": {
+        "title": "¿Completar compromiso?",
+        "description": "Marcar \"{{title}}\" como completado. Esta acción no se puede deshacer."
+      },
+      "cancel": {
+        "title": "¿Cancelar compromiso?",
+        "description": "Cancelar \"{{title}}\". No podrás reactivarlo."
+      }
+    }
   }
 }
