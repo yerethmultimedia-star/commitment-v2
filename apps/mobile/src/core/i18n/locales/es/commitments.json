@@ -103,5 +103,21 @@
     "resumed": "Compromiso reanudado",
     "completed": "Compromiso completado",
     "cancelled": "Compromiso cancelado"
+  },
+  "activity": {
+    "title": "Historial",
+    "date": {
+      "today": "Hoy • {{time}}",
+      "yesterday": "Ayer • {{time}}"
+    },
+    "type": {
+      "created": "Creó este compromiso",
+      "activated": "Activó el compromiso",
+      "paused": "Pausó el compromiso",
+      "resumed": "Reanudó el compromiso",
+      "completed": "¡Completó el compromiso!",
+      "cancelled": "Canceló el compromiso",
+      "edited": "Editó los detalles"
+    }
   }
 }

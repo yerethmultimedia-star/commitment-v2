@@ -8,6 +8,7 @@ import { getAllowedActions, isEditable, type ActionConfig } from '@/shared/domai
 import { CommitmentStatusBadge } from '../components/CommitmentStatusBadge';
 import { CommitmentActionBar } from '../components/CommitmentActionBar';
 import { CommitmentMetadata } from '../components/CommitmentMetadata';
+import { CommitmentHistory } from '../components/history';
 import { ConfirmationDialog } from '@/shared/ui/ConfirmationDialog';
 import { LoadingState } from '@/shared/ui/feedback/LoadingState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
@@ -66,7 +67,6 @@ export function CommitmentWorkspaceScreen() {
                   size="$2"
                   chromeless
                   onPress={() => router.push(`/commitments/${id}/edit` as any)}
-                  accessibilityRole="button"
                   accessibilityLabel={t('edit.headerButton', { ns: 'commitments' })}
                 >
                   <Text color="$blue10" fontWeight="600">
@@ -104,6 +104,14 @@ export function CommitmentWorkspaceScreen() {
               />
             </YStack>
           )}
+
+          {/* History */}
+          <YStack gap="$2" marginTop="$4">
+            <Text fontSize="$3" color="$textSecondary" fontWeight="bold" textTransform="uppercase">
+              {t('activity.title', { ns: 'commitments' })}
+            </Text>
+            <CommitmentHistory commitmentId={commitment.id} />
+          </YStack>
         </YStack>
       </ScrollView>
 

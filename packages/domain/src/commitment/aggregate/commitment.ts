@@ -15,6 +15,7 @@ import { CommitmentCancelledEvent } from '../events/commitment-cancelled.event.j
 import { CommitmentCompletedEvent } from '../events/commitment-completed.event.js';
 import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
 import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
+import { CommitmentEditedEvent } from '../events/commitment-edited.event.js';
 import {
   CommitmentRequiresIdentityError,
   CommitmentAlreadyCompletedError,
@@ -237,6 +238,52 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     this.recordEvent(event);
   }
 
+  public edit(
+    title?: CommitmentTitle,
+    description?: CommitmentDescription | null,
+    recurrencePattern?: RecurrencePattern,
+    targetDate?: TargetDate | null
+  ): void {
+    this.ensureNotImmutable();
+    let changed = false;
+
+    if (title && title.value !== this._title.value) {
+      changed = true;
+    }
+    
+    const currentDesc = this._description ? this._description.value : '';
+    const newDesc = description ? description.value : (description === null ? '' : currentDesc);
+    if (description !== undefined && currentDesc !== newDesc) {
+      changed = true;
+    }
+
+    if (recurrencePattern && recurrencePattern.type !== this._recurrencePattern.type) {
+      changed = true;
+    }
+
+    const currentTarget = this._targetDate ? this._targetDate.toISOString() : '';
+    const newTarget = targetDate ? targetDate.toISOString() : (targetDate === null ? '' : currentTarget);
+    if (targetDate !== undefined && currentTarget !== newTarget) {
+      changed = true;
+    }
+
+    if (!changed) {
+      return; // No meaningful changes
+    }
+
+    const event = new CommitmentEditedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value,
+        title: title ? title.value : undefined,
+        description: description !== undefined ? (description ? description.value : '') : undefined,
+        recurrencePattern: recurrencePattern ? recurrencePattern.type : undefined,
+        targetDate: targetDate !== undefined ? (targetDate ? targetDate.toISOString() : null) : undefined,
+      }
+    );
+    this.recordEvent(event);
+  }
+
   private ensureNotImmutable(): void {
     if (this._state === CommitmentState.Completed) {
       throw new CommitmentAlreadyCompletedError();
@@ -272,6 +319,20 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     } else if (event.name === 'commitment.description_updated') {
       const payload = (event as CommitmentDescriptionUpdatedEvent).payload;
       this._description = payload.description ? new CommitmentDescription(payload.description) : null;
+    } else if (event.name === 'commitment.edited') {
+      const payload = (event as unknown as CommitmentEditedEvent).payload;
+      if (payload.title !== undefined) {
+        this._title = new CommitmentTitle(payload.title);
+      }
+      if (payload.description !== undefined) {
+        this._description = payload.description ? new CommitmentDescription(payload.description) : null;
+      }
+      if (payload.recurrencePattern !== undefined) {
+        this._recurrencePattern = RecurrencePattern.create(payload.recurrencePattern as RecurrenceType);
+      }
+      if (payload.targetDate !== undefined) {
+        this._targetDate = payload.targetDate ? TargetDate.create(payload.targetDate) : null;
+      }
     }
   }
 }

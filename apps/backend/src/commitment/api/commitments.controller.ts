@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Patch,
   Body,
   Param,
   Get,
@@ -18,6 +19,9 @@ import { z } from 'zod';
 import { RegisterCommitmentDto } from './dtos/register-commitment.dto';
 import { RegisterCommitmentCommand } from '../application/commands/register-commitment.command';
 import { RegisterCommitmentResult } from '../application/commands/register-commitment.result';
+import { EditCommitmentDto } from './dtos/edit-commitment.dto';
+import { EditCommitmentCommand } from '../application/commands/edit-commitment.command';
+import { EditCommitmentResult } from '../application/commands/edit-commitment.result';
 import { ActivateCommitmentCommand } from '../application/commands/activate-commitment.command';
 import { ActivateCommitmentResult } from '../application/commands/activate-commitment.result';
 import { PauseCommitmentCommand } from '../application/commands/pause-commitment.command';
@@ -54,11 +58,13 @@ import {
 } from '../application/commands/cancel-commitment.handler';
 import { GetCommitmentByIdQuery } from '../application/queries/get-commitment-by-id.query';
 import { CommitmentNotFoundQueryError } from '../application/queries/get-commitment-by-id.handler';
+import { GetCommitmentHistoryQuery } from '../application/queries/get-commitment-history.query';
 import { ListCommitmentsQuery } from '../application/queries/list-commitments.query';
 import {
   CommitmentView,
   PaginatedCommitments,
 } from '../application/queries/commitment-view.dto';
+import type { ActivityDto } from './dtos/activity.dto';
 
 const registerSchema = z.object({
   id: z.string().uuid('Invalid commitment id UUID format'),
@@ -109,6 +115,24 @@ export class CommitmentsController {
     }
   }
 
+  @Get(':id/history')
+  async getHistory(@Param('id') id: string) {
+    const result = uuidSchema.safeParse(id);
+    if (!result.success) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+
+    try {
+      const query = new GetCommitmentHistoryQuery(id);
+
+      const result: ActivityDto[] = await this.queryBus.execute(query);
+      return result;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
   // ─── Register ─────────────────────────────────────────────────────────────
 
   @Post()
@@ -145,6 +169,43 @@ export class CommitmentsController {
       const result = (await this.commandBus.execute(
         command,
       )) as unknown as RegisterCommitmentResult;
+      return {
+        commitmentId: result.commitmentId,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // ─── Edit ─────────────────────────────────────────────────────────────────
+
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Edit a commitment' })
+  @ApiResponse({
+    status: 200,
+    description: 'Commitment edited successfully',
+  })
+  async edit(@Param('id') id: string, @Body() dto: EditCommitmentDto) {
+    const parsed = uuidSchema.safeParse(id);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid commitment UUID format');
+    }
+
+    try {
+      const command = new EditCommitmentCommand(
+        id,
+        dto.title,
+        dto.description,
+        dto.recurrencePattern,
+        dto.targetDate,
+      );
+
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as EditCommitmentResult;
       return {
         commitmentId: result.commitmentId,
         version: result.version,

@@ -13,6 +13,7 @@ export * from './events/commitment-cancelled.event.js';
 export * from './events/commitment-completed.event.js';
 export * from './events/commitment-renamed.event.js';
 export * from './events/commitment-description-updated.event.js';
+export * from './events/commitment-edited.event.js';
 export * from './errors/commitment-errors.js';
 export * from './repositories/commitment.repository.js';
 export * from './constants/commitment-constraints.js';

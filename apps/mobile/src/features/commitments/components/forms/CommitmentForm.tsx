@@ -86,7 +86,6 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
         marginTop="$4"
         disabled={isSubmitting}
         onPress={control.handleSubmit(onSubmit)}
-        accessibilityRole="button"
         accessibilityLabel={submitLabel ?? t('form.submit', { ns: 'commitments' })}
         accessibilityState={{ disabled: !!isSubmitting }}
       >

@@ -9,6 +9,10 @@ import { CompleteCommitmentNestjsHandler } from './nestjs/complete-commitment.ne
 import { CancelCommitmentNestjsHandler } from './nestjs/cancel-commitment.nestjs-handler';
 import { GetCommitmentByIdNestjsHandler } from './nestjs/get-commitment-by-id.nestjs-handler';
 import { ListCommitmentsNestjsHandler } from './nestjs/list-commitments.nestjs-handler';
+import { EditCommitmentNestjsHandler } from './nestjs/edit-commitment.nestjs-handler';
+import { InMemoryActivityRepository } from './infrastructure/in-memory-activity.repository';
+import { ActivityLoggerHandler } from './application/events/activity-logger.handler';
+import { GetCommitmentHistoryHandler } from './application/queries/get-commitment-history.handler';
 import { InMemoryCommitmentRepository } from './infrastructure/in-memory-commitment.repository';
 import { NestEventBusDispatcher } from './infrastructure/nest-event-bus.dispatcher';
 import { InMemoryCommitmentProjectionStore } from './infrastructure/in-memory-commitment-projection.store';
@@ -28,6 +32,9 @@ import { RecurringCommitmentSaga } from './application/sagas/recurring-commitmen
     CancelCommitmentNestjsHandler,
     GetCommitmentByIdNestjsHandler,
     ListCommitmentsNestjsHandler,
+    EditCommitmentNestjsHandler,
+    GetCommitmentHistoryHandler,
+    ActivityLoggerHandler,
     RecurringCommitmentSaga,
     ...CommitmentProjectors,
     {
@@ -46,7 +53,15 @@ import { RecurringCommitmentSaga } from './application/sagas/recurring-commitmen
       provide: 'CommitmentQueryService',
       useClass: InMemoryCommitmentQueryService,
     },
+    {
+      provide: 'ActivityRepository',
+      useClass: InMemoryActivityRepository,
+    },
   ],
-  exports: ['CommitmentRepository', 'DomainEventDispatcher'],
+  exports: [
+    'CommitmentRepository',
+    'DomainEventDispatcher',
+    'ActivityRepository',
+  ],
 })
 export class CommitmentModule {}

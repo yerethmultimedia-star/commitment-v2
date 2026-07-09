@@ -11,6 +11,7 @@ export function useAuthGuard() {
   const { isHydrated, sessionStatus, hasSeenOnboarding } = useSession();
   const segments = useSegments();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Do not run routing logic until Zustand has restored the persisted state
@@ -21,7 +22,6 @@ export function useAuthGuard() {
     // Rule 1: Always show onboarding first if not seen
     const segmentsList = segments as string[];
     const currentScreen = segmentsList.length > 1 ? segmentsList[1] : undefined;
-    const pathname = usePathname();
 
     // Prevent navigation loops: don't navigate if already there
     const replace = (path: string) => {
@@ -49,5 +49,5 @@ export function useAuthGuard() {
       replace('/(tabs)');
       return;
     }
-  }, [isHydrated, sessionStatus, hasSeenOnboarding, segments, router]);
+  }, [isHydrated, sessionStatus, hasSeenOnboarding, segments, router, pathname]);
 }

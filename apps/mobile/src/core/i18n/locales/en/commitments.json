@@ -103,5 +103,21 @@
     "resumed": "Commitment resumed",
     "completed": "Commitment completed",
     "cancelled": "Commitment cancelled"
+  },
+  "activity": {
+    "title": "History",
+    "date": {
+      "today": "Today • {{time}}",
+      "yesterday": "Yesterday • {{time}}"
+    },
+    "type": {
+      "created": "Created this commitment",
+      "activated": "Activated the commitment",
+      "paused": "Paused the commitment",
+      "resumed": "Resumed the commitment",
+      "completed": "Completed the commitment!",
+      "cancelled": "Cancelled the commitment",
+      "edited": "Edited details"
+    }
   }
 }
