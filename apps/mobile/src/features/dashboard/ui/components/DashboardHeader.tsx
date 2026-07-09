@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '@commitment/localization';
 import { YStack, XStack, Text, Circle } from 'tamagui';
 
 export interface DashboardHeaderProps {
@@ -19,13 +20,7 @@ export const DashboardHeader = React.memo(function DashboardHeader({ commitments
       greetingKey = 'dashboard.greetingEvening'; // "Buenas noches"
     }
 
-    // A more complete app would use the localization SDK for this date string
-    // "Miércoles, 9 de julio"
-    const dateStr = new Intl.DateTimeFormat('es-ES', { 
-      weekday: 'long', 
-      day: 'numeric', 
-      month: 'long' 
-    }).format(new Date());
+    const dateStr = formatDate(new Date(), 'EEEE, d \'de\' MMMM');
 
     // Capitalize first letter of weekday
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);

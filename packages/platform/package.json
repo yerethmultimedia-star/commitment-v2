@@ -1,0 +1,17 @@
+{
+  "name": "@commitment/platform",
+  "version": "1.0.0",
+  "description": "Platform abstraction interfaces for Commitment v2",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@commitment/config": "workspace:*",
+    "typescript": "^5.4.3"
+  }
+}

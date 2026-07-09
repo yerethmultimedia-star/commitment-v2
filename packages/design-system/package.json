@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@commitment/theme-engine": "workspace:*",
+    "@commitment/platform": "workspace:*",
     "@tamagui/config": "^2.4.2",
     "@tamagui/core": "^2.4.2",
     "tamagui": "^2.4.2"
