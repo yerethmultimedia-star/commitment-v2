@@ -27,7 +27,7 @@ export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget() {
   }, [completed, target]);
 
   return (
-    <Card variant="elevated" interactive={false}>
+    <Card variant="elevated">
       <YStack gap="$2">
         <Text fontSize="$4" fontWeight="600" color="$contentPrimary" accessibilityRole="header">
           {t('dashboard.widgets.weeklyProgress.title')}

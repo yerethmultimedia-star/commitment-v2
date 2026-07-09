@@ -33,6 +33,8 @@
     "@commitment/theme-engine": "workspace:*",
     "@tamagui/config": "^2.4.2",
     "@tamagui/core": "^2.4.2",
+    "@tamagui/lucide-icons": "2.0.0-rc.26",
+    "lucide-react-native": "^1.24.0",
     "tamagui": "^2.4.2"
   }
 }

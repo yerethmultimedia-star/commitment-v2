@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { YStack, ScrollView, Text } from 'tamagui';
+import { ScrollView } from 'tamagui';
+import { Stack, Body } from '@commitment/design-system';
 import { DashboardHeader } from './DashboardHeader.js';
 import { WidgetRenderer } from './WidgetRenderer.js';
 import { useDashboardStore } from '../../store/use-dashboard-store.js';
@@ -28,21 +29,21 @@ export const DashboardContent = React.memo(function DashboardContent({ activeCom
       contentContainerStyle={{ padding: '$4', paddingBottom: '$8' }}
       showsVerticalScrollIndicator={false}
     >
-      <YStack gap="$6">
+      <Stack gap="$lg">
         <DashboardHeader commitmentsCount={activeCommitmentsCount} />
         
         {isLoading ? (
-          <YStack flex={1} alignItems="center" justifyContent="center" padding="$10">
-            <Text color="$contentSecondary">Loading layout...</Text>
-          </YStack>
+          <Stack flex={1} alignItems="center" justifyContent="center" padding="$10">
+            <Body color="$contentSecondary">Loading layout...</Body>
+          </Stack>
         ) : (
-          <YStack gap="$4">
+          <Stack gap="$md">
             {visibleWidgets.map(widget => (
               <WidgetRenderer key={widget.id} widget={widget} />
             ))}
-          </YStack>
+          </Stack>
         )}
-      </YStack>
+      </Stack>
     </ScrollView>
   );
 });

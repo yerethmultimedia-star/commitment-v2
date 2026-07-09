@@ -6,6 +6,7 @@
     "@commitment/api-contracts": "workspace:*",
     "@commitment/design-system": "workspace:*",
     "@commitment/domain": "workspace:*",
+    "@commitment/localization": "workspace:*",
     "@commitment/theme-engine": "workspace:*",
     "@expo/ui": "~57.0.4",
     "@hookform/resolvers": "^5.4.0",

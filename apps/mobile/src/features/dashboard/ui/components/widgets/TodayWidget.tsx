@@ -21,7 +21,7 @@ export const TodayWidget = React.memo(function TodayWidget() {
   };
 
   return (
-    <Card variant="elevated" interactive={false}>
+    <Card variant="elevated">
       <YStack gap="$3">
         <XStack justifyContent="space-between" alignItems="center">
           <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
