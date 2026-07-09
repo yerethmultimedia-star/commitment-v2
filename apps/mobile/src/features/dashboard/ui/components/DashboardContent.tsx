@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { ScrollView } from 'tamagui';
-import { Stack, Body } from '@commitment/design-system';
+import { Stack, Body, AppScreen } from '@commitment/design-system';
 import { DashboardHeader } from './DashboardHeader.js';
 import { WidgetRenderer } from './WidgetRenderer.js';
 import { useDashboardStore } from '../../store/use-dashboard-store.js';
@@ -23,12 +22,7 @@ export const DashboardContent = React.memo(function DashboardContent({ activeCom
   const visibleWidgets = getVisibleWidgets();
 
   return (
-    <ScrollView 
-      flex={1} 
-      backgroundColor="$background" 
-      contentContainerStyle={{ padding: '$4', paddingBottom: '$8' }}
-      showsVerticalScrollIndicator={false}
-    >
+    <AppScreen scrollable announceOnFocus="Dashboard">
       <Stack gap="$lg">
         <DashboardHeader commitmentsCount={activeCommitmentsCount} />
         
@@ -44,6 +38,6 @@ export const DashboardContent = React.memo(function DashboardContent({ activeCom
           </Stack>
         )}
       </Stack>
-    </ScrollView>
+    </AppScreen>
   );
 });

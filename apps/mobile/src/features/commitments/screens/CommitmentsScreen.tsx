@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlashList } from '@shopify/flash-list';
-import { YStack, Text, Button } from 'tamagui';
+import { Stack, Title, Body, Button, VirtualizedScreen } from '@commitment/design-system';
 import { useCommitments } from '../hooks/useCommitments';
 import { CommitmentCard } from '../components/CommitmentCard';
 import { CommitmentsSkeleton } from '../components/CommitmentsSkeleton';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
-import { RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Plus } from '@tamagui/lucide-icons';
+import { View } from 'tamagui';
+import { IconButton } from '@commitment/design-system';
 
 export function CommitmentsScreen() {
   const { t } = useTranslation();
@@ -30,21 +31,21 @@ export function CommitmentsScreen() {
   };
 
   const renderHeader = () => (
-    <YStack padding="$4" gap="$4">
-      <YStack>
-        <Text fontSize="$4" color="$textSecondary">{getGreeting()}</Text>
-        <Text fontSize="$8" fontWeight="bold">Welcome back</Text>
-      </YStack>
+    <Stack padding="$md" gap="$md">
+      <Stack>
+        <Body tone="secondary">{getGreeting()}</Body>
+        <Title>Welcome back</Title>
+      </Stack>
 
-      <YStack backgroundColor="$blue5" padding="$4" borderRadius="$4">
-        <Text fontSize="$3" color="$blue10" fontWeight="bold" textTransform="uppercase">
+      <Stack backgroundColor="$blue5" padding="$md" borderRadius="$4">
+        <Body fontWeight="bold" color="$blue10" style={{ textTransform: 'uppercase' as any }}>
           {t('list.summary.active', { ns: 'commitments' })}
-        </Text>
-        <Text fontSize="$8" fontWeight="bold" color="$blue10">
-          {data?.length || 0}
-        </Text>
-      </YStack>
-    </YStack>
+        </Body>
+        <Title color="$blue10">
+          {String(data?.length || 0)}
+        </Title>
+      </Stack>
+    </Stack>
   );
 
   const renderEmpty = () => {
@@ -67,36 +68,29 @@ export function CommitmentsScreen() {
   };
 
   return (
-    <YStack flex={1} backgroundColor="$background">
-      <FlashList
+    <Stack flex={1} backgroundColor="$background">
+      <VirtualizedScreen
         data={data || []}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <YStack paddingHorizontal="$4" paddingBottom="$3">
+          <Stack paddingHorizontal="$4" paddingBottom="$3">
             <CommitmentCard commitment={item} />
-          </YStack>
+          </Stack>
         )}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
       />
       {/* FAB */}
-      <Button
-        position="absolute"
-        bottom="$6"
-        right="$6"
-        size="$6"
-        circular
-        theme="active"
-        elevation="$4"
-        accessibilityRole="button"
-        accessibilityLabel={t('list.fab.create', { ns: 'commitments' })}
-        onPress={() => router.push('/commitments/create')}
-      >
-        <Text color="white" fontSize="$6">+</Text>
-      </Button>
-    </YStack>
+      <View position="absolute" bottom="$6" right="$6" zIndex={100}>
+        <IconButton
+          variant="primary"
+          iconToken={<Plus color="white" />}
+          tooltipI18nKey="list.fab.create"
+          onPress={() => router.push('/commitments/create')}
+        />
+      </View>
+    </Stack>
   );
 }
