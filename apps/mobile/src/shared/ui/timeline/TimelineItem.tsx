@@ -1,4 +1,4 @@
-import { XStack, YStack, Stack } from 'tamagui';
+import { XStack, YStack } from 'tamagui';
 
 export interface TimelineItemProps {
   accessibilityLabel: string;
@@ -14,7 +14,7 @@ export function TimelineItem({ accessibilityLabel, icon, content, date, isLast }
       <YStack alignItems="center">
         {icon}
         {!isLast && (
-          <Stack
+          <YStack
             width={2}
             flex={1}
             backgroundColor="$color5"

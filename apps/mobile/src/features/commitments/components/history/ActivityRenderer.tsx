@@ -2,7 +2,7 @@ import { Activity } from '@/shared/models/activity';
 import { useTranslation } from 'react-i18next';
 import { TimelineItem, TimelineIcon, TimelineDate } from '@/shared/ui/timeline';
 import { Text } from 'tamagui';
-import { Check, Pause, Play, Plus, X, Edit2, HelpCircle } from '@tamagui/lucide-icons';
+import { Check, Pause, Play, Plus, X, Edit3, HelpCircle } from '@tamagui/lucide-icons';
 import { useActivityDateFormatter } from '@/shared/utils/activityDateFormatter';
 
 export interface ActivityRendererProps {
@@ -54,7 +54,7 @@ export function ActivityRenderer({ activity, isLast }: ActivityRendererProps) {
       accessibilityText = `Cancelled the commitment on ${formattedDate}`;
       break;
     case 'edited':
-      icon = <Edit2 size="$1" color="$color1" />;
+      icon = <Edit3 size="$1" color="$color1" />;
       backgroundColor = '$color7';
       content = <Text>{t('activity.type.edited', { defaultValue: 'Edited details' })}</Text>;
       accessibilityText = `Edited details on ${formattedDate}`;
