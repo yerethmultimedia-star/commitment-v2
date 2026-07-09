@@ -111,7 +111,8 @@
     ],
     "moduleNameMapper": {
       "^(\\.\\.?/.*)\\.js$": "$1",
-      "^@commitment/domain$": "<rootDir>/../../packages/domain/src/index"
+      "^@commitment/domain$": "<rootDir>/../../packages/domain/src/index",
+      "^@commitment/shared$": "<rootDir>/../../packages/shared/src/index"
     },
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"
