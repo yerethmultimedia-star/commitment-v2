@@ -6,11 +6,6 @@ import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { env } from './config/env.config';
-import { collectDefaultMetrics } from 'prom-client';
-
-// Habilitar la recolección de métricas por defecto de prom-client (NodeJS, heap, event loop, etc.)
-collectDefaultMetrics();
-
 // Configurar el exportador de trazas OTLP HTTP
 const traceExporter = new OTLPTraceExporter({
   url: `${env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`,

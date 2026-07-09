@@ -1,7 +1,14 @@
 import { createTamagui, TamaguiInternalConfig } from '@tamagui/core';
 import { config as configBase } from '@tamagui/config/v3';
+import { themes } from './tokens/themes.js';
 
-export const config: TamaguiInternalConfig = createTamagui(configBase) as any;
+export const config: TamaguiInternalConfig = createTamagui({
+  ...configBase,
+  themes: {
+    ...configBase.themes,
+    ...themes,
+  },
+}) as any;
 
 export type AppConfig = typeof config;
 

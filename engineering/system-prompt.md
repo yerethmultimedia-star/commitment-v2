@@ -1,10 +1,10 @@
 # COMMITMENT ENGINEERING SYSTEM PROMPT & CONSTITUTION
 
-Version: 1.15.0
+Version: 1.20.0
 Status: Active
 Owner: Architecture Review Board
 Project: Commitment
-Last Updated: 2026-07-04
+Last Updated: 2026-07-08
 
 ---
 
@@ -114,6 +114,9 @@ Specification ──► Engineering Task ──► Implementation ──► Arch
 
 - Never hardcode user strings. Every label, error message, and tip must use translation keys.
 - Domain and database levels use English. Presentation layers handle localization.
+- Theme-related text (names, descriptions, subtitles, and preview contents) must never be hardcoded and must be resolved strictly via translation keys (e.g., `theme.sunrise.name`).
+- Design System components must resolve translations internally using localization keys passed as properties (e.g., `<Button i18nKey="common.save" />`) rather than accepting raw translated string properties computed by the caller (e.g., `<Button title={t('save')} />`). This centralizes localization and simplifies testing.
+- All visual string resolutions, date/number formatting, and relative time calculations must utilize the `@commitment/localization` shared package SDK (`t()`, `formatDate()`, `formatNumber()`, `formatRelativeDate()`, `changeLanguage()`, `currentLocale()`) to guarantee consistency across platforms.
 
 ### Accessibility by Design
 
@@ -355,26 +358,124 @@ Architecture evolves through documented decisions, not through implicit code cha
 
 ---
 
-### Rule #93 — Engineering Foundation Freeze
+### Rule #93 — Engineering Foundation & Monorepo Layout Freeze
 
 Status: ACTIVE
 
 Scope:
 
-- Engineering rules
-- Governance
-- Repository structure
-- Monorepo layout
-- Build pipeline
+- Engineering rules & Governance Framework
+- Monorepo directory structure (no moving folders, no naming convention changes)
+- Shared package boundaries (no new packages unless verified via ADR)
+- Build pipelines & configuration files
 
-Changes allowed only when:
+This freeze ensures that we focus exclusively on building features, improving UI/UX, optimizing performance, and delivering visible product value, rather than refactoring workspace structures. Changes are allowed only when:
 
-1. A real limitation is discovered.
-2. An ADR approves the change.
-3. The change benefits the entire project.
+1. A real, blocking technical limitation is discovered.
+2. An ADR formally details and approves the change.
+3. The modification benefits the entire project footprint.
+
+---
+
+## 🏗️ Vertical Slice Governance Review Framework
+
+To ensure that Commitment v2 scales reliably and maintains absolute architectural integrity over the years, every vertical slice must pass through a structured review process grouped into the following categories:
+
+### 1. Architecture Reviews
+
+- **Vertical Slice Independence:** The slice must be fully decoupled from other slices, depending only on shared modules/kernels.
+- **Repository Isolation:** Repository implementations must only deal with data mapping and persistence, containing no domain validation or logic.
+- **Aggregate Versioning:** Versions must only increment on meaningful business facts (Domain Events).
+- **Security Review:**
+  1. **PII Protection:** Does the slice protect Personally Identifiable Information (PII) adequately?
+  2. **Authorization:** Are authorization rules enforced on endpoints and actions?
+  3. **Secrets:** Are secrets kept out of source code (using environment variables)?
+  4. **Credentials:** Are security parameters (tokens, Secure Storage access) configured securely?
+  5. **Input Validation:** Is rate limiting or input validation enforced where applicable?
+  6. **Telemetry Logs:** Are correlation IDs propagated properly in logs to prevent leaks?
+
+### 2. Product Reviews
+
+- **Product Review (Rule #95 / Value Delivery):**
+  1. **Immediate Value:** Does the user perceive immediate, clear value?
+  2. **Rapid Demo:** Can the feature be demonstrated in less than 2 minutes?
+  3. **UX Friction:** Does the feature reduce UX friction or increase motivation to continue using the application?
+  4. **Recommendability:** Does the feature make the product easier to recommend to others?
+
+### 3. UX Reviews
+
+- **Theme Adaptability (Rule #96 / Theme Review):**
+  1. **Cross-Theme Rendering:** Do all components render properly in the three themes (Amanecer, Medianoche, Bosque)?
+  2. **Design Tokens Compliance:** Are all colors, margins, and elevations mapped strictly to Design System tokens (no hardcoded settings)?
+  3. **Theme Adaptability:** Do system illustrations, charts, empty states, and loading states adapt correct color profiles dynamically?
+  4. **Transitions:** Does theme switching trigger a hardware-accelerated transition (150–250 ms)?
+- **Design Consistency (Rule #97 / Design System Review):**
+  1. **Component Reuse:** Are existing design components from `@commitment/design-system` extended instead of duplicated?
+  2. **Role-Based Tokens:** Are spacing, typography, radii, elevations, and layout rules derived strictly from design tokens mapped by role?
+  3. **Dynamic Assets:** Do icons (`theme.icons.X`) and illustrations (`theme.illustrations.Y`) resolve dynamically via tokens?
+  4. **Widget Registry:** Are widgets designed as plugins acoplados al `WidgetRegistry`?
+
+### 4. Localization Reviews
+
+- **Internationalization (i18n):**
+  1. **i18n Keys:** Zero hardcoded strings in user-facing views or presentation models.
+  2. **i18n Props:** Design System components receive localization keys (`i18nKey="..."`) rather than raw translated strings computed by callers.
+  3. **SDK Integration:** Mappings, formatting, and translations utilize the central `@commitment/localization` SDK.
+
+### 5. Performance Reviews
+
+- **Performance Budget Review (Rule #100):**
+  1. **Bundle Size:** Does the slice respect mobile bundle size limitations?
+  2. **Global Reactivity:** Are global context providers kept minimal to prevent render cascades?
+  3. **Lazy Loading:** Is lazy loading of modules and routes preserved?
+  4. **Virtualization:** Are large lists virtualized?
+  5. **Renders Optimization:** Is object/function recreation in renders avoided?
+
+### 6. Platform Reviews
+
+- **Offline Review:**
+  1. **Offline Functionality:** Does the feature work correctly when offline?
+  2. **Sync Conflict:** Is synchronization conflict resolution designed properly?
+  3. **Optimistic Updates:** Do optimistic updates reflect state changes immediately?
+  4. **Sync Rollback:** Is rollback logic robust when server synchronization fails?
+  5. **Cache Updates:** Are caches updated correctly?
+- **State Management Review:**
+  1. **Zustand vs React Query:** Is Zustand state used only for global, non-fetched UI state?
+  2. **Server Cache:** Is React Query used for fetched cache synchronization?
+  3. **Local State:** Is temporary state kept purely local in component states?
+  4. **Derived State:** Is state duplication avoided and derived state computed dynamically?
+
+### 7. Quality Reviews
+
+- **Technical Debt Review (Rule #99):**
+  1. **Debt Registration:** What tech debt was introduced (mocks, in-memory repository adapters, bypassed validations)?
+  2. **Intentionality:** Is the debt intentional and documented?
+  3. **Ownership:** Does it have an owner and a targeted sprint (VS) for resolution?
+  4. **Scalability Blocks:** Does it block scalability?
+- **API Contract Review (Rule #101):**
+  1. **Backwards Compatibility:** Are DTO changes backwards compatible?
+  2. **Optional Fields:** Are new fields optional by default?
+  3. **Contracts Sync:** Is `@commitment/api-contracts` synchronized?
+  4. **Decoupled UI:** No UI layer uses DTOs directly (mappers uncouple database models).
+- **API Evolution Review:**
+  1. **Bounded Context:** Does the endpoint naturally belong to this bounded context?
+  2. **HTTP Verb & REST:** Is the HTTP verb correct and RESTful consistency preserved?
+  3. **Duplication:** Is duplication with other endpoints avoided?
+  4. **Versioning:** Can the endpoint evolve without versioning?
+
+---
+
+### Governance Freeze
+
+No further rules or reviews will be added to this framework unless a concrete, real-world limitation is discovered during implementation and approved by the Architecture Review Board via an ADR. This keeps the development process lightweight and highly focused on product shipping rather than overhead.
 
 ## 📜 Change History
 
+- **v1.20.0 (2026-07-08):** Expanded Rule #93 to freeze the monorepo folder layout, naming conventions, and package boundaries, locking development strictly to product delivery.
+- **v1.19.0 (2026-07-08):** Added Rules #99-103 (Technical Debt, Performance, API Contract, Design Consistency, Feature Independence Reviews) and updated history log.
+- **v1.18.0 (2026-07-08):** Revised Rule #97 (Design System Review) to include roles, motion/icon/illustration tokens, and plugins, added Rule #98 (Maturity Tracking), and updated history.
+- **v1.17.0 (2026-07-08):** Integrated Rule #97 (Design System Review), added @commitment/localization SDK rules, and updated history.
+- **v1.16.0 (2026-07-08):** Integrated Rule #95 (Product Review) and Rule #96 (Theme Review), and added theme localization standards.
 - **v1.15.0 (2026-07-04):** Integrated Rule #87 (Version Changes Only With Meaningful State Changes) as approved by the Board.
 - **v1.14.0 (2026-07-04):** Integrated Rule #86 (Commands Are Intentions) as approved by the Board.
 - **v1.13.0 (2026-07-04):** Integrated Rule #85 (Repository Implements Persistence Only) as approved by the Board.

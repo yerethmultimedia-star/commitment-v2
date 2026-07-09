@@ -52,6 +52,14 @@ This is the standard execution pattern for developing and delivering a new verti
 
 ## 10. Product Review & Slice Closure
 
+- Perform the mandatory Governance Reviews according to the framework defined in `system-prompt.md`:
+  - **Architecture Review** (Independence, Repository Isolation, Event Sourcing, Security)
+  - **Product Review** (Immediate Value Delivery)
+  - **UX Review** (Theme Adaptability, Design Consistency, Tokens)
+  - **Localization Review** (i18n compliance, SDK utilization)
+  - **Performance Review** (Render and Bundle resource budgets)
+  - **Platform Review** (Offline-First and Zustand/React Query state management)
+  - **Quality Review** (Technical Debt logs, API Contracts & Evolution, Feature Independence)
 - Submit completion report (`vs-XXX_completion_report.md`).
-- Update `PROJECT_STATUS.md`.
+- Update `PROJECT_STATUS.md` including maturity and risk logs.
 - Commit changes and close the slice.

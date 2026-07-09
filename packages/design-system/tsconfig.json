@@ -6,7 +6,9 @@
     "skipLibCheck": true,
     "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": ["DOM", "ES2022"]
+    "lib": ["DOM", "ES2022"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true
   },
   "include": ["src/**/*"]
 }

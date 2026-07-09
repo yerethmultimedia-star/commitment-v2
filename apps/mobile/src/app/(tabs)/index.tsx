@@ -1,6 +1,6 @@
 import React from 'react';
-import { CommitmentsScreen } from '@/features/commitments';
+import { DashboardScreen } from '@/features/dashboard/ui/screens/DashboardScreen.js';
 
 export default function HomeScreen() {
-  return <CommitmentsScreen />;
+  return <DashboardScreen />;
 }

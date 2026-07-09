@@ -28,10 +28,5 @@
       "@commitment/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "test/**/*",
-    "../../packages/domain/src/**/*",
-    "../../packages/shared/src/**/*"
-  ]
+  "include": ["src/**/*", "test/**/*"]
 }
