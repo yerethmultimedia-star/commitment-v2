@@ -17,6 +17,8 @@ export interface ThemeManifest {
   supportsDarkIcons: boolean;
   /** Whether this theme looks best with light icons in the OS status bar */
   supportsLightIcons: boolean;
+  /** Version of the manifest schema */
+  manifestVersion: string;
   /** Minimum version of the theme engine required to parse this theme */
-  minimumEngineVersion: string;
+  engineVersion: string;
 }

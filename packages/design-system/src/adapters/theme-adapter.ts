@@ -4,13 +4,21 @@ import { ResolvedTheme } from '@commitment/theme-engine';
  * Adapts a generic ResolvedTheme from the Theme Engine into a Tamagui-compatible theme object.
  * This ensures Tamagui never leaks into the Theme Engine.
  */
-export function adaptThemeToTamagui(resolvedTheme: ResolvedTheme) {
-  // Tamagui themes are essentially flat objects mapping token names to values.
-  // For VS-026, we map the colors directly.
-  // In VS-027, we can expand this to map radius, spacing, etc. into Tamagui's token structure.
-  
+export function adaptThemeToTamagui(resolvedTheme: ResolvedTheme, reducedMotion: boolean = false) {
+  // Apply reduced motion at the adapter level
+  const motion = reducedMotion ? {
+    ...resolvedTheme.motion,
+    fast: 0,
+    normal: 0,
+    slow: 0,
+  } : resolvedTheme.motion;
+
   return {
     ...resolvedTheme.colors,
-    // Add other mapped tokens if needed
+    // Inject motion as theme variables
+    motionFast: motion.fast,
+    motionNormal: motion.normal,
+    motionSlow: motion.slow,
+    // Add other mapped tokens if needed (spacing, radius, etc. usually mapped globally in tamagui config)
   };
 }

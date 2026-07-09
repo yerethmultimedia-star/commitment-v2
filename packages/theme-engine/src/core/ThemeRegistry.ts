@@ -1,5 +1,6 @@
 import { ThemeManifest, ThemeId } from './ThemeManifest.js';
 import { ResolvedTheme } from './ResolvedTheme.js';
+import { ThemeMetadata, deriveThemeMetadata } from './ThemeMetadata.js';
 
 export interface ThemeDefinition {
   manifest: ThemeManifest;
@@ -28,7 +29,19 @@ export class ThemeRegistry {
     return definition.resolve();
   }
 
+  public getMetadata(id: ThemeId): ThemeMetadata | undefined {
+    const definition = this.themes.get(id);
+    if (!definition) return undefined;
+    return deriveThemeMetadata(definition.manifest, definition.resolve());
+  }
+
   public getAllManifests(): ThemeManifest[] {
     return Array.from(this.themes.values()).map(def => def.manifest);
+  }
+
+  public getAllMetadata(): ThemeMetadata[] {
+    return Array.from(this.themes.values()).map(def => 
+      deriveThemeMetadata(def.manifest, def.resolve())
+    );
   }
 }

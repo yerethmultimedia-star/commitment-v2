@@ -5,12 +5,14 @@ import { useSession } from '@/core/auth/use-session';
 import Constants from 'expo-constants';
 import * as Clipboard from 'expo-clipboard';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { logout } = useAuth();
   const { identityId } = useSession();
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
 
   const handleCopyId = async () => {
     if (identityId) {
@@ -46,6 +48,12 @@ export default function ProfileScreen() {
           <Text fontSize="$4" color="$textSecondary">{t('profile.environment', { ns: 'common' })}</Text>
           <Text fontSize="$4">{process.env.NODE_ENV}</Text>
         </XStack>
+      </YStack>
+
+      <YStack gap="$2" padding="$4" backgroundColor="$backgroundElement" borderRadius="$4">
+        <Button size="$4" theme="active" onPress={() => router.push('/(settings)/appearance' as any)}>
+          {t('profile.appearance', { ns: 'common', defaultValue: 'Apariencia' })}
+        </Button>
       </YStack>
 
       <YStack marginTop="auto">
