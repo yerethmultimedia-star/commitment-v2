@@ -18,3 +18,5 @@ export { Input } from './components/Input.js';
 export { TextArea } from './components/TextArea.js';
 export { Switch } from './components/Switch.js';
 export * from './components/EmptyState.js';
+export { TextBase, Headline, Title, Body, Caption, Label } from './components/typography/index.js';
+export type { TextProps, TypographyRole, Tone } from './components/typography/index.js';

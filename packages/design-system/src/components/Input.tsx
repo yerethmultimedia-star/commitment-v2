@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Input as TamaguiInput, Text, YStack, XStack } from 'tamagui';
+import { View, Input as TamaguiInput, YStack, XStack } from 'tamagui';
 import { t } from '@commitment/localization';
+import { Label, Caption, Body } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
 
 export interface InputProps {
@@ -94,19 +95,16 @@ export const Input = React.forwardRef<any, InputProps>(({
       {/* Label and Counter */}
       <XStack justifyContent="space-between" alignItems="center">
         {labelI18nKey && (
-          <Text
+          <Label
             id={id + '-label'}
-            fontSize="$4"
-            fontWeight="600"
+            i18nKey={labelI18nKey}
             color={error ? '$danger' : '$contentPrimary'}
-          >
-            {t(labelI18nKey)}
-          </Text>
+          />
         )}
         {counter && (
-          <Text fontSize="$3" color={counter.current > counter.max ? '$danger' : '$contentSecondary'}>
-            {counter.current} / {counter.max}
-          </Text>
+          <Caption color={counter.current > counter.max ? '$danger' : '$contentSecondary'}>
+            {`${counter.current} / ${counter.max}`}
+          </Caption>
         )}
       </XStack>
 
@@ -122,7 +120,7 @@ export const Input = React.forwardRef<any, InputProps>(({
           height={48}
         >
           {leadingIcon && <View marginRight="$2">{leadingIcon}</View>}
-          {prefix && <Text color="$contentSecondary" marginRight="$2">{prefix}</Text>}
+          {prefix && <Body color="$contentSecondary" marginRight="$2">{prefix}</Body>}
 
           <TamaguiInput
             ref={ref as any}
@@ -158,17 +156,17 @@ export const Input = React.forwardRef<any, InputProps>(({
             onMouseLeave={handlers.onHoverOut}
           />
 
-          {suffix && <Text color="$contentSecondary" marginLeft="$2">{suffix}</Text>}
+          {suffix && <Body color="$contentSecondary" marginLeft="$2">{suffix}</Body>}
           
           {/* Action icons like clear or password toggle would be rendered here, but for now we just show trailingIcon */}
           {passwordVisibility && (
             <View marginLeft="$2" cursor="pointer" onPress={() => setShowPassword(!showPassword)}>
-              <Text fontSize="$3">{showPassword ? 'Hide' : 'Show'}</Text>
+              <Caption>{showPassword ? 'Hide' : 'Show'}</Caption>
             </View>
           )}
           {clear && value.length > 0 && (
             <View marginLeft="$2" cursor="pointer" onPress={() => onChangeText('')}>
-              <Text fontSize="$3">✕</Text>
+              <Body>✕</Body>
             </View>
           )}
           {trailingIcon && <View marginLeft="$2">{trailingIcon}</View>}
@@ -177,13 +175,11 @@ export const Input = React.forwardRef<any, InputProps>(({
 
       {/* Helper Text */}
       {helperI18nKey && (
-        <Text
+        <Caption
           id={helperId}
-          fontSize="$3"
+          i18nKey={helperI18nKey}
           color={error ? '$danger' : success ? '$success' : '$contentSecondary'}
-        >
-          {t(helperI18nKey)}
-        </Text>
+        />
       )}
     </YStack>
   );

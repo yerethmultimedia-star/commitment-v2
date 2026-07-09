@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, TextArea as TamaguiTextArea, Text, YStack, XStack } from 'tamagui';
+import { View, TextArea as TamaguiTextArea, YStack, XStack } from 'tamagui';
 import { t } from '@commitment/localization';
+import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
 
 export interface TextAreaProps {
@@ -56,19 +57,16 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
       {/* Label and Counter */}
       <XStack justifyContent="space-between" alignItems="center">
         {labelI18nKey && (
-          <Text
+          <Label
             id={id + '-label'}
-            fontSize="$4"
-            fontWeight="600"
+            i18nKey={labelI18nKey}
             color={error ? '$danger' : '$contentPrimary'}
-          >
-            {t(labelI18nKey)}
-          </Text>
+          />
         )}
         {counter && (
-          <Text fontSize="$3" color={counter.current > counter.max ? '$danger' : '$contentSecondary'}>
-            {counter.current} / {counter.max}
-          </Text>
+          <Caption color={counter.current > counter.max ? '$danger' : '$contentSecondary'}>
+            {`${counter.current} / ${counter.max}`}
+          </Caption>
         )}
       </XStack>
 
@@ -108,13 +106,11 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
 
       {/* Helper Text */}
       {helperI18nKey && (
-        <Text
+        <Caption
           id={helperId}
-          fontSize="$3"
+          i18nKey={helperI18nKey}
           color={error ? '$danger' : success ? '$success' : '$contentSecondary'}
-        >
-          {t(helperI18nKey)}
-        </Text>
+        />
       )}
     </YStack>
   );

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
-import { View, Text, Spinner } from 'tamagui';
+import { View, Spinner } from 'tamagui';
 import { t } from '@commitment/localization';
+import { Label } from './typography/Label.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
 
 export interface ButtonProps {
@@ -138,17 +139,23 @@ export const Button = React.forwardRef<any, ButtonProps>(({
           <View flexDirection="row" alignItems="center" gap="$2">
             <Spinner color={textColor as any} />
             {loadingTextI18nKey && (
-              <Text color={textColor as any} fontSize={fontSize} fontWeight="600">
-                {t(loadingTextI18nKey)}
-              </Text>
+              <Label 
+                i18nKey={loadingTextI18nKey} 
+                color={textColor as any} 
+                fontSize={fontSize} 
+                fontWeight="600" 
+              />
             )}
           </View>
         ) : (
           <View flexDirection="row" alignItems="center" gap="$2">
             {iconStart}
-            <Text color={textColor as any} fontSize={fontSize} fontWeight="600">
-              {t(i18nKey)}
-            </Text>
+            <Label 
+              i18nKey={i18nKey} 
+              color={textColor as any} 
+              fontSize={fontSize} 
+              fontWeight="600" 
+            />
             {iconEnd}
           </View>
         )}

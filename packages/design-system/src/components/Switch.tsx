@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Switch as TamaguiSwitch, Text, XStack, YStack } from 'tamagui';
+import { View, Switch as TamaguiSwitch, XStack, YStack } from 'tamagui';
 import { t } from '@commitment/localization';
+import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
 
 export interface SwitchProps {
@@ -84,24 +85,19 @@ export const Switch = React.forwardRef<any, SwitchProps>(({
       {(labelI18nKey || descriptionI18nKey) && (
         <YStack flex={1}>
           {labelI18nKey && (
-            <Text
+            <Label
               id={id + '-label'}
-              fontSize="$4"
-              fontWeight="600"
+              i18nKey={labelI18nKey}
               color={isActuallyDisabled ? '$contentTertiary' : '$contentPrimary'}
-            >
-              {t(labelI18nKey)}
-            </Text>
+            />
           )}
           {descriptionI18nKey && (
-            <Text
+            <Caption
               id={descriptionId}
-              fontSize="$3"
+              i18nKey={descriptionI18nKey}
               color="$contentSecondary"
               marginTop="$1"
-            >
-              {t(descriptionI18nKey)}
-            </Text>
+            />
           )}
         </YStack>
       )}
