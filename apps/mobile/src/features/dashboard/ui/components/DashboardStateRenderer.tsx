@@ -1,7 +1,7 @@
 import React from 'react';
 import { YStack, Text } from 'tamagui';
-import { DashboardSkeleton } from './skeletons/DashboardSkeleton.js';
-import { DashboardEmptyState } from './empty-states/DashboardEmptyState.js';
+import { DashboardSkeleton } from './skeletons/DashboardSkeleton';
+import { DashboardEmptyState } from './empty-states/DashboardEmptyState';
 
 export enum DashboardState {
   Loading = 'LOADING',

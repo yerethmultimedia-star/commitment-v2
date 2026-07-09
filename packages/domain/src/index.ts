@@ -7,3 +7,4 @@ export * from './commitment/index.js';
 export * from './notifications/index.js';
 export * from './devices/index.js';
 export * from './messaging/index.js';
+export * from './appearance/index.js';

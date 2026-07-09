@@ -1,0 +1,16 @@
+{
+  "extends": "@commitment/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "lib": ["ES2022", "DOM"]
+  },
+  "include": ["src/**/*"]
+}

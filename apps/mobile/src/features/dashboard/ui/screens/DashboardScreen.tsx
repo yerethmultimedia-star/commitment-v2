@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { useCommitments } from '@/features/commitments/hooks/useCommitments.js';
-import { DashboardStateRenderer, DashboardState } from '../components/DashboardStateRenderer.js';
-import { DashboardContent } from '../components/DashboardContent.js';
+import { useCommitments } from '@/features/commitments/hooks/useCommitments';
+import { DashboardStateRenderer, DashboardState } from '../components/DashboardStateRenderer';
+import { DashboardContent } from '../components/DashboardContent';
 
 export function DashboardScreen() {
   const { data: commitments = [], isLoading, isError, error, refetch } = useCommitments();

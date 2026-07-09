@@ -1,11 +1,11 @@
 import React from 'react';
 import { YStack, ScrollView } from 'tamagui';
-import { DashboardHeader } from './DashboardHeader.js';
-import { TodayWidget } from './widgets/TodayWidget.js';
-import { WeeklyProgressWidget } from './widgets/WeeklyProgressWidget.js';
-import { QuickActionsWidget, QuickAction } from './widgets/QuickActionsWidget.js';
+import { DashboardHeader } from './DashboardHeader';
+import { TodayWidget } from './widgets/TodayWidget';
+import { WeeklyProgressWidget } from './widgets/WeeklyProgressWidget';
+import { QuickActionsWidget, QuickAction } from './widgets/QuickActionsWidget';
 
-import { CommitmentModel } from '@/features/commitments/models/commitment.model.js';
+import { CommitmentModel } from '@/features/commitments/models/commitment.model';
 
 export interface DashboardContentProps {
   commitments: CommitmentModel[];
