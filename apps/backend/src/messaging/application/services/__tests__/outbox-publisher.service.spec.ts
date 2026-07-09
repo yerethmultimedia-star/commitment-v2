@@ -4,6 +4,7 @@ import { InMemoryOutboxRepository } from '../../../infrastructure/in-memory-outb
 import { MessageBroker } from '../../ports/message-broker.port';
 import { IntegrationMessage, OutboxStatus } from '@commitment/domain';
 import { Logger } from '@nestjs/common';
+import { Counter } from 'prom-client';
 
 describe('OutboxPublisherService', () => {
   let service: OutboxPublisherService;
@@ -19,7 +20,16 @@ describe('OutboxPublisherService', () => {
       publish: jest.fn().mockResolvedValue(undefined),
     };
 
-    service = new OutboxPublisherService(repository, messageBroker);
+    const mockCounter = {
+      inc: jest.fn(),
+    } as unknown as Counter<string>;
+
+    service = new OutboxPublisherService(
+      repository,
+      messageBroker,
+      mockCounter,
+      mockCounter,
+    );
   });
 
   const createMessage = (

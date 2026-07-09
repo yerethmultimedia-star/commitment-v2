@@ -23,8 +23,15 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@commitment/domain": ["../../packages/domain/src"],
-      "@commitment/domain/*": ["../../packages/domain/src/*"]
+      "@commitment/domain/*": ["../../packages/domain/src/*"],
+      "@commitment/shared": ["../../packages/shared/src"],
+      "@commitment/shared/*": ["../../packages/shared/src/*"]
     }
   },
-  "include": ["src/**/*", "test/**/*", "../../packages/domain/src/**/*"]
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "../../packages/domain/src/**/*",
+    "../../packages/shared/src/**/*"
+  ]
 }

@@ -1,1 +1,2 @@
-export * from './tokens/colors.js';
+export * from 'tamagui';
+export * from './tamagui.config.js';

@@ -16,5 +16,10 @@
   "devDependencies": {
     "@commitment/config": "workspace:*",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@tamagui/config": "^2.4.2",
+    "@tamagui/core": "^2.4.2",
+    "tamagui": "^2.4.2"
   }
 }

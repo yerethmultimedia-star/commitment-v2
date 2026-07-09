@@ -4,6 +4,7 @@ import { RegisterCommitmentCommand } from '../commands/register-commitment.comma
 import { InMemoryCommitmentRepository } from '../../infrastructure/in-memory-commitment.repository';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
 import { DomainEvent } from '@commitment/domain';
+import { Counter } from 'prom-client';
 
 describe('RegisterCommitmentCommandHandlerCore', () => {
   let repository: InMemoryCommitmentRepository;
@@ -20,7 +21,16 @@ describe('RegisterCommitmentCommandHandlerCore', () => {
         return Promise.resolve();
       },
     };
-    handler = new RegisterCommitmentCommandHandlerCore(repository, dispatcher);
+
+    const mockCounter = {
+      inc: jest.fn(),
+    } as unknown as Counter<string>;
+
+    handler = new RegisterCommitmentCommandHandlerCore(
+      repository,
+      dispatcher,
+      mockCounter,
+    );
   });
 
   it('should successfully register a commitment and dispatch events', async () => {

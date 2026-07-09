@@ -6,6 +6,8 @@ export interface OutboxRepository {
   saveMany(messages: IntegrationMessage[]): Promise<void>;
   findById(id: string): Promise<IntegrationMessage | null>;
   getDeadLetterMessages(): Promise<IntegrationMessage[]>;
+  countPending(): Promise<number>;
+  countDeadLetter(): Promise<number>;
 }
 
 export const OUTBOX_REPOSITORY_TOKEN = 'OutboxRepository';

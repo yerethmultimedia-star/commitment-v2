@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@commitment/config": "workspace:*",
+    "@types/node": "^24.13.2",
     "typescript": "^5.0.0"
   }
 }

@@ -2,7 +2,11 @@
   "extends": "@commitment/config/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["DOM", "ES2022"]
   },
   "include": ["src/**/*"]
 }

@@ -58,14 +58,30 @@ export class InMemoryOutboxRepository implements OutboxRepository {
     return Promise.resolve(message ? this.cloneMessage(message) : null);
   }
 
-  getDeadLetterMessages(): Promise<IntegrationMessage[]> {
-    const deadLetterMessages: IntegrationMessage[] = [];
-    for (const message of this.messages.values()) {
-      if (message.status === OutboxStatus.DeadLetter) {
-        deadLetterMessages.push(this.cloneMessage(message));
-      }
-    }
-    return Promise.resolve(deadLetterMessages);
+  public getDeadLetterMessages(): Promise<IntegrationMessage[]> {
+    return Promise.resolve(
+      Array.from(this.messages.values()).filter(
+        (m) => m.status === OutboxStatus.DeadLetter,
+      ),
+    );
+  }
+
+  public countPending(): Promise<number> {
+    const now = new Date();
+    const count = Array.from(this.messages.values()).filter(
+      (m) =>
+        (m.status === OutboxStatus.Pending ||
+          m.status === OutboxStatus.Failed) &&
+        (!m.nextAttempt || m.nextAttempt <= now),
+    ).length;
+    return Promise.resolve(count);
+  }
+
+  public countDeadLetter(): Promise<number> {
+    const count = Array.from(this.messages.values()).filter(
+      (m) => m.status === OutboxStatus.DeadLetter,
+    ).length;
+    return Promise.resolve(count);
   }
 
   private cloneMessage(message: IntegrationMessage): IntegrationMessage {

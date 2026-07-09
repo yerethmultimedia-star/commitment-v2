@@ -11,13 +11,17 @@ import {
 } from '@commitment/domain';
 import { RegisterCommitmentCommand } from './register-commitment.command';
 import { RegisterCommitmentResult } from './register-commitment.result';
-import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
-import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
+import type { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
+import type { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Counter } from 'prom-client';
 
 export class RegisterCommitmentCommandHandlerCore {
   constructor(
     private readonly commitmentRepository: VersionedCommitmentRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    @InjectMetric('commitments_created_total')
+    private readonly commitmentsCounter?: Counter<string>,
   ) {}
 
   public async handle(
@@ -66,6 +70,10 @@ export class RegisterCommitmentCommandHandlerCore {
     const events = commitment.getUncommittedEvents();
     await this.eventDispatcher.dispatch(events);
     commitment.clearUncommittedEvents();
+
+    if (this.commitmentsCounter) {
+      this.commitmentsCounter.inc();
+    }
 
     return new RegisterCommitmentResult(commitment.id.value, version);
   }

@@ -4,6 +4,8 @@ import { RegisterCommitmentCommand } from '../application/commands/register-comm
 import { RegisterCommitmentCommandHandlerCore } from '../application/commands/register-commitment.handler';
 import type { VersionedCommitmentRepository } from '../application/ports/versioned-commitment-repository.port';
 import type { DomainEventDispatcher } from '../application/ports/domain-event-dispatcher.port';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
+import { Counter } from 'prom-client';
 
 @CommandHandler(RegisterCommitmentCommand)
 export class RegisterCommitmentNestjsHandler implements ICommandHandler<RegisterCommitmentCommand> {
@@ -14,10 +16,13 @@ export class RegisterCommitmentNestjsHandler implements ICommandHandler<Register
     private readonly commitmentRepository: VersionedCommitmentRepository,
     @Inject('DomainEventDispatcher')
     private readonly eventDispatcher: DomainEventDispatcher,
+    @InjectMetric('commitments_created_total')
+    private readonly commitmentsCounter: Counter<string>,
   ) {
     this.core = new RegisterCommitmentCommandHandlerCore(
       this.commitmentRepository,
       this.eventDispatcher,
+      this.commitmentsCounter,
     );
   }
 

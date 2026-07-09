@@ -7,9 +7,11 @@ import { AppModule } from './app.module';
 import { env } from './config/env.config';
 import { ProblemDetailsExceptionFilter } from './filters/problem-details-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
 
   // Configurar CORS
   app.enableCors();
@@ -36,13 +38,14 @@ async function bootstrap() {
   const port = env.PORT;
   await app.listen(port);
 
-  console.log(`🚀 NestJS Backend running on port ${port}`);
-
-  console.log(
+  const logger = app.get(Logger);
+  logger.log(`🚀 NestJS Backend running on port ${port}`);
+  logger.log(
     `📑 Documentación de Swagger disponible en: http://localhost:${port}/api/docs`,
   );
 }
 bootstrap().catch((err) => {
+  // eslint-disable-next-line no-console
   console.error('❌ Error fatal iniciando la aplicación NestJS:', err);
   process.exit(1);
 });
