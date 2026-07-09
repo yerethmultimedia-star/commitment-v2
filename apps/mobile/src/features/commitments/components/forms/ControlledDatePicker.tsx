@@ -10,9 +10,10 @@ interface Props {
   control: Control<FieldValues>;
   label?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-export function ControlledDatePicker({ name, control, label, placeholder }: Props) {
+export function ControlledDatePicker({ name, control, label, placeholder, disabled }: Props) {
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -40,15 +41,19 @@ export function ControlledDatePicker({ name, control, label, placeholder }: Prop
             value={value || new Date()}
             mode="date"
             display="default"
+            disabled={disabled}
             onChange={onDateChange}
           />
         </XStack>
       ) : (
         <Button 
-          variant="outlined" 
-          justifyContent="flex-start" 
+          theme={error ? 'red' : undefined}
           borderColor={error ? '$red10' : '$borderColor'}
+          focusStyle={{ borderColor: error ? '$red10' : '$blue10' }}
+          disabled={disabled}
+          opacity={disabled ? 0.6 : 1}
           onPress={() => setShow(true)}
+          justifyContent="flex-start"
         >
           <Text color={value ? '$text' : '$gray10'}>
             {value ? dateFormatter.formatDate(value) : placeholder}

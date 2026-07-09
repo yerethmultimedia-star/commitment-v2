@@ -7,6 +7,13 @@ interface CreateCommitmentPayload {
   recurrencePattern?: string;
 }
 
+interface EditCommitmentPayload {
+  title?: string;
+  description?: string;
+  targetDate?: string | null;
+  recurrencePattern?: string | null;
+}
+
 interface TransitionResult {
   commitmentId: string;
   state: string;
@@ -22,6 +29,9 @@ export const commitmentsApi = {
   },
   create: async (payload: CreateCommitmentPayload) => {
     return apiClient.post('commitments', { json: payload }).json<{ commitmentId: string }>();
+  },
+  edit: async (id: string, payload: EditCommitmentPayload) => {
+    return apiClient.patch(`commitments/${id}`, { json: payload }).json<{ commitmentId: string }>();
   },
   activate: async (id: string) => {
     return apiClient.post(`commitments/${id}/activate`).json<TransitionResult>();

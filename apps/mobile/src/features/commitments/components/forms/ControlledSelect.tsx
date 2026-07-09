@@ -9,9 +9,10 @@ interface Props {
   label?: string;
   placeholder?: string;
   options: { value: string; labelKey: string }[];
+  disabled?: boolean;
 }
 
-export function ControlledSelect({ name, control, label, placeholder, options }: Props) {
+export function ControlledSelect({ name, control, label, placeholder, options, disabled }: Props) {
   const { t } = useTranslation();
   const {
     field: { onChange, value },
@@ -27,8 +28,18 @@ export function ControlledSelect({ name, control, label, placeholder, options }:
     <YStack gap="$2" width="100%">
       {label && <Text color="$textSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
       
-      <Select value={value || ''} onValueChange={onChange}>
-        <Select.Trigger borderColor={error ? '$red10' : '$borderColor'} icon={<Text>▼</Text>}>
+      <Select
+        value={value}
+        onValueChange={onChange}
+        disablePreventBodyScroll
+      >
+        <Select.Trigger 
+          iconAfter={null}
+          borderColor={error ? '$red10' : '$borderColor'}
+          focusStyle={{ borderColor: error ? '$red10' : '$blue10' }}
+          disabled={disabled}
+          opacity={disabled ? 0.6 : 1}
+        >
           <Select.Value placeholder={placeholder}>
             {selectedLabel}
           </Select.Value>

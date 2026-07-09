@@ -11,9 +11,13 @@ interface Props {
   initialValues?: Partial<CommitmentFormValues>;
   onSubmit: (values: CommitmentFormValues) => Promise<void>;
   isSubmitting?: boolean;
+  /** Fields to render as read-only. Driven by getEditableFields(status). */
+  disabledFields?: string[];
+  /** Override the submit button label (defaults to form.submit) */
+  submitLabel?: string;
 }
 
-export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props) {
+export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabledFields = [], submitLabel }: Props) {
   const { t } = useTranslation();
   
   const schema = createCommitmentSchema(t);
@@ -45,6 +49,8 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
         control={untypedControl}
         label={t('form.fields.title.label', { ns: 'commitments' })}
         placeholder={t('form.fields.title.placeholder', { ns: 'commitments' })}
+        disabled={disabledFields.includes('title')}
+        accessibilityHint={disabledFields.includes('title') ? t('form.fields.readOnly', { ns: 'commitments' }) : undefined}
       />
       
       <ControlledInput
@@ -52,6 +58,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
         control={untypedControl}
         label={t('form.fields.description.label', { ns: 'commitments' })}
         placeholder={t('form.fields.description.placeholder', { ns: 'commitments' })}
+        disabled={disabledFields.includes('description')}
         multiline
         numberOfLines={3}
       />
@@ -61,6 +68,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
         control={untypedControl}
         label={t('form.fields.targetDate.label', { ns: 'commitments' })}
         placeholder={t('form.fields.targetDate.placeholder', { ns: 'commitments' })}
+        disabled={disabledFields.includes('targetDate')}
       />
 
       <ControlledSelect
@@ -69,6 +77,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
         label={t('form.fields.recurrence.label', { ns: 'commitments' })}
         placeholder={t('form.fields.recurrence.placeholder', { ns: 'commitments' })}
         options={recurrenceOptions}
+        disabled={disabledFields.includes('recurrence')}
       />
 
       <Button
@@ -77,9 +86,12 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting }: Props)
         marginTop="$4"
         disabled={isSubmitting}
         onPress={control.handleSubmit(onSubmit)}
+        accessibilityRole="button"
+        accessibilityLabel={submitLabel ?? t('form.submit', { ns: 'commitments' })}
+        accessibilityState={{ disabled: !!isSubmitting }}
       >
         <Text color="white" fontWeight="bold">
-          {isSubmitting ? '...' : t('form.submit', { ns: 'commitments' })}
+          {isSubmitting ? '...' : (submitLabel ?? t('form.submit', { ns: 'commitments' }))}
         </Text>
       </Button>
     </YStack>

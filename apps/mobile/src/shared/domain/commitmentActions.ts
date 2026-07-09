@@ -72,3 +72,28 @@ const ALLOWED_TRANSITIONS: Record<CommitmentStatus, CommitmentAction[]> = {
 export function getAllowedActions(status: CommitmentStatus): ActionConfig[] {
   return ALLOWED_TRANSITIONS[status].map((id) => ACTION_CONFIG[id]);
 }
+
+// ─── Editable Fields ─────────────────────────────────────────────────────────
+
+export type EditableField = 'title' | 'description' | 'targetDate' | 'recurrence';
+
+/**
+ * Returns which form fields may be edited for a given status.
+ * The UI must NEVER contain status conditionals; always call this function.
+ */
+const EDITABLE_FIELDS: Record<CommitmentStatus, EditableField[]> = {
+  draft:     ['title', 'description', 'targetDate', 'recurrence'],
+  active:    ['description', 'targetDate'],
+  paused:    ['description', 'targetDate'],
+  completed: [],
+  cancelled: [],
+};
+
+export function getEditableFields(status: CommitmentStatus): EditableField[] {
+  return EDITABLE_FIELDS[status];
+}
+
+/** Returns true if at least one field is editable for the given status. */
+export function isEditable(status: CommitmentStatus): boolean {
+  return EDITABLE_FIELDS[status].length > 0;
+}

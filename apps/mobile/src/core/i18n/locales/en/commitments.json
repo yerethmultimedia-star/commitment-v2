@@ -58,7 +58,8 @@
       "titleRequired": "Please enter a title",
       "titleTooShort": "Title must be at least 3 characters",
       "invalidDate": "Please select a valid date"
-    }
+    },
+    "readOnly": "This field cannot be edited in the current status"
   },
   "actions": {
     "activate": "Activate",
@@ -88,5 +89,19 @@
         "description": "Cancel \"{{title}}\". You will not be able to reactivate it."
       }
     }
+  },
+  "edit": {
+    "title": "Edit Commitment",
+    "headerButton": "Edit",
+    "submit": "Save Changes"
+  },
+  "success": {
+    "created": "Commitment created",
+    "updated": "Changes saved",
+    "activated": "Commitment activated",
+    "paused": "Commitment paused",
+    "resumed": "Commitment resumed",
+    "completed": "Commitment completed",
+    "cancelled": "Commitment cancelled"
   }
 }

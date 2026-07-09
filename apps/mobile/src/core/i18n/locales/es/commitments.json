@@ -58,7 +58,8 @@
       "titleRequired": "Por favor ingresa un título",
       "titleTooShort": "El título debe tener al menos 3 caracteres",
       "invalidDate": "Por favor selecciona una fecha válida"
-    }
+    },
+    "readOnly": "Este campo no se puede editar en el estado actual"
   },
   "actions": {
     "activate": "Activar",
@@ -88,5 +89,19 @@
         "description": "Cancelar \"{{title}}\". No podrás reactivarlo."
       }
     }
+  },
+  "edit": {
+    "title": "Editar Compromiso",
+    "headerButton": "Editar",
+    "submit": "Guardar cambios"
+  },
+  "success": {
+    "created": "Compromiso creado",
+    "updated": "Cambios guardados",
+    "activated": "Compromiso activado",
+    "paused": "Compromiso pausado",
+    "resumed": "Compromiso reanudado",
+    "completed": "Compromiso completado",
+    "cancelled": "Compromiso cancelado"
   }
 }

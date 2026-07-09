@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, ScrollView, Text } from 'tamagui';
+import { YStack, ScrollView, Text, Button } from 'tamagui';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useCommitment } from '../hooks/useCommitment';
 import { useCommitmentActions } from '../hooks/useCommitmentActions';
-import { getAllowedActions, type ActionConfig } from '@/shared/domain/commitmentActions';
+import { getAllowedActions, isEditable, type ActionConfig } from '@/shared/domain/commitmentActions';
 import { CommitmentStatusBadge } from '../components/CommitmentStatusBadge';
 import { CommitmentActionBar } from '../components/CommitmentActionBar';
 import { CommitmentMetadata } from '../components/CommitmentMetadata';
@@ -60,6 +60,21 @@ export function CommitmentWorkspaceScreen() {
         options={{
           title: commitment.title,
           headerBackTitle: t('common.back', { ns: 'common' }),
+          headerRight: isEditable(commitment.status)
+            ? () => (
+                <Button
+                  size="$2"
+                  chromeless
+                  onPress={() => router.push(`/commitments/${id}/edit` as any)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('edit.headerButton', { ns: 'commitments' })}
+                >
+                  <Text color="$blue10" fontWeight="600">
+                    {t('edit.headerButton', { ns: 'commitments' })}
+                  </Text>
+                </Button>
+              )
+            : undefined,
         }}
       />
 
