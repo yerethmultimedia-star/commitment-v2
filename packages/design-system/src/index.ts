@@ -9,7 +9,6 @@ export * from './providers/PlatformProvider.js';
 
 // Hooks
 export * from './hooks/useHaptic.js';
-export * from './hooks/useFocus.js';
 export * from './interaction/index.js';
 export { Card } from './components/Card.js';
 export { Button } from './components/Button.js';
@@ -28,3 +27,6 @@ export { ModalPrimitive, BottomSheet, ConfirmationDialog, ActionSheet, Dialog } 
 export type { ModalPrimitiveProps, BottomSheetProps, ConfirmationDialogProps, ActionSheetProps, DialogProps } from './modal/index.js';
 export { Portal, PortalProvider, usePortalContext } from './portal/index.js';
 export type { PortalProps, PortalProviderProps } from './portal/index.js';
+export * from './keyboard/index.js';
+export * from './accessibility/index.js';
+export * from './focus/index.js';

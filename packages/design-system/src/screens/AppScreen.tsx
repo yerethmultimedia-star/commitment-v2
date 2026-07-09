@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
-import { useScreenAnnouncement } from '../hooks/useFocus.js';
+import { useScreenAnnouncement } from '../focus/index.js';
 import { ScreenScroll } from '../scroll/ScreenScroll.js';
 import { StaticScreen } from './StaticScreen.js';
 import { View } from 'tamagui';
