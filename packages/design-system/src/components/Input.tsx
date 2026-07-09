@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { View, Input as TamaguiInput, Text, YStack, XStack } from 'tamagui';
+import { t } from '@commitment/localization';
+import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
+
+export interface InputProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  labelI18nKey?: string;
+  helperI18nKey?: string;
+  placeholderI18nKey?: string;
+  error?: boolean;
+  success?: boolean;
+  counter?: { current: number; max: number };
+  leadingIcon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
+  prefix?: string;
+  suffix?: string;
+  passwordVisibility?: boolean; // If true, automatically handles type="password" and toggle
+  clear?: boolean;
+  formatter?: (text: string) => string;
+  parser?: (text: string) => string;
+  inputMode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
+  autoComplete?: string;
+  keyboardType?: 'default' | 'number-pad' | 'decimal-pad' | 'numeric' | 'email-address' | 'phone-pad';
+  returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
+  disabled?: boolean;
+  loading?: boolean;
+  testID?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
+}
+
+export const Input = React.forwardRef<any, InputProps>(({
+  value,
+  onChangeText,
+  labelI18nKey,
+  helperI18nKey,
+  placeholderI18nKey,
+  error = false,
+  success = false,
+  counter,
+  leadingIcon,
+  trailingIcon,
+  prefix,
+  suffix,
+  passwordVisibility = false,
+  clear = false,
+  formatter,
+  parser,
+  inputMode,
+  autoComplete,
+  keyboardType,
+  returnKeyType,
+  disabled = false,
+  loading = false,
+  testID,
+  onFocus,
+  onBlur,
+}, ref) => {
+  const isActuallyDisabled = disabled || loading;
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { state, handlers } = useInteractionState({
+    disabled: isActuallyDisabled,
+    loading,
+    error,
+    success,
+  });
+
+  useHapticBehavior(state);
+
+  const handleChangeText = (text: string) => {
+    let newText = text;
+    if (parser) {
+      newText = parser(newText);
+    }
+    if (formatter) {
+      newText = formatter(newText);
+    }
+    onChangeText(newText);
+  };
+
+  const id = React.useId();
+  const helperId = `${id}-helper`;
+
+  let borderColor = '$divider';
+  if (state.focused) borderColor = '$focus';
+  if (error) borderColor = '$danger';
+  if (success) borderColor = '$success';
+
+  return (
+    <YStack gap="$2" opacity={isActuallyDisabled ? 0.5 : 1}>
+      {/* Label and Counter */}
+      <XStack justifyContent="space-between" alignItems="center">
+        {labelI18nKey && (
+          <Text
+            id={id + '-label'}
+            fontSize="$4"
+            fontWeight="600"
+            color={error ? '$danger' : '$contentPrimary'}
+          >
+            {t(labelI18nKey)}
+          </Text>
+        )}
+        {counter && (
+          <Text fontSize="$3" color={counter.current > counter.max ? '$danger' : '$contentSecondary'}>
+            {counter.current} / {counter.max}
+          </Text>
+        )}
+      </XStack>
+
+      <FocusRing state={state} borderRadius="$4">
+        <View
+          flexDirection="row"
+          alignItems="center"
+          backgroundColor="$surfaceRaised"
+          borderWidth={1}
+          borderColor={borderColor as any}
+          borderRadius="$4"
+          paddingHorizontal="$3"
+          height={48}
+        >
+          {leadingIcon && <View marginRight="$2">{leadingIcon}</View>}
+          {prefix && <Text color="$contentSecondary" marginRight="$2">{prefix}</Text>}
+
+          <TamaguiInput
+            ref={ref as any}
+            id={id}
+            testID={testID}
+            flex={1}
+            height="100%"
+            backgroundColor="transparent"
+            borderWidth={0}
+            padding={0}
+            color="$contentPrimary"
+            value={value}
+            onChangeText={handleChangeText}
+            placeholder={placeholderI18nKey ? t(placeholderI18nKey) : undefined}
+            placeholderTextColor="$contentTertiary"
+            secureTextEntry={passwordVisibility && !showPassword}
+            inputMode={inputMode as any}
+            autoComplete={autoComplete as any}
+            keyboardType={keyboardType}
+            returnKeyType={returnKeyType}
+            disabled={isActuallyDisabled}
+            accessibilityState={{ disabled: isActuallyDisabled }}
+            aria-describedby={helperI18nKey ? helperId : undefined}
+            onFocus={() => {
+              handlers.onFocus();
+              onFocus?.();
+            }}
+            onBlur={() => {
+              handlers.onBlur();
+              onBlur?.();
+            }}
+            onMouseEnter={handlers.onHoverIn}
+            onMouseLeave={handlers.onHoverOut}
+          />
+
+          {suffix && <Text color="$contentSecondary" marginLeft="$2">{suffix}</Text>}
+          
+          {/* Action icons like clear or password toggle would be rendered here, but for now we just show trailingIcon */}
+          {passwordVisibility && (
+            <View marginLeft="$2" cursor="pointer" onPress={() => setShowPassword(!showPassword)}>
+              <Text fontSize="$3">{showPassword ? 'Hide' : 'Show'}</Text>
+            </View>
+          )}
+          {clear && value.length > 0 && (
+            <View marginLeft="$2" cursor="pointer" onPress={() => onChangeText('')}>
+              <Text fontSize="$3">✕</Text>
+            </View>
+          )}
+          {trailingIcon && <View marginLeft="$2">{trailingIcon}</View>}
+        </View>
+      </FocusRing>
+
+      {/* Helper Text */}
+      {helperI18nKey && (
+        <Text
+          id={helperId}
+          fontSize="$3"
+          color={error ? '$danger' : success ? '$success' : '$contentSecondary'}
+        >
+          {t(helperI18nKey)}
+        </Text>
+      )}
+    </YStack>
+  );
+});
+
+Input.displayName = 'Input';
