@@ -8,9 +8,11 @@ import { CommitmentsSkeleton } from '../components/CommitmentsSkeleton';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
 import { RefreshControl } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export function CommitmentsScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { data, isLoading, isError, refetch } = useCommitments();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -91,7 +93,7 @@ export function CommitmentsScreen() {
         elevation="$4"
         accessibilityRole="button"
         accessibilityLabel={t('list.fab.create', { ns: 'commitments' })}
-        onPress={() => console.log('Navigate to create')}
+        onPress={() => router.push('/commitments/create')}
       >
         <Text color="white" fontSize="$6">+</Text>
       </Button>

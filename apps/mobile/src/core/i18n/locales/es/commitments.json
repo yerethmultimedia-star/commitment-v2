@@ -26,5 +26,38 @@
     "paused": "Pausado",
     "completed": "Completado",
     "cancelled": "Cancelado"
+  },
+  "form": {
+    "title": "Crear Compromiso",
+    "fields": {
+      "title": {
+        "label": "Título",
+        "placeholder": "¿Qué quieres lograr?"
+      },
+      "description": {
+        "label": "Descripción (Opcional)",
+        "placeholder": "Añade más detalles..."
+      },
+      "targetDate": {
+        "label": "Fecha objetivo (Opcional)",
+        "placeholder": "Selecciona una fecha"
+      },
+      "recurrence": {
+        "label": "Repetición (Opcional)",
+        "placeholder": "Selecciona un patrón",
+        "options": {
+          "none": "Ninguna",
+          "daily": "Diariamente",
+          "weekly": "Semanalmente",
+          "monthly": "Mensualmente"
+        }
+      }
+    },
+    "submit": "Guardar Compromiso",
+    "errors": {
+      "titleRequired": "Por favor ingresa un título",
+      "titleTooShort": "El título debe tener al menos 3 caracteres",
+      "invalidDate": "Por favor selecciona una fecha válida"
+    }
   }
 }

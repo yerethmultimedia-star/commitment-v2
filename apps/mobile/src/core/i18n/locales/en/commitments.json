@@ -26,5 +26,38 @@
     "paused": "Paused",
     "completed": "Completed",
     "cancelled": "Cancelled"
+  },
+  "form": {
+    "title": "Create Commitment",
+    "fields": {
+      "title": {
+        "label": "Title",
+        "placeholder": "What do you want to achieve?"
+      },
+      "description": {
+        "label": "Description (Optional)",
+        "placeholder": "Add more details..."
+      },
+      "targetDate": {
+        "label": "Target Date (Optional)",
+        "placeholder": "Select a date"
+      },
+      "recurrence": {
+        "label": "Recurrence (Optional)",
+        "placeholder": "Select a pattern",
+        "options": {
+          "none": "None",
+          "daily": "Daily",
+          "weekly": "Weekly",
+          "monthly": "Monthly"
+        }
+      }
+    },
+    "submit": "Save Commitment",
+    "errors": {
+      "titleRequired": "Please enter a title",
+      "titleTooShort": "Title must be at least 3 characters",
+      "invalidDate": "Please select a valid date"
+    }
   }
 }
