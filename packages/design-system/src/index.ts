@@ -10,5 +10,6 @@ export * from './providers/PlatformProvider.js';
 // Hooks
 export * from './hooks/useHaptic.js';
 export * from './hooks/useFocus.js';
+export * from './interaction/index.js';
 export { Card } from './components/Card.js';
 export * from './components/EmptyState.js';
