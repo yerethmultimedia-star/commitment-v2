@@ -14,29 +14,9 @@ export function DashboardScreen() {
     return DashboardState.Ready;
   }, [isLoading, isError, commitments.length]);
 
-  // Derive Weekly Progress Metrics (Mock logic for now, should come from domain logic/backend)
-  const weeklyCompleted = useMemo(() => commitments.filter(c => c.status === 'completed').length, [commitments]);
-  const weeklyTarget = 7; // Static for now
-
-  // Define Quick Actions
-  const quickActions = useMemo(() => [
-    {
-      id: 'add',
-      iconToken: 'plus',
-      i18nKey: 'dashboard.actionAdd',
-      onPress: () => console.log('Navigate to Create Commitment'),
-    },
-    {
-      id: 'calendar',
-      iconToken: 'calendar',
-      i18nKey: 'dashboard.actionCalendar',
-      onPress: () => console.log('Navigate to Calendar'),
-    }
-  ], []);
-
-  const handleCommitmentPress = (id: string) => {
-    console.log('Navigate to commitment details:', id);
-  };
+  const activeCommitmentsCount = useMemo(() => {
+    return commitments.filter(c => c.status === 'active').length;
+  }, [commitments]);
 
   return (
     <DashboardStateRenderer 
@@ -44,12 +24,7 @@ export function DashboardScreen() {
       errorMessage={error?.message}
     >
       <DashboardContent
-        commitments={commitments}
-        weeklyCompleted={weeklyCompleted}
-        weeklyTarget={weeklyTarget}
-        quickActions={quickActions}
-        onCommitmentPress={handleCommitmentPress}
-        onRefresh={refetch}
+        activeCommitmentsCount={activeCommitmentsCount}
       />
     </DashboardStateRenderer>
   );

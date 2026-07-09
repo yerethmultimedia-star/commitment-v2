@@ -311,6 +311,9 @@ importers:
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
+      react-error-boundary:
+        specifier: ^6.1.2
+        version: 6.1.2(react@19.2.3)
       react-hook-form:
         specifier: ^7.81.0
         version: 7.81.0(react@19.2.3)
@@ -410,6 +413,10 @@ importers:
         version: 5.9.3
 
   packages/domain:
+    dependencies:
+      uuid:
+        specifier: ^14.0.1
+        version: 14.0.1
     devDependencies:
       '@commitment/config':
         specifier: workspace:*
@@ -420,6 +427,9 @@ importers:
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
+      '@types/uuid':
+        specifier: ^11.0.0
+        version: 11.0.0
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@24.13.2)(ts-node@10.9.2(@types/node@24.13.2)(typescript@5.9.3))
@@ -10409,6 +10419,14 @@ packages:
     peerDependencies:
       react: ^19.2.3
 
+  react-error-boundary@6.1.2:
+    resolution:
+      {
+        integrity: sha512-3DpCr5HVdZ0caUjYE/kIHBEJN0mNP3ZCgf16c48uJ5TbWjorKVp+YG8W3XqlJ7vJAVNw6wNIImyPXmFydwmyng==,
+      }
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+
   react-fast-compare@3.2.2:
     resolution:
       {
@@ -14915,7 +14933,9 @@ snapshots:
       metro-runtime: 0.84.4
     transitivePeerDependencies:
       - '@babel/core'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-color@2.1.0': {}
 
@@ -20200,6 +20220,10 @@ snapshots:
     dependencies:
       react: 19.2.3
       scheduler: 0.27.0
+
+  react-error-boundary@6.1.2(react@19.2.3):
+    dependencies:
+      react: 19.2.3
 
   react-fast-compare@3.2.2: {}
 

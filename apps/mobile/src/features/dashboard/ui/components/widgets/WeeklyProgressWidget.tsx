@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Text } from 'tamagui';
 import { Card } from '@commitment/design-system';
 
-export interface WeeklyProgressWidgetProps {
-  completed: number;
-  target: number;
-}
+import { useCommitments } from '@/features/commitments/hooks/useCommitments.js';
 
-export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget({ completed, target }: WeeklyProgressWidgetProps) {
+export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget() {
   const { t } = useTranslation();
+  const { data: commitments = [] } = useCommitments();
+
+  const completed = useMemo(() => commitments.filter(c => c.status === 'completed').length, [commitments]);
+  const target = 7; // Currently static
 
   const progressData = useMemo(() => {
     const safeTarget = target > 0 ? target : 1;
@@ -28,8 +29,8 @@ export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget({ c
   return (
     <Card variant="elevated" interactive={false}>
       <YStack gap="$2">
-        <Text fontSize="$4" fontWeight="600" color="$contentPrimary">
-          {t('dashboard.weekProgress', 'Progreso Semanal')}
+        <Text fontSize="$4" fontWeight="600" color="$contentPrimary" accessibilityRole="header">
+          {t('dashboard.widgets.weeklyProgress.title')}
         </Text>
         
         <XStack justifyContent="space-between" alignItems="flex-end">
@@ -42,7 +43,7 @@ export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget({ c
             </Text>
           </YStack>
           
-          <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
+          <Text fontSize="$5" fontWeight="600" color="$contentPrimary" accessibilityLabel={t('dashboard.widgets.weeklyProgress.completedVsTarget', { completed, target })}>
             {completed} / {target}
           </Text>
         </XStack>

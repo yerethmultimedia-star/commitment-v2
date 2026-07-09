@@ -11,8 +11,10 @@ import { queryClient } from '../core/query/query-client';
 import { AuthProvider } from '@/core/auth/auth-provider';
 import { StatusBar } from 'expo-status-bar';
 import '@/core/i18n'; // Initialize i18n
+import { registerDefaultWidgets } from '@/features/dashboard/registry/default-widgets.js';
 
 SplashScreen.preventAutoHideAsync();
+registerDefaultWidgets();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

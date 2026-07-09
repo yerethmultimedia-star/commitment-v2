@@ -23,10 +23,10 @@ export const AppearanceSettingsScreen: React.FC = () => {
         <YStack gap="$4">
           <YStack gap="$1">
             <Text fontSize="$6" fontWeight="bold" color="$contentPrimary">
-              {t('appearance.settings.theme.title', 'Theme')}
+              {t('appearance.settings.theme.title')}
             </Text>
             <Text fontSize="$3" color="$contentSecondary">
-              {t('appearance.settings.theme.description', 'Choose your preferred color theme.')}
+              {t('appearance.settings.theme.description')}
             </Text>
           </YStack>
 
@@ -49,7 +49,7 @@ export const AppearanceSettingsScreen: React.FC = () => {
                       fontWeight={isSelected ? 'bold' : 'normal'}
                       color={isSelected ? '$contentPrimary' : '$contentSecondary'}
                     >
-                      {t(meta.nameKey, meta.id)}
+                      {t(meta.nameKey)}
                     </Text>
                   </YStack>
                 );
@@ -63,27 +63,27 @@ export const AppearanceSettingsScreen: React.FC = () => {
         <YStack gap="$4">
           <YStack gap="$1">
             <Text fontSize="$6" fontWeight="bold" color="$contentPrimary">
-              {t('appearance.settings.accessibility.title', 'Accessibility')}
+              {t('appearance.settings.accessibility.title')}
             </Text>
             <Text fontSize="$3" color="$contentSecondary">
-              {t('appearance.settings.accessibility.description', 'Adjust motion and contrast settings.')}
+              {t('appearance.settings.accessibility.description')}
             </Text>
           </YStack>
 
           <XStack alignItems="center" justifyContent="space-between">
             <YStack flex={1} paddingRight="$4">
               <Text fontSize="$4" color="$contentPrimary">
-                {t('appearance.settings.reducedMotion.label', 'Reduced Motion')}
+                {t('appearance.settings.reducedMotion.label')}
               </Text>
               <Text fontSize="$2" color="$contentSecondary" marginTop="$1">
-                {t('appearance.settings.reducedMotion.description', 'Minimize animations and screen transitions.')}
+                {t('appearance.settings.reducedMotion.description')}
               </Text>
             </YStack>
             <Switch
               size="$3"
               checked={settings.reducedMotion}
               onCheckedChange={(checked) => updateSettings({ reducedMotion: checked })}
-              accessibilityLabel={t('appearance.settings.reducedMotion.label', 'Reduced Motion')}
+              accessibilityLabel={t('appearance.settings.reducedMotion.label')}
             >
               <Switch.Thumb {...{ animation: "bouncy" } as any} />
             </Switch>
@@ -92,17 +92,17 @@ export const AppearanceSettingsScreen: React.FC = () => {
           <XStack alignItems="center" justifyContent="space-between">
             <YStack flex={1} paddingRight="$4">
               <Text fontSize="$4" color="$contentPrimary">
-                {t('appearance.settings.highContrast.label', 'High Contrast')}
+                {t('appearance.settings.highContrast.label')}
               </Text>
               <Text fontSize="$2" color="$contentSecondary" marginTop="$1">
-                {t('appearance.settings.highContrast.description', 'Increase contrast between text and backgrounds.')}
+                {t('appearance.settings.highContrast.description')}
               </Text>
             </YStack>
             <Switch
               size="$3"
               checked={settings.highContrast}
               onCheckedChange={(checked) => updateSettings({ highContrast: checked })}
-              accessibilityLabel={t('appearance.settings.highContrast.label', 'High Contrast')}
+              accessibilityLabel={t('appearance.settings.highContrast.label')}
             >
               <Switch.Thumb {...{ animation: "bouncy" } as any} />
             </Switch>

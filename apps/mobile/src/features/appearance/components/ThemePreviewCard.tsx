@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ResolvedTheme, ThemeMetadata } from '@commitment/theme-engine';
 import { adaptThemeToTamagui } from '@commitment/design-system';
+import { useTranslation } from 'react-i18next';
 // We use raw React Native components here so we can inject the theme locally
 // without relying on the global Tamagui provider which only has the currently active theme.
 
@@ -18,6 +19,7 @@ export const ThemePreviewCard: React.FC<ThemePreviewCardProps> = ({
   isSelected,
   onSelect,
 }) => {
+  const { t } = useTranslation();
   const c = theme.colors;
   const s = theme.spacing;
   const r = theme.radius;
@@ -37,7 +39,7 @@ export const ThemePreviewCard: React.FC<ThemePreviewCardProps> = ({
       ]}
       accessibilityRole="button"
       accessibilityState={{ selected: isSelected }}
-      accessibilityLabel={metadata.nameKey} // Translated higher up or by a hook if needed
+      accessibilityLabel={t(metadata.nameKey)}
     >
       <View style={[styles.previewArea, { backgroundColor: c.background }]}>
         {/* Miniature Header */}

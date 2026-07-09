@@ -1,30 +1,26 @@
-import React from 'react';
-import { YStack, ScrollView } from 'tamagui';
-import { DashboardHeader } from './DashboardHeader';
-import { TodayWidget } from './widgets/TodayWidget';
-import { WeeklyProgressWidget } from './widgets/WeeklyProgressWidget';
-import { QuickActionsWidget, QuickAction } from './widgets/QuickActionsWidget';
-
-import { CommitmentModel } from '@/features/commitments/models/commitment.model';
+import React, { useEffect } from 'react';
+import { YStack, ScrollView, Text } from 'tamagui';
+import { DashboardHeader } from './DashboardHeader.js';
+import { WidgetRenderer } from './WidgetRenderer.js';
+import { useDashboardStore } from '../../store/use-dashboard-store.js';
+import { useSession } from '@/core/auth/use-session.js';
 
 export interface DashboardContentProps {
-  commitments: CommitmentModel[];
-  weeklyCompleted: number;
-  weeklyTarget: number;
-  quickActions: QuickAction[];
-  onCommitmentPress: (id: string) => void;
-  onRefresh?: () => void;
+  activeCommitmentsCount: number;
 }
 
-export const DashboardContent = React.memo(function DashboardContent({ 
-  commitments, 
-  weeklyCompleted, 
-  weeklyTarget,
-  quickActions,
-  onCommitmentPress,
-  onRefresh
-}: DashboardContentProps) {
+export const DashboardContent = React.memo(function DashboardContent({ activeCommitmentsCount }: DashboardContentProps) {
+  const { identityId } = useSession();
+  const { getVisibleWidgets, load, isLoading } = useDashboardStore();
   
+  useEffect(() => {
+    if (identityId) {
+      load(identityId);
+    }
+  }, [identityId, load]);
+
+  const visibleWidgets = getVisibleWidgets();
+
   return (
     <ScrollView 
       flex={1} 
@@ -33,13 +29,19 @@ export const DashboardContent = React.memo(function DashboardContent({
       showsVerticalScrollIndicator={false}
     >
       <YStack gap="$6">
-        <DashboardHeader commitmentsCount={commitments.filter(c => c.status === 'active').length} />
+        <DashboardHeader commitmentsCount={activeCommitmentsCount} />
         
-        <YStack gap="$4">
-          <TodayWidget commitments={commitments} onCommitmentPress={onCommitmentPress} />
-          <WeeklyProgressWidget completed={weeklyCompleted} target={weeklyTarget} />
-          <QuickActionsWidget actions={quickActions} />
-        </YStack>
+        {isLoading ? (
+          <YStack flex={1} alignItems="center" justifyContent="center" padding="$10">
+            <Text color="$contentSecondary">Loading layout...</Text>
+          </YStack>
+        ) : (
+          <YStack gap="$4">
+            {visibleWidgets.map(widget => (
+              <WidgetRenderer key={widget.id} widget={widget} />
+            ))}
+          </YStack>
+        )}
       </YStack>
     </ScrollView>
   );

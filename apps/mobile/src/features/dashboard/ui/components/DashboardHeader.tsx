@@ -38,7 +38,7 @@ export const DashboardHeader = React.memo(function DashboardHeader({ commitments
       <XStack justifyContent="space-between" alignItems="flex-start">
         <YStack gap="$1" flex={1}>
           <Text fontSize="$7" fontWeight="bold" color="$contentPrimary" letterSpacing={-0.5}>
-            {t(headerData.greetingKey, 'Buenos días')}
+            {t(headerData.greetingKey)}
           </Text>
           <Text fontSize="$4" color="$accent" fontWeight="500">
             {headerData.formattedDate}
@@ -54,8 +54,8 @@ export const DashboardHeader = React.memo(function DashboardHeader({ commitments
       {/* Summary Phrase */}
       <Text fontSize="$4" color="$contentSecondary" marginTop="$2">
         {commitmentsCount > 0 
-          ? t('dashboard.activeCount', `Tienes ${commitmentsCount} compromisos activos hoy.`)
-          : t('dashboard.noActiveCount', 'No tienes compromisos activos por ahora.')}
+          ? t('dashboard.activeCount', { count: commitmentsCount })
+          : t('dashboard.noActiveCount')}
       </Text>
     </YStack>
   );
