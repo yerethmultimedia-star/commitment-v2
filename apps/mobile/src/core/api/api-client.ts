@@ -1,6 +1,7 @@
 import ky from 'ky';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { useAuthStore } from '../auth/auth.store';
 
 // Dynamically determine the API base URL.
 // If running on local simulator/emulator, use correct localhost IPs.
@@ -38,6 +39,13 @@ export const apiClient = ky.create({
         // Automatically attach x-request-id for observability (VS-016)
         // @ts-expect-error request typing in beforeRequest hook
         request.headers.set('x-request-id', crypto.randomUUID());
+        
+        // Automatically inject identity if authenticated
+        const { identityId, sessionStatus } = useAuthStore.getState();
+        if (sessionStatus === 'Authenticated' && identityId) {
+          // @ts-expect-error request typing
+          request.headers.set('x-identity-id', identityId);
+        }
       },
     ],
   },

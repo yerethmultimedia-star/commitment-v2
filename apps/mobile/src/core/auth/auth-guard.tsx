@@ -1,0 +1,44 @@
+import { useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
+import { useSession } from './use-session';
+
+/**
+ * Custom hook that listens to session state changes and enforces routing policies.
+ * Actual routing calls are stubbed out with console.logs for VS-018.
+ * They will be uncommented in VS-019 when screens exist.
+ */
+export function useAuthGuard() {
+  const { isHydrated, sessionStatus, hasSeenOnboarding } = useSession();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Do not run routing logic until Zustand has restored the persisted state
+    if (!isHydrated) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    // Rule 1: Always show onboarding first if not seen
+    const segmentsList = segments as string[];
+    const currentScreen = segmentsList.length > 1 ? segmentsList[1] : undefined;
+    if (!hasSeenOnboarding && currentScreen !== 'onboarding') {
+      console.log('🛡️ AuthGuard: Redirecting to onboarding');
+      // router.replace('/(auth)/onboarding'); // TODO: VS-019
+      return;
+    }
+
+    // Rule 2: If onboarding is complete but user is anonymous, enforce login
+    if (hasSeenOnboarding && sessionStatus === 'Anonymous' && !inAuthGroup) {
+      console.log('🛡️ AuthGuard: Redirecting to login');
+      // router.replace('/(auth)/login'); // TODO: VS-019
+      return;
+    }
+
+    // Rule 3: If authenticated but trying to access auth screens (login/onboarding), send to main app
+    if (sessionStatus === 'Authenticated' && inAuthGroup) {
+      console.log('🛡️ AuthGuard: Redirecting to (tabs)');
+      // router.replace('/(tabs)'); // TODO: VS-019
+      return;
+    }
+  }, [isHydrated, sessionStatus, hasSeenOnboarding, segments, router]);
+}
