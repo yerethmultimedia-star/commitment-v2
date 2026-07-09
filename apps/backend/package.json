@@ -107,9 +107,10 @@
       ]
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!@commitment/)"
+      "/node_modules/(?!(@commitment|uuid)/)"
     ],
     "moduleNameMapper": {
+      "^uuid$": "<rootDir>/test/uuid.mock.ts",
       "^(\\.\\.?/.*)\\.js$": "$1",
       "^@commitment/domain$": "<rootDir>/../../packages/domain/src/index",
       "^@commitment/shared$": "<rootDir>/../../packages/shared/src/index"
