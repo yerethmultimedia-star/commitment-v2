@@ -28,6 +28,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build Packages
+        run: pnpm run build
+
       - name: Lint Backend
         run: pnpm --filter backend run lint
 
