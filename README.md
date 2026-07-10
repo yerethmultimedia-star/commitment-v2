@@ -57,30 +57,52 @@ packages/
 
 ---
 
-## 🔗 Diagrama de Dependencias Permitidas
+## 🔗 Grafo de Dependencias del Workspace
 
-Las dependencias entre paquetes dentro del monorepo siguen una jerarquía estricta para salvaguardar la robustez del sistema:
+Las dependencias reales entre los paquetes del monorepo representan el acoplamiento estricto permitido bajo las directrices del proyecto:
 
 ```mermaid
 graph TD
     apps/mobile(apps/mobile) --> DS[@commitment/design-system]
-    apps/backend(apps/backend) --> Domain[@commitment/domain]
+    apps/mobile --> Domain[@commitment/domain]
+    apps/mobile --> contracts[@commitment/api-contracts]
+
+    apps/backend(apps/backend) --> Domain
+    apps/backend --> contracts
 
     DS --> Platform[@commitment/platform]
     DS --> Localization[@commitment/localization]
     DS --> ThemeEngine[@commitment/theme-engine]
+    DS --> shared[@commitment/shared]
 
+    contracts --> shared
     ThemeEngine --> Domain
     Localization --> Domain
     Platform --> Domain
+    Domain --> shared
+
+    style Domain fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
-### Reglas de Dependencia y Aislamiento:
+### 📊 Matriz de Dependencias Permitidas
 
-- **Dominio Puro:** El paquete `domain` **nunca** depende de ningún otro módulo del monorepo, framework de persistencia o renderizado.
+| Origen (From)                   | Dependencias Permitidas (Can depend on)                                                                                                                                                                    |
+| :------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`@commitment/domain`**        | `@commitment/shared`, `@commitment/config`                                                                                                                                                                 |
+| **`@commitment/theme-engine`**  | `@commitment/domain`, `@commitment/shared`, `@commitment/config`                                                                                                                                           |
+| **`@commitment/platform`**      | `@commitment/domain`, `@commitment/shared`, `@commitment/config`                                                                                                                                           |
+| **`@commitment/localization`**  | `@commitment/domain`, `@commitment/shared`, `@commitment/config`                                                                                                                                           |
+| **`@commitment/design-system`** | `@commitment/theme-engine`, `@commitment/localization`, `@commitment/platform`, `@commitment/shared`, `@commitment/config`                                                                                 |
+| **`@commitment/api-contracts`** | `@commitment/shared`, `@commitment/config`                                                                                                                                                                 |
+| **`apps/mobile`**               | `@commitment/design-system`, `@commitment/domain`, `@commitment/platform`, `@commitment/theme-engine`, `@commitment/localization`, `@commitment/api-contracts`, `@commitment/shared`, `@commitment/config` |
+| **`apps/backend`**              | `@commitment/domain`, `@commitment/api-contracts`, `@commitment/shared`, `@commitment/config`                                                                                                              |
+
+### Reglas de Aislamiento Estructural:
+
+- **Dominio Puro:** El paquete `domain` **nunca** depende de ningún otro módulo funcional del monorepo (como `design-system` o `platform`), framework de persistencia o renderizado.
 - **Theme Engine Agnóstico:** El paquete `theme-engine` **no depende** de librerías visuales como React o Tamagui.
 - **Design System Aislado:** El paquete `design-system` **nunca** importa APIs de hardware o sistemas operativos directamente.
-- ** features Libres de Hardware:** Los slices funcionales (features) **nunca** importan ni consumen paquetes de `react-native`, `expo-*` ni APIs nativas directamente. Toda interacción pasa por los servicios inyectados de `@commitment/platform`.
+- **Features Libres de Hardware:** Los slices funcionales (features) en `mobile` **nunca** importan ni consumen paquetes de `react-native`, `expo-*` ni APIs nativas directamente. Toda interacción pasa por los servicios inyectados de `@commitment/platform`.
 
 ---
 
@@ -217,6 +239,7 @@ npx pnpm --filter backend start:dev
 ## 📚 Documentación Adicional
 
 - [docs/ARCHITECTURE_OVERVIEW.md](file:///Users/yereth/Desktop/Commitment-v2/docs/ARCHITECTURE_OVERVIEW.md): Documentación arquitectónica técnica profunda (C4 Diagrams, Flujos de Datos).
+- [docs/DECISIONS.md](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md): Índice del registro oficial de decisiones de arquitectura (ADRs 001 a 014).
 - [docs/](file:///Users/yereth/Desktop/Commitment-v2/docs/): Directorio principal de especificaciones y ADRs de producto y técnicos.
 - [engineering/](file:///Users/yereth/Desktop/Commitment-v2/engineering/): Herramientas y estándares del flujo de ingeniería (Gobernanza activa, templates y prompts).
 - [HANDBOOK.md](file:///Users/yereth/Desktop/Commitment-v2/HANDBOOK.md): Manual de Onboarding técnico y de estilo del proyecto.
