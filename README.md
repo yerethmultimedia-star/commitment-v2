@@ -238,6 +238,7 @@ npx pnpm --filter backend start:dev
 
 ## 📚 Documentación Adicional
 
+- [local_setup_guide.md](file:///Users/yereth/Desktop/Commitment-v2/local_setup_guide.md): Guía de configuración y arranque local del monorepo (Docker, Supabase, backend, mobile).
 - [docs/ARCHITECTURE_OVERVIEW.md](file:///Users/yereth/Desktop/Commitment-v2/docs/ARCHITECTURE_OVERVIEW.md): Documentación arquitectónica técnica profunda (C4 Diagrams, Flujos de Datos).
 - [docs/DECISIONS.md](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md): Índice del registro oficial de decisiones de arquitectura (ADRs 001 a 014).
 - [docs/](file:///Users/yereth/Desktop/Commitment-v2/docs/): Directorio principal de especificaciones y ADRs de producto y técnicos.

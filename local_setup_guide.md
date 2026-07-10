@@ -1,112 +1,96 @@
 # 🚀 Guía de Configuración Local (Local Setup Guide)
 
-Bienvenido a la guía paso a paso para levantar **Commitment v2** en tu entorno de desarrollo local. Este proyecto es un monorepo que incluye un backend en NestJS, una aplicación móvil en Expo/React Native, e infraestructura de soporte con Docker y Supabase.
+Bienvenido a la guía oficial paso a paso para levantar **Commitment v2** en tu entorno de desarrollo local. Este proyecto es un monorepo administrado por **pnpm** y **Turborepo** que incluye un backend en NestJS, una aplicación móvil en Expo (React Native), e infraestructura de soporte local (Docker y Supabase).
+
+---
 
 ## 📋 Pre-requisitos
 
-Asegúrate de tener instaladas las siguientes herramientas en tu sistema (macOS/Linux):
+Asegúrate de contar con lo siguiente instalado en tu máquina:
 
-1. **Node.js**: Versión `20.0.0` o superior.
-2. **pnpm**: Gestor de paquetes oficial del proyecto. (Versión recomendada: `10.34.4`).
-   ```bash
-   npm install -g pnpm@10.34.4
-   ```
-3. **Docker y Docker Compose**: Para levantar los servicios de infraestructura (Redis, Prometheus, Grafana, OpenTelemetry).
-4. **Supabase CLI** (Opcional, pero recomendado si usas Supabase localmente para la base de datos):
-   ```bash
-   brew install supabase/tap/supabase
-   ```
-5. **Expo CLI / Expo Go**: Necesario para el desarrollo de la aplicación móvil.
+1. **Docker Desktop:** Activo y corriendo.
+2. **Node.js:** Versión `v22.0.0` o superior (Recomendado LTS).
+
+_Nota: No requieres instalar herramientas globales como `pnpm` o `supabase` en tu sistema operativo; toda la guía utiliza comandos prefijados con `npx` para ejecutarse de forma aislada y segura._
 
 ---
 
 ## 🛠️ Paso 1: Instalación de Dependencias
 
-Clona el repositorio y posiciónate en la raíz del proyecto. Una vez ahí, instala todas las dependencias del monorepo usando `pnpm`:
+Clona el repositorio e instala las dependencias desde la raíz del proyecto ejecutando:
 
 ```bash
-cd Commitment-v2
-pnpm install
+npx pnpm install
 ```
 
 ---
 
-## 🐳 Paso 2: Levantar la Infraestructura (Docker)
+## 🐳 Paso 2: Levantar Infraestructura Base (Docker)
 
-El proyecto depende de servicios adicionales como Redis y herramientas de observabilidad. Levanta los contenedores en segundo plano:
+El proyecto depende de Redis y herramientas de observabilidad local. Levanta los contenedores en segundo plano:
 
 ```bash
 docker compose up -d
 ```
 
-> **Verificación:** Puedes comprobar que los contenedores están corriendo con `docker ps`. Deberías ver instancias de `redis`, `otel-collector`, `prometheus` y `grafana`.
+> **Verificación:** Puedes ejecutar `docker ps` para validar que los contenedores `commitment-redis`, `commitment-otel-collector`, `commitment-prometheus` y `commitment-grafana` están corriendo correctamente.
 
 ---
 
-## 🗄️ Paso 3: Entorno Local de Base de Datos (Supabase)
+## 🗄️ Paso 3: Levantar Base de Datos (Supabase Local)
 
-Si el proyecto requiere interactuar con la base de datos localmente, inicia los servicios de Supabase. (Este directorio se encuentra en la raíz del proyecto):
+Para la persistencia local de datos y autenticación, levanta la suite local de Supabase ejecutando en la raíz del proyecto:
 
 ```bash
-supabase start
+npx supabase start
 ```
 
-> **Nota:** Esto te proporcionará las credenciales y URLs locales (ej. `API_URL`, claves JWT). Asegúrate de configurar tus archivos `.env` basándote en el `.env.example` en la raíz si es necesario.
+Esto inicializará Postgres, Auth, Storage y levantará la interfaz web de administración. Al completarse, verás un bloque con las credenciales locales:
+
+- **Studio URL (Consola Web):** `http://127.0.0.1:54323`
+- **API URL:** `http://127.0.0.1:54321`
+- **DB Connection URL:** `postgresql://postgres:postgres@127.0.0.1:54322/postgres`
+
+_Si en algún momento deseas apagar Supabase, ejecuta:_
+
+```bash
+npx supabase stop
+```
 
 ---
 
-## 🚀 Paso 4: Iniciar el Backend (NestJS)
+## 🖥️ Paso 4: Iniciar el API Backend (NestJS)
 
-El backend de NestJS está ubicado en `apps/backend`. Usando Turborepo, puedes iniciar todo desde la raíz:
-
-```bash
-# Iniciar todos los paquetes/apps configurados en turbo:
-pnpm dev
-```
-
-Si prefieres correr **solamente el backend** de forma manual:
+El backend expone la API y procesa los comandos/queries. Inicia el servidor de desarrollo en modo de escucha (_watch_):
 
 ```bash
-cd apps/backend
-pnpm start:dev
+npx pnpm --filter backend start:dev
 ```
 
-El servidor del backend debería iniciar sin problemas y aceptar conexiones (típicamente en el puerto `3000`).
+El backend levantará por defecto en el puerto `3000` y se conectará automáticamente a tu instancia local de Supabase.
 
 ---
 
 ## 📱 Paso 5: Iniciar la Aplicación Móvil (Expo)
 
-La aplicación móvil está construida con Expo y se encuentra en `apps/mobile`.
-
-Abre una **nueva pestaña en tu terminal**, navega a la carpeta de mobile y ejecuta el entorno de desarrollo de Expo:
+La aplicación móvil está construida sobre React Native y Expo. Levanta el servidor de desarrollo de Metro:
 
 ```bash
-cd apps/mobile
-pnpm start
+npx pnpm --filter mobile start
 ```
 
 Esto abrirá un menú interactivo en tu terminal donde podrás:
 
-- Presionar **`i`** para abrir el **Simulador de iOS**.
-- Presionar **`a`** para abrir el **Emulador de Android**.
-- Escanear el código QR con la app **Expo Go** en tu dispositivo físico para probarlo en vivo.
+- Presionar **`i`** para abrir el simulador de **iOS** (requiere Xcode en macOS).
+- Presionar **`a`** para abrir el emulador de **Android** (requiere Android Studio).
+- Escanear el código QR con la aplicación **Expo Go** en tu dispositivo físico (iOS o Android) para probar los cambios en tiempo real.
 
 ---
 
-## 📊 Paso 6: Monitoreo (Opcional)
+## 📊 Paso 6: Monitoreo & Logs (Opcional)
 
-Si necesitas acceder a las herramientas de telemetría y monitoreo que levantaste con Docker Compose, ingresa a los siguientes enlaces:
+Si necesitas auditar la telemetría del sistema, puedes acceder localmente a:
 
-- **Grafana:** [http://localhost:3001](http://localhost:3001) (Credenciales: `admin` / `admin`)
-- **Prometheus:** [http://localhost:9090](http://localhost:9090)
-
----
-
-## 🎉 ¡Listo para Desarrollar!
-
-Si has seguido los pasos anteriores de manera exitosa tendrás:
-
-1. Tu base de datos y contenedores de backend (Supabase/Docker) corriendo de fondo.
-2. Tu API NestJS corriendo en modo watch.
-3. Tu cliente móvil en Expo actualizándose con Hot-Reloading en tu simulador.
+- **Grafana:** [http://localhost:3001](http://localhost:3001) (Credenciales por defecto: `admin` / `admin`).
+- **Prometheus:** [http://localhost:9090](http://localhost:9090).
+- **Supabase Studio (Ver tablas y Auth):** [http://localhost:54323](http://localhost:54323).
