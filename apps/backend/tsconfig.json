@@ -20,13 +20,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "strictBindCallApply": true,
-    "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "@commitment/domain": ["../../packages/domain/src"],
-      "@commitment/domain/*": ["../../packages/domain/src/*"],
-      "@commitment/shared": ["../../packages/shared/src"],
-      "@commitment/shared/*": ["../../packages/shared/src/*"]
-    }
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*", "test/**/*"]
 }

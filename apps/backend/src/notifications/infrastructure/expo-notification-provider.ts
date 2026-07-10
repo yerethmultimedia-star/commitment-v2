@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Expo, ExpoPushMessage } from 'expo-server-sdk';
+import type {
+  Expo as ExpoType,
+  ExpoPushMessage,
+  ExpoPushTicket,
+} from 'expo-server-sdk';
 import {
   NotificationProvider,
   NotificationMessage,
@@ -8,9 +12,18 @@ import {
 @Injectable()
 export class ExpoNotificationProvider implements NotificationProvider {
   private readonly logger = new Logger(ExpoNotificationProvider.name);
-  private readonly expo = new Expo();
+  private expoClient: ExpoType | null = null;
+
+  private async getExpo(): Promise<ExpoType> {
+    if (!this.expoClient) {
+      const { Expo } = await import('expo-server-sdk');
+      this.expoClient = new Expo();
+    }
+    return this.expoClient;
+  }
 
   public async send(notification: NotificationMessage): Promise<void> {
+    const { Expo } = await import('expo-server-sdk');
     if (!Expo.isExpoPushToken(notification.pushToken)) {
       this.logger.error(
         `Push token ${notification.pushToken as string} is not a valid Expo push token`,
@@ -28,11 +41,12 @@ export class ExpoNotificationProvider implements NotificationProvider {
     ];
 
     try {
-      const chunks = this.expo.chunkPushNotifications(messages);
-      const tickets: any[] = [];
+      const expo = await this.getExpo();
+      const chunks = expo.chunkPushNotifications(messages);
+      const tickets: ExpoPushTicket[] = [];
 
       for (const chunk of chunks) {
-        const ticketChunk = await this.expo.sendPushNotificationsAsync(chunk);
+        const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
         tickets.push(...ticketChunk);
       }
 
