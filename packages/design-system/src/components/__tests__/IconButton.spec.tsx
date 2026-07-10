@@ -9,33 +9,33 @@ jest.mock('@commitment/localization', () => ({
 }));
 
 describe('IconButton', () => {
-  it('renders correctly', () => {
-    const { getByRole } = renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} tooltipI18nKey="common.edit" />);
+  it('renders correctly', async () => {
+    const { getByRole } = await renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} tooltipI18nKey="common.edit" />);
     expect(getByRole('button').props.accessibilityLabel).toBe('[TR] common.edit');
   });
 
-  it('matches sunrise theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'sunrise');
+  it('matches sunrise theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'sunrise');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('matches midnight theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'midnight');
+  it('matches midnight theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'midnight');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('matches forest theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'forest');
+  it('matches forest theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} />, 'forest');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('handles onPress and respects disabled state', () => {
+  it('handles onPress and respects disabled state', async () => {
     const onPress = jest.fn();
-    const { getByRole, rerender } = renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} onPress={onPress} />);
+    const { getByRole, rerender } = await renderWithTheme(<IconButton iconToken={<Text>Icon</Text>} onPress={onPress} />);
     fireEvent.press(getByRole('button'));
     expect(onPress).toHaveBeenCalledTimes(1);
 
-    rerender(<IconButton iconToken={<Text>Icon</Text>} onPress={onPress} disabled />);
+    await rerender(<IconButton iconToken={<Text>Icon</Text>} onPress={onPress} disabled />);
     fireEvent.press(getByRole('button'));
     expect(onPress).toHaveBeenCalledTimes(1); // No new call
   });

@@ -1,0 +1,325 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Scroll Primitives ScreenScroll renders scroll content correctly 1`] = `
+<div
+  edges={
+    [
+      "top",
+      "bottom",
+    ]
+  }
+  ref={[Function]}
+  style={
+    {
+      "flex": 1,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        [
+          {
+            "flex": 1,
+            "width": "100%",
+          },
+          {
+            "paddingBottom": 0,
+          },
+        ]
+      }
+    >
+      <RCTScrollView
+        contentContainerStyle={
+          {
+            "flexGrow": 1,
+            "padding": 16,
+          }
+        }
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={
+          {
+            "flex": 1,
+          }
+        }
+      >
+        <View>
+          <Text
+            suppressHighlighting={true}
+          >
+            Scroll Item
+          </Text>
+        </View>
+      </RCTScrollView>
+    </View>
+  </View>
+</div>
+`;
+
+exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
+<div
+  edges={
+    [
+      "top",
+      "bottom",
+    ]
+  }
+  ref={[Function]}
+  style={
+    {
+      "flex": 1,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        [
+          {
+            "flex": 1,
+            "width": "100%",
+          },
+          {
+            "paddingBottom": 0,
+          },
+        ]
+      }
+    >
+      <RCTScrollView
+        data={
+          [
+            {
+              "data": [
+                {
+                  "id": "1",
+                  "title": "Sub Item 1",
+                },
+              ],
+              "titleI18nKey": "section.one",
+            },
+          ]
+        }
+        getItem={[Function]}
+        getItemCount={[Function]}
+        keyExtractor={[Function]}
+        onContentSizeChange={[Function]}
+        onLayout={[Function]}
+        onMomentumScrollBegin={[Function]}
+        onMomentumScrollEnd={[Function]}
+        onScroll={[Function]}
+        onScrollBeginDrag={[Function]}
+        onScrollEndDrag={[Function]}
+        renderItem={[Function]}
+        scrollEventThrottle={0.0001}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={
+          [
+            0,
+          ]
+        }
+      >
+        <View>
+          <View
+            onFocusCapture={[Function]}
+            onLayout={[Function]}
+            style={null}
+          >
+            <View
+              style={
+                {
+                  "backgroundColor": "#FDFBF7",
+                  "paddingBottom": 7,
+                  "paddingLeft": 18,
+                  "paddingRight": 18,
+                  "paddingTop": 7,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={true}
+                maxFontSizeMultiplier={1.5}
+                style={
+                  {
+                    "color": "#2C2A26",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": 24,
+                    "letterSpacing": -0.2,
+                    "lineHeight": 32,
+                  }
+                }
+                suppressHighlighting={true}
+              />
+            </View>
+          </View>
+          <View
+            onFocusCapture={[Function]}
+            onLayout={[Function]}
+            style={null}
+          >
+            <Text
+              suppressHighlighting={true}
+            >
+              Sub Item 1
+            </Text>
+          </View>
+          <View
+            onFocusCapture={[Function]}
+            onLayout={[Function]}
+            style={null}
+          />
+        </View>
+      </RCTScrollView>
+    </View>
+  </View>
+</div>
+`;
+
+exports[`Scroll Primitives VirtualizedScreen renders data items correctly 1`] = `
+<div
+  edges={
+    [
+      "top",
+      "bottom",
+    ]
+  }
+  ref={[Function]}
+  style={
+    {
+      "flex": 1,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        [
+          {
+            "flex": 1,
+            "width": "100%",
+          },
+          {
+            "paddingBottom": 0,
+          },
+        ]
+      }
+    >
+      <View
+        collapsable={false}
+        onLayout={[Function]}
+        style={
+          [
+            {
+              "flex": 1,
+              "overflow": "hidden",
+            },
+            undefined,
+            undefined,
+          ]
+        }
+      >
+        <RCTScrollView
+          collapsable={false}
+          estimatedItemSize={100}
+          keyExtractor={[Function]}
+          maintainVisibleContentPosition={
+            {
+              "minIndexForVisible": 0,
+            }
+          }
+          onScroll={[Function]}
+          removeClippedSubviews={false}
+          scrollEventThrottle={0.0001}
+          showsVerticalScrollIndicator={false}
+        >
+          <View>
+            <View
+              style={
+                {
+                  "height": 0,
+                  "left": 0,
+                  "position": "absolute",
+                  "top": 1000000,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "height": 0,
+                  "marginTop": 0,
+                  "width": undefined,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "height": 0,
+                  "marginLeft": undefined,
+                  "marginTop": 0,
+                  "opacity": 1,
+                  "width": undefined,
+                }
+              }
+            >
+              <View
+                index={0}
+                onLayout={[Function]}
+                style={
+                  {
+                    "flexDirection": "column",
+                    "height": undefined,
+                    "left": 0,
+                    "maxHeight": undefined,
+                    "maxWidth": undefined,
+                    "minHeight": undefined,
+                    "minWidth": undefined,
+                    "opacity": 1,
+                    "position": "absolute",
+                    "top": 0,
+                    "width": 0,
+                  }
+                }
+              >
+                <Text
+                  suppressHighlighting={true}
+                >
+                  Item 1
+                </Text>
+              </View>
+            </View>
+          </View>
+        </RCTScrollView>
+      </View>
+    </View>
+  </View>
+</div>
+`;

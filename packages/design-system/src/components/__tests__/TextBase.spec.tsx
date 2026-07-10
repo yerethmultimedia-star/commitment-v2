@@ -7,24 +7,24 @@ jest.mock('@commitment/localization', () => ({
 }));
 
 describe('Typography Primitives', () => {
-  it('renders correctly with i18nKey', () => {
-    const { getByText } = renderWithTheme(<Body i18nKey="test.key" />);
+  it('renders correctly with i18nKey', async () => {
+    const { getByText } = await renderWithTheme(<Body i18nKey="test.key" />);
     expect(getByText('[TR] test.key')).toBeTruthy();
   });
 
-  it('renders correctly with children', () => {
-    const { getByText } = renderWithTheme(<Headline>Raw Text</Headline>);
+  it('renders correctly with children', async () => {
+    const { getByText } = await renderWithTheme(<Headline>Raw Text</Headline>);
     expect(getByText('Raw Text')).toBeTruthy();
   });
 
-  it('applies semantic roles correctly', () => {
-    const { toJSON } = renderWithTheme(<Title i18nKey="test" />);
+  it('applies semantic roles correctly', async () => {
+    const { toJSON } = await renderWithTheme(<Title i18nKey="test" />);
     // Snapshot will capture the font size, etc.
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('applies tone correctly', () => {
-    const { toJSON } = renderWithTheme(<Caption tone="danger">Error</Caption>);
+  it('applies tone correctly', async () => {
+    const { toJSON } = await renderWithTheme(<Caption tone="danger">Error</Caption>);
     expect(toJSON()).toMatchSnapshot();
   });
 });

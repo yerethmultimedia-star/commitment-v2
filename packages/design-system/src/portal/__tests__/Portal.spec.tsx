@@ -4,8 +4,8 @@ import { renderWithTheme } from '../../components/__tests__/setup.js';
 import { Text } from 'tamagui';
 
 describe('Portal Primitive', () => {
-  it('renders children inside host', () => {
-    const { toJSON, getByText } = renderWithTheme(
+  it('renders children inside host', async () => {
+    const { toJSON, getByText } = await renderWithTheme(
       <PortalProvider>
         <Portal>
           <Text>Inside Portal</Text>

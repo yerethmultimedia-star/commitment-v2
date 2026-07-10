@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Focus Primitives registers and pushes context stack 1`] = `
+<View>
+  <View
+    accessible={true}
+    tabIndex={0}
+  />
+  <View
+    accessible={true}
+    tabIndex={0}
+  />
+  <View
+    accessible={true}
+    tabIndex={0}
+  />
+  <View
+    tabIndex={-1}
+  />
+</View>
+`;

@@ -1,0 +1,185 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Screen Primitives AppScreen renders scrollable screen by default 1`] = `
+<View
+  style={
+    {
+      "flex": 1,
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <div
+    edges={
+      [
+        "top",
+        "bottom",
+      ]
+    }
+    ref={[Function]}
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        onLayout={[Function]}
+        style={
+          [
+            {
+              "flex": 1,
+              "width": "100%",
+            },
+            {
+              "paddingBottom": 0,
+            },
+          ]
+        }
+      >
+        <RCTScrollView
+          contentContainerStyle={
+            {
+              "flexGrow": 1,
+              "padding": 16,
+            }
+          }
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View>
+            <Text
+              suppressHighlighting={true}
+            >
+              Content
+            </Text>
+          </View>
+        </RCTScrollView>
+      </View>
+    </View>
+  </div>
+</View>
+`;
+
+exports[`Screen Primitives AppScreen renders static screen when scrollable=false 1`] = `
+<View
+  style={
+    {
+      "flex": 1,
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <div
+    edges={
+      [
+        "top",
+        "bottom",
+      ]
+    }
+    ref={[Function]}
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        [
+          {
+            "flex": 1,
+            "width": "100%",
+          },
+          {
+            "paddingBottom": 0,
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "padding": 16,
+            "width": "100%",
+          }
+        }
+      >
+        <Text
+          suppressHighlighting={true}
+        >
+          Static Content
+        </Text>
+      </View>
+    </View>
+  </div>
+</View>
+`;
+
+exports[`Screen Primitives StaticScreen renders static content correctly 1`] = `
+<div
+  edges={
+    [
+      "top",
+      "bottom",
+    ]
+  }
+  ref={[Function]}
+  style={
+    {
+      "flex": 1,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    onLayout={[Function]}
+    style={
+      [
+        {
+          "flex": 1,
+          "width": "100%",
+        },
+        {
+          "paddingBottom": 0,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "padding": 16,
+          "width": "100%",
+        }
+      }
+    >
+      <Text
+        suppressHighlighting={true}
+      >
+        Static Content
+      </Text>
+    </View>
+  </View>
+</div>
+`;

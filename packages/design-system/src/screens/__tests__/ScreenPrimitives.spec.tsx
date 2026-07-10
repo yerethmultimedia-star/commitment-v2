@@ -10,8 +10,8 @@ jest.mock('react-native-safe-area-context', () => ({
 
 describe('Screen Primitives', () => {
   describe('StaticScreen', () => {
-    it('renders static content correctly', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders static content correctly', async () => {
+      const { toJSON } = await renderWithTheme(
         <StaticScreen>
           <Text>Static Content</Text>
         </StaticScreen>
@@ -21,8 +21,8 @@ describe('Screen Primitives', () => {
   });
 
   describe('AppScreen', () => {
-    it('renders scrollable screen by default', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders scrollable screen by default', async () => {
+      const { toJSON } = await renderWithTheme(
         <AppScreen announceOnFocus="Screen announcement">
           <Text>Content</Text>
         </AppScreen>
@@ -30,8 +30,8 @@ describe('Screen Primitives', () => {
       expect(toJSON()).toMatchSnapshot();
     });
 
-    it('renders static screen when scrollable=false', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders static screen when scrollable=false', async () => {
+      const { toJSON } = await renderWithTheme(
         <AppScreen scrollable={false}>
           <Text>Static Content</Text>
         </AppScreen>

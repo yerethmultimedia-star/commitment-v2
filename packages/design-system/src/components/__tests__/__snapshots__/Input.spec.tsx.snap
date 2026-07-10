@@ -1,0 +1,328 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Input matches forest theme snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "gap": 7,
+      "opacity": 1,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+      }
+    }
+  />
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FAF7F2",
+          "borderBottomColor": "#34A853",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderBottomWidth": 1,
+          "borderLeftColor": "#34A853",
+          "borderLeftWidth": 1,
+          "borderRightColor": "#34A853",
+          "borderRightWidth": 1,
+          "borderStyle": "solid",
+          "borderTopColor": "#34A853",
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "borderTopWidth": 1,
+          "flexDirection": "row",
+          "height": 48,
+          "paddingLeft": 13,
+          "paddingRight": 13,
+        }
+      }
+    >
+      <TextInput
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        editable={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        focusable={true}
+        keyboardType="default"
+        onBlur={[Function]}
+        onChangeText={[Function]}
+        onFocus={[Function]}
+        placeholderTextColor="#9E9A92"
+        secureTextEntry={false}
+        style={
+          {
+            "backgroundColor": "transparent",
+            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomLeftRadius": 9,
+            "borderBottomRightRadius": 9,
+            "borderBottomWidth": 0,
+            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftWidth": 0,
+            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightWidth": 0,
+            "borderStyle": "solid",
+            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopLeftRadius": 9,
+            "borderTopRightRadius": 9,
+            "borderTopWidth": 0,
+            "color": "#2C2A26",
+            "flex": 1,
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 16,
+            "height": "100%",
+            "letterSpacing": 0,
+            "minWidth": 0,
+            "outlineWidth": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+          }
+        }
+        value="Hello"
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Input matches midnight theme snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "gap": 7,
+      "opacity": 1,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+      }
+    }
+  />
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FAF7F2",
+          "borderBottomColor": "#EA4335",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderBottomWidth": 1,
+          "borderLeftColor": "#EA4335",
+          "borderLeftWidth": 1,
+          "borderRightColor": "#EA4335",
+          "borderRightWidth": 1,
+          "borderStyle": "solid",
+          "borderTopColor": "#EA4335",
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "borderTopWidth": 1,
+          "flexDirection": "row",
+          "height": 48,
+          "paddingLeft": 13,
+          "paddingRight": 13,
+        }
+      }
+    >
+      <TextInput
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        editable={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        focusable={true}
+        keyboardType="default"
+        onBlur={[Function]}
+        onChangeText={[Function]}
+        onFocus={[Function]}
+        placeholderTextColor="#9E9A92"
+        secureTextEntry={false}
+        style={
+          {
+            "backgroundColor": "transparent",
+            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomLeftRadius": 9,
+            "borderBottomRightRadius": 9,
+            "borderBottomWidth": 0,
+            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftWidth": 0,
+            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightWidth": 0,
+            "borderStyle": "solid",
+            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopLeftRadius": 9,
+            "borderTopRightRadius": 9,
+            "borderTopWidth": 0,
+            "color": "#2C2A26",
+            "flex": 1,
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 16,
+            "height": "100%",
+            "letterSpacing": 0,
+            "minWidth": 0,
+            "outlineWidth": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+          }
+        }
+        value="Hello"
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Input matches sunrise theme snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "gap": 7,
+      "opacity": 1,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+      }
+    }
+  />
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FAF7F2",
+          "borderBottomColor": "#E8E4D9",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderBottomWidth": 1,
+          "borderLeftColor": "#E8E4D9",
+          "borderLeftWidth": 1,
+          "borderRightColor": "#E8E4D9",
+          "borderRightWidth": 1,
+          "borderStyle": "solid",
+          "borderTopColor": "#E8E4D9",
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "borderTopWidth": 1,
+          "flexDirection": "row",
+          "height": 48,
+          "paddingLeft": 13,
+          "paddingRight": 13,
+        }
+      }
+    >
+      <TextInput
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        editable={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        focusable={true}
+        keyboardType="default"
+        onBlur={[Function]}
+        onChangeText={[Function]}
+        onFocus={[Function]}
+        placeholderTextColor="#9E9A92"
+        secureTextEntry={false}
+        style={
+          {
+            "backgroundColor": "transparent",
+            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomLeftRadius": 9,
+            "borderBottomRightRadius": 9,
+            "borderBottomWidth": 0,
+            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftWidth": 0,
+            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightWidth": 0,
+            "borderStyle": "solid",
+            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopLeftRadius": 9,
+            "borderTopRightRadius": 9,
+            "borderTopWidth": 0,
+            "color": "#2C2A26",
+            "flex": 1,
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 16,
+            "height": "100%",
+            "letterSpacing": 0,
+            "minWidth": 0,
+            "outlineWidth": 0,
+            "paddingBottom": 0,
+            "paddingLeft": 0,
+            "paddingRight": 0,
+            "paddingTop": 0,
+          }
+        }
+        value="Hello"
+      />
+    </View>
+  </View>
+</View>
+`;

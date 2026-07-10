@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Typography Primitives applies semantic roles correctly 1`] = `
+<Text
+  allowFontScaling={true}
+  maxFontSizeMultiplier={1.5}
+  style={
+    {
+      "color": "#2C2A26",
+      "fontFamily": "Inter_600SemiBold",
+      "fontSize": 24,
+      "letterSpacing": -0.2,
+      "lineHeight": 32,
+    }
+  }
+  suppressHighlighting={true}
+>
+  [TR] test
+</Text>
+`;
+
+exports[`Typography Primitives applies tone correctly 1`] = `
+<Text
+  allowFontScaling={true}
+  maxFontSizeMultiplier={1.5}
+  style={
+    {
+      "color": "#EA4335",
+      "fontFamily": "Inter_400Regular",
+      "fontSize": 12,
+      "letterSpacing": 0.2,
+      "lineHeight": 16,
+    }
+  }
+  suppressHighlighting={true}
+>
+  Error
+</Text>
+`;

@@ -2,114 +2,208 @@
 
 > **"Frameworks are replaceable. Business rules are not."**
 
-Bienvenido a **Commitment v2**, una plataforma de software profesional diseñada para guiar el compromiso humano con un enfoque de alta calidad técnica, resiliencia offline-first y diseño calmo.
+**Commitment** es una plataforma de software profesional diseñada para guiar y motivar el compromiso humano con un enfoque de alta calidad técnica, resiliencia offline-first y diseño calmo.
 
 ---
 
-## 🧭 START HERE
+## 🏛️ Arquitectura del Monorepo
 
-### Reading Order
-
-1. [PROJECT_STATUS.md](file:///Users/yereth/Desktop/Commitment-v2/PROJECT_STATUS.md)
-2. [HANDBOOK.md](file:///Users/yereth/Desktop/Commitment-v2/HANDBOOK.md)
-3. [ENGINEERING_BOARD.md](file:///Users/yereth/Desktop/Commitment-v2/ENGINEERING_BOARD.md)
-4. [ARCHITECTURE.md](file:///Users/yereth/Desktop/Commitment-v2/ARCHITECTURE.md)
-5. [ROADMAP.md](file:///Users/yereth/Desktop/Commitment-v2/ROADMAP.md)
-
----
-
-## 🏛️ Filosofía de Arquitectura
-
-El núcleo de Commitment v2 está construido bajo principios de ingeniería sólidos:
-
-- **Independencia del Dominio:** Las reglas de negocio (Domain) son puras y no dependen de ningún framework (NestJS, Flutter, Supabase, etc.). Toda interacción externa se realiza mediante puertos y adaptadores (Arquitectura Hexagonal).
-- **Event Sourcing & CQRS:** El estado del Compromiso se deriva de un historial inmutable de eventos.
-- **Offline-First:** La aplicación móvil debe ser completamente funcional sin conexión a internet, sincronizándose de forma transparente.
-- **Diseño Calmo:** Interfaz centrada en reducir la fatiga de decisión y fomentar la motivación intrínseca.
-
----
-
-## 📂 Estructura del Proyecto (Monorepo)
-
-Este repositorio está organizado como un Monorepo utilizando `pnpm` y `Turborepo`:
+El proyecto está organizado en un monorepo administrado por **pnpm workspaces** y **Turborepo**:
 
 ```text
-.
-├── apps/
-│   ├── backend/               # API NestJS (Node.js + TypeScript)
-│   └── mobile/                # Aplicación Móvil (Flutter con FVM)
-├── docs/                      # Documentación técnica y de producto (Fuente de verdad)
-│   ├── 00-governance/         # Modelos de gobierno, principios y prompts
-│   ├── 01-product/            # Visión del producto, UX y ADRs del producto
-│   ├── 02-domain/             # Modelo de dominio, catálogo de comandos y eventos
-│   ├── 03-architecture/       # ADRs técnicos y patrones de arquitectura global
-│   ├── 04-backend/            # Arquitectura del backend, guías y especificaciones
-│   ├── 05-mobile/             # Guías de desarrollo móvil y sistema de UI
-│   ├── 06-devops/             # Infraestructura local, monitoreo y CI/CD
-│   ├── 07-quality/            # Criterios de QA y Definition of Done
-│   ├── 08-operations/         # Manuales de onboarding y mantenimiento
-│   └── G0.2-Project-Backbone/ # Documentación histórica de Project Backbone
-├── engineering/               # Infraestructura de ingeniería y gobernanza activa
-│   ├── tasks/                 # Especificaciones de tareas (por ejemplo, TASK-001)
-│   ├── reviews/               # Revisiones de arquitectura
-│   ├── specifications/        # Especificaciones técnicas
-│   ├── playbooks/             # Guías de acción paso a paso
-│   ├── templates/             # Plantillas para tareas, revisiones y especificaciones
-│   ├── system-prompt.md       # Contrato operativo permanente para Inteligencias Artificiales
-│   ├── WORKFLOW.md            # Ciclo de vida oficial de ingeniería
-│   └── ARCHITECTURE_CHECKLIST.md # Puntos de control y validación de arquitectura
-├── packages/                  # Paquetes y configuraciones compartidas
-│   ├── api-contracts/         # Esquemas de API y contratos Zod
-│   ├── config/                # Configuraciones base de TypeScript/Linters
-│   ├── design-system/         # Tokens de diseño calmo (colores HSL, etc.)
-│   ├── domain/                # Dominio puro y CQRS base (sin frameworks)
-│   └── shared/                # Utilidades e interfaces comunes
-├── ARCHITECTURE.md            # Resumen de arquitectura del proyecto
-├── DECISION_LOG.md            # Registro de decisiones de arquitectura
-├── ENGINEERING_BOARD.md       # Tablero de prioridades de desarrollo
-├── HANDBOOK.md                # Manual principal y punto de entrada de lectura
-├── PROJECT_STATUS.md          # Estado actual del proyecto y sprints
-├── RISK_REGISTER.md           # Registro de riesgos y mitigaciones
-├── ROADMAP.md                 # Plan de hitos y sprints futuros
-├── TECH_DEBT.md               # Registro de deuda técnica identificada
-├── docker-compose.yml         # Entorno local de soporte (Redis, Prometheus, Grafana)
-└── package.json
+apps/
+  ├── mobile                  # Aplicación móvil (React Native + Expo)
+  └── backend                 # API del Backend (NestJS)
+
+packages/
+  ├── domain                  # Reglas puras de negocio y CQRS base (sin frameworks)
+  ├── design-system           # Primitivas de UI calmas, Focus, Keyboard e Input Management (Tamagui)
+  ├── theme-engine            # Motor dinámico e independiente de interpretación de temas
+  ├── localization            # SDK centralizado de traducción, localización y formateo de fechas
+  ├── platform                # Adaptadores físicos de APIs nativas de cada sistema operativo (Mobile/Web)
+  ├── api-contracts           # Esquemas compartidos de validación de APIs (Zod)
+  ├── config                  # Configuraciones compartidas de compilación, linters y formato
+  └── shared                  # Utilidades y definiciones de tipos reutilizables
 ```
 
 ---
 
-## 📁 Repository Structure
+## 🛠️ Stack Tecnológico
 
-To ensure codebase organization remains clean and intuitive, the repository is divided into specific logical domains:
-
-- **Governance:** The core models, constitutions, and alignment prompts that guide AI and human behavior are stored in [docs/00-governance/](file:///Users/yereth/Desktop/Commitment-v2/docs/00-governance/) and root-level entry files (e.g. [HANDBOOK.md](file:///Users/yereth/Desktop/Commitment-v2/HANDBOOK.md), [PROJECT_STATUS.md](file:///Users/yereth/Desktop/Commitment-v2/PROJECT_STATUS.md)).
-- **Engineering:** The operational scripts, checklists, templates, tasks, and playbooks that developers use on a day-to-day basis reside inside [engineering/](file:///Users/yereth/Desktop/Commitment-v2/engineering/).
-- **Product:** Vision docs, calm design token foundations, ftue diagrams, microcopy guides, and product ADRs live under [docs/01-product/](file:///Users/yereth/Desktop/Commitment-v2/docs/01-product/).
-- **Domain:** Pure business logic rules, catalogues of commands/events, bounded contexts, and conceptual domain schemas are defined under [docs/02-domain/](file:///Users/yereth/Desktop/Commitment-v2/docs/02-domain/) and implemented strictly inside [packages/domain/](file:///Users/yereth/Desktop/Commitment-v2/packages/domain/).
-- **Architecture:** Formal Architecture Decision Records (ADRs) that document technology selections and patterns reside in [docs/03-architecture/](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/).
-- **Backend:** Technical standards for backend servers live in [docs/04-backend/](file:///Users/yereth/Desktop/Commitment-v2/docs/04-backend/), while the NestJS API application is implemented inside [apps/backend/](file:///Users/yereth/Desktop/Commitment-v2/apps/backend/).
-- **Mobile:** Technical standards for presentation and client states live in [docs/05-mobile/](file:///Users/yereth/Desktop/Commitment-v2/docs/05-mobile/), while the Flutter codebase is located inside [apps/mobile/](file:///Users/yereth/Desktop/Commitment-v2/apps/mobile/).
-- **Operations:** Guides for developer onboarding, support, and manual playbooks are located in [docs/08-operations/](file:///Users/yereth/Desktop/Commitment-v2/docs/08-operations/).
+- **Aplicación Móvil:** React Native + Expo (TypeScript)
+- **UI & Estilos:** Tamagui (CSS-in-JS con HSL tokens)
+- **Servidor Backend:** NestJS (Node.js + PostgreSQL)
+- **Gestión del Monorepo:** Turborepo + pnpm
+- **Base de Datos Local:** SQLite (para almacenamiento offline)
+- **Estado Local / Queries:** Zustand + React Query
+- **Validación de Datos:** Zod
+- **Testing:** Jest + React Native Testing Library (RNTL v14)
 
 ---
 
-## 🚀 Roadmap de Desarrollo
+## ⚙️ Requisitos del Entorno
 
-1.  **Sprint 0 — Foundation** (Sprint Actual) - Configuración del monorepo, convenciones y pipelines.
-2.  **Sprint 1 — Identity** - Autenticación y registro seguro.
-3.  **Sprint 2 — Commitment** - Core del dominio del Compromiso.
-4.  **Sprint 3 — Daily Execution** - Registro de acciones y microacciones.
-5.  **Sprint 4 — Resilience Engine** - Recuperación, victorias de regreso e índices.
-6.  **Sprint 5 — Library of Life** - Historial adaptativo del usuario.
-7.  **Sprint 6 — Support Network** - Conectividad social y apoyo.
-8.  **Sprint 7 — AI Gateway** - Triggers y análisis adaptativo.
-9.  **Sprint 8 — Insights** - Métricas avanzadas y reportería.
+Asegúrate de contar con las siguientes versiones mínimas instaladas en tu entorno local:
+
+- **Node.js:** `v22.0.0` o superior (Recomendado LTS)
+- **pnpm:** `v10.0.0` o superior
+- **Expo CLI:** SDK 51/52 compatible
 
 ---
 
-## 🛠️ Tecnologías Preferidas
+## 🚀 Instalación y Configuración
 
-- **Frontend:** Flutter (anclado con FVM en `stable`), Riverpod, GoRouter, Drift + SQLCipher.
-- **Backend:** NestJS (Node.js / TypeScript), CQRS, Zod, Drizzle (para Read Models), PostgreSQL.
-- **Infraestructura:** Supabase CLI para desarrollo local, Supabase Cloud en producción, AWS para servicios adicionales.
-- **Observabilidad:** OpenTelemetry, Prometheus, Grafana.
+Clona el repositorio e instala todas las dependencias del monorepo ejecutando en la raíz:
+
+```bash
+npx pnpm install
+```
+
+---
+
+## 💻 Comandos Útiles
+
+Turborepo compila y orquesta las tareas en paralelo de forma eficiente. Todos los comandos se ejecutan desde la raíz del monorepo:
+
+### Construcción y Compilación
+
+```bash
+npx pnpm build
+```
+
+### Ejecución de Pruebas
+
+```bash
+# Correr todo el set de pruebas del monorepo
+npx pnpm test
+
+# Correr pruebas con refresco de snapshots
+npx pnpm --filter @commitment/design-system test -- -u
+```
+
+### Linter y Verificación de Tipos
+
+```bash
+# Ejecutar verificación de estilos y linter
+npx pnpm lint
+
+# Ejecutar typecheck de TypeScript en todos los paquetes
+npx pnpm typecheck
+```
+
+### Ejecución en Modo Desarrollo
+
+```bash
+# Levantar el entorno móvil de Expo
+npx pnpm --filter mobile start
+
+# Levantar el servidor de desarrollo NestJS backend
+npx pnpm --filter backend start:dev
+```
+
+---
+
+## 📂 Estructura de Directorios
+
+- `apps/`: Contiene los ejecutables y puntos de entrada de los despliegues (NestJS backend, Expo mobile app).
+- `packages/`: Módulos compartidos, desacoplados y reutilizables en la plataforma.
+- `docs/`: Documentación del producto, especificaciones, y decisiones arquitectónicas históricas (ADRs).
+- `engineering/`: Herramientas de gobernanza operativa, prompts de IA, checklists de arquitectura y plantillas.
+
+---
+
+## 🧠 Principios Arquitectónicos
+
+1. **Domain-Driven Design (DDD):** El núcleo de reglas de negocio en `packages/domain` es puro, no importa frameworks de persistencia ni utilidades de renderizado.
+2. **Vertical Slices:** Fomentamos la organización de código por características funcionales completas (Slices) en lugar de capas técnicas estrictas.
+3. **Desacoplamiento de APIs Nativa (Platform SDK):** Ninguna Feature de la aplicación móvil interactúa directamente con APIs nativas (como `BackHandler`, `Keyboard`, `AccessibilityInfo` o `SecureStore`). En su lugar, consumen abstracciones proporcionadas por `@commitment/platform` inyectadas mediante el `PlatformProvider`.
+4. **Independencia del Design System:** El Design System provee las primitivas de interacción abstractas pero no maneja estado global ni depende de singletons de plataformas nativas.
+
+---
+
+## 🔌 Capas del Sistema de Interacción
+
+La arquitectura sigue una estructura unidireccional y limpia para aislar la lógica de presentación de las llamadas al sistema operativo:
+
+```text
+[ Feature (Slice de Negocio) ]
+             ↓
+[ Design System (Primitivas UI) ]
+             ↓
+[ Platform SDK (PlatformProvider) ]
+             ↓
+[ Native APIs (react-native, expo-*, etc.) ]
+```
+
+---
+
+## 🎨 Sistema de Temas (Theme Engine)
+
+El motor de apariencia está diseñado para soportar múltiples fuentes de renderizado e interpretación dinámica. Su flujo de resolución es:
+
+```text
+[ Theme Manifest (Configuración JSON) ]
+                     ↓
+[ Theme Engine (Procesador Agnóstico) ]
+                     ↓
+[ Resolved Theme (Estructura en Memoria) ]
+                     ↓
+[ Design System Adapter (Tamagui Tokens) ]
+                     ↓
+[ Tamagui Provider (UI final) ]
+```
+
+---
+
+## 🌐 Internacionalización (Localización)
+
+La plataforma impone reglas estrictas de internacionalización para evitar regresiones de formato y rigidez idiomática:
+
+- **Sin texto plano:** Todo componente visual debe consumir claves de traducción válidas (`i18nKey`) resueltas por el SDK.
+- **Formateo Centralizado:** Los números, divisas y fechas deben ser procesados a través del SDK de `@commitment/localization`.
+- **Restricciones:** No está permitido el uso directo del constructor `Intl` nativo dentro de las features o componentes del Design System.
+
+---
+
+## ♿ Accesibilidad (A11y)
+
+El monorepo cuenta con una infraestructura de accesibilidad de primer nivel incorporada de forma nativa en la base:
+
+- **Focus Manager:** Un orquestador centralizado de pila de contextos priorizados (`screen`, `dialog`, `bottomSheet`, `popover`, `tooltip`, `coach`).
+- **Screen Announcements:** Notificaciones de audio asíncronas para lectores de pantalla mediante prioridades (`polite` y `assertive`).
+- **Keyboard & Input Management:** Auto-scroll inteligente y reubicación de campos activos en formularios para evitar oclusión por teclado, controlando asincronía en RNTL v14.
+
+---
+
+## 🗺️ Estado del Roadmap
+
+```text
+✅ Core Platform & Workspace
+✅ Design System Foundation
+✅ Theme Engine & Experience Themes
+✅ Dynamic Dashboard & Widget Registry
+✅ Focus, Keyboard & Input Infrastructure
+🚧 Offline Storage & Operation Queues
+🚧 Cloud Sync & Profile Preferences
+🚧 Analytics & Telemetry
+🚧 AI Coach Conversational Context
+```
+
+---
+
+## 🤝 Cómo Contribuir
+
+Antes de abrir una solicitud de cambio (Pull Request), asegúrate de cumplir con el siguiente checklist de control:
+
+1. **Ejecutar Tests:** Asegúrate de que las 56 pruebas de Jest pasen sin errores.
+2. **Typecheck y Linters:** Ejecuta `npx pnpm typecheck` y `npx pnpm lint` en la raíz.
+3. **Respetar los límites:** No introduzcas dependencias directas de React Native, APIs de almacenamiento o hardware nativo dentro de `@commitment/design-system` o los features.
+4. **Validar las dependencias del monorepo:** Asegúrate de que no existan dependencias cruzadas que rompan el aislamiento de paquetes.
+
+---
+
+## 📚 Documentación Adicional
+
+- [docs/](file:///Users/yereth/Desktop/Commitment-v2/docs/): Directorio principal de documentación de producto, dominio y arquitectura global.
+- [engineering/](file:///Users/yereth/Desktop/Commitment-v2/engineering/): Herramientas y estándares del flujo de ingeniería (Gobernanza activa, templates y prompts).
+- [HANDBOOK.md](file:///Users/yereth/Desktop/Commitment-v2/HANDBOOK.md): Manual de Onboarding técnico y de estilo del proyecto.

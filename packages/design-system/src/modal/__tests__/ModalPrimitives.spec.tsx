@@ -10,8 +10,8 @@ jest.mock('@commitment/localization', () => ({
 
 describe('Modal Primitives', () => {
   describe('ModalPrimitive', () => {
-    it('renders correct content when open', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders correct content when open', async () => {
+      const { toJSON } = await renderWithTheme(
         <PortalProvider>
           <ModalPrimitive open={true} onOpenChange={() => {}}>
             <Text>Modal Content</Text>
@@ -21,8 +21,8 @@ describe('Modal Primitives', () => {
       expect(toJSON()).toMatchSnapshot();
     });
 
-    it('does not render when closed', () => {
-      const { toJSON } = renderWithTheme(
+    it('does not render when closed', async () => {
+      const { toJSON } = await renderWithTheme(
         <PortalProvider>
           <ModalPrimitive open={false} onOpenChange={() => {}}>
             <Text>Modal Content</Text>
@@ -34,8 +34,8 @@ describe('Modal Primitives', () => {
   });
 
   describe('Dialog', () => {
-    it('renders centered Dialog', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders centered Dialog', async () => {
+      const { toJSON } = await renderWithTheme(
         <PortalProvider>
           <Dialog open={true} onOpenChange={() => {}}>
             <Text>Dialog Content</Text>
@@ -47,8 +47,8 @@ describe('Modal Primitives', () => {
   });
 
   describe('BottomSheet', () => {
-    it('renders bottom sheet modal on Web', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders bottom sheet modal on Web', async () => {
+      const { toJSON } = await renderWithTheme(
         <PortalProvider>
           <BottomSheet open={true} onOpenChange={() => {}}>
             <Text>BottomSheet Content</Text>
@@ -60,8 +60,8 @@ describe('Modal Primitives', () => {
   });
 
   describe('ConfirmationDialog', () => {
-    it('renders confirmation text and buttons', () => {
-      const { toJSON, getByText } = renderWithTheme(
+    it('renders confirmation text and buttons', async () => {
+      const { toJSON, getByText } = await renderWithTheme(
         <PortalProvider>
           <ConfirmationDialog
             open={true}
@@ -81,12 +81,12 @@ describe('Modal Primitives', () => {
   });
 
   describe('ActionSheet', () => {
-    it('renders a list of actions and cancel button', () => {
+    it('renders a list of actions and cancel button', async () => {
       const actions = [
         { labelI18nKey: 'action.delete', onPress: () => {}, destructive: true },
         { labelI18nKey: 'action.edit', onPress: () => {} },
       ];
-      const { toJSON } = renderWithTheme(
+      const { toJSON } = await renderWithTheme(
         <PortalProvider>
           <ActionSheet
             open={true}

@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
-import { Modal as RNModal, StyleSheet, Platform, BackHandler, TouchableWithoutFeedback } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Modal as RNModal, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import { View, styled } from 'tamagui';
 import { Portal } from '../portal/Portal.js';
+import { FocusManager } from '../focus/FocusManager.js';
 
 export interface ModalPrimitiveProps {
   open: boolean;
@@ -27,16 +28,30 @@ export const ModalPrimitive: React.FC<ModalPrimitiveProps> = ({
   centered = true,
   children,
 }) => {
+  const containerRef = useRef<any>(null);
+  const initialFocusRef = useRef<any>(null);
+
   useEffect(() => {
     if (!open) return;
-    
-    // Handle Android back button
-    const onBackPress = () => {
-      onOpenChange(false);
-      return true;
+
+    const id = `modal-${Math.random().toString(36).substring(2, 9)}`;
+    FocusManager.pushContext(
+      id,
+      'dialog',
+      {
+        initialFocusRef,
+        trapContainerRef: containerRef,
+        isFocusTrapActive: true,
+        onEscape: () => onOpenChange(false),
+        onBack: () => onOpenChange(false),
+        announceOnFocus: 'Dialog opened',
+      },
+      10 // Mayor prioridad que pantallas estándar
+    );
+
+    return () => {
+      FocusManager.popContext(id);
     };
-    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-    return () => subscription.remove();
   }, [open, onOpenChange]);
 
   if (!open) return null;
@@ -45,6 +60,7 @@ export const ModalPrimitive: React.FC<ModalPrimitiveProps> = ({
     <Backdrop onPress={() => onOpenChange(false)}>
       <TouchableWithoutFeedback>
         <View
+          ref={containerRef}
           backgroundColor="$surface"
           borderRadius="$4"
           padding="$md"
@@ -55,14 +71,16 @@ export const ModalPrimitive: React.FC<ModalPrimitiveProps> = ({
           shadowOpacity={0.1}
           shadowRadius={10}
           shadowOffset={{ width: 0, height: 4 }}
+          tabIndex={Platform.OS === 'web' ? -1 : undefined}
         >
+          <View ref={initialFocusRef} tabIndex={Platform.OS === 'web' ? -1 : undefined} style={styles.focusAnchor} />
           {children}
         </View>
       </TouchableWithoutFeedback>
     </Backdrop>
   );
 
-  // Use Native Modal on Native platforms, Portal on Web
+  // Usar Modal nativo en Native, Portal en Web
   if (Platform.OS !== 'web') {
     return (
       <RNModal
@@ -90,5 +108,11 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
+  },
+  focusAnchor: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+    position: 'absolute',
   },
 });

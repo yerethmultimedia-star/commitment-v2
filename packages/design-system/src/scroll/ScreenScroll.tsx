@@ -1,7 +1,8 @@
-import React from 'react';
-import { ScrollView, RefreshControl, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { ScrollView, RefreshControl, KeyboardAvoidingView, Platform, StyleSheet, TextInput, findNodeHandle } from 'react-native';
 import { View, ViewProps } from 'tamagui';
 import { SafeArea } from '../layout/SafeArea.js';
+import { useKeyboard } from '../keyboard/KeyboardContext.js';
 
 export interface ScreenScrollProps extends ViewProps {
   refreshing?: boolean;
@@ -19,12 +20,51 @@ export const ScreenScroll = React.forwardRef<any, ScreenScrollProps>(({
   children,
   ...props
 }, ref) => {
+  const localScrollRef = useRef<ScrollView>(null);
+  const scrollRef = (ref as React.RefObject<ScrollView>) || localScrollRef;
+  const { keyboardVisible } = useKeyboard();
+
+  useEffect(() => {
+    if (!keyboardVisible || !keyboardAware || !scrollRef.current) return;
+
+    const timer = setTimeout(() => {
+      try {
+        const currentlyFocused = TextInput.State.currentlyFocusedInput();
+        const scrollNode = scrollRef.current;
+        if (currentlyFocused && scrollNode) {
+          const scrollHandle = findNodeHandle(scrollNode);
+          if (scrollHandle) {
+            currentlyFocused.measureLayout(
+              scrollHandle,
+              (_x: number, y: number) => {
+                scrollNode.scrollTo({ y: Math.max(0, y - 40), animated: true });
+              },
+              () => {
+                // Fallback si falla measureLayout
+                if (typeof (currentlyFocused as any).measure === 'function') {
+                  (currentlyFocused as any).measure((_x: number, _y: number, _w: number, _h: number, _px: number, py: number) => {
+                    scrollNode.scrollTo({ y: Math.max(0, py - 40), animated: true });
+                  });
+                }
+              }
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('Error measuring focused input for ScreenScroll auto-scroll:', err);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [keyboardVisible, keyboardAware, scrollRef]);
+
   const scrollElement = (
     <ScrollView
-      ref={ref as any}
+      ref={scrollRef as any}
       style={styles.scroll}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
       refreshControl={
         onRefresh ? (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

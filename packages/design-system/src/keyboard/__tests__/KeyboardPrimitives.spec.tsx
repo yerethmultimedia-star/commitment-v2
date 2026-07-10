@@ -4,8 +4,8 @@ import { renderWithTheme } from '../../components/__tests__/setup.js';
 import { Text } from 'tamagui';
 
 describe('Keyboard Primitives', () => {
-  it('renders KeyboardSpacer correctly', () => {
-    const { toJSON } = renderWithTheme(
+  it('renders KeyboardSpacer correctly', async () => {
+    const { toJSON } = await renderWithTheme(
       <KeyboardProvider>
         <KeyboardSpacer />
       </KeyboardProvider>
@@ -13,8 +13,8 @@ describe('Keyboard Primitives', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('renders KeyboardDismissArea correctly', () => {
-    const { toJSON } = renderWithTheme(
+  it('renders KeyboardDismissArea correctly', async () => {
+    const { toJSON } = await renderWithTheme(
       <KeyboardDismissArea>
         <Text>Content</Text>
       </KeyboardDismissArea>
@@ -22,8 +22,8 @@ describe('Keyboard Primitives', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('renders KeyboardAwareScroll correctly', () => {
-    const { toJSON } = renderWithTheme(
+  it('renders KeyboardAwareScroll correctly', async () => {
+    const { toJSON } = await renderWithTheme(
       <KeyboardProvider>
         <KeyboardAwareScroll>
           <Text>Content</Text>

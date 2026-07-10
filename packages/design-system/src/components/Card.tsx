@@ -75,7 +75,9 @@ export const Card = React.forwardRef<any, CardProps>(({
     <View
       ref={ref as any}
       testID={testID}
+      role={isInteractive ? 'button' : undefined}
       accessibilityRole={isInteractive ? 'button' : undefined}
+      accessible={isInteractive}
       accessibilityState={isInteractive ? { disabled: isActuallyDisabled, selected, busy: loading } : undefined}
       backgroundColor={bg as any}
       borderColor={borderColor as any}

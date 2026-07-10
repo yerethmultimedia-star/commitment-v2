@@ -1,0 +1,349 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Switch matches forest theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "row",
+      "gap": 13,
+      "opacity": 0.5,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      onBlur={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+    >
+      <View
+        accessibilityRole="switch"
+        accessibilityState={
+          {
+            "busy": false,
+            "checked": true,
+            "disabled": true,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        id="_r_u_"
+        style={
+          {
+            "backgroundColor": "hsl(0, 0%, 96.3%)",
+            "borderBottomColor": "#FF7B54",
+            "borderBottomLeftRadius": 1000,
+            "borderBottomRightRadius": 1000,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "#FF7B54",
+            "borderLeftWidth": 1,
+            "borderRightColor": "#FF7B54",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "#FF7B54",
+            "borderTopLeftRadius": 1000,
+            "borderTopRightRadius": 1000,
+            "borderTopWidth": 1,
+            "flexDirection": "column",
+            "height": 23,
+            "minHeight": 23,
+            "width": 46,
+          }
+        }
+        tabIndex={0}
+      >
+        <View
+          onLayout={[Function]}
+          style={
+            {
+              "alignSelf": "stretch",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              {
+                "alignSelf": "flex-end",
+                "backgroundColor": "#FFFFFF",
+                "borderBottomLeftRadius": 1000,
+                "borderBottomRightRadius": 1000,
+                "borderTopLeftRadius": 1000,
+                "borderTopRightRadius": 1000,
+                "flexDirection": "column",
+                "height": 23,
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "width": 23,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Switch matches midnight theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "row",
+      "gap": 13,
+      "opacity": 1,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      onBlur={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+    >
+      <View
+        accessibilityRole="switch"
+        accessibilityState={
+          {
+            "busy": false,
+            "checked": false,
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        id="_r_l_"
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "backgroundColor": "#FAF7F2",
+            "borderBottomColor": "#E8E4D9",
+            "borderBottomLeftRadius": 1000,
+            "borderBottomRightRadius": 1000,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "#E8E4D9",
+            "borderLeftWidth": 1,
+            "borderRightColor": "#E8E4D9",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "#E8E4D9",
+            "borderTopLeftRadius": 1000,
+            "borderTopRightRadius": 1000,
+            "borderTopWidth": 1,
+            "flexDirection": "column",
+            "height": 23,
+            "minHeight": 23,
+            "width": 46,
+          }
+        }
+        tabIndex={0}
+      >
+        <View
+          onLayout={[Function]}
+          style={
+            {
+              "alignSelf": "stretch",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "#FFFFFF",
+                "borderBottomLeftRadius": 1000,
+                "borderBottomRightRadius": 1000,
+                "borderTopLeftRadius": 1000,
+                "borderTopRightRadius": 1000,
+                "flexDirection": "column",
+                "height": 23,
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "width": 23,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Switch matches sunrise theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "row",
+      "gap": 13,
+      "opacity": 1,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignSelf": "flex-start",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      onBlur={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+    >
+      <View
+        accessibilityRole="switch"
+        accessibilityState={
+          {
+            "busy": false,
+            "checked": true,
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        id="_r_c_"
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "backgroundColor": "hsl(0, 0%, 96.3%)",
+            "borderBottomColor": "#FF7B54",
+            "borderBottomLeftRadius": 1000,
+            "borderBottomRightRadius": 1000,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "#FF7B54",
+            "borderLeftWidth": 1,
+            "borderRightColor": "#FF7B54",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "#FF7B54",
+            "borderTopLeftRadius": 1000,
+            "borderTopRightRadius": 1000,
+            "borderTopWidth": 1,
+            "flexDirection": "column",
+            "height": 23,
+            "minHeight": 23,
+            "width": 46,
+          }
+        }
+        tabIndex={0}
+      >
+        <View
+          onLayout={[Function]}
+          style={
+            {
+              "alignSelf": "stretch",
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            onLayout={[Function]}
+            style={
+              {
+                "alignSelf": "flex-end",
+                "backgroundColor": "#FFFFFF",
+                "borderBottomLeftRadius": 1000,
+                "borderBottomRightRadius": 1000,
+                "borderTopLeftRadius": 1000,
+                "borderTopRightRadius": 1000,
+                "flexDirection": "column",
+                "height": 23,
+                "transform": [
+                  {
+                    "translateX": 0,
+                  },
+                ],
+                "width": 23,
+              }
+            }
+          />
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;

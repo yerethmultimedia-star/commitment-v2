@@ -1,0 +1,271 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Button matches forest theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityLabel="[TR] common.save"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF7B54",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 9,
+        "borderBottomRightRadius": 9,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 9,
+        "borderTopRightRadius": 9,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "flexDirection": "row",
+        "height": 48,
+        "justifyContent": "center",
+        "opacity": 1,
+        "paddingLeft": 18,
+        "paddingRight": 18,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 7,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": "$4",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        [TR] common.save
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Button matches midnight theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityLabel="[TR] common.save"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF7B54",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 9,
+        "borderBottomRightRadius": 9,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 9,
+        "borderTopRightRadius": 9,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "flexDirection": "row",
+        "height": 48,
+        "justifyContent": "center",
+        "opacity": 1,
+        "paddingLeft": 18,
+        "paddingRight": 18,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 7,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": "$4",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        [TR] common.save
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`Button matches sunrise theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityLabel="[TR] common.save"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF7B54",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 9,
+        "borderBottomRightRadius": 9,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 9,
+        "borderTopRightRadius": 9,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "flexDirection": "row",
+        "height": 48,
+        "justifyContent": "center",
+        "opacity": 1,
+        "paddingLeft": 18,
+        "paddingRight": 18,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 7,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": "$4",
+            "letterSpacing": 0.1,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        [TR] common.save
+      </Text>
+    </View>
+  </View>
+</View>
+`;

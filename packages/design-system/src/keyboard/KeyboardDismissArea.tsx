@@ -1,13 +1,16 @@
 import React from 'react';
-import { TouchableWithoutFeedback, Keyboard, StyleSheet, View } from 'react-native';
+import { TouchableWithoutFeedback, StyleSheet, View } from 'react-native';
+import { useKeyboard } from './KeyboardContext.js';
 
 export interface KeyboardDismissAreaProps {
   children: React.ReactNode;
 }
 
 export const KeyboardDismissArea: React.FC<KeyboardDismissAreaProps> = ({ children }) => {
+  const { dismiss } = useKeyboard();
+
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <TouchableWithoutFeedback onPress={dismiss} accessible={false}>
       <View style={styles.container}>{children}</View>
     </TouchableWithoutFeedback>
   );

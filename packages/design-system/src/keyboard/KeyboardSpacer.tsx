@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Platform } from 'react-native';
-import { useKeyboardState } from './KeyboardContext.js';
+import { useKeyboard } from './KeyboardContext.js';
 
 export const KeyboardSpacer: React.FC = () => {
-  const { keyboardHeight } = useKeyboardState();
+  const { keyboardHeight } = useKeyboard();
 
   if (Platform.OS === 'web') return null;
 

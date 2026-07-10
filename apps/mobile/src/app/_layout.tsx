@@ -4,7 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import { TamaguiProvider } from '@commitment/design-system';
+import { TamaguiProvider, PlatformProvider, PlatformServices } from '@commitment/design-system';
 import { config } from '@commitment/design-system';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../core/query/query-client';
@@ -12,9 +12,19 @@ import { AuthProvider } from '@/core/auth/auth-provider';
 import { StatusBar } from 'expo-status-bar';
 import '@/core/i18n'; // Initialize i18n
 import { registerDefaultWidgets } from '@/features/dashboard/registry/default-widgets.js';
+import { createKeyboardPlatformAdapter } from '@commitment/platform';
 
 SplashScreen.preventAutoHideAsync();
 registerDefaultWidgets();
+
+const platformServices: PlatformServices = {
+  haptics: {
+    trigger: (type) => {
+      console.log('[Haptics] Triggered feedback:', type);
+    },
+  },
+  keyboard: createKeyboardPlatformAdapter(),
+};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -35,17 +45,20 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={config} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <PlatformProvider services={platformServices}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </PlatformProvider>
     </TamaguiProvider>
   );
 }
+

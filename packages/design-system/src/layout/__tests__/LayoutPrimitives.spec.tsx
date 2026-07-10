@@ -8,8 +8,8 @@ jest.mock('@commitment/localization', () => ({
 
 describe('Layout Primitives', () => {
   describe('Stack', () => {
-    it('renders correctly with gap token', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders correctly with gap token', async () => {
+      const { toJSON } = await renderWithTheme(
         <Stack gap="$md">
           <Text>1</Text>
           <Text>2</Text>
@@ -20,8 +20,8 @@ describe('Layout Primitives', () => {
   });
 
   describe('Inline', () => {
-    it('renders correctly with gap token', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders correctly with gap token', async () => {
+      const { toJSON } = await renderWithTheme(
         <Inline gap="$sm">
           <Text>1</Text>
           <Text>2</Text>
@@ -32,32 +32,32 @@ describe('Layout Primitives', () => {
   });
 
   describe('Surface', () => {
-    it('renders flat by default', () => {
-      const { toJSON } = renderWithTheme(<Surface><Text>Content</Text></Surface>);
+    it('renders flat by default', async () => {
+      const { toJSON } = await renderWithTheme(<Surface><Text>Content</Text></Surface>);
       expect(toJSON()).toMatchSnapshot();
     });
 
-    it('renders elevated variant', () => {
-      const { toJSON } = renderWithTheme(<Surface variant="elevated"><Text>Content</Text></Surface>);
+    it('renders elevated variant', async () => {
+      const { toJSON } = await renderWithTheme(<Surface variant="elevated"><Text>Content</Text></Surface>);
       expect(toJSON()).toMatchSnapshot();
     });
     
-    it('renders danger variant', () => {
-      const { toJSON } = renderWithTheme(<Surface variant="danger"><Text>Content</Text></Surface>);
+    it('renders danger variant', async () => {
+      const { toJSON } = await renderWithTheme(<Surface variant="danger"><Text>Content</Text></Surface>);
       expect(toJSON()).toMatchSnapshot();
     });
   });
 
   describe('Container', () => {
-    it('limits width and centers', () => {
-      const { toJSON } = renderWithTheme(<Container maxWidth={600}><Text>Content</Text></Container>);
+    it('limits width and centers', async () => {
+      const { toJSON } = await renderWithTheme(<Container maxWidth={600}><Text>Content</Text></Container>);
       expect(toJSON()).toMatchSnapshot();
     });
   });
 
   describe('Section', () => {
-    it('renders title and subtitle', () => {
-      const { getByText, toJSON } = renderWithTheme(
+    it('renders title and subtitle', async () => {
+      const { getByText, toJSON } = await renderWithTheme(
         <Section titleI18nKey="test.title" subtitleI18nKey="test.subtitle">
           <Text>Content</Text>
         </Section>
@@ -68,8 +68,8 @@ describe('Layout Primitives', () => {
       expect(toJSON()).toMatchSnapshot();
     });
 
-    it('renders collapsible and can toggle', () => {
-      const { queryByText } = renderWithTheme(
+    it('renders collapsible and can toggle', async () => {
+      const { queryByText } = await renderWithTheme(
         <Section titleI18nKey="test.title" collapsible>
           <Text>My Content</Text>
         </Section>

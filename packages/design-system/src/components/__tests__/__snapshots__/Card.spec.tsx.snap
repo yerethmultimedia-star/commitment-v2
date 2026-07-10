@@ -1,0 +1,145 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Card matches forest theme snapshot 1`] = `
+<View
+  accessible={false}
+  style={
+    {
+      "backgroundColor": "#FFFFFF",
+      "borderBottomColor": "#E8E4D9",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 0,
+      "borderLeftColor": "#E8E4D9",
+      "borderLeftWidth": 0,
+      "borderRightColor": "#E8E4D9",
+      "borderRightWidth": 0,
+      "borderStyle": "solid",
+      "borderTopColor": "#E8E4D9",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 0,
+      "cursor": "default",
+      "opacity": 1,
+      "paddingBottom": 18,
+      "paddingLeft": 18,
+      "paddingRight": 18,
+      "paddingTop": 18,
+      "shadowColor": "rgb(44,42,38)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    suppressHighlighting={true}
+  >
+    Hi
+  </Text>
+</View>
+`;
+
+exports[`Card matches midnight theme snapshot 1`] = `
+<View
+  accessible={false}
+  style={
+    {
+      "backgroundColor": "transparent",
+      "borderBottomColor": "#E8E4D9",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "#E8E4D9",
+      "borderLeftWidth": 1,
+      "borderRightColor": "#E8E4D9",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "#E8E4D9",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "opacity": 1,
+      "paddingBottom": 18,
+      "paddingLeft": 18,
+      "paddingRight": 18,
+      "paddingTop": 18,
+      "shadowColor": "rgb(44,42,38)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    suppressHighlighting={true}
+  >
+    Hi
+  </Text>
+</View>
+`;
+
+exports[`Card matches sunrise theme snapshot 1`] = `
+<View
+  accessible={false}
+  style={
+    {
+      "backgroundColor": "#FAF7F2",
+      "borderBottomColor": "transparent",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "transparent",
+      "borderLeftWidth": 1,
+      "borderRightColor": "transparent",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "transparent",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "opacity": 1,
+      "paddingBottom": 18,
+      "paddingLeft": 18,
+      "paddingRight": 18,
+      "paddingTop": 18,
+      "shadowColor": "rgb(44,42,38)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    suppressHighlighting={true}
+  >
+    Hi
+  </Text>
+</View>
+`;

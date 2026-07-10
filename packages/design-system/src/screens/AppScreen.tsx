@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
-import { useScreenAnnouncement } from '../focus/index.js';
+import { useScreenAnnouncement } from '../accessibility/index.js';
 import { ScreenScroll } from '../scroll/ScreenScroll.js';
 import { StaticScreen } from './StaticScreen.js';
 import { View } from 'tamagui';
+import { KeyboardProvider } from '../keyboard/KeyboardContext.js';
 
 export interface AppScreenProps {
   scrollable?: boolean;
@@ -69,10 +70,12 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   );
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={statusBarStyle} hidden={statusBarHidden} />
-      {screenContent}
-    </View>
+    <KeyboardProvider>
+      <View style={styles.container}>
+        <StatusBar barStyle={statusBarStyle} hidden={statusBarHidden} />
+        {screenContent}
+      </View>
+    </KeyboardProvider>
   );
 };
 

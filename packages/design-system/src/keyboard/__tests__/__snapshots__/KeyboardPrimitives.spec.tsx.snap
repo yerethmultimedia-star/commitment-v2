@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Keyboard Primitives renders KeyboardAwareScroll correctly 1`] = `
+<RNCSafeAreaView
+  edges={
+    {
+      "bottom": "additive",
+      "left": "off",
+      "right": "off",
+      "top": "additive",
+    }
+  }
+  style={
+    {
+      "flex": 1,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      onLayout={[Function]}
+      style={
+        [
+          {
+            "flex": 1,
+            "width": "100%",
+          },
+          {
+            "paddingBottom": 0,
+          },
+        ]
+      }
+    >
+      <RCTScrollView
+        contentContainerStyle={
+          {
+            "flexGrow": 1,
+            "padding": 16,
+          }
+        }
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={
+          {
+            "flex": 1,
+          }
+        }
+      >
+        <View>
+          <Text
+            suppressHighlighting={true}
+          >
+            Content
+          </Text>
+        </View>
+      </RCTScrollView>
+    </View>
+  </View>
+</RNCSafeAreaView>
+`;
+
+exports[`Keyboard Primitives renders KeyboardDismissArea correctly 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessible={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "flex": 1,
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
+  <Text
+    suppressHighlighting={true}
+  >
+    Content
+  </Text>
+</View>
+`;
+
+exports[`Keyboard Primitives renders KeyboardSpacer correctly 1`] = `
+<View
+  style={
+    {
+      "height": 0,
+    }
+  }
+/>
+`;

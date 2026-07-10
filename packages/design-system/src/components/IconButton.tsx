@@ -76,7 +76,9 @@ export const IconButton = React.forwardRef<any, IconButtonProps>(({
       <View
         ref={ref as any}
         testID={testID}
+        role="button"
         accessibilityRole="button"
+        accessible={true}
         accessibilityState={{ disabled: isActuallyDisabled, busy: loading }}
         accessibilityLabel={tooltipI18nKey ? t(tooltipI18nKey) : undefined}
         accessibilityHint={accessibilityHintI18nKey ? t(accessibilityHintI18nKey) : undefined}

@@ -1,8 +1,9 @@
 import React, { createContext, ReactNode } from 'react';
-import { HapticsProvider, ClipboardProvider, ShareProvider, DeviceProvider, StorageProvider, NotificationProvider, PermissionsProvider } from '@commitment/platform';
+import { HapticsProvider, ClipboardProvider, ShareProvider, DeviceProvider, StorageProvider, NotificationProvider, PermissionsProvider, KeyboardPlatformAdapter } from '@commitment/platform';
 
 export interface PlatformServices {
   haptics: HapticsProvider;
+  keyboard?: KeyboardPlatformAdapter;
   clipboard?: ClipboardProvider;
   share?: ShareProvider;
   device?: DeviceProvider;

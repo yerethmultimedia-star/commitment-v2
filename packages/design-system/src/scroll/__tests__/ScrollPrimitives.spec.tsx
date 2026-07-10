@@ -10,8 +10,8 @@ jest.mock('react-native-safe-area-context', () => ({
 
 describe('Scroll Primitives', () => {
   describe('ScreenScroll', () => {
-    it('renders scroll content correctly', () => {
-      const { toJSON } = renderWithTheme(
+    it('renders scroll content correctly', async () => {
+      const { toJSON } = await renderWithTheme(
         <ScreenScroll>
           <Text>Scroll Item</Text>
         </ScreenScroll>
@@ -21,9 +21,9 @@ describe('Scroll Primitives', () => {
   });
 
   describe('VirtualizedScreen', () => {
-    it('renders data items correctly', () => {
+    it('renders data items correctly', async () => {
       const data = [{ id: '1', title: 'Item 1' }];
-      const { toJSON } = renderWithTheme(
+      const { toJSON } = await renderWithTheme(
         <VirtualizedScreen
           data={data}
           keyExtractor={(item) => item.id}
@@ -35,14 +35,14 @@ describe('Scroll Primitives', () => {
   });
 
   describe('SectionList', () => {
-    it('renders sections correctly', () => {
+    it('renders sections correctly', async () => {
       const sections = [
         {
           titleI18nKey: 'section.one',
           data: [{ id: '1', title: 'Sub Item 1' }],
         },
       ];
-      const { toJSON } = renderWithTheme(
+      const { toJSON } = await renderWithTheme(
         <SectionList
           sections={sections}
           keyExtractor={(item) => item.id}

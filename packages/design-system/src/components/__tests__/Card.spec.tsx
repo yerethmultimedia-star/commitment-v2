@@ -5,8 +5,8 @@ import { Card } from '../Card';
 import { renderWithTheme } from './setup';
 
 describe('Card', () => {
-  it('renders correctly', () => {
-    const { getByText } = renderWithTheme(
+  it('renders correctly', async () => {
+    const { getByText } = await renderWithTheme(
       <Card>
         <Text>Content</Text>
       </Card>
@@ -14,24 +14,24 @@ describe('Card', () => {
     expect(getByText('Content')).toBeTruthy();
   });
 
-  it('matches sunrise theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<Card variant="elevated"><Text>Hi</Text></Card>, 'sunrise');
+  it('matches sunrise theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<Card variant="elevated"><Text>Hi</Text></Card>, 'sunrise');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('matches midnight theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<Card variant="outlined"><Text>Hi</Text></Card>, 'midnight');
+  it('matches midnight theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<Card variant="outlined"><Text>Hi</Text></Card>, 'midnight');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('matches forest theme snapshot', () => {
-    const { toJSON } = renderWithTheme(<Card variant="flat"><Text>Hi</Text></Card>, 'forest');
+  it('matches forest theme snapshot', async () => {
+    const { toJSON } = await renderWithTheme(<Card variant="flat"><Text>Hi</Text></Card>, 'forest');
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('handles clickable state', () => {
+  it('handles clickable state', async () => {
     const onPress = jest.fn();
-    const { getByRole } = renderWithTheme(
+    const { getByRole } = await renderWithTheme(
       <Card clickable onPress={onPress}>
         <Text>Content</Text>
       </Card>

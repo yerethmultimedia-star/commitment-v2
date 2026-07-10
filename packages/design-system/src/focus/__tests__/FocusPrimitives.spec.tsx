@@ -12,21 +12,21 @@ const FocusTestComponent = () => {
   useRestoreFocus(restoreRef, true);
   useFocusTrap(trapRef, true);
   
-  const { getTabIndex, handleKeyPress } = useRovingFocus(3);
+  const { getTabIndex, handleKeyDown } = useRovingFocus({ itemCount: 3 });
 
   return (
     <View ref={trapRef}>
       <View ref={initialRef} tabIndex={0} />
       <View ref={restoreRef} tabIndex={0} />
-      <View tabIndex={getTabIndex(0)} onKeyDown={(e) => handleKeyPress(0, e)} />
-      <View tabIndex={getTabIndex(1)} onKeyDown={(e) => handleKeyPress(1, e)} />
+      <View tabIndex={getTabIndex(0)} onKeyDown={(e) => handleKeyDown(0, e)} />
+      <View tabIndex={getTabIndex(1)} onKeyDown={(e) => handleKeyDown(1, e)} />
     </View>
   );
 };
 
 describe('Focus Primitives', () => {
-  it('registers and pushes context stack', () => {
-    const { toJSON } = renderWithTheme(<FocusTestComponent />);
+  it('registers and pushes context stack', async () => {
+    const { toJSON } = await renderWithTheme(<FocusTestComponent />);
     expect(toJSON()).toMatchSnapshot();
   });
 });

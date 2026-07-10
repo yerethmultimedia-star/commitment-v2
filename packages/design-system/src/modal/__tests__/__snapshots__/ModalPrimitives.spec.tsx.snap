@@ -1,0 +1,838 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Modal Primitives ActionSheet renders a list of actions and cancel button 1`] = `
+<div
+  data-mock="bottom-sheet"
+>
+  <div
+    data-mock="bottom-sheet-view"
+  >
+    <View
+      style={
+        {
+          "height": 0,
+          "opacity": 0,
+          "position": "absolute",
+          "width": 0,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "flex": 1,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flexDirection": "column",
+            "gap": 8,
+            "paddingBottom": 16,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+            "paddingTop": 16,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "alignSelf": "flex-start",
+              "position": "relative",
+            }
+          }
+        >
+          <View
+            accessibilityLabel="[TR] action.delete"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": false,
+                "disabled": false,
+              }
+            }
+            accessible={true}
+            onBlur={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            role="button"
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FAF7F2",
+                "borderBottomColor": "transparent",
+                "borderBottomLeftRadius": 9,
+                "borderBottomRightRadius": 9,
+                "borderBottomWidth": 0,
+                "borderLeftColor": "transparent",
+                "borderLeftWidth": 0,
+                "borderRightColor": "transparent",
+                "borderRightWidth": 0,
+                "borderStyle": "solid",
+                "borderTopColor": "transparent",
+                "borderTopLeftRadius": 9,
+                "borderTopRightRadius": 9,
+                "borderTopWidth": 0,
+                "cursor": "pointer",
+                "flexDirection": "row",
+                "height": 48,
+                "justifyContent": "center",
+                "opacity": 1,
+                "paddingLeft": 18,
+                "paddingRight": 18,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 7,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={true}
+                maxFontSizeMultiplier={1.5}
+                style={
+                  {
+                    "color": "#EA4335",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": "$4",
+                    "letterSpacing": 0.1,
+                    "lineHeight": 20,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                [TR] action.delete
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignSelf": "flex-start",
+              "position": "relative",
+            }
+          }
+        >
+          <View
+            accessibilityLabel="[TR] action.edit"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": false,
+                "disabled": false,
+              }
+            }
+            accessible={true}
+            onBlur={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            role="button"
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FAF7F2",
+                "borderBottomColor": "transparent",
+                "borderBottomLeftRadius": 9,
+                "borderBottomRightRadius": 9,
+                "borderBottomWidth": 0,
+                "borderLeftColor": "transparent",
+                "borderLeftWidth": 0,
+                "borderRightColor": "transparent",
+                "borderRightWidth": 0,
+                "borderStyle": "solid",
+                "borderTopColor": "transparent",
+                "borderTopLeftRadius": 9,
+                "borderTopRightRadius": 9,
+                "borderTopWidth": 0,
+                "cursor": "pointer",
+                "flexDirection": "row",
+                "height": 48,
+                "justifyContent": "center",
+                "opacity": 1,
+                "paddingLeft": 18,
+                "paddingRight": 18,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 7,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={true}
+                maxFontSizeMultiplier={1.5}
+                style={
+                  {
+                    "color": "#2C2A26",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": "$4",
+                    "letterSpacing": 0.1,
+                    "lineHeight": 20,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                [TR] action.edit
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "alignSelf": "flex-start",
+              "position": "relative",
+            }
+          }
+        >
+          <View
+            accessibilityLabel="[TR] action.cancel"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": false,
+                "disabled": false,
+              }
+            }
+            accessible={true}
+            onBlur={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            role="button"
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "transparent",
+                "borderBottomColor": "#E8E4D9",
+                "borderBottomLeftRadius": 9,
+                "borderBottomRightRadius": 9,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "#E8E4D9",
+                "borderLeftWidth": 1,
+                "borderRightColor": "#E8E4D9",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "#E8E4D9",
+                "borderTopLeftRadius": 9,
+                "borderTopRightRadius": 9,
+                "borderTopWidth": 1,
+                "cursor": "pointer",
+                "flexDirection": "row",
+                "height": 48,
+                "justifyContent": "center",
+                "opacity": 1,
+                "paddingLeft": 18,
+                "paddingRight": 18,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 7,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={true}
+                maxFontSizeMultiplier={1.5}
+                style={
+                  {
+                    "color": "#2C2A26",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": "$4",
+                    "letterSpacing": 0.1,
+                    "lineHeight": 20,
+                  }
+                }
+                suppressHighlighting={true}
+              >
+                [TR] action.cancel
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </div>
+</div>
+`;
+
+exports[`Modal Primitives BottomSheet renders bottom sheet modal on Web 1`] = `
+<div
+  data-mock="bottom-sheet"
+>
+  <div
+    data-mock="bottom-sheet-view"
+  >
+    <View
+      style={
+        {
+          "height": 0,
+          "opacity": 0,
+          "position": "absolute",
+          "width": 0,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "flex": 1,
+        }
+      }
+    >
+      <Text
+        suppressHighlighting={true}
+      >
+        BottomSheet Content
+      </Text>
+    </View>
+  </div>
+</div>
+`;
+
+exports[`Modal Primitives ConfirmationDialog renders confirmation text and buttons 1`] = `
+<Modal
+  animationType="fade"
+  onRequestClose={[Function]}
+  transparent={true}
+  visible={true}
+>
+  <View
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "rgba(0, 0, 0, 0.4)",
+        "bottom": 0,
+        "justifyContent": "center",
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessible={true}
+      focusable={false}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignSelf": "center",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "maxWidth": "90%",
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "shadowColor": "rgb(44,42,38)",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 10,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "height": 0,
+            "opacity": 0,
+            "position": "absolute",
+            "width": 0,
+          }
+        }
+      />
+      <View
+        style={
+          {
+            "flexDirection": "column",
+            "gap": 16,
+            "paddingBottom": 8,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={true}
+          maxFontSizeMultiplier={1.5}
+          style={
+            {
+              "color": "#2C2A26",
+              "fontFamily": "Inter_600SemiBold",
+              "fontSize": 24,
+              "letterSpacing": -0.2,
+              "lineHeight": 32,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          [TR] confirm.title
+        </Text>
+        <Text
+          allowFontScaling={true}
+          maxFontSizeMultiplier={1.5}
+          style={
+            {
+              "color": "#5E5B55",
+              "fontFamily": "Inter_400Regular",
+              "fontSize": 16,
+              "letterSpacing": 0,
+              "lineHeight": 24,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          [TR] confirm.description
+        </Text>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "marginTop": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignSelf": "flex-start",
+                "position": "relative",
+              }
+            }
+          >
+            <View
+              accessibilityLabel="[TR] action.cancel"
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": false,
+                  "disabled": false,
+                }
+              }
+              accessible={true}
+              onBlur={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              role="button"
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "transparent",
+                  "borderBottomColor": "#E8E4D9",
+                  "borderBottomLeftRadius": 9,
+                  "borderBottomRightRadius": 9,
+                  "borderBottomWidth": 1,
+                  "borderLeftColor": "#E8E4D9",
+                  "borderLeftWidth": 1,
+                  "borderRightColor": "#E8E4D9",
+                  "borderRightWidth": 1,
+                  "borderStyle": "solid",
+                  "borderTopColor": "#E8E4D9",
+                  "borderTopLeftRadius": 9,
+                  "borderTopRightRadius": 9,
+                  "borderTopWidth": 1,
+                  "cursor": "pointer",
+                  "flexDirection": "row",
+                  "height": 48,
+                  "justifyContent": "center",
+                  "opacity": 1,
+                  "paddingLeft": 18,
+                  "paddingRight": 18,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                  "width": "100%",
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 7,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={true}
+                  maxFontSizeMultiplier={1.5}
+                  style={
+                    {
+                      "color": "#2C2A26",
+                      "fontFamily": "Inter_600SemiBold",
+                      "fontSize": "$4",
+                      "letterSpacing": 0.1,
+                      "lineHeight": 20,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  [TR] action.cancel
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            style={
+              {
+                "alignSelf": "flex-start",
+                "position": "relative",
+              }
+            }
+          >
+            <View
+              accessibilityLabel="[TR] action.confirm"
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": false,
+                  "disabled": false,
+                }
+              }
+              accessible={true}
+              onBlur={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              role="button"
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#FF7B54",
+                  "borderBottomColor": "transparent",
+                  "borderBottomLeftRadius": 9,
+                  "borderBottomRightRadius": 9,
+                  "borderBottomWidth": 0,
+                  "borderLeftColor": "transparent",
+                  "borderLeftWidth": 0,
+                  "borderRightColor": "transparent",
+                  "borderRightWidth": 0,
+                  "borderStyle": "solid",
+                  "borderTopColor": "transparent",
+                  "borderTopLeftRadius": 9,
+                  "borderTopRightRadius": 9,
+                  "borderTopWidth": 0,
+                  "cursor": "pointer",
+                  "flexDirection": "row",
+                  "height": 48,
+                  "justifyContent": "center",
+                  "opacity": 1,
+                  "paddingLeft": 18,
+                  "paddingRight": 18,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                  "width": "100%",
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 7,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={true}
+                  maxFontSizeMultiplier={1.5}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "Inter_600SemiBold",
+                      "fontSize": "$4",
+                      "letterSpacing": 0.1,
+                      "lineHeight": 20,
+                    }
+                  }
+                  suppressHighlighting={true}
+                >
+                  [TR] action.confirm
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</Modal>
+`;
+
+exports[`Modal Primitives Dialog renders centered Dialog 1`] = `
+<Modal
+  animationType="fade"
+  onRequestClose={[Function]}
+  transparent={true}
+  visible={true}
+>
+  <View
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "rgba(0, 0, 0, 0.4)",
+        "bottom": 0,
+        "justifyContent": "center",
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessible={true}
+      focusable={false}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignSelf": "center",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "maxWidth": "90%",
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "shadowColor": "rgb(44,42,38)",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 10,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "height": 0,
+            "opacity": 0,
+            "position": "absolute",
+            "width": 0,
+          }
+        }
+      />
+      <Text
+        suppressHighlighting={true}
+      >
+        Dialog Content
+      </Text>
+    </View>
+  </View>
+</Modal>
+`;
+
+exports[`Modal Primitives ModalPrimitive renders correct content when open 1`] = `
+<Modal
+  animationType="fade"
+  onRequestClose={[Function]}
+  transparent={true}
+  visible={true}
+>
+  <View
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "rgba(0, 0, 0, 0.4)",
+        "bottom": 0,
+        "justifyContent": "center",
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessible={true}
+      focusable={false}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignSelf": "center",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomLeftRadius": 9,
+          "borderBottomRightRadius": 9,
+          "borderTopLeftRadius": 9,
+          "borderTopRightRadius": 9,
+          "maxWidth": "90%",
+          "paddingBottom": 16,
+          "paddingLeft": 16,
+          "paddingRight": 16,
+          "paddingTop": 16,
+          "shadowColor": "rgb(44,42,38)",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 10,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "height": 0,
+            "opacity": 0,
+            "position": "absolute",
+            "width": 0,
+          }
+        }
+      />
+      <Text
+        suppressHighlighting={true}
+      >
+        Modal Content
+      </Text>
+    </View>
+  </View>
+</Modal>
+`;

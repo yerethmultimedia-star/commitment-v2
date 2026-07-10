@@ -1,0 +1,199 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IconButton matches forest theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "transparent",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 22,
+        "borderBottomRightRadius": 22,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 22,
+        "borderTopRightRadius": 22,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "height": 44,
+        "justifyContent": "center",
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+        "width": 44,
+      }
+    }
+  >
+    <Text
+      suppressHighlighting={true}
+    >
+      Icon
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`IconButton matches midnight theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "transparent",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 22,
+        "borderBottomRightRadius": 22,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 22,
+        "borderTopRightRadius": 22,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "height": 44,
+        "justifyContent": "center",
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+        "width": 44,
+      }
+    }
+  >
+    <Text
+      suppressHighlighting={true}
+    >
+      Icon
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`IconButton matches sunrise theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "position": "relative",
+    }
+  }
+>
+  <View
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": false,
+        "disabled": false,
+      }
+    }
+    accessible={true}
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    role="button"
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "transparent",
+        "borderBottomColor": "transparent",
+        "borderBottomLeftRadius": 22,
+        "borderBottomRightRadius": 22,
+        "borderBottomWidth": 0,
+        "borderLeftColor": "transparent",
+        "borderLeftWidth": 0,
+        "borderRightColor": "transparent",
+        "borderRightWidth": 0,
+        "borderStyle": "solid",
+        "borderTopColor": "transparent",
+        "borderTopLeftRadius": 22,
+        "borderTopRightRadius": 22,
+        "borderTopWidth": 0,
+        "cursor": "pointer",
+        "height": 44,
+        "justifyContent": "center",
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+        "width": 44,
+      }
+    }
+  >
+    <Text
+      suppressHighlighting={true}
+    >
+      Icon
+    </Text>
+  </View>
+</View>
+`;

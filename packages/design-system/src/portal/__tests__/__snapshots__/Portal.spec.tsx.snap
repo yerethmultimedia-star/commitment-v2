@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Portal Primitive renders children inside host 1`] = `
+<Text
+  suppressHighlighting={true}
+>
+  Inside Portal
+</Text>
+`;

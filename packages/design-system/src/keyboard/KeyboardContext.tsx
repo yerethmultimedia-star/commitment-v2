@@ -1,56 +1,74 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Keyboard, Platform, KeyboardEvent } from 'react-native';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { PlatformContext } from '../providers/PlatformProvider.js';
 
 export interface KeyboardState {
-  keyboardVisible: boolean;
   keyboardHeight: number;
+  keyboardVisible: boolean;
+  animationDuration: number;
+  animationCurve: string;
+  dismiss: () => void;
 }
 
 const KeyboardContext = createContext<KeyboardState>({
-  keyboardVisible: false,
   keyboardHeight: 0,
+  keyboardVisible: false,
+  animationDuration: 0,
+  animationCurve: 'none',
+  dismiss: () => {},
 });
 
-export const useKeyboardState = () => useContext(KeyboardContext);
+export const useKeyboard = () => useContext(KeyboardContext);
+
+// Alias para compatibilidad hacia atrás
+export const useKeyboardState = useKeyboard;
 
 export interface KeyboardProviderProps {
   children: React.ReactNode;
 }
 
 export const KeyboardProvider: React.FC<KeyboardProviderProps> = ({ children }) => {
-  const [state, setState] = useState<KeyboardState>({
-    keyboardVisible: false,
+  const platform = useContext(PlatformContext);
+  const adapter = platform?.keyboard || {
+    addListener: () => () => {},
+    dismiss: () => {},
+  };
+
+  const [state, setState] = useState({
     keyboardHeight: 0,
+    keyboardVisible: false,
+    animationDuration: 0,
+    animationCurve: 'none',
   });
 
   useEffect(() => {
-    if (Platform.OS === 'web') return;
+    const unsubscribeShow = adapter.addListener('show', (data) => {
+      setState({
+        keyboardHeight: data.height,
+        keyboardVisible: true,
+        animationDuration: data.duration ?? 250,
+        animationCurve: data.easing ?? 'keyboard',
+      });
+    });
 
-    const showSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e: KeyboardEvent) => {
-        setState({
-          keyboardVisible: true,
-          keyboardHeight: e.endCoordinates.height,
-        });
-      }
-    );
-
-    const hideSubscription = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        setState({
-          keyboardVisible: false,
-          keyboardHeight: 0,
-        });
-      }
-    );
+    const unsubscribeHide = adapter.addListener('hide', (data) => {
+      setState({
+        keyboardHeight: 0,
+        keyboardVisible: false,
+        animationDuration: data?.duration ?? 250,
+        animationCurve: data?.easing ?? 'keyboard',
+      });
+    });
 
     return () => {
-      showSubscription.remove();
-      hideSubscription.remove();
+      unsubscribeShow();
+      unsubscribeHide();
     };
-  }, []);
+  }, [adapter]);
 
-  return <KeyboardContext.Provider value={state}>{children}</KeyboardContext.Provider>;
+  const value = useMemo<KeyboardState>(() => ({
+    ...state,
+    dismiss: () => adapter.dismiss(),
+  }), [state, adapter]);
+
+  return <KeyboardContext.Provider value={value}>{children}</KeyboardContext.Provider>;
 };

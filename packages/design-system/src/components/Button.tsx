@@ -108,7 +108,9 @@ export const Button = React.forwardRef<any, ButtonProps>(({
       <View
         ref={ref as any}
         testID={testID}
+        role="button"
         accessibilityRole="button"
+        accessible={true}
         accessibilityState={{ disabled: isActuallyDisabled, busy: loading }}
         accessibilityLabel={t(i18nKey)}
         aria-describedby={ariaDescribedBy}
