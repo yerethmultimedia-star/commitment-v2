@@ -1,12 +1,110 @@
 {
   "profile": {
     "title": "Profile",
+    "subtitle": "User account & app settings",
+    "appearance": "Appearance Settings",
+    "copied": "Copied to clipboard",
+    "copy": "Copy",
     "identityId": "Identity ID",
-    "version": "Version",
+    "version": "App Version",
     "environment": "Environment",
-    "logout": "Log out",
-    "copied": "Copied to clipboard"
+    "logout": "Log Out"
   },
   "back": "Back",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "tabs": {
+    "today": "Today",
+    "goals": "Goals",
+    "tasks": "Tasks",
+    "progress": "Progress",
+    "profile": "Profile"
+  },
+  "insights": {
+    "title": "Insights",
+    "weeklyConsistency": "Weekly Consistency",
+    "completionTrend": "Completion Trend",
+    "focusScore": "Focus Score",
+    "streakCalendar": "Streak Calendar",
+    "focusScoreDesc": "Your task focus is higher than average.",
+    "streakDesc": "Keep the flame alive!"
+  },
+  "quickCapture": {
+    "title": "Quick Capture",
+    "placeholder": "Capture task, goal or habit...",
+    "btnCapture": "Capture",
+    "btnCancel": "Cancel"
+  },
+  "dashboard": {
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening",
+    "hero": {
+      "dailyFocus": {
+        "title": "You have {{count}} focus tasks today",
+        "subtitle": "Tap here to continue your daily progress."
+      },
+      "streak": {
+        "title": "You completed {{count}} tasks this week!",
+        "subtitle": "Keep the momentum going."
+      },
+      "default": {
+        "title": "Ready to level up your commitments?",
+        "subtitle": "Set goals and build consistency today."
+      }
+    },
+    "activeCount": "You have {{count}} active commitments",
+    "noActiveCount": "No active commitments",
+    "loading": "Loading...",
+    "error": {
+      "title": "Widget Error",
+      "description": "Failed to load widget"
+    },
+    "widgets": {
+      "today": {
+        "title": "Today's Focus",
+        "remaining": "{{count}} tasks remaining",
+        "empty": {
+          "title": "All caught up!",
+          "description": "No tasks for today."
+        },
+        "itemA11y": "Task: {{title}}"
+      },
+      "upcoming": {
+        "title": "Upcoming Tasks",
+        "empty": "No upcoming tasks."
+      },
+      "weeklyProgress": {
+        "title": "Weekly Progress",
+        "completedVsTarget": "{{completed}} of {{target}} completed"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "actionAdd": "Add Task",
+        "actionCalendar": "Calendar"
+      },
+      "currentStreak": {
+        "title": "Daily Streak",
+        "count_one": "{{count}} Day",
+        "count_other": "{{count}} Days",
+        "activeMsg": "Keep the flame burning!",
+        "inactiveMsg": "Complete a task today to start a streak!"
+      },
+      "recentActivity": {
+        "title": "Recent Activity",
+        "empty": "No recent activity.",
+        "justNow": "Just now",
+        "minutesAgo_one": "{{count}}m ago",
+        "minutesAgo_other": "{{count}}m ago",
+        "hoursAgo_one": "{{count}}h ago",
+        "hoursAgo_other": "{{count}}h ago"
+      },
+      "completionRate": {
+        "title": "Completion Rate",
+        "thisWeek": "This week"
+      },
+      "motivation": {
+        "title": "Daily Spark"
+      }
+    }
+  }
 }

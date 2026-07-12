@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Text } from 'tamagui';
 import { Card } from '@commitment/design-system';
 
-import { useCommitments } from '@/features/commitments/hooks/useCommitments.js';
+import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
 
 export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget() {
   const { t } = useTranslation();
-  const { data: commitments = [] } = useCommitments();
+  const { data: dashboard } = useDashboardQuery();
 
-  const completed = useMemo(() => commitments.filter(c => c.status === 'completed').length, [commitments]);
-  const target = 7; // Currently static
+  const completed = dashboard?.metrics.completedThisWeek ?? 0;
+  const target = Math.max(completed + (dashboard?.metrics.pending ?? 0), 1);
 
   const progressData = useMemo(() => {
     const safeTarget = target > 0 ? target : 1;

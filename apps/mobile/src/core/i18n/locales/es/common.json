@@ -1,12 +1,110 @@
 {
   "profile": {
     "title": "Perfil",
-    "identityId": "Identity ID",
-    "version": "Versión",
+    "subtitle": "Ajustes de cuenta y aplicación",
+    "appearance": "Ajustes de Apariencia",
+    "copied": "Copiado al portapapeles",
+    "copy": "Copiar",
+    "identityId": "ID de Identidad",
+    "version": "Versión de App",
     "environment": "Entorno",
-    "logout": "Cerrar sesión",
-    "copied": "Copiado al portapapeles"
+    "logout": "Cerrar Sesión"
   },
   "back": "Atrás",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "tabs": {
+    "today": "Hoy",
+    "goals": "Objetivos",
+    "tasks": "Tareas",
+    "progress": "Progreso",
+    "profile": "Perfil"
+  },
+  "insights": {
+    "title": "Insights",
+    "weeklyConsistency": "Consistencia Semanal",
+    "completionTrend": "Tendencia de Finalización",
+    "focusScore": "Puntuación de Enfoque",
+    "streakCalendar": "Calendario de Racha",
+    "focusScoreDesc": "Tu enfoque de tareas es superior a la media.",
+    "streakDesc": "¡Mantén la llama encendida!"
+  },
+  "quickCapture": {
+    "title": "Captura Rápida",
+    "placeholder": "Captura una tarea, objetivo o hábito...",
+    "btnCapture": "Capturar",
+    "btnCancel": "Cancelar"
+  },
+  "dashboard": {
+    "greetingMorning": "Buenos días",
+    "greetingAfternoon": "Buenas tardes",
+    "greetingEvening": "Buenas noches",
+    "hero": {
+      "dailyFocus": {
+        "title": "Tienes {{count}} tareas de enfoque hoy",
+        "subtitle": "Toca aquí para continuar tu progreso diario."
+      },
+      "streak": {
+        "title": "¡Completaste {{count}} tareas esta semana!",
+        "subtitle": "Mantén el impulso."
+      },
+      "default": {
+        "title": "¿Listo para potenciar tus compromisos?",
+        "subtitle": "Establece objetivos y crea consistencia hoy."
+      }
+    },
+    "activeCount": "Tienes {{count}} compromisos activos",
+    "noActiveCount": "Sin compromisos activos",
+    "loading": "Cargando...",
+    "error": {
+      "title": "Error de Widget",
+      "description": "Error al cargar widget"
+    },
+    "widgets": {
+      "today": {
+        "title": "Enfoque de Hoy",
+        "remaining": "{{count}} tareas restantes",
+        "empty": {
+          "title": "¡Todo al día!",
+          "description": "Sin tareas para hoy."
+        },
+        "itemA11y": "Tarea: {{title}}"
+      },
+      "upcoming": {
+        "title": "Próximas Tareas",
+        "empty": "Sin tareas próximas."
+      },
+      "weeklyProgress": {
+        "title": "Progreso Semanal",
+        "completedVsTarget": "{{completed}} de {{target}} completados"
+      },
+      "quickActions": {
+        "title": "Acciones Rápidas",
+        "actionAdd": "Nueva Tarea",
+        "actionCalendar": "Calendario"
+      },
+      "currentStreak": {
+        "title": "Racha Diaria",
+        "count_one": "{{count}} Día",
+        "count_other": "{{count}} Días",
+        "activeMsg": "¡Mantén la llama encendida!",
+        "inactiveMsg": "¡Completa una tarea hoy para empezar una racha!"
+      },
+      "recentActivity": {
+        "title": "Actividad Reciente",
+        "empty": "Sin actividad reciente.",
+        "justNow": "Hace un momento",
+        "minutesAgo_one": "Hace {{count}}m",
+        "minutesAgo_other": "Hace {{count}}m",
+        "hoursAgo_one": "Hace {{count}}h",
+        "hoursAgo_other": "Hace {{count}}h"
+      },
+      "completionRate": {
+        "title": "Tasa de Finalización",
+        "thisWeek": "Esta semana"
+      },
+      "motivation": {
+        "title": "Chispa Diaria"
+      }
+    }
+  }
 }

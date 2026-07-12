@@ -2,10 +2,10 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { View, Text, Switch, YStack, XStack, Separator } from 'tamagui';
 import { useTranslation } from 'react-i18next';
-import { appThemeRegistry } from '../providers/theme-registry.js';
-import { useAppearanceStore } from '../store/use-appearance-store.js';
+import { appThemeRegistry } from '../providers/theme-registry';
+import { useAppearanceStore } from '../store/use-appearance-store';
 import { ThemeMetadata } from '@commitment/theme-engine';
-import { ThemePreviewCard } from '../components/ThemePreviewCard.js';
+import { ThemePreviewCard } from '../components/ThemePreviewCard';
 
 export const AppearanceSettingsScreen: React.FC = () => {
   const { t } = useTranslation();

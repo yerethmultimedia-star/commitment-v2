@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import { Stack, Body, AppScreen } from '@commitment/design-system';
-import { DashboardHeader } from './DashboardHeader.js';
-import { WidgetRenderer } from './WidgetRenderer.js';
-import { useDashboardStore } from '../../store/use-dashboard-store.js';
-import { useSession } from '@/core/auth/use-session.js';
+import { DashboardHeader } from './DashboardHeader';
+import { WidgetRenderer } from './WidgetRenderer';
+import { useDashboardStore } from '../../store/use-dashboard-store';
+import { useSession } from '@/core/auth/use-session';
+import { useTranslation } from 'react-i18next';
 
 export interface DashboardContentProps {
   activeCommitmentsCount: number;
 }
 
 export const DashboardContent = React.memo(function DashboardContent({ activeCommitmentsCount }: DashboardContentProps) {
+  const { t } = useTranslation('common');
   const { identityId } = useSession();
   const { getVisibleWidgets, load, isLoading } = useDashboardStore();
   
@@ -28,7 +30,7 @@ export const DashboardContent = React.memo(function DashboardContent({ activeCom
         
         {isLoading ? (
           <Stack flex={1} alignItems="center" justifyContent="center" padding="$10">
-            <Body color="$contentSecondary">Loading layout...</Body>
+            <Body color="$contentSecondary">{t('dashboard.loading')}</Body>
           </Stack>
         ) : (
           <Stack gap="$md">

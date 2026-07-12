@@ -1,3 +1,4 @@
+import { Inject, Injectable } from '@nestjs/common';
 import {
   CommitmentQueryService,
   CommitmentFilters,
@@ -8,8 +9,12 @@ import {
 } from '../application/queries/commitment-view.dto';
 import { InMemoryCommitmentProjectionStore } from './in-memory-commitment-projection.store';
 
+@Injectable()
 export class InMemoryCommitmentQueryService implements CommitmentQueryService {
-  constructor(private readonly store: InMemoryCommitmentProjectionStore) {}
+  constructor(
+    @Inject('CommitmentProjectionStore')
+    private readonly store: InMemoryCommitmentProjectionStore,
+  ) {}
 
   public findById(id: string): Promise<CommitmentView | null> {
     const view = this.store.findById(id);

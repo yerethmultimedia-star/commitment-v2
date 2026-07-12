@@ -8,7 +8,8 @@ export function useCommitments() {
     queryKey: queryKeys.commitments.list(),
     queryFn: async ({ signal }) => {
       const response = await commitmentsApi.list(signal);
-      return response.items.map(commitmentMapper.fromDTO);
+      const items = response.items || (response as any).data || [];
+      return items.map(commitmentMapper.fromDTO);
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2,

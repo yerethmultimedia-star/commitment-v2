@@ -11,11 +11,10 @@ import { queryClient } from '../core/query/query-client';
 import { AuthProvider } from '@/core/auth/auth-provider';
 import { StatusBar } from 'expo-status-bar';
 import '@/core/i18n'; // Initialize i18n
-import { registerDefaultWidgets } from '@/features/dashboard/registry/default-widgets.js';
+import { registerDefaultWidgets } from '@/features/dashboard/registry/default-widgets';
 import { createKeyboardPlatformAdapter } from '@commitment/platform';
 
 SplashScreen.preventAutoHideAsync();
-registerDefaultWidgets();
 
 const platformServices: PlatformServices = {
   haptics: {
@@ -32,6 +31,10 @@ export default function RootLayout() {
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
   });
+
+  useEffect(() => {
+    registerDefaultWidgets();
+  }, []);
 
   useEffect(() => {
     if (loaded) {

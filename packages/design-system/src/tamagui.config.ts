@@ -1,8 +1,8 @@
 import { createTamagui, TamaguiInternalConfig } from '@tamagui/core';
 import { config as configBase } from '@tamagui/config/v3';
-import { themes } from './tokens/themes.js';
-import { interFont } from './tokens/typography.js';
-import { space, size } from './tokens/space.js';
+import { themes } from './tokens/themes';
+import { interFont } from './tokens/typography';
+import { space, size } from './tokens/space';
 
 export const config: TamaguiInternalConfig = createTamagui({
   ...configBase,

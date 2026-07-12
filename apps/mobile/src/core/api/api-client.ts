@@ -12,11 +12,11 @@ const getBaseUrl = () => {
 
   if (Platform.OS === 'android') {
     // Android emulator alias to host machine localhost
-    return 'http://10.0.2.2:3000';
+    return 'http://10.0.2.2:4000';
   }
 
   // iOS simulator or default localhost
-  return 'http://localhost:3000';
+  return 'http://localhost:4000';
 };
 
 const baseUrl = getBaseUrl();
@@ -26,8 +26,8 @@ const baseUrl = getBaseUrl();
  * Interceptors can be added here for JWT and request-ids.
  */
 export const apiClient = ky.create({
-  // @ts-expect-error Ky typings might differ
-  prefixUrl: `${baseUrl}/v1`,
+  // @ts-ignore
+  prefix: `${baseUrl}/v1`,
   timeout: 10000,
   retry: {
     limit: 2,
@@ -36,24 +36,56 @@ export const apiClient = ky.create({
   },
   hooks: {
     beforeRequest: [
-      (request) => {
-        // Automatically attach x-request-id for observability (VS-016)
-        // @ts-expect-error request typing in beforeRequest hook
-        request.headers.set('x-request-id', crypto.randomUUID());
-        
-        // Automatically inject identity if authenticated
+      ((request: any, options: any) => {
+        // Generate UUID safely since crypto might not be available in React Native without polyfills
+        let uuid = 'dev-uuid';
+        try {
+          if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            uuid = crypto.randomUUID();
+          } else {
+            uuid = Math.random().toString(36).substring(2) + Date.now().toString(36);
+          }
+        } catch (e) {}
+
         const { identityId, sessionStatus } = useAuthStore.getState();
-        if (sessionStatus === 'Authenticated' && identityId) {
-          // @ts-expect-error request typing
-          request.headers.set('x-identity-id', identityId);
+
+        // 1. Try setting headers on options object if it exists
+        if (options) {
+          try {
+            if (!options.headers) {
+              options.headers = new Headers();
+            } else if (!(options.headers instanceof Headers)) {
+              options.headers = new Headers(options.headers);
+            }
+            
+            const headers = options.headers as Headers;
+            headers.set('x-request-id', uuid);
+            if (sessionStatus === 'Authenticated' && identityId) {
+              headers.set('x-identity-id', identityId);
+            }
+            if (i18next.language) {
+              headers.set('Accept-Language', i18next.language);
+            }
+          } catch (e) {
+            console.warn('Failed to set headers on options', e);
+          }
         }
         
-        // Inject current language
-        if (i18next.language) {
-          // @ts-expect-error request typing
-          request.headers.set('Accept-Language', i18next.language);
+        // 2. Try setting headers on request object if it and request.headers exists
+        if (request && request.headers && typeof request.headers.set === 'function') {
+          try {
+            request.headers.set('x-request-id', uuid);
+            if (sessionStatus === 'Authenticated' && identityId) {
+              request.headers.set('x-identity-id', identityId);
+            }
+            if (i18next.language) {
+              request.headers.set('Accept-Language', i18next.language);
+            }
+          } catch (e) {
+            console.warn('Failed to set headers on request object', e);
+          }
         }
-      },
+      }) as any,
     ],
   },
 });

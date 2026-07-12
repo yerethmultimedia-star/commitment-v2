@@ -1,12 +1,38 @@
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { DashboardLayout, DashboardLayoutRepository } from '@commitment/domain';
 
 const STORE_KEY = 'dashboard_layout';
 
+// Helper to handle Web compatibility since SecureStore is only for iOS/Android
+const storage = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (Platform.OS === 'web') {
+      try {
+        return typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    return await SecureStore.getItemAsync(key);
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (Platform.OS === 'web') {
+      try {
+        if (typeof window !== 'undefined') window.localStorage.setItem(key, value);
+      } catch (e) {
+        // ignore
+      }
+      return;
+    }
+    await SecureStore.setItemAsync(key, value);
+  }
+};
+
 export class DashboardLayoutRepositoryImpl implements DashboardLayoutRepository {
   async get(userId: string): Promise<DashboardLayout | null> {
     try {
-      const data = await SecureStore.getItemAsync(`${STORE_KEY}_${userId}`);
+      const data = await storage.getItem(`${STORE_KEY}_${userId}`);
       if (!data) return null;
       
       const parsed = JSON.parse(data);
@@ -33,7 +59,7 @@ export class DashboardLayoutRepositoryImpl implements DashboardLayoutRepository 
         widgets: layout.widgets,
         updatedAt: layout.updatedAt.toISOString(),
       });
-      await SecureStore.setItemAsync(`${STORE_KEY}_${layout.userId}`, data);
+      await storage.setItem(`${STORE_KEY}_${layout.userId}`, data);
     } catch (error) {
       console.error('Failed to save dashboard layout', error);
       throw error; // Let the store handle it

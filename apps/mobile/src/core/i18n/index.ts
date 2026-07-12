@@ -14,6 +14,7 @@ i18n
     resources,
     lng: getDeviceLanguage(), // Fallback to device language
     fallbackLng: 'en',
+    defaultNS: 'common',
     interpolation: {
       escapeValue: false, // React already escapes values
     },

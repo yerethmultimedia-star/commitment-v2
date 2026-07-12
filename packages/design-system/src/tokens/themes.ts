@@ -1,5 +1,5 @@
 import { sunriseTheme, midnightTheme, forestTheme } from '@commitment/theme-engine';
-import { adaptThemeToTamagui } from '../adapters/theme-adapter.js';
+import { adaptThemeToTamagui } from '../adapters/theme-adapter';
 
 export const themes = {
   light: adaptThemeToTamagui(sunriseTheme.resolve()),

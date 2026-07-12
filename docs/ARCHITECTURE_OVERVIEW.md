@@ -239,7 +239,14 @@ const platformServices: PlatformServices = {
 
 ## 11. Internacionalización & Localización
 
-El SDK de localización (`@commitment/localization`) centraliza el motor de idiomas e impone directrices estrictas:
+El SDK de localización (`@commitment/localization`) centraliza el motor de idiomas e impone la arquitectura declarativa de traducción detallada en [ADR-013](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_013_internationalization_first.md):
 
+- **Regla 1 — Internacionalización Obligatoria (Zero Hardcoded Text):** Ningún texto visible al usuario puede agregarse directamente en una Feature. Esto incluye títulos, subtítulos, botones, placeholders, mensajes de error, snacks, diálogos, widgets, etc. Todo debe venir desde traducción.
+- **Regla 2 — UI Declarativa (Ninguna Feature usa `t()`):** Las Features no llaman a `t()` directamente. Se provee la clave `i18nKey` a los componentes de tipografía y botones del Design System.
+- **Regla 3 — Actualización Simultánea de Idiomas:** Cada cambio de locales requiere actualizar a la par inglés (`en/`) y español (`es/`).
+- **Regla 4 — Rechazo de Strings Hardcodeados:** Todo componente que acepte hijos como texto plano literal será rechazado en el control de calidad.
+- **Regla 5 — Accesibilidad Localizada:** Todos los anuncios de pantalla, descriptors y etiquetas de VoiceOver/TalkBack deben ir traducidos.
+- **Regla 6 — Widgets Declarativos:** Widget Registry y Hero Cards se definen utilizando propiedades `i18nKey`, nunca textos planos.
+- **Regla 7 — Definition of Done:** Ninguna feature se considera terminada hasta completar la internacionalización al 100% de los idiomas soportados.
 - **Formateo Temporal:** El formateo de fechas y horas se realiza a través de las utilidades expuestas por el SDK, apoyándose en la zona horaria del usuario.
 - **Prohibición de `Intl`:** Se prohíbe el uso directo del constructor `Intl` de JavaScript en las vistas para garantizar uniformidad en toda la aplicación y compatibilidad en entornos antiguos de JS runtime.

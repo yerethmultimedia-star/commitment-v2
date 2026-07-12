@@ -11,12 +11,13 @@ Last Updated: 2026-07-08
 
 - **ADR-011:** Preferred Tech Stack Flexibility (Approved, [adr_011_tech_stack_flexibility.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_011_tech_stack_flexibility.md))
 - **ADR-012:** Governance Framework (Approved, integrated under [docs/00-governance/](file:///Users/yereth/Desktop/Commitment-v2/docs/00-governance/))
-- **ADR-013:** Internationalization First (Planned)
+- **ADR-013:** Internationalization First & Declarative UI (Approved, [adr_013_internationalization_first.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_013_internationalization_first.md))
 - **ADR-014:** Activity History & Experience Themes Subsystem (Approved, [adr_014_activity_history_recommendations.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_014_activity_history_recommendations.md))
 
 ---
 
 ## 📜 Change History
 
+- **v1.2.0 (2026-07-12):** Approved ADR-013 for Mandatory Internationalization & Declarative UI.
 - **v1.1.0 (2026-07-08):** Registered ADR-014 for Activity History recommendations and Experience Themes subsystem.
 - **v1.0.0 (2026-07-04):** Integrated as the official decision log at the root level.

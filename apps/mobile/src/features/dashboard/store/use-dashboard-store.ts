@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { DashboardLayout } from '@commitment/domain';
-import { DashboardLayoutRepositoryImpl } from '../repository/dashboard.repository.impl.js';
-import { appWidgetRegistry, WidgetDefinition } from '../registry/WidgetRegistry.js';
+import { DashboardLayoutRepositoryImpl } from '../repository/dashboard.repository.impl';
+import { appWidgetRegistry, WidgetDefinition } from '../registry/WidgetRegistry';
 
 const repository = new DashboardLayoutRepositoryImpl();
 
@@ -37,6 +37,20 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         });
         
         await repository.save(layout);
+      } else {
+        // Check for missing registered widgets in existing layout and add them
+        const allWidgets = appWidgetRegistry.getAll().sort((a, b) => a.priority - b.priority);
+        let hasChanges = false;
+        allWidgets.forEach(w => {
+          const exists = layout!.widgets.some(lw => lw.widgetId === w.id);
+          if (!exists) {
+            layout!.addWidget(w.id, w.defaultSize);
+            hasChanges = true;
+          }
+        });
+        if (hasChanges) {
+          await repository.save(layout);
+        }
       }
       
       set({ layout, isLoading: false });

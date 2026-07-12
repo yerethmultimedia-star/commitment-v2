@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Text, YStack } from 'tamagui';
-import { WidgetDefinition } from '../../registry/WidgetRegistry.js';
+import { WidgetDefinition } from '../../registry/WidgetRegistry';
 
 export interface WidgetRendererProps {
   widget: WidgetDefinition;

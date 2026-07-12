@@ -1,0 +1,39 @@
+{
+  "title": "Tareas",
+  "new": "Nueva",
+  "close": "Cerrar",
+  "loading": "Cargando…",
+  "empty": "No tienes tareas pendientes.",
+  "form": {
+    "title": "Nueva tarea",
+    "titlePlaceholder": "¿Qué necesitas hacer?",
+    "description": "Descripción de la tarea",
+    "descriptionPlaceholder": "Descripción opcional",
+    "priority": "Prioridad",
+    "priorityLow": "Baja",
+    "priorityMedium": "Media",
+    "priorityHigh": "Alta",
+    "commitment": "Compromiso Relacionado",
+    "noCommitment": "Sin Compromiso (General)",
+    "editTitle": "Editar tarea",
+    "save": "Guardar cambios",
+    "sortBy": "Ordenar por",
+    "sortCreated": "Fecha de Creación",
+    "sortPriority": "Prioridad",
+    "submit": "Crear tarea"
+  },
+  "actions": {
+    "complete": "Completar",
+    "duplicate": "Duplicar",
+    "archive": "Archivar",
+    "edit": "Editar"
+  },
+  "progress": {
+    "title": "Progreso",
+    "completionRate": "Tasa de Finalización",
+    "weeklySummary": "Resumen Semanal",
+    "completedTasks": "Tareas Completadas",
+    "pendingTasks": "Tareas Pendientes",
+    "description": "Análisis de tu actividad semanal y tasa de finalización."
+  }
+}

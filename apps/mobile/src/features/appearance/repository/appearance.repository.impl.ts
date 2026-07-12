@@ -1,12 +1,12 @@
-import * as SecureStore from 'expo-secure-store';
 import { Appearance, AppearanceRepository, AppearanceSettings, AppearanceSettingsProps } from '@commitment/domain';
+import { secureStorage } from '../../../core/storage/secure-storage';
 
 const APPEARANCE_STORAGE_KEY = 'commitment.appearance.settings';
 
 export class AppearanceRepositoryImpl implements AppearanceRepository {
   async get(userId: string): Promise<Appearance> {
     try {
-      const storedData = await SecureStore.getItemAsync(APPEARANCE_STORAGE_KEY);
+      const storedData = await secureStorage.getItem(APPEARANCE_STORAGE_KEY);
       
       if (storedData) {
         const parsed = JSON.parse(storedData) as AppearanceSettingsProps;
@@ -26,7 +26,7 @@ export class AppearanceRepositoryImpl implements AppearanceRepository {
   async save(appearance: Appearance): Promise<void> {
     try {
       const dataToSave = JSON.stringify(appearance.settings.toJSON());
-      await SecureStore.setItemAsync(APPEARANCE_STORAGE_KEY, dataToSave);
+      await secureStorage.setItem(APPEARANCE_STORAGE_KEY, dataToSave);
     } catch (error) {
       console.error('Failed to save appearance settings to SecureStore', error);
       throw error;

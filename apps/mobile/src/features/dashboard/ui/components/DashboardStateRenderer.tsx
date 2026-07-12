@@ -2,6 +2,7 @@ import React from 'react';
 import { YStack, Text } from 'tamagui';
 import { DashboardSkeleton } from './skeletons/DashboardSkeleton';
 import { DashboardEmptyState } from './empty-states/DashboardEmptyState';
+import { useTranslation } from 'react-i18next';
 
 export enum DashboardState {
   Loading = 'LOADING',
@@ -17,6 +18,7 @@ export interface DashboardStateRendererProps {
 }
 
 export function DashboardStateRenderer({ state, errorMessage, children }: DashboardStateRendererProps) {
+  const { t } = useTranslation('common');
   switch (state) {
     case DashboardState.Loading:
       return <DashboardSkeleton />;
@@ -28,7 +30,7 @@ export function DashboardStateRenderer({ state, errorMessage, children }: Dashbo
       return (
         <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
           <Text color="$danger" fontSize="$5" fontWeight="600" textAlign="center">
-            {errorMessage || 'Ha ocurrido un error al cargar el dashboard.'}
+            {errorMessage || t('dashboard.error.description')}
           </Text>
         </YStack>
       );

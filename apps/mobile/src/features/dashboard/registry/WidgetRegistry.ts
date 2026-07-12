@@ -16,6 +16,12 @@ export interface WidgetDefinition {
   featureFlags: string[];
   permissions: string[];
   minimumAppVersion?: string;
+  supportsPersonalization?: boolean;
+  minimumSize?: 'small' | 'medium' | 'large';
+  preferredPosition?: number;
+  requiresData?: boolean;
+  dependencies?: string[];
+  supportsOffline?: boolean;
 }
 
 export class WidgetRegistry {

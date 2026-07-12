@@ -1,0 +1,39 @@
+{
+  "title": "Tasks",
+  "new": "New",
+  "close": "Close",
+  "loading": "Loading…",
+  "empty": "You have no pending tasks.",
+  "form": {
+    "title": "New task",
+    "titlePlaceholder": "What needs doing?",
+    "description": "Task description",
+    "descriptionPlaceholder": "Optional description",
+    "priority": "Priority",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "commitment": "Related Commitment",
+    "noCommitment": "No Commitment (General)",
+    "editTitle": "Edit task",
+    "save": "Save changes",
+    "sortBy": "Sort by",
+    "sortCreated": "Date Created",
+    "sortPriority": "Priority",
+    "submit": "Create task"
+  },
+  "actions": {
+    "complete": "Complete",
+    "duplicate": "Duplicate",
+    "archive": "Archive",
+    "edit": "Edit"
+  },
+  "progress": {
+    "title": "Progress",
+    "completionRate": "Completion Rate",
+    "weeklySummary": "Weekly Summary",
+    "completedTasks": "Completed Tasks",
+    "pendingTasks": "Pending Tasks",
+    "description": "Your weekly activity and completion rate analysis."
+  }
+}

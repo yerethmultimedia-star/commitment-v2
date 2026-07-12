@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ThemeResolver, ResolvedAppearance } from '@commitment/theme-engine';
-import { useAppearanceStore } from '../store/use-appearance-store.js';
-import { appThemeRegistry } from './theme-registry.js';
+import { useAppearanceStore } from '../store/use-appearance-store';
+import { appThemeRegistry } from './theme-registry';
 import { Theme } from 'tamagui';
 import ViewShot from 'react-native-view-shot';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated';
