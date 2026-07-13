@@ -2,8 +2,8 @@
  * DashboardLayoutEngine — determinism & correctness tests
  */
 
-import { resolve } from '../layout/DashboardLayoutEngine';
-import { LAYOUT_SCHEMA_VERSION } from '../layout/DashboardLayoutDescriptor';
+import { resolve } from '../DashboardLayoutEngine';
+import { LAYOUT_SCHEMA_VERSION } from '../DashboardLayoutDescriptor';
 import { DashboardContext, Recommendation } from '@commitment/domain';
 
 const baseContext: DashboardContext = {

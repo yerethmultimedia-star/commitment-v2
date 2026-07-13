@@ -25,7 +25,7 @@ export function ActivityRenderer({ activity, isLast }: ActivityRendererProps) {
 
   const formattedDate = formatDate(activity.occurredAt);
 
-  let icon = <HelpCircle size="$1" color="$color1" />;
+  let icon = <ActivityIcon size="$1" color="$color1" />;
   let backgroundColor = '$color5';
   let content = <Text>{t(`activity.type.${activity.type}`, { defaultValue: activity.type })}</Text>;
   let accessibilityText = '';
@@ -51,13 +51,13 @@ export function ActivityRenderer({ activity, isLast }: ActivityRendererProps) {
       accessibilityText = `Paused the commitment on ${formattedDate}`;
       break;
     case 'completed':
-      icon = <Check size="$1" color="$color1" />;
+      icon = <CheckCircle size="$1" color="$color1" />;
       backgroundColor = '$green10';
       content = <Text>{t('activity.type.completed', { defaultValue: 'Completed the commitment!' })}</Text>;
       accessibilityText = `Completed the commitment on ${formattedDate}`;
       break;
     case 'cancelled':
-      icon = <X size="$1" color="$color1" />;
+      icon = <Trash2 size="$1" color="$color1" />;
       backgroundColor = '$red9';
       content = <Text>{t('activity.type.cancelled', { defaultValue: 'Cancelled the commitment' })}</Text>;
       accessibilityText = `Cancelled the commitment on ${formattedDate}`;

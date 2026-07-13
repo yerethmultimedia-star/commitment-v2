@@ -17,7 +17,7 @@ module.exports = {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        tsconfig: path.resolve(__dirname, '../../tsconfig.json'),
+        tsconfig: path.resolve(__dirname, 'tsconfig.jest.json'),
         useESM: false,
       },
     ],
