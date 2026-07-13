@@ -87,7 +87,7 @@ const changePrioritySchema = z.object({
 });
 
 @ApiTags('tasks')
-@Controller('v1/tasks')
+@Controller('tasks')
 export class TasksController {
   constructor(
     private readonly queryBus: QueryBus,

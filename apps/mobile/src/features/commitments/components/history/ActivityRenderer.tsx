@@ -2,7 +2,16 @@ import { Activity } from '@/shared/models/activity';
 import { useTranslation } from 'react-i18next';
 import { TimelineItem, TimelineIcon, TimelineDate } from '@/shared/ui/timeline';
 import { Text } from 'tamagui';
-import { Check, Pause, Play, Plus, X, Edit3, HelpCircle } from '@tamagui/lucide-icons';
+import { 
+  Play, 
+  Pause, 
+  CheckCircle, 
+  RotateCcw, 
+  Trash2, 
+  Edit3, 
+  Activity as ActivityIcon,
+  Plus
+} from '@tamagui/lucide-icons';
 import { useActivityDateFormatter } from '@/shared/utils/activityDateFormatter';
 
 export interface ActivityRendererProps {

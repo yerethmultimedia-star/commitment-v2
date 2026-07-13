@@ -9,8 +9,13 @@
  *       → RecommendationEngine    (pure, deterministic)
  *       → DashboardLayoutEngine   (pure, deterministic)
  *       → DashboardLayoutDescriptor
- *   DashboardStateRenderer        (loading / error / empty gates)
- *   DashboardRenderer             (maps descriptor → widgets)
+ *   DashboardStateRenderer        (loading / error gates)
+ *   DashboardContent + DashboardRenderer (maps descriptor → widgets)
+ *
+ * Empty state policy:
+ *   Only shows EmptyState when user has explicitly zero commitments AND zero
+ *   pending tasks (i.e., genuinely empty account, not API error / offline).
+ *   API errors degrade gracefully: dashboard renders with empty data.
  */
 
 import React, { useMemo } from 'react';
@@ -23,11 +28,9 @@ export function DashboardScreen() {
 
   const currentState = useMemo(() => {
     if (isLoading) return DashboardState.Loading;
+    // isError only propagates when auth is missing — not for API errors.
     if (isError) return DashboardState.Error;
     if (!layout) return DashboardState.Loading;
-    const totalActive = layout.quickSummary.activeCommitmentsCount;
-    const pendingToday = layout.quickSummary.pendingTasksCount;
-    if (totalActive === 0 && pendingToday === 0) return DashboardState.Empty;
     return DashboardState.Ready;
   }, [isLoading, isError, layout]);
 

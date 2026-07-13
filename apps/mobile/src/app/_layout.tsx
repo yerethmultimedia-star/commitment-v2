@@ -3,9 +3,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
-import { TamaguiProvider, PlatformProvider, PlatformServices } from '@commitment/design-system';
-import { config } from '@commitment/design-system';
+import { useColorScheme, Platform } from 'react-native';
+import { PlatformProvider, PlatformServices } from '@commitment/design-system';
+import { TamaguiProvider } from 'tamagui';
+import config from '../../tamagui.config';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../core/query/query-client';
 import { AuthProvider } from '@/core/auth/auth-provider';
@@ -48,6 +49,9 @@ export default function RootLayout() {
 
   return (
     <TamaguiProvider config={config} defaultTheme={colorScheme === 'dark' ? 'dark' : 'light'}>
+      {Platform.OS === 'web' && (
+        <style dangerouslySetInnerHTML={{ __html: config.getCSS() }} />
+      )}
       <PlatformProvider services={platformServices}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>

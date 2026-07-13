@@ -7,7 +7,7 @@ import { CommitmentsSkeleton } from '../components/CommitmentsSkeleton';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
 import { useRouter } from 'expo-router';
-import { Plus } from '@tamagui/lucide-icons';
+import { Filter, Plus } from '@tamagui/lucide-icons';
 import { View } from 'tamagui';
 import { IconButton } from '@commitment/design-system';
 
