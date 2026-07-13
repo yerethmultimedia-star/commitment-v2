@@ -54,7 +54,14 @@
     },
     "activeCount": "Tienes {{count}} compromisos activos",
     "noActiveCount": "Sin compromisos activos",
+    "noCommitmentsTitle": "Empecemos a construir hábitos",
+    "noCommitmentsSubtitle": "Crea tu primer compromiso y da el primer paso hacia tu meta.",
     "loading": "Cargando...",
+    "summary": {
+      "activeCommitments": "Compromisos",
+      "pendingTasks": "Tareas Hoy",
+      "streak": "Días Seguidos"
+    },
     "error": {
       "title": "Error de Widget",
       "description": "Error al cargar widget"

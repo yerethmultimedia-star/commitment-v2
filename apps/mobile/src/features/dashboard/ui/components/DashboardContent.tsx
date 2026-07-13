@@ -1,44 +1,45 @@
+/**
+ * DashboardContent
+ *
+ * Scrollable body of the Dashboard.
+ * Receives a DashboardLayoutDescriptor and delegates rendering
+ * to DashboardHeader (greeting + avatar) and DashboardRenderer (widgets).
+ *
+ * No data fetching here — all data arrives via the layout descriptor.
+ */
+
 import React, { useEffect } from 'react';
-import { Stack, Body, AppScreen } from '@commitment/design-system';
+import { AppScreen, Stack } from '@commitment/design-system';
 import { DashboardHeader } from './DashboardHeader';
-import { WidgetRenderer } from './WidgetRenderer';
+import { DashboardRenderer } from '../screens/DashboardRenderer';
 import { useDashboardStore } from '../../store/use-dashboard-store';
 import { useSession } from '@/core/auth/use-session';
-import { useTranslation } from 'react-i18next';
+import { DashboardLayoutDescriptor } from '../../engine/layout/DashboardLayoutDescriptor';
 
 export interface DashboardContentProps {
-  activeCommitmentsCount: number;
+  layout: DashboardLayoutDescriptor;
 }
 
-export const DashboardContent = React.memo(function DashboardContent({ activeCommitmentsCount }: DashboardContentProps) {
-  const { t } = useTranslation('common');
+export const DashboardContent = React.memo(function DashboardContent({
+  layout,
+}: DashboardContentProps) {
   const { identityId } = useSession();
-  const { getVisibleWidgets, load, isLoading } = useDashboardStore();
-  
+  const { load } = useDashboardStore();
+
+  // Sync the persisted DashboardLayout (widget ordering / visibility store)
   useEffect(() => {
     if (identityId) {
       load(identityId);
     }
   }, [identityId, load]);
 
-  const visibleWidgets = getVisibleWidgets();
-
   return (
     <AppScreen scrollable announceOnFocus="Dashboard">
       <Stack gap="$lg">
-        <DashboardHeader commitmentsCount={activeCommitmentsCount} />
-        
-        {isLoading ? (
-          <Stack flex={1} alignItems="center" justifyContent="center" padding="$10">
-            <Body color="$contentSecondary">{t('dashboard.loading')}</Body>
-          </Stack>
-        ) : (
-          <Stack gap="$md">
-            {visibleWidgets.map(widget => (
-              <WidgetRenderer key={widget.id} widget={widget} />
-            ))}
-          </Stack>
-        )}
+        <DashboardHeader
+          commitmentsCount={layout.quickSummary.activeCommitmentsCount}
+        />
+        <DashboardRenderer layout={layout} />
       </Stack>
     </AppScreen>
   );

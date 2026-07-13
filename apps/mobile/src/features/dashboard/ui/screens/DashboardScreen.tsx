@@ -1,33 +1,39 @@
+/**
+ * DashboardScreen
+ *
+ * Entry point for the Dashboard tab.
+ *
+ * Architecture (VS-031, Block A):
+ *   useDashboardLayout()
+ *       → useDashboardContext()   (assembles DashboardContext from stores)
+ *       → RecommendationEngine    (pure, deterministic)
+ *       → DashboardLayoutEngine   (pure, deterministic)
+ *       → DashboardLayoutDescriptor
+ *   DashboardStateRenderer        (loading / error / empty gates)
+ *   DashboardRenderer             (maps descriptor → widgets)
+ */
+
 import React, { useMemo } from 'react';
-import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { DashboardStateRenderer, DashboardState } from '../components/DashboardStateRenderer';
 import { DashboardContent } from '../components/DashboardContent';
-import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
+import { useDashboardLayout } from '../../hooks/useDashboardLayout';
 
 export function DashboardScreen() {
-  const { data: commitments = [], isLoading, isError, error, refetch } = useCommitments();
-  const tasks = useDashboardQuery();
+  const { layout, isLoading, isError } = useDashboardLayout();
 
-  // Determine Dashboard State
   const currentState = useMemo(() => {
-    if (isLoading || tasks.isLoading) return DashboardState.Loading;
-    if (isError || tasks.isError) return DashboardState.Error;
-    if (commitments.length === 0 && !tasks.data?.metrics.pending) return DashboardState.Empty;
+    if (isLoading) return DashboardState.Loading;
+    if (isError) return DashboardState.Error;
+    if (!layout) return DashboardState.Loading;
+    const totalActive = layout.quickSummary.activeCommitmentsCount;
+    const pendingToday = layout.quickSummary.pendingTasksCount;
+    if (totalActive === 0 && pendingToday === 0) return DashboardState.Empty;
     return DashboardState.Ready;
-  }, [isLoading, isError, commitments.length, tasks.isLoading, tasks.isError, tasks.data?.metrics.pending]);
-
-  const activeCommitmentsCount = useMemo(() => {
-    return commitments.filter(c => c.status === 'active').length;
-  }, [commitments]);
+  }, [isLoading, isError, layout]);
 
   return (
-    <DashboardStateRenderer 
-      state={currentState} 
-      errorMessage={error?.message}
-    >
-      <DashboardContent
-        activeCommitmentsCount={activeCommitmentsCount}
-      />
+    <DashboardStateRenderer state={currentState}>
+      {layout && <DashboardContent layout={layout} />}
     </DashboardStateRenderer>
   );
 }

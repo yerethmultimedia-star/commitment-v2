@@ -1,26 +1,41 @@
+/**
+ * HeroCardStrategy
+ *
+ * @deprecated
+ * This module is replaced by the DashboardLayoutEngine (Block A, VS-031).
+ * The engine resolves the hero via Recommendation + DashboardLayoutEngine.resolve().
+ *
+ * Kept for backward compatibility during transition. Will be removed in VS-031 cleanup.
+ * Do NOT add new strategies here.
+ *
+ * @see apps/mobile/src/features/dashboard/engine/layout/DashboardLayoutEngine.ts
+ */
+
 export interface HeroCardViewModel {
   titleI18nKey: string;
-  titleParams?: Record<string, any>;
+  titleParams?: Record<string, unknown>;
   subtitleI18nKey: string;
-  subtitleParams?: Record<string, any>;
-  illustration: string; // emoji or visual token
-  actionRoute: string; // screen to redirect
+  subtitleParams?: Record<string, unknown>;
+  illustration: string;
+  actionRoute: string;
   priority: number;
   themeVariant: 'gradient' | 'accent' | 'success';
+  dismissible: boolean;
+  validUntil?: string;
 }
 
 export interface HeroCardStrategy {
-  shouldApply(data: any): boolean;
-  execute(data: any): HeroCardViewModel;
+  shouldApply(data: unknown): boolean;
+  execute(data: unknown): HeroCardViewModel;
 }
 
 export class DailyFocusStrategy implements HeroCardStrategy {
-  shouldApply(data: any): boolean {
-    return (data?.today?.length ?? 0) > 0;
+  shouldApply(data: unknown): boolean {
+    return ((data as any)?.today?.length ?? 0) > 0;
   }
 
-  execute(data: any): HeroCardViewModel {
-    const count = data?.today?.length ?? 0;
+  execute(data: unknown): HeroCardViewModel {
+    const count = (data as any)?.today?.length ?? 0;
     return {
       titleI18nKey: 'dashboard.hero.dailyFocus.title',
       titleParams: { count },
@@ -29,17 +44,18 @@ export class DailyFocusStrategy implements HeroCardStrategy {
       actionRoute: '/(tabs)/today',
       priority: 100,
       themeVariant: 'accent',
+      dismissible: false,
     };
   }
 }
 
 export class StreakStrategy implements HeroCardStrategy {
-  shouldApply(data: any): boolean {
-    return (data?.metrics?.completedThisWeek ?? 0) > 0;
+  shouldApply(data: unknown): boolean {
+    return ((data as any)?.metrics?.completedThisWeek ?? 0) > 0;
   }
 
-  execute(data: any): HeroCardViewModel {
-    const days = data?.metrics?.completedThisWeek ?? 0;
+  execute(data: unknown): HeroCardViewModel {
+    const days = (data as any)?.metrics?.completedThisWeek ?? 0;
     return {
       titleI18nKey: 'dashboard.hero.streak.title',
       titleParams: { count: days },
@@ -48,6 +64,7 @@ export class StreakStrategy implements HeroCardStrategy {
       actionRoute: '/(tabs)/insights',
       priority: 50,
       themeVariant: 'success',
+      dismissible: true,
     };
   }
 }
@@ -65,6 +82,7 @@ export class DefaultStrategy implements HeroCardStrategy {
       actionRoute: '/(tabs)/goals',
       priority: 0,
       themeVariant: 'gradient',
+      dismissible: false,
     };
   }
 }
@@ -75,8 +93,10 @@ export const heroCardStrategies: HeroCardStrategy[] = [
   new DefaultStrategy(),
 ];
 
-export function getActiveHeroCard(data: any): HeroCardViewModel {
-  const sorted = [...heroCardStrategies].sort((a, b) => b.execute(data).priority - a.execute(data).priority);
+export function getActiveHeroCard(data: unknown): HeroCardViewModel {
+  const sorted = [...heroCardStrategies].sort(
+    (a, b) => b.execute(data).priority - a.execute(data).priority,
+  );
   for (const strategy of sorted) {
     if (strategy.shouldApply(data)) {
       return strategy.execute(data);

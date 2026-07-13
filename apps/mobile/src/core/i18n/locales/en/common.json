@@ -54,7 +54,14 @@
     },
     "activeCount": "You have {{count}} active commitments",
     "noActiveCount": "No active commitments",
+    "noCommitmentsTitle": "Let's start building habits",
+    "noCommitmentsSubtitle": "Create your first commitment and take the first step toward your goal.",
     "loading": "Loading...",
+    "summary": {
+      "activeCommitments": "Commitments",
+      "pendingTasks": "Tasks Today",
+      "streak": "Day Streak"
+    },
     "error": {
       "title": "Widget Error",
       "description": "Failed to load widget"

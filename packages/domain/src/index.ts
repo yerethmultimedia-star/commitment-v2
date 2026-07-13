@@ -12,5 +12,7 @@ export * from './task/index.js';
 export * from './dashboard/WidgetCapabilities.js';
 export * from './dashboard/DashboardLayout.js';
 export * from './dashboard/DashboardLayoutRepository.js';
+export * from './dashboard/DashboardContext.js';
+export * from './dashboard/Recommendation.js';
 export * from './messaging/index.js';
 export * from './appearance/index.js';
