@@ -1,6 +1,6 @@
 # Roadmap
 
-Version: 1.6.0
+Version: 1.7.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-14
@@ -27,8 +27,9 @@ Last Updated: 2026-07-14
 - **Sprint VS-031:** Product Experience Foundation (Completed, verified — grew far past Block A to
   cover Habits, Goals/Milestones, Insights, Commitment Priority, Theme Engine redesign, Coach, an
   accessibility pass, and the canonical demo dataset; see
-  `engineering/governance/vs031_completion_report.md` v2.0.0. Not `Closed` — uncommitted; whether
-  the post-Block-A scope should retroactively split into new sprint numbers per Rule 2 is open.)
+  `engineering/governance/vs031_completion_report.md` v2.2.0. Not `Closed` — committed (`1a3f598`,
+  `7853f22`), but whether the post-Block-A scope should retroactively split into new sprint
+  numbers per Rule 2 is still an open decision.)
 - **Sprint VS-032:** Calendar (Planned)
 - **Sprint VS-033:** Reminder Settings (Planned)
 - **Sprint VS-034:** Recurrence Management (Planned)
@@ -39,6 +40,12 @@ Last Updated: 2026-07-14
 
 ## 📜 Change History
 
+- **v1.7.0 (2026-07-14):** VS-031's working-tree changes committed (`1a3f598`, `7853f22`) —
+  superseding v1.6.0's "pending commit" note. Retroactive sprint-scoping decision (ADR-016 Rule 2)
+  remains open. Also: a systemic i18n architecture violation was found (see `TECH_DEBT.md` Item 3)
+  and an iCloud Desktop sync corruption hazard was found and mitigated mid-commit (see
+  `RISK_REGISTER.md` Risk 3) — neither changes VS-031's Completed status but both are worth knowing
+  before starting VS-032.
 - **v1.6.0 (2026-07-14):** VS-031 marked Completed (verified — see
   `engineering/governance/vs031_completion_report.md` v2.0.0), not Closed pending commit of 218
   working-tree files and a product decision on retroactive sprint scoping.

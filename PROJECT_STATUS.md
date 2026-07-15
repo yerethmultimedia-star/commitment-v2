@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.12.0
+Version: 1.13.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-14
@@ -102,7 +102,7 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
 - ✅ **VS-028 — Widget Registry** (Completed, self-labeled)
 - ⚪ **VS-029 — Motion System** (Planned; no commit evidence found)
 - ✅ **VS-030 — Accessibility & Polish** (Completed, self-labeled; accessibility criteria not independently verified)
-- ✅ **VS-031 — Product Experience Foundation** (Completed, verified — see `vs031_completion_report.md` v2.0.0; not `Closed`, not committed)
+- ✅ **VS-031 — Product Experience Foundation** (Completed, verified — see `vs031_completion_report.md` v2.2.0; committed as `1a3f598`/`7853f22`; not `Closed` — retroactive sprint-scoping decision still open)
 
 1. **VS-032 — Calendar**
 2. **VS-033 — Reminder Settings**
@@ -133,6 +133,13 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
 
 ## 📜 Change History
 
+- **v1.13.0 (2026-07-14):** VS-031's working tree committed (`1a3f598`, `7853f22`) — supersedes
+  v1.12.0's "uncommitted" note. Discovered `ARCHITECTURE.md`, `TECH_DEBT.md`, `RISK_REGISTER.md`
+  already existed and were never read before this point — produced a discrepancy report (see
+  `TECH_DEBT.md` Item 3, `RISK_REGISTER.md` Risk 1/3) rather than silently reconciling. Most
+  notable finding: 26 Feature files violate the documented i18n Rule 2 (no direct `t()` calls in
+  Features) — this contradicts the "Internationalization by Design" principle listed below and is
+  now tracked as technical debt, not fixed.
 - **v1.12.0 (2026-07-14):** VS-031 moved from `Active` to `Completed` (verified per
   `engineering/governance/vs031_completion_report.md` v2.0.0 — 399 tests passing, 12-screen
   Playwright walkthrough, 0 crashes) — not `Closed`; 218 files of working-tree changes remain

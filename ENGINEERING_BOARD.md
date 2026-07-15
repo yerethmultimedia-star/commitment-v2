@@ -1,6 +1,6 @@
 # Engineering Board
 
-Version: 1.4.0
+Version: 1.5.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-14
@@ -32,29 +32,28 @@ for VS-031 specifically, `engineering/governance/vs031_completion_report.md`.
 
 ---
 
-## Current Risks
+## Current Risks & Technical Debt
 
-- **Working tree not committed.** 218 files of functional changes (Habits, Goals, Insights,
-  Theme Engine, Commitment Priority, accessibility pass, demo dataset) exist only locally. Nothing
-  in this board or the roadmap is reproducible from `git log` until this is committed.
-- **VS-031 scope expansion pending governance decision.** What shipped absorbed Habits, Goals,
-  Insights, Coach, Theme Engine, and an accessibility pass — well past its original Block A. Needs
-  a product/architecture call on whether to retroactively split into new sprint numbers (ADR-016
-  Rule 2) once the code is committed.
-- **`walkthrough.md` is obsolete.** Still describes the mobile client as Flutter and only covers
-  Sprint 0/1. Needs a dedicated rewrite pass; not attempted here to avoid introducing inaccurate
-  "compliance" under time pressure.
-- **Calendar cold-load localization bug.** `/calendar`'s date/weekday header renders in English on
-  a cold direct URL load (works correctly via in-app navigation). Root cause not isolated — see
-  `vs031_completion_report.md` §2/§4. Low severity, does not affect normal navigation.
-- **Progress/maturity table was partially stale.** Fixed 2026-07-14 for the areas this session
-  verified (Theme Engine, Dashboard, Habits, Goals, Insights, Coach, Accessibility); the remaining
-  rows in `PROJECT_STATUS.md` are still carried over from 2026-07-08 and need their own audit.
+Tracked in the canonical registers, not duplicated here: `RISK_REGISTER.md` and `TECH_DEBT.md`.
+(An earlier version of this board briefly duplicated this content directly, before those canonical
+registers — which predate this board — were found; see `TECH_DEBT.md`/`RISK_REGISTER.md` v1.2.0/
+v1.1.0 change history.)
+
+**Still open, requiring a product/architecture decision (not just tracking):**
+
+- **VS-031 scope expansion.** What shipped absorbed Habits, Goals, Insights, Coach, Theme Engine,
+  and an accessibility pass — well past its original Block A. Code is now committed (`1a3f598`,
+  `7853f22`); the open question is whether to retroactively split this into new sprint numbers per
+  ADR-016 Rule 2.
 
 ---
 
 ## 📜 Change History
 
+- **v1.5.0 (2026-07-14):** Discovered `TECH_DEBT.md`/`RISK_REGISTER.md` already exist as canonical
+  registers (were not read before this point in the session). Migrated the "Current Risks" block
+  added in v1.4.0 into those registers instead of duplicating; kept only the one still-open
+  product/architecture decision (VS-031 retroactive scope split) here.
 - **v1.4.0 (2026-07-14):** VS-031 marked Completed (verified, not Closed — see
   `vs031_completion_report.md` v2.0.0). Added a "Current Risks" block per user feedback so the
   board tracks open governance/technical risks, not just the priority list.

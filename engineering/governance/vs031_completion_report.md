@@ -1,6 +1,6 @@
 # VS-031 Completion Report (Product Experience Foundation)
 
-Version: 2.1.0
+Version: 2.2.0
 Status: Draft
 Owner: Architecture Review Board
 Date: 2026-07-14
@@ -216,8 +216,13 @@ Dataset now stands at 17 Commitments / 9 Habits / 20 Milestones.
 
 ## 4. Localization Review
 
-- ✅ **i18n & Localization SDK:** all new UI added since the original report includes both `en` and
+- ✅ **i18n coverage (en/es):** all new UI added since the original report includes both `en` and
   `es` keys in the same change (spot-checked across commitments/tasks/common locale files).
+- ⚠️ **i18n architecture compliance (Rule 2, declarative-only):** downgraded from this section's
+  original ✅ after discovering `docs/ARCHITECTURE_OVERVIEW.md` §11 post-v2.0.0 — 26 Feature files
+  call `useTranslation()`/`t()` directly, violating the documented "Features never call `t()`"
+  rule. Coverage (en/es present) is not the same as architectural compliance; see `TECH_DEBT.md`
+  Item 3.
 - ✅ **i18n reactivity infrastructure fixed:** 6 design-system components were reading translations
   via an imperative `t()` import instead of the reactive `useTranslation()` hook, meaning they
   never re-rendered on a language change. Fixed, plus a Metro config fix for a `react-i18next`
@@ -253,21 +258,30 @@ Dataset now stands at 17 Commitments / 9 Habits / 20 Milestones.
 
 ### Technical Debt Log
 
-| Deuda                                                                                                                                                                                                                                                                                                                                | Estado                                                                                                                                                                                                                                                                     | Sprint de Eliminación                                | Owner |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :---- |
-| `HeroCardStrategy` deprecated but not removed                                                                                                                                                                                                                                                                                        | Superseded — `DashboardHeroCard` was rebuilt with a `kind`-based switch (`generic`/`priorityTask`) during the amendment-13 work; the old strategy file's status wasn't re-checked this pass                                                                                | Unassigned                                           | —     |
-| Dashboard engine tests had a broken `jest`/`ts-jest` setup, wrong import path                                                                                                                                                                                                                                                        | **Fixed** (prior session, `0f53f92`)                                                                                                                                                                                                                                       | —                                                    | —     |
-| `assertDeterministic` used `__DEV__` under Jest's `node` environment, causing 11/21 dashboard-engine test failures                                                                                                                                                                                                                   | **Fixed** — dashboard-engine suite is now 41/41 passing (verified this session)                                                                                                                                                                                            | —                                                    | —     |
-| VS-030's fitness against roadmap accessibility criteria not independently verified                                                                                                                                                                                                                                                   | Superseded by this session's Phase 8 accessibility pass (see §3), though still not checked against a formal third-party WCAG tool                                                                                                                                          | Unassigned                                           | —     |
-| Calendar cold-load date-formatting falls back to English                                                                                                                                                                                                                                                                             | **Open**, newly found this session (see §2/§4)                                                                                                                                                                                                                             | Unassigned                                           | —     |
-| `apps/backend` `tsc --noEmit` has 2 pre-existing errors in untouched test files                                                                                                                                                                                                                                                      | **Open**, pre-existing, confirmed unrelated to this session's changes; tests pass at runtime regardless                                                                                                                                                                    | Unassigned                                           | —     |
-| 3 files (`packages/domain/src/index.ts`, `.../reminder-queued.event.ts`, `.../reminder-queued-message.mapper.ts`) existed on disk only as stray `" 2"`-suffixed duplicates, with the correctly-named file **missing** — `packages/domain/src/index.ts` being one of them means the domain package's entire export surface was broken | **Fixed this session**, found only by inspecting `git status` output for anomalies before committing (jest didn't reliably catch it — see below)                                                                                                                           | —                                                    | —     |
-| Pre-commit verification (`tsc --noEmit`, jest) intermittently did not catch the missing-`index.ts` breakage — 2 separate full jest runs of `apps/backend`/`packages/domain` passed cleanly earlier the same session despite the file being missing on disk                                                                           | **Open observation**, cause not fully diagnosed (suspected stale ts-jest/Jest haste-map cache from before the corruption occurred); worth noting that "tests passed" is not sufficient evidence a package's entry point exists — `git status` / `ls` should be checked too | Unassigned                                           | —     |
-| 218 files of working-tree changes are uncommitted                                                                                                                                                                                                                                                                                    | **Open** — see the governance-critical-fact callout above                                                                                                                                                                                                                  | User (commit is an explicit, user-authorized action) | —     |
+Tracked in the repo's canonical registers, not duplicated here — `TECH_DEBT.md` and
+`RISK_REGISTER.md` predate this report and were not discovered until after v2.0.0 was written (see
+the discrepancy note below). Items registered there as a direct result of this report's work:
+`HeroCardStrategy` cleanup, the fixed `__DEV__` dashboard-engine failures, the Calendar cold-load
+i18n bug, the 2 pre-existing backend `tsc` errors, the missing-`index.ts`/stray-`" 2"`-file
+incident, and the unaudited-accessibility/Feature-Independence gap. `RISK_REGISTER.md` also now
+tracks the iCloud Desktop sync corruption hazard discovered while committing this work.
+
+**Governance-critical-fact update:** the "218 files uncommitted" blocker above is now resolved —
+this work is committed as `1a3f598` (code) and `7853f22` (governance).
+
+**New discrepancy found after this report's v2.0.0 was written, not yet resolved:** this report's
+§4 (Localization Review) claimed ✅ for "i18n & Localization SDK" without checking
+`docs/ARCHITECTURE_OVERVIEW.md` §11's Rule 2 (Features must never call `t()` directly, only pass
+`i18nKey` to Design System components) — that document was not read before this report's v2.0.0
+was written. Verified: 26 files violate this, including `calendar.tsx`, edited during this same
+session. Registered as `TECH_DEBT.md` Item 3 rather than silently corrected here — see that
+document for full detail and the open architectural question (Rule 2 may need a documented
+exception for cases like `Stack.Screen`'s `title` prop, which cannot accept a component-level
+`i18nKey`).
 
 - ✅ **API Contract & Evolution:** the one new API surface change (`CommitmentPriority` on
   register/edit Commitment DTOs) is additive and optional with a safe default — non-breaking.
-- 🟡 **Feature Independence:** not audited at the source level this pass.
+- 🟡 **Feature Independence:** not audited at the source level this pass — see `TECH_DEBT.md` Item 7.
 
 ---
 
@@ -304,12 +318,13 @@ Reassessed against the v1.0.0 report's own checklist:
 4. ~~Decision on whether Block A is the entirety of scope~~ — **answered**: no, scope grew
    substantially past both the original slice and the 2026-07-13 amendment (see Scope amendment II).
 
-All four of the previous blockers are now resolved. The blocker that replaces them:
+All four of the previous blockers are now resolved.
 
-5. **Nothing is committed.** 218 files of working-tree changes, spanning what is now most of the
-   mobile app's product surface, have never been committed. A sprint cannot be meaningfully
-   `Closed` — arguably not even `Completed` in a way that means anything to anyone reading git
-   history — while the work exists only as an uncommitted local working tree.
+5. ~~Nothing is committed~~ — **resolved**: committed as `1a3f598` (code) and `7853f22`
+   (governance) on 2026-07-14.
+
+Remaining open items:
+
 6. A product/architecture decision on how to name-and-scope this retroactively (is this still one
    sprint, "VS-031," or does the 2026-07-14 amendment's work deserve its own sprint numbers per
    ADR-016 Rule 2?) is still open and cannot be made by this report alone.
@@ -320,18 +335,31 @@ All four of the previous blockers are now resolved. The blocker that replaces th
 8. No task file exists under `engineering/tasks/` for VS-031 or any of the amendment work (only one
    old `TASK-001` file exists in that directory) — noted as a pre-existing pattern gap, not a new
    convention invented for this report.
+9. **New (found after v2.0.0):** a systemic architecture-compliance gap — 26 Feature files violate
+   `docs/ARCHITECTURE_OVERVIEW.md`'s i18n Rule 2 (declarative-only translation). Registered as
+   `TECH_DEBT.md` Item 3. Whether this blocks `Closed` is itself a product/architecture call: the
+   feature works correctly today, but the architecture document that defines this project's own
+   quality bar is being violated at scale, silently, by design work done in this same sprint.
 
 ### Recommendation
 
-Mark VS-031 **`Completed`**, not `Closed`: the code exists, runs, and is verified per the results
-above. Do **not** mark it `Closed` until (a) the working tree is committed and (b) items 6-8 above
-get an explicit product/governance decision — both are outside what a verification pass can decide
-unilaterally.
+Mark VS-031 **`Completed`**, which now holds unconditionally — the code exists, runs, is committed,
+and is verified per the results above. Do **not** mark it `Closed` until items 6, 7, 8, and
+(arguably) 9 above get an explicit product/governance decision — none of these are things a
+verification pass can decide unilaterally.
 
 ---
 
 ## 📜 Change History
 
+- **v2.2.0 (2026-07-14):** Discovered `ARCHITECTURE.md`, `TECH_DEBT.md`, and `RISK_REGISTER.md`
+  already exist at the repo root (were never read in this report's earlier versions). Produced a
+  discrepancy report against `docs/ARCHITECTURE_OVERVIEW.md`: a 26-file systemic violation of i18n
+  Rule 2 (declarative-only translation), a possibly-false SQLite/Offline-First "Active" claim, and
+  missing coverage of the Habit/Goal/Insights/Coach/Calendar engines. Migrated this report's
+  Technical Debt Log into the canonical `TECH_DEBT.md`/`RISK_REGISTER.md` instead of duplicating.
+  Downgraded §4's i18n claim from unconditional ✅ given the Rule 2 finding. Noted the 218
+  uncommitted files from v2.1.0 are now committed (`1a3f598`, `7853f22`).
 - **v2.1.0 (2026-07-14):** Pre-commit inspection of `git status` (per user request to proceed with
   committing) found 3 files existing on disk only under a stray `" 2"`-suffixed name, with their
   correctly-named counterpart missing — including `packages/domain/src/index.ts`, the domain
