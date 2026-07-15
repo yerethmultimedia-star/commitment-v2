@@ -10,10 +10,10 @@ export default function LoginScreen() {
   return (
     <FullScreenCenter>
       <YStack gap="$4" alignItems="center">
-        <Text fontSize="$9" fontWeight="bold" color="$blue10">
+        <Text fontSize="$9" fontWeight="bold" color="$accent">
           {t('login.title', { ns: 'auth' })}
         </Text>
-        <Text fontSize="$5" color="$gray10">
+        <Text fontSize="$5" color="$contentSecondary">
           {t('login.subtitle', { ns: 'auth' })}
         </Text>
         

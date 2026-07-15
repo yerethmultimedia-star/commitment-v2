@@ -67,7 +67,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FAF7F2",
+                "backgroundColor": "#FFFFFF",
                 "borderBottomColor": "transparent",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
@@ -86,8 +86,8 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 "height": 48,
                 "justifyContent": "center",
                 "opacity": 1,
-                "paddingLeft": 18,
-                "paddingRight": 18,
+                "paddingLeft": 16,
+                "paddingRight": 16,
                 "transform": [
                   {
                     "scale": 1,
@@ -102,7 +102,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 {
                   "alignItems": "center",
                   "flexDirection": "row",
-                  "gap": 7,
+                  "gap": 8,
                 }
               }
             >
@@ -111,11 +111,11 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#EA4335",
+                    "color": "#FF6B5E",
                     "fontFamily": "Inter_600SemiBold",
-                    "fontSize": "$4",
+                    "fontSize": 14,
                     "letterSpacing": 0.1,
-                    "lineHeight": 20,
+                    "lineHeight": 18,
                   }
                 }
                 suppressHighlighting={true}
@@ -155,7 +155,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FAF7F2",
+                "backgroundColor": "#FFFFFF",
                 "borderBottomColor": "transparent",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
@@ -174,8 +174,8 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 "height": 48,
                 "justifyContent": "center",
                 "opacity": 1,
-                "paddingLeft": 18,
-                "paddingRight": 18,
+                "paddingLeft": 16,
+                "paddingRight": 16,
                 "transform": [
                   {
                     "scale": 1,
@@ -190,7 +190,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 {
                   "alignItems": "center",
                   "flexDirection": "row",
-                  "gap": 7,
+                  "gap": 8,
                 }
               }
             >
@@ -199,11 +199,11 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#2C2A26",
+                    "color": "#18181F",
                     "fontFamily": "Inter_600SemiBold",
-                    "fontSize": "$4",
+                    "fontSize": 14,
                     "letterSpacing": 0.1,
-                    "lineHeight": 20,
+                    "lineHeight": 18,
                   }
                 }
                 suppressHighlighting={true}
@@ -244,16 +244,16 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
               {
                 "alignItems": "center",
                 "backgroundColor": "transparent",
-                "borderBottomColor": "#E8E4D9",
+                "borderBottomColor": "#E7E7EF",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
                 "borderBottomWidth": 1,
-                "borderLeftColor": "#E8E4D9",
+                "borderLeftColor": "#E7E7EF",
                 "borderLeftWidth": 1,
-                "borderRightColor": "#E8E4D9",
+                "borderRightColor": "#E7E7EF",
                 "borderRightWidth": 1,
                 "borderStyle": "solid",
-                "borderTopColor": "#E8E4D9",
+                "borderTopColor": "#E7E7EF",
                 "borderTopLeftRadius": 9,
                 "borderTopRightRadius": 9,
                 "borderTopWidth": 1,
@@ -262,8 +262,8 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 "height": 48,
                 "justifyContent": "center",
                 "opacity": 1,
-                "paddingLeft": 18,
-                "paddingRight": 18,
+                "paddingLeft": 16,
+                "paddingRight": 16,
                 "transform": [
                   {
                     "scale": 1,
@@ -278,7 +278,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 {
                   "alignItems": "center",
                   "flexDirection": "row",
-                  "gap": 7,
+                  "gap": 8,
                 }
               }
             >
@@ -287,11 +287,11 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#2C2A26",
+                    "color": "#18181F",
                     "fontFamily": "Inter_600SemiBold",
-                    "fontSize": "$4",
+                    "fontSize": 14,
                     "letterSpacing": 0.1,
-                    "lineHeight": 20,
+                    "lineHeight": 18,
                   }
                 }
                 suppressHighlighting={true}
@@ -400,7 +400,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(44,42,38)",
+          "shadowColor": "rgb(24,24,31)",
           "shadowOffset": {
             "height": 4,
             "width": 0,
@@ -438,11 +438,11 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           maxFontSizeMultiplier={1.5}
           style={
             {
-              "color": "#2C2A26",
+              "color": "#18181F",
               "fontFamily": "Inter_600SemiBold",
-              "fontSize": 24,
+              "fontSize": 17,
               "letterSpacing": -0.2,
-              "lineHeight": 32,
+              "lineHeight": 22,
               "textAlign": "center",
             }
           }
@@ -455,11 +455,11 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           maxFontSizeMultiplier={1.5}
           style={
             {
-              "color": "#5E5B55",
+              "color": "#6B6B76",
               "fontFamily": "Inter_400Regular",
-              "fontSize": 16,
+              "fontSize": 14,
               "letterSpacing": 0,
-              "lineHeight": 24,
+              "lineHeight": 20,
               "textAlign": "center",
             }
           }
@@ -507,16 +507,16 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                 {
                   "alignItems": "center",
                   "backgroundColor": "transparent",
-                  "borderBottomColor": "#E8E4D9",
+                  "borderBottomColor": "#E7E7EF",
                   "borderBottomLeftRadius": 9,
                   "borderBottomRightRadius": 9,
                   "borderBottomWidth": 1,
-                  "borderLeftColor": "#E8E4D9",
+                  "borderLeftColor": "#E7E7EF",
                   "borderLeftWidth": 1,
-                  "borderRightColor": "#E8E4D9",
+                  "borderRightColor": "#E7E7EF",
                   "borderRightWidth": 1,
                   "borderStyle": "solid",
-                  "borderTopColor": "#E8E4D9",
+                  "borderTopColor": "#E7E7EF",
                   "borderTopLeftRadius": 9,
                   "borderTopRightRadius": 9,
                   "borderTopWidth": 1,
@@ -525,8 +525,8 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   "height": 48,
                   "justifyContent": "center",
                   "opacity": 1,
-                  "paddingLeft": 18,
-                  "paddingRight": 18,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
                   "transform": [
                     {
                       "scale": 1,
@@ -541,7 +541,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   {
                     "alignItems": "center",
                     "flexDirection": "row",
-                    "gap": 7,
+                    "gap": 8,
                   }
                 }
               >
@@ -550,11 +550,11 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   maxFontSizeMultiplier={1.5}
                   style={
                     {
-                      "color": "#2C2A26",
+                      "color": "#18181F",
                       "fontFamily": "Inter_600SemiBold",
-                      "fontSize": "$4",
+                      "fontSize": 14,
                       "letterSpacing": 0.1,
-                      "lineHeight": 20,
+                      "lineHeight": 18,
                     }
                   }
                   suppressHighlighting={true}
@@ -594,7 +594,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#FF7B54",
+                  "backgroundColor": "#6C4EFF",
                   "borderBottomColor": "transparent",
                   "borderBottomLeftRadius": 9,
                   "borderBottomRightRadius": 9,
@@ -613,8 +613,8 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   "height": 48,
                   "justifyContent": "center",
                   "opacity": 1,
-                  "paddingLeft": 18,
-                  "paddingRight": 18,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
                   "transform": [
                     {
                       "scale": 1,
@@ -629,7 +629,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   {
                     "alignItems": "center",
                     "flexDirection": "row",
-                    "gap": 7,
+                    "gap": 8,
                   }
                 }
               >
@@ -640,9 +640,9 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                     {
                       "color": "#FFFFFF",
                       "fontFamily": "Inter_600SemiBold",
-                      "fontSize": "$4",
+                      "fontSize": 14,
                       "letterSpacing": 0.1,
-                      "lineHeight": 20,
+                      "lineHeight": 18,
                     }
                   }
                   suppressHighlighting={true}
@@ -717,7 +717,7 @@ exports[`Modal Primitives Dialog renders centered Dialog 1`] = `
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(44,42,38)",
+          "shadowColor": "rgb(24,24,31)",
           "shadowOffset": {
             "height": 4,
             "width": 0,
@@ -806,7 +806,7 @@ exports[`Modal Primitives ModalPrimitive renders correct content when open 1`] =
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(44,42,38)",
+          "shadowColor": "rgb(24,24,31)",
           "shadowOffset": {
             "height": 4,
             "width": 0,

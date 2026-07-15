@@ -12,29 +12,53 @@
  *   - quickSummary section
  */
 
-export const LAYOUT_SCHEMA_VERSION = 2 as const;
+export const LAYOUT_SCHEMA_VERSION = 3 as const;
 
 // ---------------------------------------------------------------------------
 // Hero Card
 // ---------------------------------------------------------------------------
 
+/**
+ * Two hero "kinds" share one descriptor shape (fields optional per kind)
+ * rather than a strict discriminated union, so existing i18n-key-based
+ * fields stay directly accessible without a `kind` narrowing check at every
+ * call site — `DashboardHeroCard.tsx` is the one place that actually
+ * branches on `kind`.
+ *
+ * - 'generic': the original recommendation-driven hero (default/dailyFocus/
+ *   streak) — i18n-templated, no real user data.
+ * - 'priorityTask': today's single highest-priority task + its parent
+ *   commitment's real title/progress — takes precedence over 'generic'
+ *   whenever DashboardContext.priorityTask is non-null (see resolveHero()).
+ */
 export interface HeroCardDescriptor {
+  readonly kind: 'generic' | 'priorityTask';
+
+  // --- 'generic' fields ---
   /** i18n key for the hero title */
-  readonly titleKey: string;
+  readonly titleKey?: string;
   /** Optional i18n interpolation params */
   readonly titleParams?: Readonly<Record<string, unknown>>;
-  readonly subtitleKey: string;
+  readonly subtitleKey?: string;
   readonly subtitleParams?: Readonly<Record<string, unknown>>;
   /** Visual token (emoji or illustration token) */
-  readonly illustration: string;
-  /** Route to push when the hero is tapped */
-  readonly actionRoute: string;
+  readonly illustration?: string;
   /** Visual theme variant */
-  readonly themeVariant: 'gradient' | 'accent' | 'success';
+  readonly themeVariant?: 'gradient' | 'accent' | 'success';
   /** ISO string; hero should not render after this time */
   readonly validUntil?: string;
   /** User can dismiss this hero card */
-  readonly dismissible: boolean;
+  readonly dismissible?: boolean;
+
+  // --- 'priorityTask' fields ---
+  readonly taskTitle?: string;
+  readonly commitmentTitle?: string;
+  readonly priority?: 'high' | 'medium' | 'low';
+  /** 0..1 — the parent commitment's overall progress, not the task's own binary state. */
+  readonly progressRatio?: number;
+
+  /** Route to push when the hero is tapped — always present, both kinds. */
+  readonly actionRoute: string;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-import { YStack, ScrollView, Text } from 'tamagui';
+import { YStack, ScrollView } from 'tamagui';
 import { useTranslation } from 'react-i18next';
+import { Title } from '@commitment/design-system';
 import { CommitmentForm } from '../components/forms/CommitmentForm';
 import { useCreateCommitment } from '../hooks/useCreateCommitment';
 import { CommitmentFormValues } from '../models/commitment.schema';
-import { Alert } from 'react-native';
 
 export function CreateCommitmentScreen() {
   const { t } = useTranslation();
@@ -30,10 +30,10 @@ export function CreateCommitmentScreen() {
   return (
     <ScrollView backgroundColor="$background" flex={1}>
       <YStack padding="$4" gap="$6" paddingBottom="$10">
-        <Text fontSize="$8" fontWeight="bold" color="$text">
+        <Title fontSize="$8" fontWeight="bold">
           {t('form.title', { ns: 'commitments' })}
-        </Text>
-        
+        </Title>
+
         <CommitmentForm 
           onSubmit={handleSubmit} 
         />

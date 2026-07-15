@@ -1,4 +1,4 @@
-import { CommitmentModel, CommitmentStatus } from '../models/commitment.model';
+import { CommitmentModel, CommitmentPriority, CommitmentStatus } from '../models/commitment.model';
 
 export const commitmentMapper = {
   fromDTO: (dto: any): CommitmentModel => {
@@ -14,8 +14,10 @@ export const commitmentMapper = {
       id: dto.id,
       title: dto.title,
       status: statusMap[dto.state] || 'draft',
+      priority: (dto.priority as CommitmentPriority) || 'medium',
       targetDate: dto.targetDate || undefined,
       recurrencePattern: dto.recurrencePattern || undefined,
+      goalId: dto.goalId || undefined,
     };
   },
 

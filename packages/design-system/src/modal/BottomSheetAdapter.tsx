@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import GorhomBottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { View } from 'tamagui';
+import { View, useTheme } from 'tamagui';
 import { FocusManager } from '../focus/FocusManager.js';
 
 export interface BottomSheetAdapterProps {
@@ -17,6 +17,20 @@ export const BottomSheetAdapter: React.FC<BottomSheetAdapterProps> = ({
 }) => {
   const sheetRef = useRef<GorhomBottomSheet>(null);
   const initialFocusRef = useRef<any>(null);
+
+  // @gorhom/bottom-sheet renders outside the Tamagui tree (its own native
+  // Animated views), so it can't resolve "$surface"-style token strings —
+  // those only work inside components Tamagui itself styles. useTheme()
+  // reads the currently active theme's resolved values so this sheet follows
+  // theme changes instead of being hardcoded to light-mode colors.
+  const theme = useTheme();
+  const dynamicStyles = useMemo(
+    () => ({
+      background: { backgroundColor: theme.surface?.get() ?? theme.background?.get() },
+      indicator: { backgroundColor: theme.divider?.get() ?? theme.borderColor?.get() },
+    }),
+    [theme]
+  );
 
   useEffect(() => {
     if (open) {
@@ -60,8 +74,8 @@ export const BottomSheetAdapter: React.FC<BottomSheetAdapterProps> = ({
       snapPoints={['60%']}
       enablePanDownToClose
       onChange={handleSheetChanges}
-      backgroundStyle={styles.background}
-      handleIndicatorStyle={styles.indicator}
+      backgroundStyle={[styles.background, dynamicStyles.background]}
+      handleIndicatorStyle={[styles.indicator, dynamicStyles.indicator]}
     >
       <BottomSheetView style={styles.contentContainer}>
         <View ref={initialFocusRef} style={styles.focusAnchor} />
@@ -77,8 +91,10 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
+  // Fallback only — overridden by dynamicStyles (theme.surface / theme.divider)
+  // above. Kept in case useTheme() can't resolve before first paint.
   background: {
-    backgroundColor: '#ffffff', // matches $surface in default light mode
+    backgroundColor: '#ffffff',
   },
   indicator: {
     backgroundColor: '#cccccc',

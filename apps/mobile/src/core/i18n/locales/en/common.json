@@ -1,36 +1,504 @@
 {
+  "appearance": {
+    "settings": {
+      "theme": {
+        "title": "Theme",
+        "description": "Choose the visual identity that fits how you like to work."
+      },
+      "accessibility": {
+        "title": "Accessibility",
+        "description": "Fine-tune motion and contrast to your preference."
+      },
+      "reducedMotion": {
+        "label": "Reduce Motion",
+        "description": "Minimize animations and transitions."
+      },
+      "highContrast": {
+        "label": "High Contrast",
+        "description": "Increase contrast for better readability."
+      }
+    },
+    "themes": {
+      "defaultLight": {
+        "name": "Default Light",
+        "description": "Clean, modern, and premium."
+      },
+      "sunrise": {
+        "name": "Sunrise",
+        "description": "Warm, energetic, and bright."
+      },
+      "midnight": {
+        "name": "Midnight",
+        "description": "Calm, focused, and easy on the eyes."
+      },
+      "forest": {
+        "name": "Forest",
+        "description": "Grounded, natural, and steady."
+      }
+    }
+  },
   "profile": {
     "title": "Profile",
-    "subtitle": "User account & app settings",
-    "appearance": "Appearance Settings",
+    "header": {
+      "title": "My Profile"
+    },
+    "memberSince": "Member since {{date}}",
+    "plan": {
+      "title": "MY PLAN",
+      "planLabel": "{{plan}} Plan",
+      "renewal": "Renews: {{date}}",
+      "manage": "Manage"
+    },
+    "account": {
+      "title": "ACCOUNT",
+      "preferences": "Preferences",
+      "notifications": "Notifications",
+      "notificationsDescription": "Request notification permissions"
+    },
     "copied": "Copied to clipboard",
     "copy": "Copy",
     "identityId": "Identity ID",
     "version": "App Version",
     "environment": "Environment",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "developer": {
+      "title": "Developer",
+      "demoMode": {
+        "label": "Demo Mode",
+        "description": "Show sample goals, tasks, and stats instead of your real data."
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "appearance": "APPEARANCE"
+    },
+    "rows": {
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "language": {
+      "title": "Language",
+      "english": "English",
+      "spanish": "Español"
+    }
   },
   "back": "Back",
   "cancel": "Cancel",
+  "notFound": {
+    "title": "Oops!",
+    "description": "This screen doesn't exist.",
+    "link": "Go to home screen"
+  },
   "tabs": {
     "today": "Today",
     "goals": "Goals",
+    "coach": "Coach",
     "tasks": "Tasks",
     "progress": "Progress",
     "profile": "Profile"
   },
+  "calendar": {
+    "title": "Calendar",
+    "loading": "Loading...",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "addActivity": "Add activity",
+    "durationMinutes": "{{count}} min",
+    "empty": {
+      "title": "Nothing scheduled today",
+      "description": "Tasks, commitments and habits with a date will show up here."
+    },
+    "itemA11y": "{{title}}, {{type}}",
+    "types": {
+      "task": "Task",
+      "commitment": "Commitment",
+      "habit": "Habit",
+      "reminder": "Reminder"
+    }
+  },
+  "coach": {
+    "title": "Coach",
+    "subtitle": "Tips based on your current progress.",
+    "quickCapture": "Quick Capture",
+    "quickCaptureHint": "Opens Quick Capture to add a new goal, habit, task or note.",
+    "loading": "Loading...",
+    "addSuggestion": "Add",
+    "empty": {
+      "title": "No tips right now",
+      "description": "Check back once you have some activity to review."
+    },
+    "sections": {
+      "todayRecommendation": "Today's Recommendation",
+      "priorityRecommendations": "Priority Recommendations",
+      "opportunities": "Opportunities",
+      "achievements": "Achievements",
+      "momentum": "Momentum",
+      "goalFocus": "Goal Focus",
+      "upcomingRisks": "Upcoming Risks",
+      "suggestedGoals": "Suggested Goals",
+      "suggestedHabits": "Suggested Habits",
+      "suggestedTasks": "Suggested Tasks"
+    },
+    "goalFocus": {
+      "needsAttention": {
+        "title": "{{title}} needs attention",
+        "description": "{{percent}}% complete — give it some focus."
+      },
+      "closeToCompletion": {
+        "title": "You're close to completing {{title}}",
+        "description": "{{percent}}% done — almost there."
+      }
+    },
+    "tips": {
+      "startFirstGoal": {
+        "title": "Start your first goal",
+        "description": "Create a goal to see it here."
+      },
+      "focusToday": {
+        "title": "You have {{count}} tasks today",
+        "description": "Tackling a few now keeps your day on track."
+      },
+      "protectStreak": {
+        "title": "You're on a {{count}}-day streak",
+        "description": "Complete a task today to keep it alive."
+      },
+      "weeklyMomentum": {
+        "title": "{{count}} tasks completed this week",
+        "description": "Good momentum — keep it going."
+      },
+      "stayConsistent": {
+        "title": "Stay consistent",
+        "description": "Small, regular steps add up over time."
+      }
+    },
+    "opportunities": {
+      "noHabitsToday": {
+        "title": "No habits scheduled today",
+        "description": "Add a habit to build consistency over time."
+      },
+      "planAhead": {
+        "title": "Nothing planned ahead",
+        "description": "Add an upcoming task to keep your goals moving."
+      }
+    },
+    "achievements": {
+      "weekStreak": {
+        "title": "{{count}}-day streak!",
+        "description": "You're building real consistency."
+      },
+      "goalsCompleted": {
+        "title": "{{count}} goals completed",
+        "description": "Great work following through."
+      },
+      "allHabitsDone": {
+        "title": "All habits done today",
+        "description": "A clean sweep — nice work."
+      }
+    },
+    "risks": {
+      "habitStreaksAtRisk": {
+        "title": "{{count}} habit streaks at risk",
+        "description": "Complete them today to keep the streak alive."
+      },
+      "heavyDay": {
+        "title": "{{count}} tasks pending today",
+        "description": "That's a lot for one day — consider rescheduling some."
+      }
+    },
+    "suggestions": {
+      "goals": {
+        "firstGoal": {
+          "title": "Try setting a goal",
+          "description": "Turn something you want to achieve into a goal.",
+          "prefill": "My first goal"
+        }
+      },
+      "habits": {
+        "drinkWater": {
+          "title": "Drink more water",
+          "description": "A simple daily habit to build momentum.",
+          "prefill": "Drink 2L of water"
+        },
+        "stretch": {
+          "title": "Stretch for 5 minutes",
+          "description": "A light daily habit that's easy to keep.",
+          "prefill": "Stretch for 5 minutes"
+        }
+      },
+      "tasks": {
+        "planTomorrow": {
+          "title": "Plan tomorrow",
+          "description": "A quick task to set up a productive day.",
+          "prefill": "Plan tomorrow's priorities"
+        }
+      }
+    },
+    "momentum": {
+      "building": {
+        "title": "Building momentum",
+        "description": "Your streak is growing — keep it up."
+      },
+      "steady": {
+        "title": "Steady",
+        "description": "You're making progress this week."
+      },
+      "needsAttention": {
+        "title": "Needs attention",
+        "description": "It's been quiet — a small step today helps."
+      }
+    }
+  },
+  "goals": {
+    "categories": {
+      "health": "Health",
+      "career": "Career",
+      "finance": "Finance",
+      "learning": "Learning",
+      "personal": "Personal"
+    },
+    "priority": {
+      "high": "High priority",
+      "medium": "Medium priority",
+      "low": "Low priority"
+    },
+    "tabs": {
+      "objectives": "Goals",
+      "tasks": "Tasks",
+      "habits": "Habits",
+      "roadmaps": "Roadmaps"
+    },
+    "statusChips": {
+      "active": "Active",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "empty": {
+        "active": {
+          "title": "No active goals",
+          "description": "Goals you're actively working on show up here."
+        },
+        "inProgress": {
+          "title": "Nothing in progress",
+          "description": "Active goals with some progress show up here."
+        },
+        "completed": {
+          "title": "No completed goals yet",
+          "description": "Goals you finish will show up here."
+        }
+      }
+    },
+    "tasksTab": {
+      "empty": {
+        "title": "No tasks yet",
+        "description": "Commitments linked to your goals will show up here."
+      }
+    },
+    "habitsTab": {
+      "empty": {
+        "title": "No habits yet",
+        "description": "Habits linked to your goals will show up here."
+      }
+    },
+    "roadmaps": {
+      "empty": {
+        "title": "Roadmaps are coming soon",
+        "description": "This view isn't built yet — check back in a future update."
+      }
+    },
+    "list": {
+      "title": "Your Goals",
+      "subtitle": "Everything you're working toward, in one place.",
+      "loading": "Loading...",
+      "empty": {
+        "title": "No goals yet",
+        "description": "Create your first goal and start building toward it."
+      },
+      "error": {
+        "title": "Failed to load goals",
+        "retry": "Try again"
+      },
+      "fab": {
+        "create": "Create goal",
+        "createHint": "Opens Quick Capture to add a new goal."
+      }
+    },
+    "workspace": {
+      "loading": "Loading goal...",
+      "progress": "Progress",
+      "targetDate": "Target: {{date}}",
+      "statistics": "Statistics",
+      "stats": {
+        "tasks": "Tasks",
+        "avgStreak": "Avg. Streak",
+        "milestones": "Milestones",
+        "days": "{{count}}d"
+      },
+      "tabs": {
+        "summary": "Summary",
+        "tasks": "Tasks",
+        "milestones": "Milestones",
+        "notes": "Notes"
+      },
+      "progressLabel": "Overall progress",
+      "progressDescription": {
+        "great": "Great progress. You're on track.",
+        "good": "Good progress. Keep it up.",
+        "starting": "Just getting started. Every step counts."
+      },
+      "dueDate": "Due date",
+      "type": "Type",
+      "milestones": "Milestones",
+      "commitments": "Commitments",
+      "habits": "Habits",
+      "upcoming": "Upcoming",
+      "upcomingEmpty": "Nothing upcoming for this goal.",
+      "milestoneA11y": "Milestone: {{title}}",
+      "notes": "Notes",
+      "notesEmpty": "No notes yet.",
+      "attachments": "Attachments",
+      "attachmentsEmpty": "No attachments yet.",
+      "activity": "Activity Timeline",
+      "activityEmpty": "Activity history isn't tracked yet."
+    }
+  },
+  "habits": {
+    "recurrence": {
+      "daily": "Daily",
+      "workdays": "Workdays",
+      "biweeklyOn": "Every 2 weeks: {{days}}",
+      "monthlyOn": "Monthly on day {{day}}",
+      "yearlyOn": "Yearly on {{month}} {{day}}"
+    },
+    "enableA11y": "Enable habit: {{title}}",
+    "disableA11y": "Disable habit: {{title}}",
+    "postpone": {
+      "title": "Snooze reminder",
+      "custom": "Custom",
+      "customPrompt": "Minutes to snooze",
+      "presets": {
+        "15": "15 min",
+        "30": "30 min",
+        "60": "1 hour",
+        "180": "3 hours"
+      }
+    },
+    "recurrenceOptions": {
+      "Daily": "Daily",
+      "Workdays": "Workdays",
+      "Weekly": "Weekly",
+      "Biweekly": "Every 2 weeks",
+      "Monthly": "Monthly",
+      "Yearly": "Yearly"
+    },
+    "weekdayShort": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
+    "months": {
+      "0": "January",
+      "1": "February",
+      "2": "March",
+      "3": "April",
+      "4": "May",
+      "5": "June",
+      "6": "July",
+      "7": "August",
+      "8": "September",
+      "9": "October",
+      "10": "November",
+      "11": "December"
+    },
+    "form": {
+      "createTitle": "New Habit",
+      "editTitle": "Edit Habit",
+      "fields": {
+        "title": { "label": "Title", "placeholder": "e.g. Drink water" },
+        "recurrenceType": { "label": "Repeat" },
+        "daysOfWeek": { "label": "On these days" },
+        "dayOfMonth": { "label": "Day of month" },
+        "month": { "label": "Month" },
+        "reminderTime": { "label": "Reminder time" },
+        "enabled": { "label": "Habit enabled" }
+      },
+      "errors": {
+        "titleRequired": "Title is required",
+        "daysOfWeekRequired": "Pick at least one day",
+        "dayOfMonthRequired": "Pick a day of the month",
+        "monthRequired": "Pick a month"
+      },
+      "submit": "Save",
+      "createSubmit": "Create Habit"
+    }
+  },
   "insights": {
     "title": "Insights",
-    "weeklyConsistency": "Weekly Consistency",
-    "completionTrend": "Completion Trend",
-    "focusScore": "Focus Score",
-    "streakCalendar": "Streak Calendar",
-    "focusScoreDesc": "Your task focus is higher than average.",
-    "streakDesc": "Keep the flame alive!"
+    "error": {
+      "description": "We couldn't load your insights. Please sign in again."
+    },
+    "overview": {
+      "title": "Your Progress",
+      "weeklySummary": "WEEKLY SUMMARY",
+      "currentStreak": "CURRENT STREAK",
+      "more": "More",
+      "range": {
+        "week": "Week",
+        "month": "Month",
+        "quarter": "Quarter",
+        "year": "Year",
+        "comingSoon": "Coming soon"
+      },
+      "stats": {
+        "goalsCompleted": { "title": "Goals completed" },
+        "tasksCompleted": { "title": "Tasks completed" },
+        "productivity": { "title": "Productivity" },
+        "focusMinutes": { "title": "Avg. focus" }
+      },
+      "deltaVsLastWeek": "{{sign}}{{count}} vs last week"
+    },
+    "focus": {
+      "title": "Focus",
+      "bestDay": "Best day",
+      "worstDay": "Worst day",
+      "minutesLabel": "{{count}} min",
+      "empty": "No focus data for this week yet."
+    },
+    "goalProgress": {
+      "title": "Goal Progress",
+      "empty": {
+        "title": "No goals yet",
+        "description": "Create a goal to see its progress here."
+      }
+    },
+    "habitConsistency": {
+      "title": "Today's Habits",
+      "completed": "Completed",
+      "dueToday": "Due today"
+    },
+    "streakHighlight": {
+      "title": "Best Streak",
+      "days": "{{count}} Days"
+    }
   },
   "quickCapture": {
     "title": "Quick Capture",
-    "placeholder": "Capture task, goal or habit...",
+    "types": {
+      "goal": "Goal",
+      "habit": "Habit",
+      "task": "Task",
+      "note": "Note"
+    },
+    "placeholders": {
+      "goal": "What do you want to achieve?",
+      "habit": "What will you do repeatedly?",
+      "task": "What needs doing?",
+      "note": "Write a quick note..."
+    },
     "btnCapture": "Capture",
     "btnCancel": "Cancel"
   },
@@ -38,6 +506,10 @@
     "greetingMorning": "Good morning",
     "greetingAfternoon": "Good afternoon",
     "greetingEvening": "Good evening",
+    "sections": {
+      "thisWeek": "This Week",
+      "more": "More"
+    },
     "hero": {
       "dailyFocus": {
         "title": "You have {{count}} focus tasks today",
@@ -50,7 +522,18 @@
       "default": {
         "title": "Ready to level up your commitments?",
         "subtitle": "Set goals and build consistency today."
+      },
+      "priorityTask": {
+        "label": "Priority of the day",
+        "priority": {
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low"
+        }
       }
+    },
+    "header": {
+      "notifications": "Notifications"
     },
     "activeCount": "You have {{count}} active commitments",
     "noActiveCount": "No active commitments",
@@ -76,6 +559,26 @@
         },
         "itemA11y": "Task: {{title}}"
       },
+      "todayHabits": {
+        "title": "Today's Habits",
+        "remaining": "{{count}} habits today",
+        "viewAll": "View all",
+        "empty": {
+          "title": "No habits scheduled today",
+          "description": "Add a habit from Quick Capture to see it here."
+        },
+        "itemA11y": "Habit: {{title}}",
+        "streak": "{{count}}d"
+      },
+      "todayAgenda": {
+        "title": "Today's Agenda",
+        "viewAll": "View all",
+        "empty": {
+          "title": "Nothing scheduled today",
+          "description": "Tasks, commitments and habits with a date show up here."
+        },
+        "a11y": "Open the full calendar"
+      },
       "upcoming": {
         "title": "Upcoming Tasks",
         "empty": "No upcoming tasks."
@@ -88,6 +591,9 @@
         "title": "Quick Actions",
         "actionAdd": "Add Task",
         "actionCalendar": "Calendar"
+      },
+      "coachMessage": {
+        "label": "Message from your coach"
       },
       "currentStreak": {
         "title": "Daily Streak",

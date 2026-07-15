@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Switch as TamaguiSwitch, XStack, YStack } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
 
@@ -27,6 +27,7 @@ export const Switch = React.forwardRef<any, SwitchProps>(({
   accessibilityValue,
   testID,
 }, ref) => {
+  const { t } = useTranslation();
   const isActuallyDisabled = disabled || loading;
 
   const { state, handlers } = useInteractionState({

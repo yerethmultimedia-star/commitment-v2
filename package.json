@@ -30,7 +30,8 @@
   "pnpm": {
     "overrides": {
       "@tamagui/core": "^2.4.2",
-      "tamagui": "^2.4.2"
+      "tamagui": "^2.4.2",
+      "i18next": "^26.3.5"
     }
   }
 }

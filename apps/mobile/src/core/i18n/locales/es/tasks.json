@@ -4,6 +4,38 @@
   "close": "Cerrar",
   "loading": "Cargando…",
   "empty": "No tienes tareas pendientes.",
+  "emptyDescription": "Anota lo que necesitas hacer y aparecerá aquí.",
+  "fab": "Nueva tarea",
+  "fabHint": "Abre Captura Rápida para agregar una nueva tarea.",
+  "buckets": {
+    "inbox": "Bandeja",
+    "today": "Hoy",
+    "upcoming": "Próximas",
+    "completed": "Completadas",
+    "archived": "Archivadas",
+    "empty": {
+      "inbox": {
+        "title": "La bandeja está vacía",
+        "description": "Las tareas sin fecha límite aparecen aquí."
+      },
+      "today": {
+        "title": "Nada vence hoy",
+        "description": "Las tareas vencidas y las de hoy aparecen aquí."
+      },
+      "upcoming": {
+        "title": "Nada próximo",
+        "description": "Las tareas con fecha futura aparecerán aquí."
+      },
+      "completed": {
+        "title": "Aún no hay tareas completadas",
+        "description": "Las tareas que termines aparecerán aquí."
+      },
+      "archived": {
+        "title": "No hay tareas archivadas",
+        "description": "Las tareas que archives aparecerán aquí."
+      }
+    }
+  },
   "form": {
     "title": "Nueva tarea",
     "titlePlaceholder": "¿Qué necesitas hacer?",
@@ -20,13 +52,19 @@
     "sortBy": "Ordenar por",
     "sortCreated": "Fecha de Creación",
     "sortPriority": "Prioridad",
-    "submit": "Crear tarea"
+    "submit": "Crear tarea",
+    "titleRequired": "El título es obligatorio"
   },
   "actions": {
     "complete": "Completar",
     "duplicate": "Duplicar",
     "archive": "Archivar",
     "edit": "Editar"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "completed": "Completada",
+    "archived": "Archivada"
   },
   "progress": {
     "title": "Progreso",

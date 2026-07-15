@@ -3,11 +3,16 @@ import { QuickCaptureCommand } from '../commands/quick-capture.command';
 import { QuickCaptureResult } from '../commands/quick-capture.result';
 import { TaskApplicationService } from './task-application.service';
 import { RegisterTaskCommand } from '../commands/register-task.command';
+import { HabitApplicationService } from '../../../habit/application/services/habit-application.service';
+import { RegisterHabitCommand } from '../../../habit/application/commands/register-habit.command';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class QuickCaptureApplicationService {
-  constructor(private readonly taskAppService: TaskApplicationService) {}
+  constructor(
+    private readonly taskAppService: TaskApplicationService,
+    private readonly habitAppService: HabitApplicationService,
+  ) {}
 
   async execute(command: QuickCaptureCommand): Promise<QuickCaptureResult> {
     const textLower = command.text.toLowerCase().trim();
@@ -61,10 +66,24 @@ export class QuickCaptureApplicationService {
         command.context || {},
       );
       await this.taskAppService.registerTask(registerCmd);
+    } else if (type === 'habit') {
+      // Sensible defaults for a bare quick-captured habit — Daily at 9:00 AM, fully editable afterward.
+      const registerCmd = new RegisterHabitCommand(
+        id,
+        command.identityId,
+        cleanText,
+        'Daily',
+        [],
+        undefined,
+        undefined,
+        9,
+        0,
+        undefined,
+      );
+      await this.habitAppService.registerHabit(registerCmd);
     }
 
-    // In a future sprint, other types (goal, habit, note) will have their repositories/services.
-    // For now we map them or register them under task.
+    // In a future sprint, remaining types (goal, note) will have their own repositories/services.
     return new QuickCaptureResult(id, type);
   }
 }

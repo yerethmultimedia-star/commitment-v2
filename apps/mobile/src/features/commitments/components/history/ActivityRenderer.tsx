@@ -2,13 +2,12 @@ import { Activity } from '@/shared/models/activity';
 import { useTranslation } from 'react-i18next';
 import { TimelineItem, TimelineIcon, TimelineDate } from '@/shared/ui/timeline';
 import { Text } from 'tamagui';
-import { 
-  Play, 
-  Pause, 
-  CheckCircle, 
-  RotateCcw, 
-  Trash2, 
-  Edit3, 
+import {
+  Play,
+  Pause,
+  CheckCircle,
+  Trash2,
+  Edit3,
   Activity as ActivityIcon,
   Plus
 } from '@tamagui/lucide-icons';
@@ -25,59 +24,58 @@ export function ActivityRenderer({ activity, isLast }: ActivityRendererProps) {
 
   const formattedDate = formatDate(activity.occurredAt);
 
-  let icon = <ActivityIcon size="$1" color="$color1" />;
-  let backgroundColor = '$color5';
-  let content = <Text>{t(`activity.type.${activity.type}`, { defaultValue: activity.type })}</Text>;
-  let accessibilityText = '';
+  let icon = <ActivityIcon size="$1" color="$contentSecondary" />;
+  let backgroundColor = '$surfaceRaised';
+  let iconColor = '$contentSecondary';
+  let label = t(`activity.type.${activity.type}`, { defaultValue: activity.type });
 
   switch (activity.type) {
     case 'created':
-      icon = <Plus size="$1" color="$color1" />;
-      backgroundColor = '$blue9';
-      content = <Text>{t('activity.type.created', { defaultValue: 'Created this commitment' })}</Text>;
-      accessibilityText = `Created this commitment on ${formattedDate}`;
+      backgroundColor = '$accent';
+      iconColor = '$contentOnAccent';
+      icon = <Plus size="$1" color={iconColor as any} />;
+      label = t('activity.type.created', { defaultValue: 'Created this commitment' });
       break;
     case 'activated':
     case 'resumed':
-      icon = <Play size="$1" color="$color1" />;
-      backgroundColor = '$green9';
-      content = <Text>{t('activity.type.activated', { defaultValue: 'Activated the commitment' })}</Text>;
-      accessibilityText = `Activated the commitment on ${formattedDate}`;
+      backgroundColor = '$success';
+      iconColor = '$contentOnSemantic';
+      icon = <Play size="$1" color={iconColor as any} />;
+      label = t('activity.type.activated', { defaultValue: 'Activated the commitment' });
       break;
     case 'paused':
-      icon = <Pause size="$1" color="$color1" />;
-      backgroundColor = '$orange9';
-      content = <Text>{t('activity.type.paused', { defaultValue: 'Paused the commitment' })}</Text>;
-      accessibilityText = `Paused the commitment on ${formattedDate}`;
+      backgroundColor = '$warning';
+      iconColor = '$contentOnSemantic';
+      icon = <Pause size="$1" color={iconColor as any} />;
+      label = t('activity.type.paused', { defaultValue: 'Paused the commitment' });
       break;
     case 'completed':
-      icon = <CheckCircle size="$1" color="$color1" />;
-      backgroundColor = '$green10';
-      content = <Text>{t('activity.type.completed', { defaultValue: 'Completed the commitment!' })}</Text>;
-      accessibilityText = `Completed the commitment on ${formattedDate}`;
+      backgroundColor = '$success';
+      iconColor = '$contentOnSemantic';
+      icon = <CheckCircle size="$1" color={iconColor as any} />;
+      label = t('activity.type.completed', { defaultValue: 'Completed the commitment!' });
       break;
     case 'cancelled':
-      icon = <Trash2 size="$1" color="$color1" />;
-      backgroundColor = '$red9';
-      content = <Text>{t('activity.type.cancelled', { defaultValue: 'Cancelled the commitment' })}</Text>;
-      accessibilityText = `Cancelled the commitment on ${formattedDate}`;
+      backgroundColor = '$danger';
+      iconColor = '$contentOnSemantic';
+      icon = <Trash2 size="$1" color={iconColor as any} />;
+      label = t('activity.type.cancelled', { defaultValue: 'Cancelled the commitment' });
       break;
     case 'edited':
-      icon = <Edit3 size="$1" color="$color1" />;
-      backgroundColor = '$color7';
-      content = <Text>{t('activity.type.edited', { defaultValue: 'Edited details' })}</Text>;
-      accessibilityText = `Edited details on ${formattedDate}`;
+      backgroundColor = '$surfaceRaised';
+      iconColor = '$contentSecondary';
+      icon = <Edit3 size="$1" color={iconColor as any} />;
+      label = t('activity.type.edited', { defaultValue: 'Edited details' });
       break;
     default:
-      accessibilityText = `Activity ${activity.type} on ${formattedDate}`;
       break;
   }
 
   return (
     <TimelineItem
-      accessibilityLabel={accessibilityText}
+      accessibilityLabel={t('activity.a11yLabel', { defaultValue: '{{label}} on {{date}}', label, date: formattedDate })}
       icon={<TimelineIcon icon={icon} backgroundColor={backgroundColor} />}
-      content={content}
+      content={<Text color="$contentPrimary">{label}</Text>}
       date={<TimelineDate>{formattedDate}</TimelineDate>}
       isLast={isLast}
     />

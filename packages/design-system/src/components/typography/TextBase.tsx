@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as TamaguiText, styled, GetProps } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 
 export type TypographyRole = 'display' | 'headline' | 'title' | 'subtitle' | 'body' | 'label' | 'caption' | 'overline';
 export type Tone = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'disabled' | 'inverse';
@@ -53,6 +53,7 @@ export type TextContentProps =
 export type TextProps = BaseTextProps & TextContentProps;
 
 export const TextBase = React.forwardRef<any, TextProps>((props, ref) => {
+  const { t } = useTranslation();
   const {
     i18nKey,
     children,
@@ -63,7 +64,7 @@ export const TextBase = React.forwardRef<any, TextProps>((props, ref) => {
     maxFontSizeMultiplier = 1.5,
     ...rest
   } = props;
-  
+
   const content = i18nKey ? t(i18nKey, i18nParams) : children;
   
   // Handling truncation

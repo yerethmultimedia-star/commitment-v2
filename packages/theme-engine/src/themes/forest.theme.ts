@@ -1,5 +1,9 @@
 import { ThemeDefinition, ThemeManifest, ResolvedTheme } from '../index.js';
 
+// "Bosque" redesign — flips this theme from a dark pine palette to a light
+// sage one (background/surface/content colors below are all light-register
+// now), so supportsDarkIcons/supportsLightIcons flip to match (dark icons
+// read correctly on a light background, same as the other 3 light themes).
 export const forestManifest: ThemeManifest = {
   id: 'Forest',
   version: '1.0.0',
@@ -8,40 +12,46 @@ export const forestManifest: ThemeManifest = {
   nameKey: 'appearance.themes.forest.name',
   descriptionKey: 'appearance.themes.forest.description',
   author: 'Commitment',
-  supportsDarkIcons: false,
-  supportsLightIcons: true,
+  supportsDarkIcons: true,
+  supportsLightIcons: false,
 };
 
 export const forestResolvedTheme: ResolvedTheme = {
   colors: {
-    // Pine / Dark Moss background
-    background: '#1A211D',
-    backgroundSecondary: '#212A25',
-    
+    // Light sage / mint background
+    background: '#F4F7F4',
+    backgroundSecondary: '#E0E8E1',
+
     // Surfaces
-    surface: '#29352F',
-    surfaceRaised: '#334038',
-    
-    // Content colors (light earthy tones on dark)
-    contentPrimary: '#EBEAE4',
-    contentSecondary: '#A9ACA4',
-    contentTertiary: '#7F847A',
-    
-    // Accents (Soft Olive / Golden Moss)
-    accent: '#A3B18A',
-    
+    surface: '#FFFFFF',
+    surfaceRaised: '#FFFFFF',
+
+    // Content colors
+    contentPrimary: '#14281A',
+    contentSecondary: '#567A5E',
+    contentTertiary: '#567A5E',
+
+    // Accent (leaf green)
+    accent: '#22C55E',
+
     // Semantic
-    success: '#84A59D',
-    warning: '#D4A373',
-    danger: '#E07A5F',
-    info: '#669BBC',
-    
+    success: '#22C55E',
+    warning: '#F5A623',
+    danger: '#FF6B5E',
+    info: '#22C55E',
+
     // Interactive states
-    interactive: '#A3B18A',
-    focus: '#588157',
-    
+    interactive: '#22C55E',
+    focus: '#22C55E66',
+
     // Borders
-    divider: '#3E4A43',
+    divider: '#E0E8E1',
+
+    // Text-on-color pairs, verified against WCAG AA (see ResolvedTheme.ts).
+    // Leaf-green accent is light enough that white text fails contrast
+    // (2.28:1) — dark text passes at 6.84:1.
+    contentOnAccent: '#14281A',
+    contentOnSemantic: '#14281A',
   },
   typography: {
     fontFamily: 'Inter',
@@ -51,16 +61,16 @@ export const forestResolvedTheme: ResolvedTheme = {
     '0': 0, '1': 4, '2': 8, '3': 12, '4': 16, '5': 24, '6': 32, '7': 48, '8': 64
   },
   radius: {
-    '0': 0, '1': 4, '2': 8, '3': 12, '4': 16, full: 9999
+    '0': 0, '1': 8, '2': 12, '3': 16, '4': 20, full: 9999
   },
   border: {
     width: 1,
-    color: '#3E4A43',
+    color: '#E0E8E1',
   },
   elevation: {
     '0': 'none',
-    '1': 'sm',
-    '2': 'md',
+    '1': 'xs',
+    '2': 'sm',
   },
   motion: {
     fast: 150,
@@ -74,15 +84,15 @@ export const forestResolvedTheme: ResolvedTheme = {
     listAnimation: null
   },
   icons: {
-    style: 'solid'
+    style: 'outline'
   },
   illustrations: {
     style: 'flat'
   },
   opacity: {
     disabled: 0.4,
-    hover: 0.8,
-    press: 0.6
+    hover: 0.85,
+    press: 0.7
   },
   zIndex: {
     base: 0,

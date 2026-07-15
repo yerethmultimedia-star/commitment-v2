@@ -10,9 +10,11 @@ interface Props {
   placeholder?: string;
   options: { value: string; labelKey: string }[];
   disabled?: boolean;
+  /** i18next namespace the option labelKeys live in — defaults to 'commitments' for backward compat. */
+  ns?: string;
 }
 
-export function ControlledSelect({ name, control, label, placeholder, options, disabled }: Props) {
+export function ControlledSelect({ name, control, label, placeholder, options, disabled, ns = 'commitments' }: Props) {
   const { t } = useTranslation();
   const {
     field: { onChange, value },
@@ -21,24 +23,26 @@ export function ControlledSelect({ name, control, label, placeholder, options, d
 
   const selectedLabel = useMemo(() => {
     const option = options.find((o) => o.value === value);
-    return option ? t(option.labelKey, { ns: 'commitments' }) : placeholder;
-  }, [value, options, t, placeholder]);
+    return option ? t(option.labelKey, { ns }) : placeholder;
+  }, [value, options, t, placeholder, ns]);
 
   return (
     <YStack gap="$2" width="100%">
-      {label && <Text color="$textSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
-      
+      {label && <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
+
       <Select
         value={value}
         onValueChange={onChange}
         disablePreventBodyScroll
       >
-        <Select.Trigger 
+        <Select.Trigger
           iconAfter={null}
-          borderColor={error ? '$red10' : '$borderColor'}
-          focusStyle={{ borderColor: error ? '$red10' : '$blue10' }}
+          borderColor={error ? '$danger' : '$divider'}
+          focusStyle={{ borderColor: error ? '$danger' : '$accent' }}
           disabled={disabled}
           opacity={disabled ? 0.6 : 1}
+          accessibilityRole="button"
+          accessibilityLabel={label}
         >
           <Select.Value placeholder={placeholder}>
             {selectedLabel}
@@ -62,7 +66,7 @@ export function ControlledSelect({ name, control, label, placeholder, options, d
               <Select.Label>{label}</Select.Label>
               {options.map((item, i) => (
                 <Select.Item index={i} key={item.value} value={item.value}>
-                  <Select.ItemText>{t(item.labelKey, { ns: 'commitments' })}</Select.ItemText>
+                  <Select.ItemText>{t(item.labelKey, { ns })}</Select.ItemText>
                 </Select.Item>
               ))}
             </Select.Group>
@@ -71,7 +75,7 @@ export function ControlledSelect({ name, control, label, placeholder, options, d
       </Select>
 
       {error && (
-        <Text color="$red10" fontSize="$2">{error.message}</Text>
+        <Text color="$danger" fontSize="$2">{error.message}</Text>
       )}
     </YStack>
   );

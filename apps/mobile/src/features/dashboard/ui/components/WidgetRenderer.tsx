@@ -14,8 +14,8 @@ const WidgetErrorFallback = ({ error }: FallbackProps) => {
   const { t } = useTranslation();
   return (
     <YStack padding="$4" backgroundColor="$danger" borderRadius="$4" opacity={0.8}>
-      <Text color="white" fontWeight="bold" accessibilityRole="header">{t('dashboard.error.title')}</Text>
-      <Text color="white" fontSize="$2">{t('dashboard.error.description')}: {error instanceof Error ? error.message : String(error)}</Text>
+      <Text color="$contentOnSemantic" fontWeight="bold" accessibilityRole="header">{t('dashboard.error.title')}</Text>
+      <Text color="$contentOnSemantic" fontSize="$2">{t('dashboard.error.description')}: {error instanceof Error ? error.message : String(error)}</Text>
     </YStack>
   );
 };

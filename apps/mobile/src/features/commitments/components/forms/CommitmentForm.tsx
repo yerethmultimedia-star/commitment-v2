@@ -29,6 +29,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
       description: initialValues?.description || '',
       targetDate: initialValues?.targetDate || null,
       recurrence: initialValues?.recurrence || 'none',
+      priority: initialValues?.priority || 'medium',
     },
   });
 
@@ -40,6 +41,12 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
     { value: 'daily', labelKey: 'form.fields.recurrence.options.daily' },
     { value: 'weekly', labelKey: 'form.fields.recurrence.options.weekly' },
     { value: 'monthly', labelKey: 'form.fields.recurrence.options.monthly' },
+  ];
+
+  const priorityOptions = [
+    { value: 'low', labelKey: 'form.fields.priority.options.low' },
+    { value: 'medium', labelKey: 'form.fields.priority.options.medium' },
+    { value: 'high', labelKey: 'form.fields.priority.options.high' },
   ];
 
   return (
@@ -80,6 +87,15 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
         disabled={disabledFields.includes('recurrence')}
       />
 
+      <ControlledSelect
+        name="priority"
+        control={untypedControl}
+        label={t('form.fields.priority.label', { ns: 'commitments' })}
+        placeholder={t('form.fields.priority.placeholder', { ns: 'commitments' })}
+        options={priorityOptions}
+        disabled={disabledFields.includes('priority')}
+      />
+
       <Button
         theme="active"
         size="$5"
@@ -89,7 +105,7 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
         accessibilityLabel={submitLabel ?? t('form.submit', { ns: 'commitments' })}
         accessibilityState={{ disabled: !!isSubmitting }}
       >
-        <Text color="white" fontWeight="bold">
+        <Text color="$contentOnAccent" fontWeight="bold">
           {isSubmitting ? '...' : (submitLabel ?? t('form.submit', { ns: 'commitments' }))}
         </Text>
       </Button>

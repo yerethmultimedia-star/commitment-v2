@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, Spinner } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 import { Label } from './typography/Label.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
 
@@ -45,6 +45,7 @@ export const Button = React.forwardRef<any, ButtonProps>(({
   'aria-describedby': ariaDescribedBy,
   onPress,
 }, ref) => {
+  const { t } = useTranslation();
   const actualTone = destructive ? 'error' : tone;
   const isActuallyDisabled = disabled || loading;
 
@@ -80,8 +81,11 @@ export const Button = React.forwardRef<any, ButtonProps>(({
   let borderColor = 'transparent';
 
   if (variant === 'primary') {
+    const isSemanticTone = actualTone === 'error' || actualTone === 'success';
     bg = actualTone === 'error' ? '$danger' : actualTone === 'success' ? '$success' : '$interactive';
-    textColor = '#FFFFFF'; // Primary buttons often have inverted text
+    // contentOnAccent/contentOnSemantic are picked per theme so this always
+    // clears WCAG AA — some themes' accent is too light for white text.
+    textColor = isSemanticTone ? '$contentOnSemantic' : '$contentOnAccent';
   } else if (variant === 'secondary') {
     bg = '$surfaceRaised';
     textColor = actualTone === 'error' ? '$danger' : '$contentPrimary';

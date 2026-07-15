@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { YStack, Text, Button, XStack, Circle } from 'tamagui';
+import { YStack, Button, XStack, Circle } from 'tamagui';
 import { useTranslation } from 'react-i18next';
+import { Title, Body } from '@commitment/design-system';
 import { useAuth } from '@/core/auth/use-auth';
 import { FullScreenCenter } from '@/components/FullScreenCenter';
 
@@ -25,12 +26,12 @@ export default function OnboardingScreen() {
       <YStack flex={1} width="100%" justifyContent="center" alignItems="center" gap="$8">
         
         <YStack height={200} justifyContent="center" alignItems="center" gap="$4">
-          <Text fontSize="$8" fontWeight="bold" textAlign="center">
+          <Title fontSize="$8" fontWeight="bold" textAlign="center">
             {t(`onboarding.${currentStep}.title`, { ns: 'auth' })}
-          </Text>
-          <Text fontSize="$5" color="$gray10" textAlign="center">
+          </Title>
+          <Body tone="secondary" fontSize="$5" textAlign="center">
             {t(`onboarding.${currentStep}.subtitle`, { ns: 'auth' })}
-          </Text>
+          </Body>
         </YStack>
 
         <XStack gap="$3" marginBottom="$8">
@@ -38,7 +39,7 @@ export default function OnboardingScreen() {
             <Circle 
               key={idx} 
               size={12} 
-              backgroundColor={idx === step ? '$blue10' : '$gray5'} 
+              backgroundColor={idx === step ? '$accent' : '$divider'}
             />
           ))}
         </XStack>

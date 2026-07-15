@@ -11,6 +11,10 @@ const baseContext: DashboardContext = {
   commitments: { totalActive: 2, totalCompleted: 5 },
   tasks: { pendingToday: 3, completedThisWeek: 7, upcomingCount: 4 },
   streak: { currentStreakDays: 5, longestStreakDays: 10 },
+  habits: { scheduledTodayCount: 2, completedTodayCount: 1, atRiskCount: 0 },
+  // null here means resolveHero() falls through to the generic (recommendation-driven)
+  // hero for every test below — the priorityTask hero has its own describe block.
+  priorityTask: null,
   snapshotAt: '2026-01-01T10:00:00.000Z',
 };
 
@@ -18,10 +22,10 @@ const noRecs: Recommendation[] = [];
 
 describe('DashboardLayoutEngine', () => {
   describe('schemaVersion', () => {
-    it('always returns schemaVersion 2', () => {
+    it('always returns the current schemaVersion', () => {
       const layout = resolve(baseContext, noRecs);
       expect(layout.schemaVersion).toBe(LAYOUT_SCHEMA_VERSION);
-      expect(layout.schemaVersion).toBe(2);
+      expect(layout.schemaVersion).toBe(3);
     });
   });
 
@@ -83,6 +87,45 @@ describe('DashboardLayoutEngine', () => {
       ];
       const layout = resolve(baseContext, recs);
       expect(layout.hero.titleKey).toBe('dashboard.hero.dailyFocus.title');
+    });
+  });
+
+  describe('priorityTask hero', () => {
+    const priorityContext: DashboardContext = {
+      ...baseContext,
+      priorityTask: {
+        taskId: 't-01',
+        title: 'Finish onboarding',
+        priority: 'high',
+        commitmentId: 'c-01',
+        commitmentTitle: 'Commitment Project',
+        commitmentProgressRatio: 0.72,
+      },
+    };
+
+    it('takes precedence over the generic hero even when a PIN_HERO recommendation exists', () => {
+      const recs: Recommendation[] = [
+        { type: 'PIN_HERO', targetId: 'daily-focus', source: 'test', priority: 100, metadata: { count: 5 } },
+      ];
+      const layout = resolve(priorityContext, recs);
+      expect(layout.hero.kind).toBe('priorityTask');
+      expect(layout.hero.taskTitle).toBe('Finish onboarding');
+      expect(layout.hero.commitmentTitle).toBe('Commitment Project');
+      expect(layout.hero.priority).toBe('high');
+      expect(layout.hero.progressRatio).toBe(0.72);
+      expect(layout.hero.actionRoute).toBe('/(tabs)/tasks?taskId=t-01');
+    });
+
+    it('falls back to the generic hero when priorityTask is null', () => {
+      const layout = resolve(baseContext, noRecs);
+      expect(layout.hero.kind).toBe('generic');
+      expect(layout.hero.taskTitle).toBeUndefined();
+    });
+
+    it('is deterministic for identical priorityTask input', () => {
+      const layout1 = resolve(priorityContext, noRecs);
+      const layout2 = resolve(priorityContext, noRecs);
+      expect(JSON.stringify(layout1)).toBe(JSON.stringify(layout2));
     });
   });
 

@@ -1,38 +1,19 @@
-import { Link, Stack } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { useRouter, Stack } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { YStack } from 'tamagui';
+import { Title, Body, Button } from '@commitment/design-system';
 
 export default function NotFoundScreen() {
+  const { t } = useTranslation('common');
+  const router = useRouter();
+
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn't exist.</Text>
-
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
-        </Link>
-      </View>
+      <Stack.Screen options={{ title: t('notFound.title') }} />
+      <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" gap="$3" backgroundColor="$background">
+        <Title i18nKey="notFound.description" fontSize="$5" fontWeight="bold" textAlign="center" />
+        <Button i18nKey="notFound.link" onPress={() => router.replace('/')} />
+      </YStack>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-  linkText: {
-    fontSize: 14,
-    color: '#2e78b7',
-  },
-});

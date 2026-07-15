@@ -49,10 +49,13 @@ exports[`Screen Primitives AppScreen renders scrollable screen by default 1`] = 
       >
         <RCTScrollView
           contentContainerStyle={
-            {
-              "flexGrow": 1,
-              "padding": 16,
-            }
+            [
+              {
+                "flexGrow": 1,
+                "padding": 16,
+              },
+              false,
+            ]
           }
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}

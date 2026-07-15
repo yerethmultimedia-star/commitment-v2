@@ -12,6 +12,6 @@ export class RescheduleReminderOnResumeHandler implements IEventHandler<Commitme
 
   public async handle(event: CommitmentResumedEvent): Promise<void> {
     const { commitmentId, targetDate } = event.payload;
-    await this.scheduler.reschedule(commitmentId, targetDate);
+    await this.scheduler.reschedule(commitmentId, 'commitment', targetDate);
   }
 }

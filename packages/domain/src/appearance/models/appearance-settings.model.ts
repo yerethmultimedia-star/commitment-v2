@@ -37,7 +37,7 @@ export class AppearanceSettings {
 
   public static create(props: Partial<AppearanceSettingsProps>): AppearanceSettings {
     return new AppearanceSettings({
-      themeId: props.themeId ?? 'Sunrise',
+      themeId: props.themeId ?? 'DefaultLight',
       locale: props.locale ?? 'es',
       reducedMotion: props.reducedMotion ?? false,
       highContrast: props.highContrast ?? false,

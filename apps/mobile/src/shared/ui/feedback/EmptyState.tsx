@@ -1,4 +1,5 @@
-import { YStack, Text } from 'tamagui';
+import { YStack } from 'tamagui';
+import { Title, Body } from '@commitment/design-system';
 
 interface EmptyStateProps {
   title: string;
@@ -8,12 +9,12 @@ interface EmptyStateProps {
 export function EmptyState({ title, description }: EmptyStateProps) {
   return (
     <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" gap="$4">
-      <Text fontSize="$6" fontWeight="bold" color="$text" textAlign="center">
+      <Title fontSize="$6" fontWeight="bold" textAlign="center">
         {title}
-      </Text>
-      <Text fontSize="$4" color="$textSecondary" textAlign="center">
+      </Title>
+      <Body tone="secondary" fontSize="$4" textAlign="center">
         {description}
-      </Text>
+      </Body>
     </YStack>
   );
 }

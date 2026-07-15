@@ -6,8 +6,9 @@ import { appThemeRegistry } from './theme-registry';
 import { Theme } from 'tamagui';
 import ViewShot from 'react-native-view-shot';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming, runOnJS } from 'react-native-reanimated';
+import i18n from '@/core/i18n';
 
-const themeResolver = new ThemeResolver(appThemeRegistry, 'Sunrise');
+const themeResolver = new ThemeResolver(appThemeRegistry, 'DefaultLight');
 const AppearanceContext = createContext<ResolvedAppearance | null>(null);
 
 export const useResolvedAppearance = () => {
@@ -73,6 +74,17 @@ export const AppearanceProvider = ({ children, userId }: { children: React.React
     }
   }, [appearance, activeAppearance, opacity]);
 
+  // The one real wiring point for AppearanceSettings.locale — the field
+  // already existed on the domain model and was already persisted by
+  // updateSettings(), but nothing ever called i18next to actually switch
+  // language until now.
+  useEffect(() => {
+    const locale = activeAppearance?.settings.locale;
+    if (locale && i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [activeAppearance?.settings.locale]);
+
   const resolvedAppearance = useMemo(() => {
     if (!activeAppearance) return null;
     return themeResolver.resolve({
@@ -83,13 +95,13 @@ export const AppearanceProvider = ({ children, userId }: { children: React.React
     });
   }, [activeAppearance]);
 
-  if (isLoading || !resolvedAppearance || !activeAppearance) {
-    return null; 
-  }
-
   const animatedOverlayStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
+
+  if (isLoading || !resolvedAppearance || !activeAppearance) {
+    return null;
+  }
 
   return (
     <AppearanceContext.Provider value={resolvedAppearance}>

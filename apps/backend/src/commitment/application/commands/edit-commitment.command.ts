@@ -5,5 +5,6 @@ export class EditCommitmentCommand {
     public readonly description?: string,
     public readonly recurrencePattern?: string,
     public readonly targetDate?: string,
+    public readonly priority?: string,
   ) {}
 }

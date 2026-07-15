@@ -20,6 +20,7 @@ export class ScheduleReminderOnActivationHandler implements IEventHandler<Commit
     } = event.payload;
     await this.scheduler.schedule(
       commitmentId,
+      'commitment',
       identityId,
       targetDate,
       seriesId,

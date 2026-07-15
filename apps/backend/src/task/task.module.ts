@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CommitmentModule } from '../commitment/commitment.module';
+import { HabitModule } from '../habit/habit.module';
 
 import { TasksController } from './api/tasks.controller';
 
@@ -35,7 +36,7 @@ import { TaskApplicationService } from './application/services/task-application.
 import { QuickCaptureApplicationService } from './application/services/quick-capture-application.service';
 
 @Module({
-  imports: [CqrsModule, CommitmentModule],
+  imports: [CqrsModule, CommitmentModule, HabitModule],
   controllers: [TasksController],
   providers: [
     // Application Services

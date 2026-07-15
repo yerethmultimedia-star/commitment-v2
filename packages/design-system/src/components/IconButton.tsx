@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Spinner } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
 
 export interface IconButtonProps {
@@ -33,6 +33,7 @@ export const IconButton = React.forwardRef<any, IconButtonProps>(({
   testID,
   onPress,
 }, ref) => {
+  const { t } = useTranslation();
   const isActuallyDisabled = disabled || loading;
 
   const { state, handlers } = useInteractionState({
@@ -82,6 +83,16 @@ export const IconButton = React.forwardRef<any, IconButtonProps>(({
         accessibilityState={{ disabled: isActuallyDisabled, busy: loading }}
         accessibilityLabel={tooltipI18nKey ? t(tooltipI18nKey) : undefined}
         accessibilityHint={accessibilityHintI18nKey ? t(accessibilityHintI18nKey) : undefined}
+        // Tamagui's web output forwards accessibility* props to the DOM
+        // as-is instead of translating them to ARIA (hence the "React does
+        // not recognize `accessibilityRole`" warnings) — the aria-* props
+        // below are what the browser/screen reader actually reads on web.
+        // RN 0.71+ also accepts aria-* directly, so these are safe on native too.
+        {...({
+          'aria-label': tooltipI18nKey ? t(tooltipI18nKey) : undefined,
+          'aria-disabled': isActuallyDisabled,
+          'aria-busy': loading,
+        } as any)}
         width={touchTargetSize}
         height={touchTargetSize}
         borderRadius={touchTargetSize / 2}

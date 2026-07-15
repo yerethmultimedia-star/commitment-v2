@@ -6,6 +6,8 @@ import { CommitmentDescription } from '../value-objects/commitment-description.j
 import { RecurrencePattern, RecurrenceType } from '../value-objects/recurrence-pattern.js';
 import { SeriesId } from '../value-objects/series-id.js';
 import { TargetDate } from '../value-objects/target-date.js';
+import { CommitmentPriority } from '../value-objects/commitment-priority.js';
+import { PriorityType } from '../../task/value-objects/task-priority.js';
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { CommitmentRegisteredEvent } from '../events/commitment-registered.event.js';
 import { CommitmentActivatedEvent } from '../events/commitment-activated.event.js';
@@ -16,6 +18,7 @@ import { CommitmentCompletedEvent } from '../events/commitment-completed.event.j
 import { CommitmentRenamedEvent } from '../events/commitment-renamed.event.js';
 import { CommitmentDescriptionUpdatedEvent } from '../events/commitment-description-updated.event.js';
 import { CommitmentEditedEvent } from '../events/commitment-edited.event.js';
+import { CommitmentPriorityChangedEvent } from '../events/commitment-priority-changed.event.js';
 import {
   CommitmentRequiresIdentityError,
   CommitmentAlreadyCompletedError,
@@ -42,6 +45,7 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   private _recurrencePattern!: RecurrencePattern;
   private _targetDate!: TargetDate | null;
   private _seriesId!: SeriesId;
+  private _priority!: CommitmentPriority;
 
   private constructor(id: CommitmentId) {
     super(id);
@@ -75,6 +79,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     return this._seriesId;
   }
 
+  public get priority(): CommitmentPriority {
+    return this._priority;
+  }
+
   public static register(
     id: CommitmentId,
     identityId: IdentityId,
@@ -82,7 +90,8 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     description: CommitmentDescription | null,
     recurrencePattern?: RecurrencePattern,
     targetDate?: TargetDate | null,
-    seriesId?: SeriesId
+    seriesId?: SeriesId,
+    priority?: CommitmentPriority
   ): Commitment {
     if (!identityId) {
       throw new CommitmentRequiresIdentityError();
@@ -90,6 +99,10 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     const pattern = recurrencePattern ?? RecurrencePattern.create(RecurrenceType.None);
     const sId = seriesId ?? SeriesId.create(id.value);
     const tDate = targetDate ?? null;
+    // Priority is a newer field retrofitted onto this aggregate — defaulting
+    // to Medium keeps every existing caller of register() (backend commands,
+    // tests) working without requiring them to pick a value up front.
+    const pr = priority ?? CommitmentPriority.medium();
 
     const commitment = new Commitment(id);
     const event = new CommitmentRegisteredEvent(
@@ -101,7 +114,8 @@ export class Commitment extends AggregateRoot<CommitmentId> {
         description: description ? description.value : '',
         recurrencePattern: pattern.type,
         targetDate: tDate ? tDate.toISOString() : undefined,
-        seriesId: sId.value
+        seriesId: sId.value,
+        priority: pr.value
       }
     );
     commitment.recordEvent(event);
@@ -284,6 +298,21 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     this.recordEvent(event);
   }
 
+  public changePriority(newPriority: CommitmentPriority): void {
+    this.ensureNotImmutable();
+    if (newPriority.value === this._priority.value) {
+      return; // Rule #77 — No Meaningless Events
+    }
+    const event = new CommitmentPriorityChangedEvent(
+      this.id.value,
+      {
+        commitmentId: this.id.value,
+        priority: newPriority.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
   private ensureNotImmutable(): void {
     if (this._state === CommitmentState.Completed) {
       throw new CommitmentAlreadyCompletedError();
@@ -303,6 +332,7 @@ export class Commitment extends AggregateRoot<CommitmentId> {
       this._recurrencePattern = RecurrencePattern.create(payload.recurrencePattern as RecurrenceType);
       this._targetDate = payload.targetDate ? TargetDate.create(payload.targetDate) : null;
       this._seriesId = SeriesId.create(payload.seriesId);
+      this._priority = new CommitmentPriority(payload.priority as PriorityType);
     } else if (event.name === 'commitment.activated') {
       this._state = CommitmentState.Active;
     } else if (event.name === 'commitment.paused') {
@@ -333,6 +363,9 @@ export class Commitment extends AggregateRoot<CommitmentId> {
       if (payload.targetDate !== undefined) {
         this._targetDate = payload.targetDate ? TargetDate.create(payload.targetDate) : null;
       }
+    } else if (event.name === 'commitment.priority_changed') {
+      const payload = (event as CommitmentPriorityChangedEvent).payload;
+      this._priority = new CommitmentPriority(payload.priority as PriorityType);
     }
   }
 }

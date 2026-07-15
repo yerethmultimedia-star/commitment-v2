@@ -19,7 +19,8 @@ export class ReminderQueuedMessageMapper {
       new Date(event.metadata.occurredAt),
       {
         reminderId: event.payload.reminderId,
-        commitmentId: event.payload.commitmentId,
+        sourceId: event.payload.sourceId,
+        sourceType: event.payload.sourceType,
         identityId: event.payload.identityId,
         scheduledFor: event.payload.scheduledFor,
       },

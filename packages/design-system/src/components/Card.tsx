@@ -106,7 +106,7 @@ export const Card = React.forwardRef<any, CardProps>(({
 
   if (isInteractive && focusable) {
     return (
-      <FocusRing state={state} borderRadius="$4">
+      <FocusRing state={state} borderRadius="$4" stretch>
         {innerContent}
       </FocusRing>
     );

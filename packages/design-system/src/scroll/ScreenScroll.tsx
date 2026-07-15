@@ -9,6 +9,8 @@ export interface ScreenScrollProps extends ViewProps {
   onRefresh?: () => void;
   keyboardAware?: boolean;
   safeArea?: boolean;
+  /** Extra bottom padding on top of the default content padding — for content that would otherwise sit behind an app-level floating overlay (e.g. a floating tab bar) that isn't part of normal layout flow. */
+  contentBottomInset?: number;
   children?: React.ReactNode;
 }
 
@@ -17,6 +19,7 @@ export const ScreenScroll = React.forwardRef<any, ScreenScrollProps>(({
   onRefresh,
   keyboardAware = true,
   safeArea = true,
+  contentBottomInset = 0,
   children,
   ...props
 }, ref) => {
@@ -62,7 +65,7 @@ export const ScreenScroll = React.forwardRef<any, ScreenScrollProps>(({
     <ScrollView
       ref={scrollRef as any}
       style={styles.scroll}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, contentBottomInset > 0 && { paddingBottom: 16 + contentBottomInset }]}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       refreshControl={

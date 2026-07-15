@@ -21,23 +21,23 @@ export const CurrentStreakWidget = React.memo(function CurrentStreakWidget() {
 
   return (
     <Card variant="elevated" padding={0} overflow="hidden">
-      <YStack 
-        padding="$4" 
-        backgroundColor="$red9" 
+      <YStack
+        padding="$4"
+        backgroundColor="$accent"
         borderRadius="$4"
       >
         <YStack gap="$3">
-          <Text fontSize="$5" fontWeight="600" color="white">
+          <Text fontSize="$5" fontWeight="600" color="$contentOnAccent">
             {t('dashboard.widgets.currentStreak.title', { defaultValue: 'Daily Streak' })}
           </Text>
 
           <XStack alignItems="center" gap="$3">
             <Text fontSize="$9">🔥</Text>
             <YStack>
-              <Text fontSize="$8" fontWeight="bold" color="white">
+              <Text fontSize="$8" fontWeight="bold" color="$contentOnAccent">
                 {t('dashboard.widgets.currentStreak.count', { count: streakInfo.streak, defaultValue: '{{count}} Days' })}
               </Text>
-              <Text fontSize="$3" color="rgba(255, 255, 255, 0.9)">
+              <Text fontSize="$3" color="$contentOnAccent" opacity={0.85}>
                 {streakInfo.active 
                   ? t('dashboard.widgets.currentStreak.activeMsg', { defaultValue: 'Keep the flame burning!' }) 
                   : t('dashboard.widgets.currentStreak.inactiveMsg', { defaultValue: 'Complete a task today to start a streak!' })}

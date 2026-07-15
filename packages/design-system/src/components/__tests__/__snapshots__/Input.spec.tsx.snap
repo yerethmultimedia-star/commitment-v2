@@ -5,7 +5,7 @@ exports[`Input matches forest theme snapshot 1`] = `
   style={
     {
       "flexDirection": "column",
-      "gap": 7,
+      "gap": 8,
       "opacity": 1,
     }
   }
@@ -31,24 +31,24 @@ exports[`Input matches forest theme snapshot 1`] = `
       style={
         {
           "alignItems": "center",
-          "backgroundColor": "#FAF7F2",
-          "borderBottomColor": "#34A853",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomColor": "#22C55E",
           "borderBottomLeftRadius": 9,
           "borderBottomRightRadius": 9,
           "borderBottomWidth": 1,
-          "borderLeftColor": "#34A853",
+          "borderLeftColor": "#22C55E",
           "borderLeftWidth": 1,
-          "borderRightColor": "#34A853",
+          "borderRightColor": "#22C55E",
           "borderRightWidth": 1,
           "borderStyle": "solid",
-          "borderTopColor": "#34A853",
+          "borderTopColor": "#22C55E",
           "borderTopLeftRadius": 9,
           "borderTopRightRadius": 9,
           "borderTopWidth": 1,
           "flexDirection": "row",
           "height": 48,
-          "paddingLeft": 13,
-          "paddingRight": 13,
+          "paddingLeft": 12,
+          "paddingRight": 12,
         }
       }
     >
@@ -70,7 +70,7 @@ exports[`Input matches forest theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#9E9A92"
+        placeholderTextColor="#6B6B76"
         secureTextEntry={false}
         style={
           {
@@ -88,10 +88,10 @@ exports[`Input matches forest theme snapshot 1`] = `
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#2C2A26",
+            "color": "#18181F",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
-            "fontSize": 16,
+            "fontSize": 14,
             "height": "100%",
             "letterSpacing": 0,
             "minWidth": 0,
@@ -114,7 +114,7 @@ exports[`Input matches midnight theme snapshot 1`] = `
   style={
     {
       "flexDirection": "column",
-      "gap": 7,
+      "gap": 8,
       "opacity": 1,
     }
   }
@@ -140,24 +140,24 @@ exports[`Input matches midnight theme snapshot 1`] = `
       style={
         {
           "alignItems": "center",
-          "backgroundColor": "#FAF7F2",
-          "borderBottomColor": "#EA4335",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomColor": "#FF6B5E",
           "borderBottomLeftRadius": 9,
           "borderBottomRightRadius": 9,
           "borderBottomWidth": 1,
-          "borderLeftColor": "#EA4335",
+          "borderLeftColor": "#FF6B5E",
           "borderLeftWidth": 1,
-          "borderRightColor": "#EA4335",
+          "borderRightColor": "#FF6B5E",
           "borderRightWidth": 1,
           "borderStyle": "solid",
-          "borderTopColor": "#EA4335",
+          "borderTopColor": "#FF6B5E",
           "borderTopLeftRadius": 9,
           "borderTopRightRadius": 9,
           "borderTopWidth": 1,
           "flexDirection": "row",
           "height": 48,
-          "paddingLeft": 13,
-          "paddingRight": 13,
+          "paddingLeft": 12,
+          "paddingRight": 12,
         }
       }
     >
@@ -179,7 +179,7 @@ exports[`Input matches midnight theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#9E9A92"
+        placeholderTextColor="#6B6B76"
         secureTextEntry={false}
         style={
           {
@@ -197,10 +197,10 @@ exports[`Input matches midnight theme snapshot 1`] = `
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#2C2A26",
+            "color": "#18181F",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
-            "fontSize": 16,
+            "fontSize": 14,
             "height": "100%",
             "letterSpacing": 0,
             "minWidth": 0,
@@ -223,7 +223,7 @@ exports[`Input matches sunrise theme snapshot 1`] = `
   style={
     {
       "flexDirection": "column",
-      "gap": 7,
+      "gap": 8,
       "opacity": 1,
     }
   }
@@ -249,24 +249,24 @@ exports[`Input matches sunrise theme snapshot 1`] = `
       style={
         {
           "alignItems": "center",
-          "backgroundColor": "#FAF7F2",
-          "borderBottomColor": "#E8E4D9",
+          "backgroundColor": "#FFFFFF",
+          "borderBottomColor": "#E7E7EF",
           "borderBottomLeftRadius": 9,
           "borderBottomRightRadius": 9,
           "borderBottomWidth": 1,
-          "borderLeftColor": "#E8E4D9",
+          "borderLeftColor": "#E7E7EF",
           "borderLeftWidth": 1,
-          "borderRightColor": "#E8E4D9",
+          "borderRightColor": "#E7E7EF",
           "borderRightWidth": 1,
           "borderStyle": "solid",
-          "borderTopColor": "#E8E4D9",
+          "borderTopColor": "#E7E7EF",
           "borderTopLeftRadius": 9,
           "borderTopRightRadius": 9,
           "borderTopWidth": 1,
           "flexDirection": "row",
           "height": 48,
-          "paddingLeft": 13,
-          "paddingRight": 13,
+          "paddingLeft": 12,
+          "paddingRight": 12,
         }
       }
     >
@@ -288,7 +288,7 @@ exports[`Input matches sunrise theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#9E9A92"
+        placeholderTextColor="#6B6B76"
         secureTextEntry={false}
         style={
           {
@@ -306,10 +306,10 @@ exports[`Input matches sunrise theme snapshot 1`] = `
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#2C2A26",
+            "color": "#18181F",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
-            "fontSize": 16,
+            "fontSize": 14,
             "height": "100%",
             "letterSpacing": 0,
             "minWidth": 0,

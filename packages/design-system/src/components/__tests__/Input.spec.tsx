@@ -5,6 +5,7 @@ import { renderWithTheme } from './setup';
 
 jest.mock('@commitment/localization', () => ({
   t: (key: string) => `[TR] ${key}`,
+  useTranslation: () => ({ t: (key: string) => `[TR] ${key}` }),
 }));
 
 describe('Input', () => {

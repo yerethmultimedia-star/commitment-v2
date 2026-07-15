@@ -8,6 +8,7 @@ export interface CommitmentRegisteredEventPayload {
   readonly recurrencePattern: string;
   readonly targetDate?: string;
   readonly seriesId: string;
+  readonly priority: string;
 }
 
 export class CommitmentRegisteredEvent implements DomainEvent {

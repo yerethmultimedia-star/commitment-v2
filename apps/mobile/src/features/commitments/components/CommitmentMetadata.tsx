@@ -15,10 +15,10 @@ interface MetadataRowProps {
 function MetadataRow({ label, value }: MetadataRowProps) {
   return (
     <XStack justifyContent="space-between" alignItems="center" paddingVertical="$2">
-      <Text color="$textSecondary" fontSize="$3" fontWeight="bold">
+      <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">
         {label}
       </Text>
-      <Text color="$text" fontSize="$3">
+      <Text color="$contentPrimary" fontSize="$3">
         {value}
       </Text>
     </XStack>
@@ -30,7 +30,7 @@ export function CommitmentMetadata({ commitment }: Props) {
 
   return (
     <YStack
-      backgroundColor="$backgroundElement"
+      backgroundColor="$surfaceRaised"
       borderRadius="$4"
       padding="$4"
       gap="$1"
@@ -53,7 +53,7 @@ export function CommitmentMetadata({ commitment }: Props) {
       )}
 
       {!commitment.targetDate && !commitment.recurrencePattern && (
-        <Text color="$textSecondary" fontSize="$3" textAlign="center" paddingVertical="$2">
+        <Text color="$contentSecondary" fontSize="$3" textAlign="center" paddingVertical="$2">
           {t('workspace.metadata.empty', { ns: 'commitments' })}
         </Text>
       )}

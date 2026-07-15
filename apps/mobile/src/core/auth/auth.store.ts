@@ -43,8 +43,16 @@ export const useAuthStore = create<AuthState>()(
         set({ hasSeenOnboarding: true });
       },
 
-      setHydrated: (state) => {
-        set({ isHydrated: state });
+      setHydrated: (hydrated) => {
+        // Resolve sessionStatus in the same set() call — mutating it
+        // separately (as the previous implementation did inside
+        // onRehydrateStorage) doesn't go through Zustand's setState, so
+        // subscribers are never notified and sessionStatus stays stuck at
+        // its initial 'Loading' value forever.
+        set((current) => ({
+          isHydrated: hydrated,
+          sessionStatus: current.identityId ? 'Authenticated' : 'Anonymous',
+        }));
       },
     }),
     {
@@ -54,11 +62,6 @@ export const useAuthStore = create<AuthState>()(
         // Runs when hydration is done
         if (state) {
           state.setHydrated(true);
-          if (state.identityId) {
-            state.sessionStatus = 'Authenticated';
-          } else {
-            state.sessionStatus = 'Anonymous';
-          }
         }
       },
     }

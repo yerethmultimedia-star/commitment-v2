@@ -17,7 +17,6 @@ export function CommitmentActionBar({ actions, onAction, pendingAction }: Props)
   const destructiveActions = actions.filter((a) => a.variant === 'destructive');
 
   const getTheme = (action: ActionConfig) => {
-    if (action.variant === 'destructive') return 'red';
     if (action.variant === 'primary') return 'active';
     return undefined;
   };
@@ -52,8 +51,8 @@ export function CommitmentActionBar({ actions, onAction, pendingAction }: Props)
       {destructiveActions.map((action) => (
         <Button
           key={action.id}
-          theme="red"
           variant="outlined"
+          borderColor="$danger"
           size="$4"
           disabled={pendingAction != null}
           onPress={() => onAction(action)}
@@ -61,7 +60,7 @@ export function CommitmentActionBar({ actions, onAction, pendingAction }: Props)
           accessibilityLabel={t(action.labelKey, { ns: 'commitments' })}
           accessibilityState={{ disabled: pendingAction != null }}
         >
-          <Text color="$red10" fontWeight="bold">
+          <Text color="$danger" fontWeight="bold">
             {t(action.labelKey, { ns: 'commitments' })}
           </Text>
         </Button>

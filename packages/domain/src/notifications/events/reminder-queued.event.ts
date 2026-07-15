@@ -1,8 +1,10 @@
 import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interface.js';
+import { ReminderSourceType } from '../aggregate/reminder-source-type.js';
 
 export interface ReminderQueuedPayload {
   reminderId: string;
-  commitmentId: string;
+  sourceId: string;
+  sourceType: ReminderSourceType;
   identityId: string;
   scheduledFor: string;
 }

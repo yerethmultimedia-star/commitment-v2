@@ -7,8 +7,34 @@ import { CompletionRateWidget } from '../ui/components/widgets/CompletionRateWid
 import { RecentActivityWidget } from '../ui/components/widgets/RecentActivityWidget';
 import { CurrentStreakWidget } from '../ui/components/widgets/CurrentStreakWidget';
 import { MotivationWidget } from '../ui/components/widgets/MotivationWidget';
+import { TodayHabitsWidget } from '../ui/components/widgets/TodayHabitsWidget';
+import { TodayAgendaWidget } from '../ui/components/widgets/TodayAgendaWidget';
+import { CoachMessageWidget } from '../ui/components/widgets/CoachMessageWidget';
 
 export function registerDefaultWidgets() {
+  appWidgetRegistry.register({
+    id: 'coach-message-widget',
+    titleKey: 'dashboard.widgets.coachMessage.label',
+    accessibilityKey: 'dashboard.widgets.coachMessage.label',
+    iconToken: 'bot',
+    category: 'motivation',
+    priority: 14,
+    defaultSize: 'medium',
+    component: CoachMessageWidget,
+    capabilities: {
+      refreshable: true,
+      collapsible: false,
+      editable: false,
+      offline: true,
+      requiresAuth: true,
+      supportsTheme: true,
+      supportsAnimation: true,
+    },
+    featureFlags: [],
+    permissions: [],
+    minimumAppVersion: '1.0.0',
+  });
+
   appWidgetRegistry.register({
     id: 'today-widget',
     titleKey: 'dashboard.widgets.today.title',
@@ -20,6 +46,54 @@ export function registerDefaultWidgets() {
     priority: 10,
     defaultSize: 'medium',
     component: TodayWidget,
+    capabilities: {
+      refreshable: true,
+      collapsible: false,
+      editable: false,
+      offline: true,
+      requiresAuth: true,
+      supportsTheme: true,
+      supportsAnimation: true,
+    },
+    featureFlags: [],
+    permissions: [],
+    minimumAppVersion: '1.0.0',
+  });
+
+  appWidgetRegistry.register({
+    id: 'today-habits-widget',
+    titleKey: 'dashboard.widgets.todayHabits.title',
+    emptyStateKey: 'dashboard.widgets.todayHabits.empty.title',
+    accessibilityKey: 'dashboard.widgets.todayHabits.itemA11y',
+    iconToken: 'check-circle',
+    category: 'activity',
+    priority: 12,
+    defaultSize: 'medium',
+    component: TodayHabitsWidget,
+    capabilities: {
+      refreshable: true,
+      collapsible: false,
+      editable: false,
+      offline: true,
+      requiresAuth: true,
+      supportsTheme: true,
+      supportsAnimation: true,
+    },
+    featureFlags: [],
+    permissions: [],
+    minimumAppVersion: '1.0.0',
+  });
+
+  appWidgetRegistry.register({
+    id: 'today-agenda-widget',
+    titleKey: 'dashboard.widgets.todayAgenda.title',
+    emptyStateKey: 'dashboard.widgets.todayAgenda.empty.title',
+    accessibilityKey: 'dashboard.widgets.todayAgenda.a11y',
+    iconToken: 'calendar',
+    category: 'activity',
+    priority: 13,
+    defaultSize: 'medium',
+    component: TodayAgendaWidget,
     capabilities: {
       refreshable: true,
       collapsible: false,

@@ -4,7 +4,7 @@ import { FullScreenCenter } from '../FullScreenCenter';
 export function LoadingState() {
   return (
     <FullScreenCenter>
-      <Spinner size="large" color="$blue10" />
+      <Spinner size="large" color="$accent" />
     </FullScreenCenter>
   );
 }

@@ -7,6 +7,7 @@ export const createCommitmentSchema = (t: TFunction) => {
     description: z.string().optional(),
     targetDate: z.date().optional().nullable(),
     recurrence: z.enum(['none', 'daily', 'weekly', 'monthly']).optional().nullable(),
+    priority: z.enum(['low', 'medium', 'high']).optional(),
   });
 };
 

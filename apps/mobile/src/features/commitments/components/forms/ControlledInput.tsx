@@ -15,17 +15,18 @@ export function ControlledInput({ name, control, label, ...inputProps }: Props) 
 
   return (
     <YStack gap="$2" width="100%">
-      {label && <Text color="$textSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
+      {label && <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
       <Input
         value={value}
         onChangeText={onChange}
         onBlur={onBlur}
-        borderColor={error ? '$red10' : '$borderColor'}
-        focusStyle={{ borderColor: error ? '$red10' : '$blue10' }}
+        borderColor={error ? '$danger' : '$divider'}
+        focusStyle={{ borderColor: error ? '$danger' : '$accent' }}
+        accessibilityLabel={label}
         {...inputProps}
       />
       {error && (
-        <Text color="$red10" fontSize="$2">{error.message}</Text>
+        <Text color="$danger" fontSize="$2">{error.message}</Text>
       )}
     </YStack>
   );

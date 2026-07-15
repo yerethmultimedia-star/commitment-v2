@@ -6,11 +6,11 @@ exports[`Typography Primitives applies semantic roles correctly 1`] = `
   maxFontSizeMultiplier={1.5}
   style={
     {
-      "color": "#2C2A26",
+      "color": "#18181F",
       "fontFamily": "Inter_600SemiBold",
-      "fontSize": 24,
+      "fontSize": 17,
       "letterSpacing": -0.2,
-      "lineHeight": 32,
+      "lineHeight": 22,
     }
   }
   suppressHighlighting={true}
@@ -25,11 +25,11 @@ exports[`Typography Primitives applies tone correctly 1`] = `
   maxFontSizeMultiplier={1.5}
   style={
     {
-      "color": "#EA4335",
+      "color": "#FF6B5E",
       "fontFamily": "Inter_400Regular",
-      "fontSize": 12,
+      "fontSize": 11,
       "letterSpacing": 0.2,
-      "lineHeight": 16,
+      "lineHeight": 15,
     }
   }
   suppressHighlighting={true}

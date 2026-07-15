@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, ScrollView, Text } from 'tamagui';
+import { YStack, ScrollView } from 'tamagui';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
+import { Title } from '@commitment/design-system';
 import { useCommitment } from '../hooks/useCommitment';
 import { useEditCommitment } from '../hooks/useEditCommitment';
 import { getEditableFields } from '@/shared/domain/commitmentActions';
@@ -21,9 +22,9 @@ export function EditCommitmentScreen() {
 
   // Derive the non-editable fields declaratively — no if/else in the component
   const disabledFields = useMemo(() => {
-    if (!commitment) return ['title', 'description', 'targetDate', 'recurrence'];
+    if (!commitment) return ['title', 'description', 'targetDate', 'recurrence', 'priority'];
     const editable = getEditableFields(commitment.status);
-    const allFields = ['title', 'description', 'targetDate', 'recurrence'];
+    const allFields = ['title', 'description', 'targetDate', 'recurrence', 'priority'];
     return allFields.filter((f) => !editable.includes(f as any));
   }, [commitment]);
 
@@ -42,6 +43,7 @@ export function EditCommitmentScreen() {
     title: commitment.title,
     targetDate: commitment.targetDate ? new Date(commitment.targetDate) : null,
     recurrence: (commitment.recurrencePattern as any) ?? 'none',
+    priority: commitment.priority,
   };
 
   const handleSubmit = async (values: CommitmentFormValues) => {
@@ -64,9 +66,9 @@ export function EditCommitmentScreen() {
         <YStack padding="$4" gap="$5" paddingBottom="$10">
           {/* Status context — so the user knows why some fields are locked */}
           <YStack gap="$2">
-            <Text fontSize="$7" fontWeight="bold" color="$text">
+            <Title fontSize="$7" fontWeight="bold">
               {commitment.title}
-            </Text>
+            </Title>
             <CommitmentStatusBadge status={commitment.status} />
           </YStack>
 

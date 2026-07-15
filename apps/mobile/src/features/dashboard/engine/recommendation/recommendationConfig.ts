@@ -11,9 +11,11 @@
 
 import { RecommendationProvider } from './RecommendationProvider';
 import { RuleRecommendationProvider } from './RuleRecommendationProvider';
+import { CoachRecommendationProvider } from './CoachRecommendationProvider';
 
 export const recommendationProviders: RecommendationProvider[] = [
   new RuleRecommendationProvider(),
+  new CoachRecommendationProvider(),
   // VS-034: new AIRecommendationProvider(),
   // VS-034: new ExperimentRecommendationProvider(),
 ];

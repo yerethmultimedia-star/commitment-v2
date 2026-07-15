@@ -9,4 +9,14 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) => ['tasks', 'list', filters] as const,
     dashboard: (identityId: string) => ['tasks', 'dashboard', identityId] as const,
   },
+  habits: {
+    all: ['habits'] as const,
+    list: ['habits', 'list'] as const,
+    detail: (id: string) => ['habits', 'detail', id] as const,
+  },
+  goals: {
+    all: ['goals'] as const,
+    list: ['goals', 'list'] as const,
+    detail: (id: string) => ['goals', 'detail', id] as const,
+  },
 };

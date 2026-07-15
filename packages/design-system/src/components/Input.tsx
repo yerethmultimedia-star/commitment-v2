@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Input as TamaguiInput, YStack, XStack } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 import { Label, Caption, Body } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
 
@@ -10,6 +10,8 @@ export interface InputProps {
   labelI18nKey?: string;
   helperI18nKey?: string;
   placeholderI18nKey?: string;
+  /** Accessible name when there's no visible labelI18nKey (e.g. a placeholder-only field) — ignored if labelI18nKey is set, since the visible Label already supplies one. */
+  accessibilityLabelI18nKey?: string;
   error?: boolean;
   success?: boolean;
   counter?: { current: number; max: number };
@@ -38,6 +40,7 @@ export const Input = React.forwardRef<any, InputProps>(({
   labelI18nKey,
   helperI18nKey,
   placeholderI18nKey,
+  accessibilityLabelI18nKey,
   error = false,
   success = false,
   counter,
@@ -59,6 +62,7 @@ export const Input = React.forwardRef<any, InputProps>(({
   onFocus,
   onBlur,
 }, ref) => {
+  const { t } = useTranslation();
   const isActuallyDisabled = disabled || loading;
   const [showPassword, setShowPassword] = useState(false);
 
@@ -143,6 +147,10 @@ export const Input = React.forwardRef<any, InputProps>(({
             returnKeyType={returnKeyType}
             disabled={isActuallyDisabled}
             accessibilityState={{ disabled: isActuallyDisabled }}
+            accessibilityLabel={
+              labelI18nKey ? t(labelI18nKey) : accessibilityLabelI18nKey ? t(accessibilityLabelI18nKey) : undefined
+            }
+            {...(labelI18nKey ? ({ 'aria-labelledby': id + '-label' } as any) : {})}
             aria-describedby={helperI18nKey ? helperId : undefined}
             onFocus={() => {
               handlers.onFocus();

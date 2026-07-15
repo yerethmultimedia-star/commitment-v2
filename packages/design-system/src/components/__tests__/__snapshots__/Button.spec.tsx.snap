@@ -31,7 +31,7 @@ exports[`Button matches forest theme snapshot 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#FF7B54",
+        "backgroundColor": "#6C4EFF",
         "borderBottomColor": "transparent",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
@@ -50,8 +50,8 @@ exports[`Button matches forest theme snapshot 1`] = `
         "height": 48,
         "justifyContent": "center",
         "opacity": 1,
-        "paddingLeft": 18,
-        "paddingRight": 18,
+        "paddingLeft": 16,
+        "paddingRight": 16,
         "transform": [
           {
             "scale": 1,
@@ -65,7 +65,7 @@ exports[`Button matches forest theme snapshot 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 7,
+          "gap": 8,
         }
       }
     >
@@ -76,9 +76,9 @@ exports[`Button matches forest theme snapshot 1`] = `
           {
             "color": "#FFFFFF",
             "fontFamily": "Inter_600SemiBold",
-            "fontSize": "$4",
+            "fontSize": 14,
             "letterSpacing": 0.1,
-            "lineHeight": 20,
+            "lineHeight": 18,
           }
         }
         suppressHighlighting={true}
@@ -121,7 +121,7 @@ exports[`Button matches midnight theme snapshot 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#FF7B54",
+        "backgroundColor": "#6C4EFF",
         "borderBottomColor": "transparent",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
@@ -140,8 +140,8 @@ exports[`Button matches midnight theme snapshot 1`] = `
         "height": 48,
         "justifyContent": "center",
         "opacity": 1,
-        "paddingLeft": 18,
-        "paddingRight": 18,
+        "paddingLeft": 16,
+        "paddingRight": 16,
         "transform": [
           {
             "scale": 1,
@@ -155,7 +155,7 @@ exports[`Button matches midnight theme snapshot 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 7,
+          "gap": 8,
         }
       }
     >
@@ -166,9 +166,9 @@ exports[`Button matches midnight theme snapshot 1`] = `
           {
             "color": "#FFFFFF",
             "fontFamily": "Inter_600SemiBold",
-            "fontSize": "$4",
+            "fontSize": 14,
             "letterSpacing": 0.1,
-            "lineHeight": 20,
+            "lineHeight": 18,
           }
         }
         suppressHighlighting={true}
@@ -211,7 +211,7 @@ exports[`Button matches sunrise theme snapshot 1`] = `
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#FF7B54",
+        "backgroundColor": "#6C4EFF",
         "borderBottomColor": "transparent",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
@@ -230,8 +230,8 @@ exports[`Button matches sunrise theme snapshot 1`] = `
         "height": 48,
         "justifyContent": "center",
         "opacity": 1,
-        "paddingLeft": 18,
-        "paddingRight": 18,
+        "paddingLeft": 16,
+        "paddingRight": 16,
         "transform": [
           {
             "scale": 1,
@@ -245,7 +245,7 @@ exports[`Button matches sunrise theme snapshot 1`] = `
         {
           "alignItems": "center",
           "flexDirection": "row",
-          "gap": 7,
+          "gap": 8,
         }
       }
     >
@@ -256,9 +256,9 @@ exports[`Button matches sunrise theme snapshot 1`] = `
           {
             "color": "#FFFFFF",
             "fontFamily": "Inter_600SemiBold",
-            "fontSize": "$4",
+            "fontSize": 14,
             "letterSpacing": 0.1,
-            "lineHeight": 20,
+            "lineHeight": 18,
           }
         }
         suppressHighlighting={true}

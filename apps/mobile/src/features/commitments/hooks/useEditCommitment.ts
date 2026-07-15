@@ -14,6 +14,7 @@ export function useEditCommitment(commitmentId: string) {
         description: values.description || undefined,
         targetDate: values.targetDate ? values.targetDate.toISOString() : null,
         recurrencePattern: values.recurrence !== 'none' ? values.recurrence || null : null,
+        priority: values.priority,
       });
     },
     onMutate: async (newValues) => {
@@ -33,6 +34,7 @@ export function useEditCommitment(commitmentId: string) {
                 targetDate: newValues.targetDate?.toISOString() ?? old.targetDate,
                 recurrencePattern:
                   newValues.recurrence !== 'none' ? newValues.recurrence ?? old.recurrencePattern : undefined,
+                priority: newValues.priority ?? old.priority,
               }
             : old,
       );

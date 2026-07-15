@@ -11,25 +11,27 @@ export interface QuickAction {
 }
 
 import { useRouter } from 'expo-router';
+import { useUiStore } from '@/core/store/use-ui-store';
 
 export const QuickActionsWidget = React.memo(function QuickActionsWidget() {
   const { t } = useTranslation();
   const router = useRouter();
+  const openQuickCapture = useUiStore((s) => s.openQuickCapture);
 
   const actions = useMemo(() => [
     {
       id: 'add',
       iconToken: 'plus',
       i18nKey: 'dashboard.widgets.quickActions.actionAdd',
-      onPress: () => router.push('/(tabs)/commitments/create' as any),
+      onPress: () => openQuickCapture('today'),
     },
     {
       id: 'calendar',
       iconToken: 'calendar',
       i18nKey: 'dashboard.widgets.quickActions.actionCalendar',
-      onPress: () => router.push('/(tabs)/calendar' as any),
+      onPress: () => router.push('/calendar' as any),
     }
-  ], [router]);
+  ], [router, openQuickCapture]);
 
   return (
     <Card variant="flat" backgroundColor="transparent" borderWidth={0} padding="$0">

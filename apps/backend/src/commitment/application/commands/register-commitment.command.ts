@@ -7,5 +7,6 @@ export class RegisterCommitmentCommand {
     public readonly recurrencePattern?: string,
     public readonly targetDate?: string,
     public readonly seriesId?: string,
+    public readonly priority?: string,
   ) {}
 }

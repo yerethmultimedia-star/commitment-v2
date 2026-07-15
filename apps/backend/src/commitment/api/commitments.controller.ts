@@ -74,6 +74,7 @@ const registerSchema = z.object({
   recurrencePattern: z.string().optional(),
   targetDate: z.string().optional(),
   seriesId: z.string().uuid('Invalid series id UUID format').optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
 });
 
 const uuidSchema = z.string().uuid('Invalid UUID format');
@@ -164,6 +165,7 @@ export class CommitmentsController {
         dto.recurrencePattern,
         dto.targetDate,
         dto.seriesId,
+        dto.priority,
       );
 
       const result = (await this.commandBus.execute(
@@ -201,6 +203,7 @@ export class CommitmentsController {
         dto.description,
         dto.recurrencePattern,
         dto.targetDate,
+        dto.priority,
       );
 
       const result = (await this.commandBus.execute(

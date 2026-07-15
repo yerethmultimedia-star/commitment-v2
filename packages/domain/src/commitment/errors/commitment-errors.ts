@@ -105,3 +105,12 @@ export class CommitmentCannotBeDescriptionUpdatedError extends Error {
     Object.freeze(this);
   }
 }
+
+export class InvalidCommitmentPriorityError extends Error {
+  public readonly code = 'INVALID_COMMITMENT_PRIORITY';
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidCommitmentPriorityError';
+    Object.freeze(this);
+  }
+}

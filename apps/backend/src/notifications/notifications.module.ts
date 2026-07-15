@@ -7,6 +7,17 @@ import {
   CancelReminderOnCompletedHandler,
   CancelReminderOnCancelledHandler,
 } from './application/handlers/cancel-reminder-on-terminal-state.handler';
+import { ScheduleReminderOnHabitRegisteredHandler } from './application/handlers/schedule-reminder-on-habit-registered.handler';
+import {
+  RescheduleReminderOnHabitCompletedHandler,
+  RescheduleReminderOnHabitMissedHandler,
+} from './application/handlers/reschedule-reminder-on-habit-occurrence.handler';
+import { RescheduleReminderOnHabitPostponedHandler } from './application/handlers/reschedule-reminder-on-habit-postponed.handler';
+import { SuspendReminderOnHabitDisabledHandler } from './application/handlers/suspend-reminder-on-habit-disabled.handler';
+import { ResumeReminderOnHabitEnabledHandler } from './application/handlers/resume-reminder-on-habit-enabled.handler';
+import { CancelReminderOnHabitArchivedHandler } from './application/handlers/cancel-reminder-on-habit-archived.handler';
+import { HabitReminderSchedulingService } from './application/services/habit-reminder-scheduling.service';
+import { HabitReminderRolloverService } from './application/services/habit-reminder-rollover.service';
 import { InMemoryReminderScheduler } from './infrastructure/in-memory-reminder-scheduler';
 import { InMemoryReminderRepository } from './infrastructure/in-memory-reminder.repository';
 import { BullModule } from '@nestjs/bullmq';
@@ -22,11 +33,13 @@ import { ReminderQueuedMessageMapper } from './application/mappers/reminder-queu
 import { UpdateDeviceProjectionOnRegisteredHandler } from './application/handlers/update-device-projection-on-registered.handler';
 import { UpdateDeviceProjectionOnUpdatedHandler } from './application/handlers/update-device-projection-on-updated.handler';
 import { MessagingModule } from '../messaging/messaging.module';
+import { HabitModule } from '../habit/habit.module';
 
 @Module({
   imports: [
     CqrsModule,
     MessagingModule,
+    HabitModule,
     BullModule.registerQueue({
       name: 'reminders',
     }),
@@ -37,6 +50,15 @@ import { MessagingModule } from '../messaging/messaging.module';
     RescheduleReminderOnResumeHandler,
     CancelReminderOnCompletedHandler,
     CancelReminderOnCancelledHandler,
+    ScheduleReminderOnHabitRegisteredHandler,
+    RescheduleReminderOnHabitCompletedHandler,
+    RescheduleReminderOnHabitMissedHandler,
+    RescheduleReminderOnHabitPostponedHandler,
+    SuspendReminderOnHabitDisabledHandler,
+    ResumeReminderOnHabitEnabledHandler,
+    CancelReminderOnHabitArchivedHandler,
+    HabitReminderSchedulingService,
+    HabitReminderRolloverService,
     ReminderDispatcher,
     ReminderWorkerService,
     ReminderProcessor,

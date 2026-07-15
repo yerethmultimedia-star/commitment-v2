@@ -13,7 +13,14 @@ export type RecommendationType =
   | 'HIDE_WIDGET'      // remove widget from current layout
   | 'SHOW_WIDGET'      // surface a hidden widget
   | 'PIN_HERO'         // set specific hero card variant
-  | 'INSERT_INSIGHT';  // inject an insight into the layout
+  | 'INSERT_INSIGHT'   // inject an insight into the layout
+  | 'COACH_TIP'                // priority coaching tip on the Coach screen
+  | 'COACH_OPPORTUNITY'        // something the user could start/improve
+  | 'COACH_ACHIEVEMENT'        // something worth celebrating
+  | 'COACH_RISK'                // something at risk of slipping
+  | 'COACH_SUGGESTED_HABIT'    // a habit worth adding — Quick Capture prefill
+  | 'COACH_SUGGESTED_GOAL'     // a goal worth adding — Quick Capture prefill
+  | 'COACH_SUGGESTED_TASK';    // a task worth adding — Quick Capture prefill
 
 export interface Recommendation {
   readonly type: RecommendationType;

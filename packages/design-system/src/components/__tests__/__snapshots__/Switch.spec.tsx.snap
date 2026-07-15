@@ -6,7 +6,7 @@ exports[`Switch matches forest theme snapshot 1`] = `
     {
       "alignItems": "center",
       "flexDirection": "row",
-      "gap": 13,
+      "gap": 12,
       "opacity": 0.5,
       "transform": [
         {
@@ -54,16 +54,16 @@ exports[`Switch matches forest theme snapshot 1`] = `
         style={
           {
             "backgroundColor": "hsl(0, 0%, 96.3%)",
-            "borderBottomColor": "#FF7B54",
+            "borderBottomColor": "#6C4EFF",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#FF7B54",
+            "borderLeftColor": "#6C4EFF",
             "borderLeftWidth": 1,
-            "borderRightColor": "#FF7B54",
+            "borderRightColor": "#6C4EFF",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#FF7B54",
+            "borderTopColor": "#6C4EFF",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,
@@ -118,7 +118,7 @@ exports[`Switch matches midnight theme snapshot 1`] = `
     {
       "alignItems": "center",
       "flexDirection": "row",
-      "gap": 13,
+      "gap": 12,
       "opacity": 1,
       "transform": [
         {
@@ -171,17 +171,17 @@ exports[`Switch matches midnight theme snapshot 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#FAF7F2",
-            "borderBottomColor": "#E8E4D9",
+            "backgroundColor": "#FFFFFF",
+            "borderBottomColor": "#E7E7EF",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#E8E4D9",
+            "borderLeftColor": "#E7E7EF",
             "borderLeftWidth": 1,
-            "borderRightColor": "#E8E4D9",
+            "borderRightColor": "#E7E7EF",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#E8E4D9",
+            "borderTopColor": "#E7E7EF",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,
@@ -236,7 +236,7 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
     {
       "alignItems": "center",
       "flexDirection": "row",
-      "gap": 13,
+      "gap": 12,
       "opacity": 1,
       "transform": [
         {
@@ -290,16 +290,16 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
         style={
           {
             "backgroundColor": "hsl(0, 0%, 96.3%)",
-            "borderBottomColor": "#FF7B54",
+            "borderBottomColor": "#6C4EFF",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#FF7B54",
+            "borderLeftColor": "#6C4EFF",
             "borderLeftWidth": 1,
-            "borderRightColor": "#FF7B54",
+            "borderRightColor": "#6C4EFF",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#FF7B54",
+            "borderTopColor": "#6C4EFF",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,

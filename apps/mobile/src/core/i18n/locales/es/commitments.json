@@ -1,9 +1,8 @@
 {
   "list": {
-    "greeting": {
-      "morning": "Buenos días",
-      "afternoon": "Buenas tardes",
-      "evening": "Buenas noches"
+    "header": {
+      "title": "Tus Metas",
+      "subtitle": "Da seguimiento a los compromisos que te importan."
     },
     "summary": {
       "active": "Activos"
@@ -17,7 +16,8 @@
       "retry": "Reintentar"
     },
     "fab": {
-      "create": "Crear compromiso"
+      "create": "Crear objetivo",
+      "createHint": "Abre Captura Rápida para agregar un nuevo objetivo."
     }
   },
   "status": {
@@ -50,6 +50,15 @@
           "daily": "Diariamente",
           "weekly": "Semanalmente",
           "monthly": "Mensualmente"
+        }
+      },
+      "priority": {
+        "label": "Prioridad",
+        "placeholder": "Selecciona una prioridad",
+        "options": {
+          "low": "Baja",
+          "medium": "Media",
+          "high": "Alta"
         }
       }
     },
@@ -106,6 +115,7 @@
   },
   "activity": {
     "title": "Historial",
+    "a11yLabel": "{{label}} el {{date}}",
     "date": {
       "today": "Hoy • {{time}}",
       "yesterday": "Ayer • {{time}}"

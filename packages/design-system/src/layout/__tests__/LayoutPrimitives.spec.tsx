@@ -4,6 +4,7 @@ import { Text } from 'tamagui';
 
 jest.mock('@commitment/localization', () => ({
   t: (key: string, params?: any) => `[TR] ${key}${params ? ' ' + JSON.stringify(params) : ''}`,
+  useTranslation: () => ({ t: (key: string, params?: any) => `[TR] ${key}${params ? ' ' + JSON.stringify(params) : ''}` }),
 }));
 
 describe('Layout Primitives', () => {

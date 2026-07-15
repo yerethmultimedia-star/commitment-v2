@@ -3,7 +3,9 @@ import {
   CommitmentTitle,
   CommitmentDescription,
   Commitment,
+  CommitmentPriority,
   IdentityId,
+  PriorityType,
   RecurrencePattern,
   RecurrenceType,
   SeriesId,
@@ -51,6 +53,9 @@ export class RegisterCommitmentCommandHandlerCore {
     const seriesId = command.seriesId
       ? SeriesId.create(command.seriesId)
       : undefined;
+    const priority = command.priority
+      ? new CommitmentPriority(command.priority as PriorityType)
+      : undefined;
 
     // 3. Invoke Domain Aggregate Behavior
     const commitment: Commitment = Commitment.register(
@@ -61,6 +66,7 @@ export class RegisterCommitmentCommandHandlerCore {
       pattern,
       targetDate,
       seriesId,
+      priority,
     );
 
     // 4. Save to Repository — receive actual version

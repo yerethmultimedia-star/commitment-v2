@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, TextArea as TamaguiTextArea, YStack, XStack } from 'tamagui';
-import { t } from '@commitment/localization';
+import { useTranslation } from '@commitment/localization';
 import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
 
@@ -33,6 +33,7 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
   testID,
   numberOfLines = 4,
 }, ref) => {
+  const { t } = useTranslation();
   const isActuallyDisabled = disabled || loading;
 
   const { state, handlers } = useInteractionState({

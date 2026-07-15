@@ -8,6 +8,7 @@ export type CommitmentView = {
   recurrencePattern: string;
   targetDate?: string;
   seriesId: string;
+  priority: string;
 };
 
 export type PaginatedCommitments = {

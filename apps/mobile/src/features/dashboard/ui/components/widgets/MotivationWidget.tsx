@@ -35,19 +35,19 @@ export const MotivationWidget = React.memo(function MotivationWidget() {
     <Card variant="elevated" padding={0} overflow="hidden">
       <YStack 
         padding="$4" 
-        backgroundColor="$purple9" 
+        backgroundColor="$accent"
         borderRadius="$4"
         gap="$2"
       >
-        <Text fontSize="$3" fontWeight="bold" color="rgba(255,255,255,0.8)" textTransform="uppercase" letterSpacing={1}>
+        <Text fontSize="$3" fontWeight="bold" color="$contentOnAccent" opacity={0.8} textTransform="uppercase" letterSpacing={1}>
           {t('dashboard.widgets.motivation.title', { defaultValue: 'Daily Spark' })}
         </Text>
 
-        <Text fontSize="$5" fontWeight="600" color="white" fontStyle="italic" lineHeight={22} marginTop="$1">
+        <Text fontSize="$5" fontWeight="600" color="$contentOnAccent" fontStyle="italic" lineHeight={22} marginTop="$1">
           "{quote.text}"
         </Text>
 
-        <Text fontSize="$2" fontWeight="bold" color="rgba(255,255,255,0.9)" textAlign="right" marginTop="$1">
+        <Text fontSize="$2" fontWeight="bold" color="$contentOnAccent" opacity={0.9} textAlign="right" marginTop="$1">
           — {quote.author}
         </Text>
       </YStack>

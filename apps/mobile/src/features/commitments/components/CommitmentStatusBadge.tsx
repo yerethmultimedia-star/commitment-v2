@@ -10,20 +10,26 @@ interface Props {
 export function CommitmentStatusBadge({ status }: Props) {
   const { t } = useTranslation();
 
+  // Solid semantic background + contentOnSemantic/contentOnAccent text —
+  // light-tinted backgrounds (e.g. $focus) with a semantic-colored text on
+  // top measured well under WCAG AA (some combinations under 1.5:1). See
+  // DashboardHeroCard for the same pattern: success/warning/danger get
+  // contentOnSemantic (dark), accent gets contentOnAccent (white) since
+  // accent isn't dark enough for dark text to clear 4.5:1 against white.
   const getColors = () => {
     switch (status) {
       case 'active':
-        return { bg: '$green5', text: '$green10' };
+        return { bg: '$success', text: '$contentOnSemantic' };
       case 'draft':
-        return { bg: '$gray5', text: '$gray10' };
+        return { bg: '$surfaceRaised', text: '$contentSecondary' };
       case 'paused':
-        return { bg: '$orange5', text: '$orange10' };
+        return { bg: '$warning', text: '$contentOnSemantic' };
       case 'completed':
-        return { bg: '$blue5', text: '$blue10' };
+        return { bg: '$accent', text: '$contentOnAccent' };
       case 'cancelled':
-        return { bg: '$red5', text: '$red10' };
+        return { bg: '$danger', text: '$contentOnSemantic' };
       default:
-        return { bg: '$gray5', text: '$gray10' };
+        return { bg: '$surfaceRaised', text: '$contentSecondary' };
     }
   };
 

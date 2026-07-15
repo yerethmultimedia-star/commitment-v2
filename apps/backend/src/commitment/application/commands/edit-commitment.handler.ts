@@ -2,6 +2,8 @@ import {
   CommitmentId,
   CommitmentTitle,
   CommitmentDescription,
+  CommitmentPriority,
+  PriorityType,
   RecurrencePattern,
   RecurrenceType,
   TargetDate,
@@ -60,6 +62,12 @@ export class EditCommitmentCommandHandlerCore {
     }
 
     commitment.edit(title, description, recurrencePattern, targetDate);
+
+    if (command.priority !== undefined) {
+      commitment.changePriority(
+        new CommitmentPriority(command.priority as PriorityType),
+      );
+    }
 
     const version = await this.commitmentRepository.save(commitment);
 

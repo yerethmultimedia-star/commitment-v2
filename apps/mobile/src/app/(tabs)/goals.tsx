@@ -1,2 +1,2 @@
-import { CommitmentsScreen } from '@/features/commitments/screens/CommitmentsScreen';
-export default CommitmentsScreen;
+import { GoalsScreen } from '@/features/goals/screens/GoalsScreen';
+export default GoalsScreen;

@@ -1,6 +1,7 @@
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { ReminderQueuedEvent } from '../events/reminder-queued.event.js';
 import { AggregateRoot } from '../../shared/aggregate-root.js';
+import { ReminderSourceType } from './reminder-source-type.js';
 
 export enum ReminderStatus {
   Scheduled = 'Scheduled',
@@ -12,8 +13,11 @@ export enum ReminderStatus {
   Failed = 'Failed',
 }
 
+export type { ReminderSourceType };
+
 export class Reminder extends AggregateRoot<string> {
-  private _commitmentId!: string;
+  private _sourceId!: string;
+  private _sourceType!: ReminderSourceType;
   private _identityId!: string;
   private _scheduledFor!: Date;
   private _status!: ReminderStatus;
@@ -29,7 +33,8 @@ export class Reminder extends AggregateRoot<string> {
     super(id);
   }
 
-  public get commitmentId(): string { return this._commitmentId; }
+  public get sourceId(): string { return this._sourceId; }
+  public get sourceType(): ReminderSourceType { return this._sourceType; }
   public get identityId(): string { return this._identityId; }
   public get scheduledFor(): Date { return this._scheduledFor; }
   public get status(): ReminderStatus { return this._status; }
@@ -44,7 +49,8 @@ export class Reminder extends AggregateRoot<string> {
   // Factory
   public static create(
     id: string,
-    commitmentId: string,
+    sourceId: string,
+    sourceType: ReminderSourceType,
     identityId: string,
     scheduledFor: Date,
   ): Reminder {
@@ -52,7 +58,8 @@ export class Reminder extends AggregateRoot<string> {
     reminder.recordEvent(
       new ReminderQueuedEvent(id, {
         reminderId: id,
-        commitmentId,
+        sourceId,
+        sourceType,
         identityId,
         scheduledFor: scheduledFor.toISOString(),
       })
@@ -63,7 +70,8 @@ export class Reminder extends AggregateRoot<string> {
   protected applyEvent(event: DomainEvent): void {
     if (event.name === 'reminder.queued') {
       const payload = (event as ReminderQueuedEvent).payload;
-      this._commitmentId = payload.commitmentId;
+      this._sourceId = payload.sourceId;
+      this._sourceType = payload.sourceType;
       this._identityId = payload.identityId;
       this._scheduledFor = new Date(payload.scheduledFor);
       this._status = ReminderStatus.Queued;
@@ -128,7 +136,8 @@ export class Reminder extends AggregateRoot<string> {
     this.recordEvent(
       new ReminderQueuedEvent(this.id, {
         reminderId: this.id,
-        commitmentId: this.commitmentId,
+        sourceId: this.sourceId,
+        sourceType: this.sourceType,
         identityId: this.identityId,
         scheduledFor: this.scheduledFor.toISOString(),
       })
@@ -169,7 +178,8 @@ export class Reminder extends AggregateRoot<string> {
   // Restore for repository
   public static restore(props: {
     id: string;
-    commitmentId: string;
+    sourceId: string;
+    sourceType: ReminderSourceType;
     identityId: string;
     scheduledFor: Date;
     status: ReminderStatus;
@@ -182,7 +192,8 @@ export class Reminder extends AggregateRoot<string> {
     updatedAt: Date;
   }): Reminder {
     const reminder = new Reminder(props.id);
-    reminder._commitmentId = props.commitmentId;
+    reminder._sourceId = props.sourceId;
+    reminder._sourceType = props.sourceType;
     reminder._identityId = props.identityId;
     reminder._scheduledFor = props.scheduledFor;
     reminder._status = props.status;

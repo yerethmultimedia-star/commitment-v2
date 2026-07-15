@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Reminder, ReminderStatus } from '@commitment/domain';
+import {
+  Reminder,
+  ReminderStatus,
+  ReminderSourceType,
+} from '@commitment/domain';
 import { ReminderRepository } from '../application/ports/reminder.repository.port';
 
 @Injectable()
@@ -11,12 +15,16 @@ export class InMemoryReminderRepository implements ReminderRepository {
     this.reminders.set(reminder.id, reminder);
   }
 
-  public async findByCommitmentId(
-    commitmentId: string,
+  public async findBySourceId(
+    sourceId: string,
+    sourceType: ReminderSourceType,
   ): Promise<Reminder | null> {
     await Promise.resolve();
     for (const reminder of this.reminders.values()) {
-      if (reminder.commitmentId === commitmentId) {
+      if (
+        reminder.sourceId === sourceId &&
+        reminder.sourceType === sourceType
+      ) {
         return reminder;
       }
     }

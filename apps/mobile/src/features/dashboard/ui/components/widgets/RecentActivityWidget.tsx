@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Text } from 'tamagui';
 import { Card } from '@commitment/design-system';
+import { formatDate } from '@commitment/localization';
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
 
 export const RecentActivityWidget = React.memo(function RecentActivityWidget() {
@@ -22,7 +23,7 @@ export const RecentActivityWidget = React.memo(function RecentActivityWidget() {
       if (diffMins < 60) return t('dashboard.widgets.recentActivity.minutesAgo', { count: diffMins, defaultValue: '{{count}}m ago' });
       if (diffHours < 24) return t('dashboard.widgets.recentActivity.hoursAgo', { count: diffHours, defaultValue: '{{count}}h ago' });
       
-      return date.toLocaleDateString();
+      return formatDate(date);
     } catch (e) {
       return '';
     }

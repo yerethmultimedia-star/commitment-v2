@@ -9,7 +9,7 @@ interface ErrorStateProps {
 export function ErrorState({ message, onRetry, retryLabel }: ErrorStateProps) {
   return (
     <YStack flex={1} alignItems="center" justifyContent="center" padding="$6" gap="$4">
-      <Text fontSize="$5" color="$red10" textAlign="center">
+      <Text fontSize="$5" color="$danger" textAlign="center">
         {message}
       </Text>
       <Button theme="active" onPress={onRetry}>

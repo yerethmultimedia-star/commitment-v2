@@ -40,10 +40,13 @@ exports[`Scroll Primitives ScreenScroll renders scroll content correctly 1`] = `
     >
       <RCTScrollView
         contentContainerStyle={
-          {
-            "flexGrow": 1,
-            "padding": 16,
-          }
+          [
+            {
+              "flexGrow": 1,
+              "padding": 16,
+            },
+            false,
+          ]
         }
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -146,11 +149,11 @@ exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
             <View
               style={
                 {
-                  "backgroundColor": "#FDFBF7",
-                  "paddingBottom": 7,
-                  "paddingLeft": 18,
-                  "paddingRight": 18,
-                  "paddingTop": 7,
+                  "backgroundColor": "#F5F5F8",
+                  "paddingBottom": 8,
+                  "paddingLeft": 16,
+                  "paddingRight": 16,
+                  "paddingTop": 8,
                 }
               }
             >
@@ -159,15 +162,17 @@ exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#2C2A26",
+                    "color": "#18181F",
                     "fontFamily": "Inter_600SemiBold",
-                    "fontSize": 24,
+                    "fontSize": 17,
                     "letterSpacing": -0.2,
-                    "lineHeight": 32,
+                    "lineHeight": 22,
                   }
                 }
                 suppressHighlighting={true}
-              />
+              >
+                section.one
+              </Text>
             </View>
           </View>
           <View

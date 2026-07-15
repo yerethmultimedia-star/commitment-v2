@@ -1,9 +1,8 @@
 {
   "list": {
-    "greeting": {
-      "morning": "Good morning",
-      "afternoon": "Good afternoon",
-      "evening": "Good evening"
+    "header": {
+      "title": "Your Goals",
+      "subtitle": "Track the commitments that matter to you."
     },
     "summary": {
       "active": "Active"
@@ -17,7 +16,8 @@
       "retry": "Try again"
     },
     "fab": {
-      "create": "Create commitment"
+      "create": "Create goal",
+      "createHint": "Opens Quick Capture to add a new goal."
     }
   },
   "status": {
@@ -50,6 +50,15 @@
           "daily": "Daily",
           "weekly": "Weekly",
           "monthly": "Monthly"
+        }
+      },
+      "priority": {
+        "label": "Priority",
+        "placeholder": "Select a priority",
+        "options": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
         }
       }
     },
@@ -106,6 +115,7 @@
   },
   "activity": {
     "title": "History",
+    "a11yLabel": "{{label}} on {{date}}",
     "date": {
       "today": "Today • {{time}}",
       "yesterday": "Yesterday • {{time}}"

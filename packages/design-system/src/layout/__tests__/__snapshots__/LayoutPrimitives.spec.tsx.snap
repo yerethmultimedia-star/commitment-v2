@@ -45,13 +45,13 @@ exports[`Layout Primitives Section renders title and subtitle 1`] = `
 <View
   style={
     {
-      "borderBottomColor": "#E8E4D9",
+      "borderBottomColor": "#E7E7EF",
       "borderBottomWidth": 0,
       "borderStyle": "solid",
       "flexDirection": "column",
       "gap": 16,
-      "paddingBottom": 18,
-      "paddingTop": 18,
+      "paddingBottom": 16,
+      "paddingTop": 16,
     }
   }
 >
@@ -79,11 +79,11 @@ exports[`Layout Primitives Section renders title and subtitle 1`] = `
         maxFontSizeMultiplier={1.5}
         style={
           {
-            "color": "#2C2A26",
+            "color": "#18181F",
             "fontFamily": "Inter_600SemiBold",
-            "fontSize": 24,
+            "fontSize": 17,
             "letterSpacing": -0.2,
-            "lineHeight": 32,
+            "lineHeight": 22,
           }
         }
         suppressHighlighting={true}
@@ -95,11 +95,11 @@ exports[`Layout Primitives Section renders title and subtitle 1`] = `
         maxFontSizeMultiplier={1.5}
         style={
           {
-            "color": "#5E5B55",
+            "color": "#6B6B76",
             "fontFamily": "Inter_400Regular",
-            "fontSize": 16,
+            "fontSize": 14,
             "letterSpacing": 0,
-            "lineHeight": 24,
+            "lineHeight": 20,
           }
         }
         suppressHighlighting={true}
@@ -153,23 +153,23 @@ exports[`Layout Primitives Surface renders danger variant 1`] = `
 <View
   style={
     {
-      "backgroundColor": "#EA4335",
-      "borderBottomColor": "#EA4335",
+      "backgroundColor": "#FF6B5E",
+      "borderBottomColor": "#FF6B5E",
       "borderBottomLeftRadius": 9,
       "borderBottomRightRadius": 9,
       "borderBottomWidth": 1,
-      "borderLeftColor": "#EA4335",
+      "borderLeftColor": "#FF6B5E",
       "borderLeftWidth": 1,
-      "borderRightColor": "#EA4335",
+      "borderRightColor": "#FF6B5E",
       "borderRightWidth": 1,
       "borderStyle": "solid",
-      "borderTopColor": "#EA4335",
+      "borderTopColor": "#FF6B5E",
       "borderTopLeftRadius": 9,
       "borderTopRightRadius": 9,
       "borderTopWidth": 1,
       "cursor": "default",
       "opacity": 1,
-      "shadowColor": "rgb(44,42,38)",
+      "shadowColor": "rgb(24,24,31)",
       "shadowOffset": {
         "height": 4,
         "width": 0,
@@ -196,7 +196,7 @@ exports[`Layout Primitives Surface renders elevated variant 1`] = `
 <View
   style={
     {
-      "backgroundColor": "#FAF7F2",
+      "backgroundColor": "#FFFFFF",
       "borderBottomColor": "transparent",
       "borderBottomLeftRadius": 9,
       "borderBottomRightRadius": 9,
@@ -212,7 +212,7 @@ exports[`Layout Primitives Surface renders elevated variant 1`] = `
       "borderTopWidth": 0,
       "cursor": "default",
       "opacity": 1,
-      "shadowColor": "rgb(44,42,38)",
+      "shadowColor": "rgb(24,24,31)",
       "shadowOffset": {
         "height": 4,
         "width": 0,
@@ -255,7 +255,7 @@ exports[`Layout Primitives Surface renders flat by default 1`] = `
       "borderTopWidth": 0,
       "cursor": "default",
       "opacity": 1,
-      "shadowColor": "rgb(44,42,38)",
+      "shadowColor": "rgb(24,24,31)",
       "shadowOffset": {
         "height": 4,
         "width": 0,

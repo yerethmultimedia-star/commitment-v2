@@ -14,6 +14,8 @@ export interface AppScreenProps {
   announceOnFocus?: string;
   statusBar?: 'light' | 'dark' | 'auto' | 'hidden';
   testID?: string;
+  /** Extra bottom padding for scrollable content — see ScreenScrollProps.contentBottomInset. No-op when scrollable is false. */
+  contentBottomInset?: number;
   children?: React.ReactNode;
 }
 
@@ -25,6 +27,7 @@ export const AppScreen: React.FC<AppScreenProps> = ({
   announceOnFocus,
   statusBar = 'auto',
   testID,
+  contentBottomInset,
   children,
 }) => {
   const { announce } = useScreenAnnouncement();
@@ -56,6 +59,7 @@ export const AppScreen: React.FC<AppScreenProps> = ({
       refreshing={refreshControl?.refreshing}
       onRefresh={refreshControl?.onRefresh}
       testID={testID}
+      contentBottomInset={contentBottomInset}
     >
       {children}
     </ScreenScroll>

@@ -11,6 +11,6 @@ export class SuspendReminderOnPauseHandler implements IEventHandler<CommitmentPa
   ) {}
 
   public async handle(event: CommitmentPausedEvent): Promise<void> {
-    await this.scheduler.suspend(event.payload.commitmentId);
+    await this.scheduler.suspend(event.payload.commitmentId, 'commitment');
   }
 }

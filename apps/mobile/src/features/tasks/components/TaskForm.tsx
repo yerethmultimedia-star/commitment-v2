@@ -1,29 +1,33 @@
 import { useState, useMemo } from 'react';
-import { Button, Input, Label, Text, YStack, Select, Adapt, Sheet, XStack } from 'tamagui';
+import { Text, YStack, Select, Adapt, Sheet, XStack, Button as TamaguiButton } from 'tamagui';
+import { Title, Input, Button } from '@commitment/design-system';
 import { useSession } from '@/core/auth/use-session';
 import { tasksApi } from '../api/tasks.api';
 import { TaskModel, TaskPriority } from '../models/task.model';
 import { useTranslation } from 'react-i18next';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 
-export function TaskForm({ 
-  task, 
-  onSaved, 
-  onCancel 
-}: { 
-  task?: TaskModel; 
-  onSaved: () => void; 
+export function TaskForm({
+  task,
+  onSaved,
+  onCancel
+}: {
+  task?: TaskModel;
+  onSaved: () => void;
   onCancel?: () => void;
 }) {
   const { identityId } = useSession();
   const { t } = useTranslation('tasks');
   const { data: commitments = [] } = useCommitments();
-  
+
   const [title, setTitle] = useState(task?.title ?? '');
+  const [titleTouched, setTitleTouched] = useState(false);
   const [description, setDescription] = useState(task?.description ?? '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'medium');
   const [commitmentId, setCommitmentId] = useState<string>(task?.commitmentId ?? 'none');
   const [saving, setSaving] = useState(false);
+
+  const titleError = titleTouched && !title.trim();
 
   const commitmentOptions = useMemo(() => {
     return [
@@ -38,6 +42,7 @@ export function TaskForm({
   }, [commitmentId, commitmentOptions, t]);
 
   const save = async () => {
+    setTitleTouched(true);
     if (!identityId || !title.trim()) return;
     setSaving(true);
     try {
@@ -72,73 +77,74 @@ export function TaskForm({
           commitmentId: commitmentId !== 'none' ? commitmentId : undefined
         });
       }
-      
-      setTitle(''); 
-      setDescription(''); 
+
+      setTitle('');
+      setTitleTouched(false);
+      setDescription('');
       setCommitmentId('none');
       setPriority('medium');
       onSaved();
-    } finally { 
-      setSaving(false); 
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <YStack gap="$3" padding="$4" backgroundColor="$backgroundElement" borderRadius="$4">
-      <Text fontSize="$5" fontWeight="bold" color="$text">
+    <YStack gap="$3" padding="$4" backgroundColor="$surfaceRaised" borderRadius="$4">
+      <Title fontSize="$5" fontWeight="bold">
         {task ? t('form.editTitle') : t('form.title')}
-      </Text>
+      </Title>
+
+      <Input
+        value={title}
+        onChangeText={setTitle}
+        onBlur={() => setTitleTouched(true)}
+        labelI18nKey="tasks:form.title"
+        placeholderI18nKey="tasks:form.titlePlaceholder"
+        error={titleError}
+        helperI18nKey={titleError ? 'tasks:form.titleRequired' : undefined}
+      />
+
+      <Input
+        value={description}
+        onChangeText={setDescription}
+        labelI18nKey="tasks:form.description"
+        placeholderI18nKey="tasks:form.descriptionPlaceholder"
+      />
 
       <YStack gap="$1">
-        <Label htmlFor="task-title" fontWeight="bold">{t('form.title')}</Label>
-        <Input 
-          id="task-title" 
-          value={title} 
-          onChangeText={setTitle} 
-          placeholder={t('form.titlePlaceholder')} 
-          accessibilityLabel={t('form.title')} 
-        />
-      </YStack>
-
-      <YStack gap="$1">
-        <Label fontWeight="bold">{t('form.description')}</Label>
-        <Input 
-          value={description} 
-          onChangeText={setDescription} 
-          placeholder={t('form.descriptionPlaceholder')} 
-          accessibilityLabel={t('form.description')} 
-        />
-      </YStack>
-
-      <YStack gap="$1">
-        <Label fontWeight="bold">{t('form.priority')}</Label>
+        <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{t('form.priority')}</Text>
         <XStack gap="$2">
           {(['low', 'medium', 'high'] as TaskPriority[]).map(value => (
-            <Button 
-              key={value} 
-              size="$2" 
-              theme={priority === value ? 'active' : undefined} 
+            <TamaguiButton
+              key={value}
+              size="$2"
+              theme={priority === value ? 'active' : undefined}
               onPress={() => setPriority(value)}
               flex={1}
+              accessibilityRole="button"
+              accessibilityState={{ selected: priority === value }}
             >
               {t(`form.priority${value.charAt(0).toUpperCase() + value.slice(1)}`)}
-            </Button>
+            </TamaguiButton>
           ))}
         </XStack>
       </YStack>
 
       {!task && (
         <YStack gap="$1">
-          <Label fontWeight="bold">{t('form.commitment')}</Label>
+          <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{t('form.commitment')}</Text>
           <Select
             value={commitmentId}
             onValueChange={setCommitmentId}
             disablePreventBodyScroll
           >
-            <Select.Trigger 
+            <Select.Trigger
               iconAfter={null}
-              borderColor="$borderColor"
-              focusStyle={{ borderColor: '$blue10' }}
+              borderColor="$divider"
+              focusStyle={{ borderColor: '$focus' }}
+              accessibilityRole="button"
+              accessibilityLabel={t('form.commitment')}
             >
               <Select.Value placeholder={t('form.noCommitment')}>
                 {selectedCommitmentLabel}
@@ -174,20 +180,20 @@ export function TaskForm({
 
       <XStack gap="$2" marginTop="$2">
         {onCancel && (
-          <Button flex={1} onPress={onCancel}>
-            {t('close')}
-          </Button>
+          <XStack flex={1}>
+            <Button variant="outline" i18nKey="tasks:close" onPress={onCancel} fullWidth />
+          </XStack>
         )}
-        <Button 
-          theme="active" 
-          disabled={!title.trim() || saving} 
-          onPress={save}
-          flex={1}
-        >
-          <Text color="white" fontWeight="bold">
-            {saving ? '…' : (task ? t('form.save') : t('form.submit'))}
-          </Text>
-        </Button>
+        <XStack flex={1}>
+          <Button
+            variant="primary"
+            i18nKey={task ? 'tasks:form.save' : 'tasks:form.submit'}
+            disabled={!title.trim()}
+            loading={saving}
+            onPress={save}
+            fullWidth
+          />
+        </XStack>
       </XStack>
     </YStack>
   );

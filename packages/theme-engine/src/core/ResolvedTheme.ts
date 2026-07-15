@@ -14,6 +14,20 @@ export interface ThemeColors {
   interactive: string;
   focus: string;
   divider: string;
+  /**
+   * Text color for content rendered on top of `accent`/`interactive`
+   * surfaces. Not a fixed white/black — some themes' accent is light enough
+   * that white text fails WCAG AA (e.g. Sunrise's coral, Forest's olive), so
+   * this is picked per theme rather than assumed.
+   */
+  contentOnAccent: string;
+  /**
+   * Text color for content on top of `success`/`warning`/`danger` surfaces.
+   * Verified dark text clears WCAG AA (>=4.5:1) against all four shipped
+   * themes' semantic colors, while white does not — see ADR-017 addendum /
+   * VS-031 theme audit for the measured contrast ratios.
+   */
+  contentOnSemantic: string;
   // Fallbacks or extra
   [key: string]: string;
 }

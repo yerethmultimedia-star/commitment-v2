@@ -15,6 +15,7 @@ export function useCreateCommitment() {
         description: values.description || undefined,
         targetDate: values.targetDate ? values.targetDate.toISOString() : undefined,
         recurrencePattern: values.recurrence !== 'none' ? values.recurrence || undefined : undefined,
+        priority: values.priority,
       });
     },
     onMutate: async (newCommitment) => {
@@ -29,6 +30,7 @@ export function useCreateCommitment() {
         id: Math.random().toString(), // temporary ID
         title: newCommitment.title,
         status: 'active', // default status
+        priority: newCommitment.priority || 'medium',
         targetDate: newCommitment.targetDate ? newCommitment.targetDate.toISOString() : undefined,
       };
 

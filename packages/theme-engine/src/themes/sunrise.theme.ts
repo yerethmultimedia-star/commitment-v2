@@ -14,34 +14,40 @@ export const sunriseManifest: ThemeManifest = {
 
 export const sunriseResolvedTheme: ResolvedTheme = {
   colors: {
-    // Ivory / Warm white background instead of #FFFFFF
-    background: '#FDFBF7', 
-    backgroundSecondary: '#F5F2EB',
-    
+    // Warm ivory background — "Amanecer" redesign
+    background: '#FFFDF5',
+    backgroundSecondary: '#EBE4D5',
+
     // Surfaces remain light but distinct from background
     surface: '#FFFFFF',
-    surfaceRaised: '#FAF7F2',
-    
+    surfaceRaised: '#FFFFFF',
+
     // Content colors
-    contentPrimary: '#2C2A26',
-    contentSecondary: '#5E5B55',
-    contentTertiary: '#9E9A92',
-    
-    // Accents (Warm Sunrise Orange/Coral)
-    accent: '#FF7B54',
-    
+    contentPrimary: '#271F15',
+    contentSecondary: '#786E5D',
+    contentTertiary: '#786E5D',
+
+    // Accents (Amber)
+    accent: '#F59E0B',
+
     // Semantic
-    success: '#34A853',
-    warning: '#FBBC05',
-    danger: '#EA4335',
-    info: '#4285F4',
-    
+    success: '#22C55E',
+    warning: '#F5A623',
+    danger: '#FF6B5E',
+    info: '#F59E0B',
+
     // Interactive states
-    interactive: '#FF7B54',
-    focus: '#FFD5C8',
-    
+    interactive: '#F59E0B',
+    focus: '#F59E0B66',
+
     // Borders
-    divider: '#E8E4D9',
+    divider: '#EBE4D5',
+
+    // Text-on-color pairs, verified against WCAG AA (see ResolvedTheme.ts).
+    // Amber accent is light enough that white text fails contrast (2.15:1) —
+    // dark text passes at 7.56:1.
+    contentOnAccent: '#271F15',
+    contentOnSemantic: '#271F15',
   },
   typography: {
     fontFamily: 'Inter',
@@ -51,16 +57,16 @@ export const sunriseResolvedTheme: ResolvedTheme = {
     '0': 0, '1': 4, '2': 8, '3': 12, '4': 16, '5': 24, '6': 32, '7': 48, '8': 64
   },
   radius: {
-    '0': 0, '1': 4, '2': 8, '3': 12, '4': 16, full: 9999
+    '0': 0, '1': 8, '2': 12, '3': 16, '4': 20, full: 9999
   },
   border: {
     width: 1,
-    color: '#E8E4D9',
+    color: '#EBE4D5',
   },
   elevation: {
     '0': 'none',
-    '1': 'sm',
-    '2': 'md',
+    '1': 'xs',
+    '2': 'sm',
   },
   motion: {
     fast: 150,
@@ -74,15 +80,15 @@ export const sunriseResolvedTheme: ResolvedTheme = {
     listAnimation: null
   },
   icons: {
-    style: 'solid'
+    style: 'outline'
   },
   illustrations: {
     style: 'flat'
   },
   opacity: {
-    disabled: 0.5,
-    hover: 0.8,
-    press: 0.6
+    disabled: 0.4,
+    hover: 0.85,
+    press: 0.7
   },
   zIndex: {
     base: 0,

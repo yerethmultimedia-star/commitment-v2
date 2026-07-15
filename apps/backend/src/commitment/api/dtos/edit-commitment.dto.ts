@@ -14,4 +14,7 @@ export class EditCommitmentDto {
 
   @ApiPropertyOptional({ description: 'The new target date' })
   targetDate?: string;
+
+  @ApiPropertyOptional({ description: 'The new priority (low, medium, high)' })
+  priority?: string;
 }

@@ -4,6 +4,35 @@
   "close": "Close",
   "loading": "Loading…",
   "empty": "You have no pending tasks.",
+  "emptyDescription": "Capture what needs doing and it'll show up here.",
+  "fab": "New task",
+  "fabHint": "Opens Quick Capture to add a new task.",
+  "buckets": {
+    "inbox": "Inbox",
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "archived": "Archived",
+    "empty": {
+      "inbox": { "title": "Inbox is empty", "description": "Tasks without a due date land here." },
+      "today": {
+        "title": "Nothing due today",
+        "description": "Overdue and today's tasks show up here."
+      },
+      "upcoming": {
+        "title": "Nothing upcoming",
+        "description": "Tasks due later will show up here."
+      },
+      "completed": {
+        "title": "No completed tasks yet",
+        "description": "Tasks you finish will show up here."
+      },
+      "archived": {
+        "title": "No archived tasks",
+        "description": "Tasks you archive will show up here."
+      }
+    }
+  },
   "form": {
     "title": "New task",
     "titlePlaceholder": "What needs doing?",
@@ -20,13 +49,19 @@
     "sortBy": "Sort by",
     "sortCreated": "Date Created",
     "sortPriority": "Priority",
-    "submit": "Create task"
+    "submit": "Create task",
+    "titleRequired": "Title is required"
   },
   "actions": {
     "complete": "Complete",
     "duplicate": "Duplicate",
     "archive": "Archive",
     "edit": "Edit"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Completed",
+    "archived": "Archived"
   },
   "progress": {
     "title": "Progress",

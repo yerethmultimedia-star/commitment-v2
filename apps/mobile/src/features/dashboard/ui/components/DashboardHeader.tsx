@@ -1,7 +1,9 @@
 /**
  * DashboardHeader
  *
- * Greeting row + avatar at the top of the Dashboard.
+ * Greeting row + notification bell at the top of the Dashboard. No avatar
+ * here — the real user identity (name/avatar/plan) now lives on the Profile
+ * tab; this placeholder "ME" circle predated that and was redundant.
  * Receives commitmentsCount from the parent (DashboardContent),
  * which derives it from the DashboardLayoutDescriptor.
  *
@@ -9,9 +11,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { YStack, XStack, Circle } from 'tamagui';
-import { Title, Body } from '@commitment/design-system';
-import { formatDate } from '@commitment/localization';
+import { YStack, XStack } from 'tamagui';
+import { Title, Body, IconButton } from '@commitment/design-system';
+import { Bell } from '@tamagui/lucide-icons';
+import { formatLongDate } from '@commitment/localization';
 import { useTranslation } from 'react-i18next';
 
 export interface DashboardHeaderProps {
@@ -33,7 +36,7 @@ export const DashboardHeader = React.memo(function DashboardHeader({
       greetingKey = 'dashboard.greetingEvening';
     }
 
-    const dateStr = formatDate(new Date(), "EEEE, d 'de' MMMM");
+    const dateStr = formatLongDate(new Date());
     const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
 
     return { greetingKey, formattedDate };
@@ -60,19 +63,14 @@ export const DashboardHeader = React.memo(function DashboardHeader({
           </Body>
         </YStack>
 
-        {/* Avatar */}
-        <Circle
-          size={44}
-          backgroundColor="$accent"
-          borderWidth={1}
-          borderColor="$borderColor"
-          marginLeft="$4"
-          elevation={2}
-        >
-          <Title fontSize="$4" fontWeight="bold" color="white">
-            ME
-          </Title>
-        </Circle>
+        {/* No unread badge yet — no real notification data source exists in
+            this app today; showing a fake count would misrepresent state. */}
+        <XStack marginLeft="$3">
+          <IconButton
+            iconToken={<Bell size={22} color="$contentSecondary" />}
+            tooltipI18nKey="dashboard.header.notifications"
+          />
+        </XStack>
       </XStack>
 
       {/* Active commitment count */}

@@ -14,7 +14,7 @@ export class CancelReminderOnCompletedHandler implements IEventHandler<Commitmen
   ) {}
 
   public async handle(event: CommitmentCompletedEvent): Promise<void> {
-    await this.scheduler.cancel(event.payload.commitmentId);
+    await this.scheduler.cancel(event.payload.commitmentId, 'commitment');
   }
 }
 
@@ -26,6 +26,6 @@ export class CancelReminderOnCancelledHandler implements IEventHandler<Commitmen
   ) {}
 
   public async handle(event: CommitmentCancelledEvent): Promise<void> {
-    await this.scheduler.cancel(event.payload.commitmentId);
+    await this.scheduler.cancel(event.payload.commitmentId, 'commitment');
   }
 }

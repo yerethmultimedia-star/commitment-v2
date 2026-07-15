@@ -8,6 +8,7 @@ import {
   CommitmentCancelledEvent,
   CommitmentRenamedEvent,
   CommitmentDescriptionUpdatedEvent,
+  CommitmentPriorityChangedEvent,
 } from '@commitment/domain';
 import { Inject } from '@nestjs/common';
 import { InMemoryCommitmentProjectionStore } from '../../infrastructure/in-memory-commitment-projection.store';
@@ -30,6 +31,7 @@ export class CommitmentRegisteredProjector implements IEventHandler<CommitmentRe
       recurrencePattern: event.payload.recurrencePattern,
       targetDate: event.payload.targetDate,
       seriesId: event.payload.seriesId,
+      priority: event.payload.priority,
     });
   }
 }
@@ -153,6 +155,23 @@ export class CommitmentDescriptionUpdatedProjector implements IEventHandler<Comm
   }
 }
 
+@EventsHandler(CommitmentPriorityChangedEvent)
+export class CommitmentPriorityChangedProjector implements IEventHandler<CommitmentPriorityChangedEvent> {
+  constructor(
+    @Inject('CommitmentProjectionStore')
+    private readonly store: InMemoryCommitmentProjectionStore,
+  ) {}
+
+  public handle(event: CommitmentPriorityChangedEvent): void {
+    const view = this.store.findById(event.payload.commitmentId);
+    if (view) {
+      view.priority = event.payload.priority;
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
 export const CommitmentProjectors = [
   CommitmentRegisteredProjector,
   CommitmentActivatedProjector,
@@ -162,4 +181,5 @@ export const CommitmentProjectors = [
   CommitmentCancelledProjector,
   CommitmentRenamedProjector,
   CommitmentDescriptionUpdatedProjector,
+  CommitmentPriorityChangedProjector,
 ];

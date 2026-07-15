@@ -36,8 +36,12 @@ export function useAuthGuard() {
       return;
     }
 
-    // Rule 2: If onboarding is complete but user is anonymous, enforce login
-    if (hasSeenOnboarding && sessionStatus === 'Anonymous' && !inAuthGroup) {
+    // Rule 2: If onboarding is complete but user is anonymous, enforce login.
+    // Must check the specific screen (not just inAuthGroup) — onboarding itself
+    // is inAuthGroup, so gating on !inAuthGroup here would never fire the
+    // redirect the moment hasSeenOnboarding flips true while still on
+    // /onboarding, permanently stranding the user there.
+    if (hasSeenOnboarding && sessionStatus === 'Anonymous' && currentScreen !== 'login') {
       console.log('🛡️ AuthGuard: Redirecting to login');
       replace('/(auth)/login');
       return;

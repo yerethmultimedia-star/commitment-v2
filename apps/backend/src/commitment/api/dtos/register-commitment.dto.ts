@@ -49,4 +49,12 @@ export class RegisterCommitmentDto {
     required: false,
   })
   readonly seriesId?: string;
+
+  @ApiProperty({
+    description:
+      'Prioridad del compromiso (low, medium, high) - defaults to medium',
+    example: 'medium',
+    required: false,
+  })
+  readonly priority?: string;
 }

@@ -11,9 +11,11 @@ interface Props {
   label?: string;
   placeholder?: string;
   disabled?: boolean;
+  /** 'date' (default) or 'time' — reused by Habit's reminder-time field, which is otherwise identical. */
+  mode?: 'date' | 'time';
 }
 
-export function ControlledDatePicker({ name, control, label, placeholder, disabled }: Props) {
+export function ControlledDatePicker({ name, control, label, placeholder, disabled, mode = 'date' }: Props) {
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -25,38 +27,42 @@ export function ControlledDatePicker({ name, control, label, placeholder, disabl
     if (Platform.OS === 'android') {
       setShow(false);
     }
-    
+
     if (event.type === 'set' && selectedDate) {
       onChange(selectedDate);
     }
   };
 
+  const formatValue = (d: Date) => (mode === 'time' ? dateFormatter.formatTime(d) : dateFormatter.formatDate(d));
+
   return (
     <YStack gap="$2" width="100%">
-      {label && <Text color="$textSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
-      
+      {label && <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{label}</Text>}
+
       {Platform.OS === 'ios' ? (
         <XStack alignItems="center" height={44}>
           <DateTimePicker
             value={value || new Date()}
-            mode="date"
+            mode={mode}
             display="default"
             disabled={disabled}
             onChange={onDateChange}
+            accessibilityLabel={label}
           />
         </XStack>
       ) : (
-        <Button 
-          theme={error ? 'red' : undefined}
-          borderColor={error ? '$red10' : '$borderColor'}
-          focusStyle={{ borderColor: error ? '$red10' : '$blue10' }}
+        <Button
+          borderColor={error ? '$danger' : '$divider'}
+          focusStyle={{ borderColor: error ? '$danger' : '$accent' }}
           disabled={disabled}
           opacity={disabled ? 0.6 : 1}
           onPress={() => setShow(true)}
           justifyContent="flex-start"
+          accessibilityRole="button"
+          accessibilityLabel={label}
         >
-          <Text color={value ? '$text' : '$gray10'}>
-            {value ? dateFormatter.formatDate(value) : placeholder}
+          <Text color={value ? '$contentPrimary' : '$contentTertiary'}>
+            {value ? formatValue(value) : placeholder}
           </Text>
         </Button>
       )}
@@ -64,14 +70,14 @@ export function ControlledDatePicker({ name, control, label, placeholder, disabl
       {show && Platform.OS === 'android' && (
         <DateTimePicker
           value={value || new Date()}
-          mode="date"
+          mode={mode}
           display="default"
           onChange={onDateChange}
         />
       )}
 
       {error && (
-        <Text color="$red10" fontSize="$2">{error.message}</Text>
+        <Text color="$danger" fontSize="$2">{error.message}</Text>
       )}
     </YStack>
   );

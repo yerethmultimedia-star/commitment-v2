@@ -23,7 +23,7 @@ export function CommitmentHistory({ commitmentId }: CommitmentHistoryProps) {
   if (error) {
     return (
       <YStack padding="$4" alignItems="center">
-        <Text color="$red10">{t('errors.load_history_failed', 'Failed to load history')}</Text>
+        <Text color="$danger">{t('errors.load_history_failed', 'Failed to load history')}</Text>
       </YStack>
     );
   }

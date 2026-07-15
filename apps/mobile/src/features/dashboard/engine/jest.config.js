@@ -11,6 +11,10 @@ const path = require('path');
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  // __DEV__ is an RN/Metro global that plain Node doesn't provide.
+  // assertDeterministic.ts's dev-only guards need it defined to exercise
+  // the same code path they run under during real app development.
+  globals: { __DEV__: true },
   rootDir: path.resolve(__dirname, '..'),
   testMatch: ['<rootDir>/engine/**/__tests__/**/*.test.ts'],
   transform: {
@@ -23,7 +27,7 @@ module.exports = {
     ],
   },
   moduleNameMapper: {
-    '^@commitment/domain$': path.resolve(__dirname, '../../../../packages/domain/src/index.ts'),
+    '^@commitment/domain$': path.resolve(__dirname, '../../../../../packages/domain/src/index.ts'),
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   testPathIgnorePatterns: ['/node_modules/'],

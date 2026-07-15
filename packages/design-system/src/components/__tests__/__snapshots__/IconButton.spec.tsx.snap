@@ -18,6 +18,8 @@ exports[`IconButton matches forest theme snapshot 1`] = `
       }
     }
     accessible={true}
+    aria-busy={false}
+    aria-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -84,6 +86,8 @@ exports[`IconButton matches midnight theme snapshot 1`] = `
       }
     }
     accessible={true}
+    aria-busy={false}
+    aria-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -150,6 +154,8 @@ exports[`IconButton matches sunrise theme snapshot 1`] = `
       }
     }
     accessible={true}
+    aria-busy={false}
+    aria-disabled={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
