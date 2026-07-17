@@ -1,0 +1,90 @@
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import {
+  GoalRegisteredEvent,
+  GoalRenamedEvent,
+  GoalCompletedEvent,
+  GoalArchivedEvent,
+} from '@commitment/domain';
+import { Inject } from '@nestjs/common';
+import { InMemoryGoalProjectionStore } from '../../infrastructure/in-memory-goal-projection.store';
+
+@EventsHandler(GoalRegisteredEvent)
+export class GoalRegisteredProjector implements IEventHandler<GoalRegisteredEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalRegisteredEvent): void {
+    this.store.save({
+      id: event.payload.goalId,
+      identityId: event.payload.identityId,
+      title: event.payload.title,
+      description: event.payload.description || null,
+      state: 'Draft',
+      version: 1,
+      commitmentIds: [],
+      habitIds: [],
+      completedAt: null,
+    });
+  }
+}
+
+@EventsHandler(GoalRenamedEvent)
+export class GoalRenamedProjector implements IEventHandler<GoalRenamedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalRenamedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.title = event.payload.title;
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+@EventsHandler(GoalCompletedEvent)
+export class GoalCompletedProjector implements IEventHandler<GoalCompletedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalCompletedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.state = 'Completed';
+      view.completedAt = event.payload.completedAt;
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+@EventsHandler(GoalArchivedEvent)
+export class GoalArchivedProjector implements IEventHandler<GoalArchivedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalArchivedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.state = 'Archived';
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+export const GoalProjectors = [
+  GoalRegisteredProjector,
+  GoalRenamedProjector,
+  GoalCompletedProjector,
+  GoalArchivedProjector,
+];

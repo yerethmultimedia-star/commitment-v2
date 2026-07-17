@@ -6,6 +6,7 @@ import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { CommitmentModule } from './commitment/commitment.module';
 import { TaskModule } from './task/task.module';
 import { HabitModule } from './habit/habit.module';
+import { GoalModule } from './goal/goal.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DevicesModule } from './devices/devices.module';
 import { MessagingModule } from './messaging/messaging.module';
@@ -59,6 +60,7 @@ import { BullModule } from '@nestjs/bullmq';
     CommitmentModule,
     TaskModule,
     HabitModule,
+    GoalModule,
     NotificationsModule,
     DevicesModule,
     MessagingModule,

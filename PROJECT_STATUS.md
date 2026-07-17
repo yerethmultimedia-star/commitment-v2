@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.50.0
+Version: 1.52.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,14 +222,53 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. **Candidate, not yet numbered — Historical/Analytics Engine.** Flagged 2026-07-16 during the
-   Insights audit: almost everything Insights shows is computed live off _current_ state
-   (`currentStreakDays`, `completedAt`, etc.) — there's no persisted daily/event history, which is
-   exactly why "últimos 7 días"/"peor día de la semana" for Habits couldn't be built honestly this
-   round (see `TECH_DEBT.md` RI-5). A real daily-snapshot or event-sourced history table would
-   unlock weekly adherence, best/worst day, monthly trends, heatmaps, and materially better Coach/AI
-   insights later — not a VS-032 concern, explicitly deferred to VS-033 or a future architectural
-   cycle, not started.
+8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 1 implemented
+   (2026-07-17).** Resumed as the strategic initiative after VS-037 closed, following the same
+   Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
+   deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
+goal_backend_current_assessment.md` (Paso 1), `docs/03-architecture/
+goal_backend_alternatives_evaluation.md` (Paso 2/3), `docs/03-architecture/
+adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key reframe: the real
+   problem was never CQRS or Event Store — it was that Goal has no backend at all — and a complete
+   `InMemoryEventStore` was found already built and registered in DI, but never once invoked
+   anywhere in the codebase, which the investigation explicitly treated as _not_ evidence it was
+   needed. **Decision:** build `apps/backend/src/goal/` mirroring Commitment/Task/Habit's existing
+   CQRS + versioned-state pattern (state stays the source of truth, no Event Sourcing), plus
+   connect the previously-unused Event Store as a durable domain-event log generalizing ADR-014's
+   Commitment-only history mechanism, with Goal as its first consumer. Full detail: `TECH_DEBT.md`
+   Item 10.
+   - **Explicitly deferred, not part of this decision:** migrating Commitment/Task/Habit onto the
+     same history infrastructure (only if it later demonstrates real value); reducing per-command
+     backend boilerplate (~7 files/command, the one technical pain point actually measured in the
+     Assessment) — registered as its own future candidate, "Backend Infrastructure
+     Simplification," below.
+   - **Fase 1 status (2026-07-17):** implemented and verified per
+     `docs/03-architecture/goal_backend_implementation_plan.md`. `apps/backend/src/goal/` now has
+     Register/Rename/Complete/Archive commands, a single `GoalView` read model, an in-memory
+     versioned repository, `GoalsController`, and `GoalModule` (registered in `app.module.ts`,
+     reusing `CommitmentModule`'s exported `DomainEventDispatcher` rather than duplicating it — the
+     same DI pattern `task.module.ts` already uses). Verified clean: `tsc --noEmit`, 81/81 backend
+     jest tests (7 new), 10 new e2e tests. Remaining: LinkCommitment/LinkHabit (Fase 3), Event Store
+     connection (Fase 4), mobile integration (Fase 5), Golden Path + closure (Fase 6) — none started.
+     Full detail: `TECH_DEBT.md` Item 10.
+9. **Candidate, not yet numbered — Backend Infrastructure Simplification.** Surfaced 2026-07-17
+   during the Goal Backend investigation: a single backend command costs ~7 files (command,
+   handler, nestjs-handler, result, DTO, 2 tests); Commitment alone has 64 backend files for 7
+   commands. This is the only technical pain point the investigation found actually _measured_,
+   not hypothetical — and it's orthogonal to whichever persistence strategy is chosen (Event
+   Sourcing wouldn't reduce it on its own). Deliberately kept out of ADR-021's scope — optimizing
+   shared command infrastructure before building the module that would need it (Goal) was judged
+   premature. Not started, not yet scoped.
+10. **Candidate, not yet numbered — Historical/Analytics Engine.** Flagged 2026-07-16 during the
+    Insights audit: almost everything Insights shows is computed live off _current_ state
+    (`currentStreakDays`, `completedAt`, etc.) — there's no persisted daily/event history, which is
+    exactly why "últimos 7 días"/"peor día de la semana" for Habits couldn't be built honestly this
+    round (see `TECH_DEBT.md` RI-5). A real daily-snapshot or event-sourced history table would
+    unlock weekly adherence, best/worst day, monthly trends, heatmaps, and materially better Coach/AI
+    insights later — not a VS-032 concern, explicitly deferred to VS-033 or a future architectural
+    cycle, not started. **Potentially unlocked by ADR-021's Event Store infrastructure once Goal
+    (and possibly other aggregates) start producing durable domain-event history** — not yet
+    connected, worth revisiting once ADR-021 ships.
 
 ---
 
@@ -254,6 +293,27 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
 
 ## 📜 Change History
 
+- **v1.52.0 (2026-07-17):** **Goal Backend Fase 1 ("Goal Backend mínimo") implemented and
+  verified.** Per `docs/03-architecture/goal_backend_implementation_plan.md`:
+  `apps/backend/src/goal/` now exists with Register/Rename/Complete/Archive commands, a single
+  `GoalView` read model, an in-memory versioned repository, `GoalsController`, and `GoalModule`
+  (reuses `CommitmentModule`'s exported `DomainEventDispatcher` via DI import inheritance, mirroring
+  `task.module.ts` — no duplicate event dispatcher). Registered in `app.module.ts`. Verified:
+  `tsc --noEmit` clean, 81/81 backend jest tests passing (7 new), 10 new e2e tests
+  (`test/goals.e2e-spec.ts`) passing, no regressions in Commitment/Task/Habit. Implementation
+  guardrail held throughout: no ADR-021 architecture reopened. Remaining scope (LinkCommitment/
+  LinkHabit, Event Store connection, mobile integration, Golden Path) not started. Full detail:
+  `TECH_DEBT.md` Item 10.
+- **v1.51.0 (2026-07-17):** **ADR-021 approved — Goal Backend / CQRS / Event Store decided.**
+  Investigation-first process (Assessment → Alternatives → ADR) found the real problem was total
+  absence of a Goal backend, not a CQRS/Event Store limitation, and that a complete `EventStore`
+  already existed in the codebase but was never invoked anywhere — its existence was explicitly
+  not treated as evidence it was needed. Decision: build Goal's backend on the same
+  CQRS+versioned-state pattern already proven by Commitment/Task/Habit, and separately connect the
+  existing Event Store as a durable domain-event log generalizing ADR-014's Commitment-only
+  history mechanism (state stays the source of truth — not Event Sourcing). Migrating other
+  aggregates onto shared history, and reducing per-command boilerplate, both explicitly deferred
+  as separate future work, not part of this decision. Full detail: `TECH_DEBT.md` Item 10.
 - **v1.50.0 (2026-07-17):** **Roadmap sequencing confirmed post-VS-037.** Goal Backend / CQRS /
   Event Store resumes as the next strategic initiative (VS-037 was a cross-cutting audit inserted
   between two roadmap items, not a replacement for either). Consistency Cleanup (T-001/V-001/V-002)

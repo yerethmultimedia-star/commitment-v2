@@ -25,6 +25,10 @@ const providers = [
     help: 'Total number of commitments created',
   }),
   makeCounterProvider({
+    name: 'goals_created_total',
+    help: 'Total number of goals created',
+  }),
+  makeCounterProvider({
     name: 'notifications_sent_total',
     help: 'Total number of notifications sent',
   }),

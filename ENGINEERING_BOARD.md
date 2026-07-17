@@ -1,6 +1,6 @@
 # Engineering Board
 
-Version: 1.46.0
+Version: 1.47.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -343,6 +343,11 @@ v1.1.0 change history.)
 
 ## 📜 Change History
 
+- **v1.47.0 (2026-07-17):** **ADR-021 approved — Goal Backend / CQRS / Event Store decided.**
+  Goal's backend to be built on the same pattern Commitment/Task/Habit already prove in production
+  (versioned state, not Event Sourcing), plus a previously-built-but-unused `EventStore` connected
+  as a durable history log generalizing ADR-014's Commitment-only mechanism. Full detail:
+  `TECH_DEBT.md` v1.48.0, `PROJECT_STATUS.md` v1.51.0.
 - **v1.46.0 (2026-07-17):** **VS-037's audit phase closed.** 6 findings across 4 categories, 1
   already fixed (B-001), 3 queued into a "Consistency Cleanup" batch (T-001, V-001, V-002), 2
   closed with no action, 1 left open as a genuine product question. Full results table:

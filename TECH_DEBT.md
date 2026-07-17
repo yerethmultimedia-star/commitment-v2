@@ -1,6 +1,6 @@
 # Technical Debt Register
 
-Version: 1.47.0
+Version: 1.49.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -180,8 +180,24 @@ This document tracks identified technical debt, compilation warnings, and archit
 
 ---
 
-## Active Technical Debt Item 10: Goal aggregate has no backend module
+## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 1 Implemented
 
+- **Status update (2026-07-17):** Fase 1 ("Goal Backend mínimo," per
+  `docs/03-architecture/goal_backend_implementation_plan.md`) is implemented and verified.
+  `apps/backend/src/goal/` now exists: Register/Rename/Complete/Archive commands, a single
+  `GoalView` read model with projectors for all four events, an in-memory versioned repository
+  (mirroring `InMemoryCommitmentRepository` exactly), `GoalsController` (`/goals` REST endpoints),
+  and `GoalModule` — which reuses `CommitmentModule`'s exported `DomainEventDispatcher` via NestJS
+  DI import inheritance (`imports: [CqrsModule, CommitmentModule]`), the same pattern
+  `task.module.ts` uses, rather than duplicating a Goal-local event dispatcher. Registered in
+  `app.module.ts`. Verified: `apps/backend` `tsc --noEmit` clean (only the 2 pre-existing Item 35
+  errors remain), 7 new unit tests + 10 new e2e tests (`test/goals.e2e-spec.ts`) passing, full
+  `apps/backend` jest suite green (81/81, 17 suites) — no regressions in Commitment/Task/Habit.
+  **Not yet done (remaining ADR-021/plan scope):** LinkCommitment/LinkHabit commands (Fase 3),
+  `InMemoryEventStore` connection + `GoalHistoryProjector` (Fase 4), mobile integration —
+  `goals.api.ts` still routes unconditionally to the demo repository (Fase 5), and a Golden Path +
+  formal closure (Fase 6). `toggleMilestone` remains explicitly out of scope (no backend Milestone
+  aggregate exists by design — see `milestone.model.ts`'s own doc comment).
 - **Description:** `packages/domain/src/goal/` is a full Aggregate Root with its own domain events
   (`GoalRegisteredEvent`, `GoalArchivedEvent`, etc.) and a `GoalRepository` interface — but
   `apps/backend/src/` has no `goal/` module at all. `goal.repository.ts` and
@@ -194,9 +210,27 @@ This document tracks identified technical debt, compilation warnings, and archit
 - **Impact:** Any product-facing claim that "Goal is a first-class aggregate root" needs qualifying
   with "demo/mobile-only until a backend module ships" — governance docs currently don't make this
   distinction. Not a bug (the gap is honestly commented in-code), but a real capability gap.
-- **Priority:** High.
-- **Recommended Resolution:** Scope a Goal backend CQRS module (mirroring Habit's, which this same
-  audit found to be a clean reference implementation) as part of a future sprint. Not started.
+- **Priority:** High. **Decided, 2026-07-17:** the "Goal Backend / CQRS / Event Store" roadmap
+  initiative investigated this properly before implementing — full evidence trail:
+  `docs/03-architecture/goal_backend_current_assessment.md` (Paso 1, no decisions),
+  `docs/03-architecture/goal_backend_alternatives_evaluation.md` (Paso 2/3, alternatives evaluated
+  against evidence-derived criteria), and **`docs/03-architecture/
+adr_021_goal_backend_and_domain_history_infrastructure.md`** (Aprobada). Key findings that
+  reframed the question: the actual problem was never CQRS or Event Store, it was the total
+  absence of a Goal backend; a complete `InMemoryEventStore` already existed in the codebase,
+  fully built, registered in DI, but never once invoked anywhere (verified exhaustively) — its
+  existence wasn't treated as evidence it was needed; Commitment's history (ADR-014) already
+  proves history doesn't require Event Sourcing.
+- **Recommended Resolution (per ADR-021, not yet implemented):** build `apps/backend/src/goal/`
+  mirroring the exact CQRS + versioned-state pattern Commitment/Task/Habit already use in
+  production (same in-memory repository shape, commands derived from the domain aggregate's
+  existing methods: register/rename/linkCommitment/linkHabit/complete/archive) — **plus** connect
+  the previously-unused `InMemoryEventStore` as a durable domain-event log, generalizing ADR-014's
+  Commitment-only history pattern, with Goal as its first consumer. Explicitly not required by
+  this work: migrating Commitment/Task/Habit to consume the same history infrastructure (may
+  happen later, only if it demonstrates real value, not automatically), or reducing per-command
+  boilerplate (registered separately, see the "Backend Infrastructure Simplification" candidate
+  below — explicitly not a blocker for this item).
 
 ---
 
@@ -1827,6 +1861,30 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ## 📜 Change History
 
+- **v1.49.0 (2026-07-17):** **Item 10 — Fase 1 ("Goal Backend mínimo") implemented and verified.**
+  `apps/backend/src/goal/` built mirroring Commitment's exact CQRS+versioned-state pattern:
+  Register/Rename/Complete/Archive commands, single `GoalView` read model, in-memory versioned
+  repository, `GoalsController`, `GoalModule` (reuses `CommitmentModule`'s exported
+  `DomainEventDispatcher` via DI import inheritance — same pattern as `task.module.ts`, avoiding a
+  duplicate event dispatcher). Registered in `app.module.ts`. Verified: `tsc --noEmit` clean (only
+  the 2 pre-existing Item 35 errors), 81/81 backend jest tests passing (7 new), 10 new e2e tests
+  passing (`test/goals.e2e-spec.ts`), no regressions. Remaining ADR-021 scope (LinkCommitment/
+  LinkHabit, Event Store connection, mobile integration, Golden Path) explicitly not started —
+  guardrail held: no architecture reopened during implementation.
+- **v1.48.0 (2026-07-17):** **ADR-021 approved — Item 10 (Goal has no backend) decided.**
+  Investigation-first: Assessment (`goal_backend_current_assessment.md`) found the real problem
+  was total absence of a Goal backend, not CQRS/Event Store, and that a fully-built `EventStore`
+  already existed but was never invoked anywhere in the codebase. Alternatives evaluation
+  (`goal_backend_alternatives_evaluation.md`) compared 3 persistence strategies against
+  evidence-derived criteria; the winning option reframed from "reuse the Event Store" to
+  "generalize the domain-history infrastructure ADR-014 already proved for Commitment, using the
+  Event Store as its implementation." Decision: build Goal's backend on the same
+  CQRS+versioned-state pattern Commitment/Task/Habit already use (state stays source of truth),
+  plus connect the Event Store as a durable event log for history — explicitly not Event Sourcing.
+  Migrating other aggregates onto shared history, and reducing per-command boilerplate (~7
+  files/command, the one measured technical pain point), both explicitly deferred as separate
+  future work — registered as a new roadmap candidate, "Backend Infrastructure Simplification."
+  No code changed — implementation not started.
 - **v1.47.0 (2026-07-17):** **VS-037's audit phase closed.** Visual category swept and closed:
   V-001 (Item 38, Task's priority/status don't reuse the `Badge` component Commitment already
   uses for the same semantics — priority sub-case is pure duplication, status sub-case needs a
