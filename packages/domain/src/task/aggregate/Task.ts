@@ -18,6 +18,8 @@ import { TaskDeletedEvent } from '../events/task-deleted.event.js';
 import { TaskPriorityChangedEvent } from '../events/task-priority-changed.event.js';
 import { TaskDueDateChangedEvent } from '../events/task-due-date-changed.event.js';
 import { TaskDuplicatedEvent } from '../events/task-duplicated.event.js';
+import { TaskRelinkedToGoalEvent } from '../events/task-relinked-to-goal.event.js';
+import { TaskRelinkedToCommitmentEvent } from '../events/task-relinked-to-commitment.event.js';
 
 import {
   TaskAlreadyCompletedError,
@@ -292,6 +294,64 @@ export class Task extends AggregateRoot<TaskId> {
     this.recordEvent(event);
   }
 
+  /**
+   * Links this task directly to a Goal, or clears the link with `goalId: null`.
+   * A task's Goal and Commitment links are mutually exclusive — linking to a
+   * Goal directly clears any existing Commitment link, since the Goal would
+   * otherwise be ambiguous (direct vs. resolved-through-the-commitment).
+   */
+  public relinkGoal(goalId: string | null, now: Date = new Date()): void {
+    this.ensureNotDeleted();
+    this.ensureNotArchived();
+
+    if (goalId === this._props.goalId) return;
+
+    const event = new TaskRelinkedToGoalEvent(
+      this.id.value,
+      { taskId: this.id.value, goalId },
+      now.toISOString()
+    );
+    this.recordEvent(event);
+
+    if (goalId !== null && this._props.commitmentId !== null) {
+      const clearCommitmentEvent = new TaskRelinkedToCommitmentEvent(
+        this.id.value,
+        { taskId: this.id.value, commitmentId: null },
+        now.toISOString()
+      );
+      this.recordEvent(clearCommitmentEvent);
+    }
+  }
+
+  /**
+   * Links this task to a Commitment, or clears the link with `commitmentId: null`.
+   * Mutually exclusive with a direct Goal link — see relinkGoal().
+   */
+  public relinkCommitment(commitmentId: CommitmentId | null, now: Date = new Date()): void {
+    this.ensureNotDeleted();
+    this.ensureNotArchived();
+
+    const currentValue = this._props.commitmentId ? this._props.commitmentId.value : null;
+    const newValue = commitmentId ? commitmentId.value : null;
+    if (newValue === currentValue) return;
+
+    const event = new TaskRelinkedToCommitmentEvent(
+      this.id.value,
+      { taskId: this.id.value, commitmentId: newValue },
+      now.toISOString()
+    );
+    this.recordEvent(event);
+
+    if (commitmentId !== null && this._props.goalId !== null) {
+      const clearGoalEvent = new TaskRelinkedToGoalEvent(
+        this.id.value,
+        { taskId: this.id.value, goalId: null },
+        now.toISOString()
+      );
+      this.recordEvent(clearGoalEvent);
+    }
+  }
+
   public duplicate(newId: TaskId): Task {
     this.ensureNotDeleted();
     
@@ -389,6 +449,14 @@ export class Task extends AggregateRoot<TaskId> {
     } else if (event.name === 'task.due_date_changed') {
       const payload = (event as TaskDueDateChangedEvent).payload;
       this._props.dueDate = payload.dueDate ? new Date(payload.dueDate) : null;
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.relinked_to_goal') {
+      const payload = (event as TaskRelinkedToGoalEvent).payload;
+      this._props.goalId = payload.goalId;
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.relinked_to_commitment') {
+      const payload = (event as TaskRelinkedToCommitmentEvent).payload;
+      this._props.commitmentId = payload.commitmentId ? new CommitmentId(payload.commitmentId) : null;
       this._props.updatedAt = new Date(event.metadata.occurredAt);
     }
   }

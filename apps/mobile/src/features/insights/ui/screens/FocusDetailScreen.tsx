@@ -1,12 +1,11 @@
 import React from 'react';
 import { Stack as ExpoStack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { YStack, XStack, Text } from 'tamagui';
-import { AppScreen } from '@commitment/design-system';
+import { YStack, XStack } from 'tamagui';
+import { AppScreen, LoadingState, ErrorState, EmptyState } from '@commitment/design-system';
 import { useFocusDetail } from '../../hooks/useFocusDetail';
 import { FocusDayBarChart } from '../components/FocusDayBarChart';
 import { BestWorstDayCard } from '../components/BestWorstDayCard';
-import { LoadingState } from '@/shared/ui/feedback/LoadingState';
 
 export function FocusDetailScreen() {
   const { t } = useTranslation('common');
@@ -15,12 +14,10 @@ export function FocusDetailScreen() {
   return (
     <AppScreen scrollable>
       <ExpoStack.Screen options={{ headerShown: true, title: t('insights.focus.title'), presentation: 'card' }} />
-      <YStack padding="$4" gap="$4">
-        {isLoading && <LoadingState />}
+      <YStack padding="$4" gap="$4" backgroundColor="$background">
+        {isLoading && <LoadingState fullscreen={false} title={{ i18nKey: 'insights.loading' }} />}
         {isError && (
-          <Text color="$danger" fontSize="$5" fontWeight="600" textAlign="center">
-            {t('insights.error.description')}
-          </Text>
+          <ErrorState fullscreen={false} title={{ i18nKey: 'insights.error.description' }} />
         )}
 
         {!isLoading && !isError && (
@@ -33,9 +30,7 @@ export function FocusDetailScreen() {
                 <BestWorstDayCard label={t('insights.focus.worstDay')} day={worstDay} />
               </XStack>
             ) : (
-              <Text color="$contentSecondary" fontSize="$3" textAlign="center">
-                {t('insights.focus.empty')}
-              </Text>
+              <EmptyState fullscreen={false} title={{ i18nKey: 'insights.focus.empty' }} />
             )}
           </>
         )}

@@ -61,6 +61,7 @@ exports[`Input matches forest theme snapshot 1`] = `
         editable={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#22C55E66",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
@@ -70,25 +71,25 @@ exports[`Input matches forest theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#6B6B76"
+        placeholderTextColor="#567A5E"
         secureTextEntry={false}
         style={
           {
             "backgroundColor": "transparent",
-            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomColor": "#E0E8E1",
             "borderBottomLeftRadius": 9,
             "borderBottomRightRadius": 9,
             "borderBottomWidth": 0,
-            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftColor": "#E0E8E1",
             "borderLeftWidth": 0,
-            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightColor": "#E0E8E1",
             "borderRightWidth": 0,
             "borderStyle": "solid",
-            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopColor": "#E0E8E1",
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#18181F",
+            "color": "#14281A",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
             "fontSize": 14,
@@ -140,7 +141,7 @@ exports[`Input matches midnight theme snapshot 1`] = `
       style={
         {
           "alignItems": "center",
-          "backgroundColor": "#FFFFFF",
+          "backgroundColor": "#18181B",
           "borderBottomColor": "#FF6B5E",
           "borderBottomLeftRadius": 9,
           "borderBottomRightRadius": 9,
@@ -170,6 +171,7 @@ exports[`Input matches midnight theme snapshot 1`] = `
         editable={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#8B5CF666",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
@@ -179,25 +181,25 @@ exports[`Input matches midnight theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#6B6B76"
+        placeholderTextColor="#A1A1AA"
         secureTextEntry={false}
         style={
           {
             "backgroundColor": "transparent",
-            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomColor": "#27272A",
             "borderBottomLeftRadius": 9,
             "borderBottomRightRadius": 9,
             "borderBottomWidth": 0,
-            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftColor": "#27272A",
             "borderLeftWidth": 0,
-            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightColor": "#27272A",
             "borderRightWidth": 0,
             "borderStyle": "solid",
-            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopColor": "#27272A",
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#18181F",
+            "color": "#FAFAFA",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
             "fontSize": 14,
@@ -250,16 +252,16 @@ exports[`Input matches sunrise theme snapshot 1`] = `
         {
           "alignItems": "center",
           "backgroundColor": "#FFFFFF",
-          "borderBottomColor": "#E7E7EF",
+          "borderBottomColor": "#EBE4D5",
           "borderBottomLeftRadius": 9,
           "borderBottomRightRadius": 9,
           "borderBottomWidth": 1,
-          "borderLeftColor": "#E7E7EF",
+          "borderLeftColor": "#EBE4D5",
           "borderLeftWidth": 1,
-          "borderRightColor": "#E7E7EF",
+          "borderRightColor": "#EBE4D5",
           "borderRightWidth": 1,
           "borderStyle": "solid",
-          "borderTopColor": "#E7E7EF",
+          "borderTopColor": "#EBE4D5",
           "borderTopLeftRadius": 9,
           "borderTopRightRadius": 9,
           "borderTopWidth": 1,
@@ -279,6 +281,7 @@ exports[`Input matches sunrise theme snapshot 1`] = `
         editable={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#F59E0B66",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
@@ -288,25 +291,25 @@ exports[`Input matches sunrise theme snapshot 1`] = `
         onBlur={[Function]}
         onChangeText={[Function]}
         onFocus={[Function]}
-        placeholderTextColor="#6B6B76"
+        placeholderTextColor="#786E5D"
         secureTextEntry={false}
         style={
           {
             "backgroundColor": "transparent",
-            "borderBottomColor": "hsl(0, 0%, 92.0%)",
+            "borderBottomColor": "#EBE4D5",
             "borderBottomLeftRadius": 9,
             "borderBottomRightRadius": 9,
             "borderBottomWidth": 0,
-            "borderLeftColor": "hsl(0, 0%, 92.0%)",
+            "borderLeftColor": "#EBE4D5",
             "borderLeftWidth": 0,
-            "borderRightColor": "hsl(0, 0%, 92.0%)",
+            "borderRightColor": "#EBE4D5",
             "borderRightWidth": 0,
             "borderStyle": "solid",
-            "borderTopColor": "hsl(0, 0%, 92.0%)",
+            "borderTopColor": "#EBE4D5",
             "borderTopLeftRadius": 9,
             "borderTopRightRadius": 9,
             "borderTopWidth": 0,
-            "color": "#18181F",
+            "color": "#271F15",
             "flex": 1,
             "fontFamily": "Inter_400Regular",
             "fontSize": 14,

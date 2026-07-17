@@ -17,10 +17,19 @@ export interface CalendarCommitmentInput {
   readonly completed: boolean;
 }
 
+export interface CalendarMilestoneInput {
+  readonly id: string;
+  readonly goalId: string;
+  readonly title: string;
+  readonly targetDate?: string;
+  readonly completed: boolean;
+}
+
 export interface CalendarContext {
   readonly tasks: readonly CalendarTaskInput[];
   readonly commitments: readonly CalendarCommitmentInput[];
   readonly habits: readonly HabitSummary[];
+  readonly milestones: readonly CalendarMilestoneInput[];
 }
 
 const sameDay = (isoDate: string | undefined, date: Date): boolean => {
@@ -41,8 +50,8 @@ const isoTime = (isoDate: string | undefined): string | undefined => {
 };
 
 /**
- * Pure computation: normalizes tasks/commitments/habits for one calendar
- * day into a flat, sorted agenda. No I/O — same constraint as
+ * Pure computation: normalizes tasks/commitments/habits/milestones for one
+ * calendar day into a flat, sorted agenda. No I/O — same constraint as
  * RecommendationEngine's getRecommendations. Reminders aren't populated
  * yet (no reminder domain exists), but the item type is modeled so a
  * future source can slot in without a shape change here.
@@ -86,6 +95,19 @@ export function buildDayAgenda(context: CalendarContext, date: Date): DayAgenda 
       time: `${String(habit.reminderHour).padStart(2, '0')}:${String(habit.reminderMinute).padStart(2, '0')}`,
       completed: habit.completedToday,
       sourceId: habit.id,
+    });
+  }
+
+  for (const milestone of context.milestones) {
+    if (!sameDay(milestone.targetDate, date)) continue;
+    items.push({
+      id: `milestone-${milestone.id}`,
+      type: 'milestone',
+      title: milestone.title,
+      time: isoTime(milestone.targetDate),
+      completed: milestone.completed,
+      // A Milestone has no screen of its own — route to its owning Goal.
+      sourceId: milestone.goalId,
     });
   }
 

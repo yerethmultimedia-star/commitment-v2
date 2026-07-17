@@ -3,6 +3,7 @@ import { View, Spinner } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label } from './typography/Label.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface ButtonProps {
   /**
@@ -112,11 +113,12 @@ export const Button = React.forwardRef<any, ButtonProps>(({
       <View
         ref={ref as any}
         testID={testID}
-        role="button"
-        accessibilityRole="button"
         accessible={true}
-        accessibilityState={{ disabled: isActuallyDisabled, busy: loading }}
-        accessibilityLabel={t(i18nKey)}
+        {...toPlatformAccessibilityProps({
+          accessibilityRole: 'button',
+          accessibilityState: { disabled: isActuallyDisabled, busy: loading },
+          accessibilityLabel: t(i18nKey),
+        })}
         aria-describedby={ariaDescribedBy}
         height={height}
         paddingHorizontal={px}
@@ -130,6 +132,7 @@ export const Button = React.forwardRef<any, ButtonProps>(({
         width={fullWidth ? '100%' : undefined}
         opacity={animationStyle.opacity}
         scale={animationStyle.scale}
+        transition={animationStyle.transition}
         cursor={isActuallyDisabled ? 'not-allowed' : 'pointer'}
         // Interaction Handlers
         onPress={handlePress}

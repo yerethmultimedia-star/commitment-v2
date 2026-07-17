@@ -10,6 +10,8 @@ import { RestoreTaskCommand } from '../commands/restore-task.command';
 import { DeleteTaskCommand } from '../commands/delete-task.command';
 import { ChangePriorityTaskCommand } from '../commands/change-priority-task.command';
 import { DuplicateTaskCommand } from '../commands/duplicate-task.command';
+import { RelinkTaskGoalCommand } from '../commands/relink-task-goal.command';
+import { RelinkTaskCommitmentCommand } from '../commands/relink-task-commitment.command';
 import { GetTaskByIdQuery } from '../queries/get-task-by-id.query';
 import { ListTasksQuery } from '../queries/list-tasks.query';
 import { PaginatedTasks, TaskView } from '../queries/task-view.dto';
@@ -62,6 +64,14 @@ export class TaskApplicationService {
     return this.commandBus.execute<DuplicateTaskCommand, RegisterTaskResult>(
       cmd,
     );
+  }
+
+  async relinkGoal(cmd: RelinkTaskGoalCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async relinkCommitment(cmd: RelinkTaskCommitmentCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
   }
 
   async getTaskById(id: string): Promise<TaskView> {

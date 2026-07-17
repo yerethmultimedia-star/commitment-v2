@@ -1,6 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XStack, YStack, View } from 'tamagui';
-import { Body } from '@commitment/design-system';
+import { Body, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { FocusDayBar } from '../../engine/focus-detail';
 
 const BAR_MAX_HEIGHT = 120;
@@ -17,6 +18,7 @@ export interface FocusDayBarChartProps {
 
 /** Day-by-day focus-minutes bar chart with a dashed average line, reusing WeeklyActivityInsight's height-scaling technique. The average line is a plain dashed View border, not SVG — simpler than a hand-rolled dashed SVG line for a straight horizontal rule. */
 export function FocusDayBarChart({ days, averageMinutes }: FocusDayBarChartProps) {
+  const { t } = useTranslation('common');
   const maxValue = Math.max(1, averageMinutes, ...days.map((d) => d.focusMinutes));
   const avgLineOffset = FOOTER_HEIGHT + (averageMinutes / maxValue) * BAR_MAX_HEIGHT;
 
@@ -35,7 +37,16 @@ export function FocusDayBarChart({ days, averageMinutes }: FocusDayBarChartProps
       )}
       <XStack height={BAR_MAX_HEIGHT + FOOTER_HEIGHT} alignItems="flex-end" justifyContent="space-between" paddingHorizontal="$2">
         {days.map((day) => (
-          <YStack key={day.date} alignItems="center" gap="$2" flex={1}>
+          <YStack
+            key={day.date}
+            alignItems="center"
+            gap="$2"
+            flex={1}
+            accessible
+            {...toPlatformAccessibilityProps({
+              accessibilityLabel: `${day.weekdayLabel}: ${t('insights.focus.minutesLabel', { count: day.focusMinutes })}`,
+            })}
+          >
             <Body fontSize="$2" fontWeight="bold" color="$contentSecondary">{day.focusMinutes}</Body>
             <View
               width={20}

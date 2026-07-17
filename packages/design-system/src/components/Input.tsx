@@ -3,6 +3,7 @@ import { View, Input as TamaguiInput, YStack, XStack } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label, Caption, Body } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface InputProps {
   value: string;
@@ -146,10 +147,10 @@ export const Input = React.forwardRef<any, InputProps>(({
             keyboardType={keyboardType}
             returnKeyType={returnKeyType}
             disabled={isActuallyDisabled}
-            accessibilityState={{ disabled: isActuallyDisabled }}
-            accessibilityLabel={
-              labelI18nKey ? t(labelI18nKey) : accessibilityLabelI18nKey ? t(accessibilityLabelI18nKey) : undefined
-            }
+            {...toPlatformAccessibilityProps({
+              accessibilityState: { disabled: isActuallyDisabled },
+              accessibilityLabel: labelI18nKey ? t(labelI18nKey) : accessibilityLabelI18nKey ? t(accessibilityLabelI18nKey) : undefined,
+            })}
             {...(labelI18nKey ? ({ 'aria-labelledby': id + '-label' } as any) : {})}
             aria-describedby={helperI18nKey ? helperId : undefined}
             onFocus={() => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { ResolvedTheme, ThemeMetadata } from '@commitment/theme-engine';
-import { adaptThemeToTamagui } from '@commitment/design-system';
+import { adaptThemeToTamagui, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { useTranslation } from 'react-i18next';
 // We use raw React Native components here so we can inject the theme locally
 // without relying on the global Tamagui provider which only has the currently active theme.
@@ -37,9 +37,11 @@ export const ThemePreviewCard: React.FC<ThemePreviewCardProps> = ({
           borderRadius: r['4'],
         }
       ]}
-      accessibilityRole="button"
-      accessibilityState={{ selected: isSelected }}
-      accessibilityLabel={t(metadata.nameKey)}
+      {...toPlatformAccessibilityProps({
+        accessibilityRole: 'button',
+        accessibilityState: { selected: isSelected },
+        accessibilityLabel: t(metadata.nameKey),
+      })}
     >
       <View style={[styles.previewArea, { backgroundColor: c.background }]}>
         {/* Miniature Header */}

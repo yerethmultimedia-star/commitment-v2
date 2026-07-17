@@ -1,11 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Button as TamaguiButton, ScrollView } from 'tamagui';
-import { Body } from '@commitment/design-system';
+import { EmptyState, ErrorState, LoadingState, Button, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { useGoals } from '../hooks/useGoals';
 import { GoalCard } from './GoalCard';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { ErrorState } from '@/shared/ui/feedback/ErrorState';
 
 type StatusChip = 'active' | 'inProgress' | 'completed';
 const CHIPS: StatusChip[] = ['active', 'inProgress', 'completed'];
@@ -25,14 +23,14 @@ export function ObjectivesTab() {
   const filtered = useMemo(() => goals.filter((g: any) => matchesChip(g, chip)), [goals, chip]);
 
   if (isLoading) {
-    return <Body i18nKey="goals.list.loading" tone="secondary" />;
+    return <LoadingState fullscreen={false} title={{ i18nKey: 'goals.list.loading' }} />;
   }
   if (isError) {
     return (
       <ErrorState
-        message={t('goals.list.error.title')}
-        retryLabel={t('goals.list.error.retry')}
-        onRetry={refetch}
+        fullscreen={false}
+        title={{ i18nKey: 'goals.list.error.title' }}
+        primaryAction={<Button variant="primary" onPress={refetch} i18nKey="goals.list.error.retry" />}
       />
     );
   }
@@ -52,8 +50,10 @@ export function ObjectivesTab() {
               fontWeight={chip === c ? '700' : '500'}
               pressStyle={{ opacity: 0.85 }}
               onPress={() => setChip(c)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: chip === c }}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityState: { selected: chip === c },
+              })}
             >
               {t(`goals.statusChips.${c}`)}
             </TamaguiButton>
@@ -63,8 +63,9 @@ export function ObjectivesTab() {
 
       {filtered.length === 0 ? (
         <EmptyState
-          title={t(`goals.statusChips.empty.${chip}.title`)}
-          description={t(`goals.statusChips.empty.${chip}.description`)}
+          fullscreen={false}
+          title={{ i18nKey: `goals.statusChips.empty.${chip}.title` }}
+          description={{ i18nKey: `goals.statusChips.empty.${chip}.description` }}
         />
       ) : (
         <YStack gap="$3">

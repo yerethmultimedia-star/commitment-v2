@@ -1,9 +1,9 @@
 # Decision Log
 
-Version: 1.5.0
+Version: 1.6.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-13
+Last Updated: 2026-07-15
 
 ---
 
@@ -16,11 +16,17 @@ Last Updated: 2026-07-13
 - **ADR-015:** Roadmap Reprioritization (2026 Q3) (Approved, [adr_015_roadmap_reprioritization.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_015_roadmap_reprioritization.md))
 - **ADR-016:** Sprint Governance Rules (Approved, [adr_016_sprint_governance_rules.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_016_sprint_governance_rules.md))
 - **ADR-017:** Metro Module Resolution Hazards — i18next Singleton + Tamagui Platform Builds (Approved, [adr_017_i18next_singleton_resolution.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_017_i18next_singleton_resolution.md))
+- **ADR-018:** Bounded Exceptions to i18n Rule 2 — React Navigation `options`, `ThemePreviewCard` (Approved, [adr_018_i18n_rule2_exceptions.md](file:///Users/yereth/Desktop/Commitment-v2/docs/03-architecture/adr_018_i18n_rule2_exceptions.md))
 
 ---
 
 ## 📜 Change History
 
+- **v1.6.0 (2026-07-15):** Registered ADR-018: two narrow, verified exceptions to i18n Rule 2
+  (declarative-only translation) — React Navigation route `options` fields read outside React's
+  render cycle, and `ThemePreviewCard.tsx`'s intentional Design-System avoidance to escape ambient
+  theme context. Both require passing a demonstrable-restriction test, not general permission to
+  call `t()` where convenient.
 - **v1.5.0 (2026-07-13):** Extended ADR-017 with a second, related finding from the same sprint:
   a static (non-platform-aware) `unstable_conditionNames` in `metro.config.js` was forcing every
   Tamagui package to resolve its `react-native` build even when bundling for web, crashing any

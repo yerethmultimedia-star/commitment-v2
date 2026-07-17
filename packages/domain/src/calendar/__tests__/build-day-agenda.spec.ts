@@ -30,6 +30,7 @@ describe('buildDayAgenda', () => {
         { id: 'c1', title: 'Target today', targetDate: '2026-07-13T00:00:00', completed: false },
       ],
       habits: [],
+      milestones: [],
     };
 
     const agenda = buildDayAgenda(context, monday);
@@ -46,6 +47,7 @@ describe('buildDayAgenda', () => {
         weeklyHabit({ id: 'h1', title: 'Monday habit', daysOfWeek: [1], currentStreakDays: 3 }),
         weeklyHabit({ id: 'h2', title: 'Wednesday habit', daysOfWeek: [3] }),
       ],
+      milestones: [],
     };
 
     const agenda = buildDayAgenda(context, monday);
@@ -63,6 +65,7 @@ describe('buildDayAgenda', () => {
         { id: 'c-allday', title: 'All day', targetDate: '2026-07-13T00:00:00', completed: false },
       ],
       habits: [],
+      milestones: [],
     };
 
     const agenda = buildDayAgenda(context, monday);
@@ -70,8 +73,25 @@ describe('buildDayAgenda', () => {
     expect(agenda.items.map((i) => i.sourceId)).toEqual(['t-early', 't-late', 'c-allday']);
   });
 
+  it('includes milestones scheduled for the given day, routed to their owning Goal', () => {
+    const context: CalendarContext = {
+      tasks: [],
+      commitments: [],
+      habits: [],
+      milestones: [
+        { id: 'm1', goalId: 'g1', title: 'Finish the half marathon', targetDate: '2026-07-13T00:00:00', completed: false },
+        { id: 'm2', goalId: 'g2', title: 'Not today', targetDate: '2026-07-14T00:00:00', completed: false },
+      ],
+    };
+
+    const agenda = buildDayAgenda(context, monday);
+
+    expect(agenda.items).toHaveLength(1);
+    expect(agenda.items[0]).toMatchObject({ type: 'milestone', sourceId: 'g1', title: 'Finish the half marathon' });
+  });
+
   it('returns an empty agenda when nothing is scheduled', () => {
-    const context: CalendarContext = { tasks: [], commitments: [], habits: [] };
+    const context: CalendarContext = { tasks: [], commitments: [], habits: [], milestones: [] };
     const agenda = buildDayAgenda(context, monday);
     expect(agenda.items).toEqual([]);
   });

@@ -84,20 +84,20 @@ function resolveGenericHero(recommendations: Recommendation[]): HeroCardDescript
  * A real "priority of the day" task takes precedence over the generic,
  * i18n-templated heroes whenever one exists — showing something concrete
  * beats a motivational placeholder. Falls back to the recommendation-driven
- * generic hero only when context.priorityTask is null (no pending-today
- * task has a parent commitment to show).
+ * generic hero only when context.priorityTask is null (no pending task due
+ * today at all).
  */
 function resolveHero(context: DashboardContext, recommendations: Recommendation[]): HeroCardDescriptor {
   if (context.priorityTask) {
     return {
       kind: 'priorityTask',
       taskTitle: context.priorityTask.title,
-      commitmentTitle: context.priorityTask.commitmentTitle,
+      contextLabel: context.priorityTask.contextLabel,
       priority: context.priorityTask.priority,
       progressRatio: context.priorityTask.commitmentProgressRatio,
       // Opens the task itself in the Tasks tab — neither the Goal Workspace
       // nor the Commitment Workspace screen shows individual Task items, so
-      // those routes are dead ends here even though this task belongs to one.
+      // those routes are dead ends here even though this task may belong to one.
       actionRoute: `/(tabs)/tasks?taskId=${context.priorityTask.taskId}`,
     };
   }

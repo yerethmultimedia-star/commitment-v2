@@ -3,19 +3,20 @@
 exports[`Card matches forest theme snapshot 1`] = `
 <View
   accessible={false}
+  collapsable={false}
   style={
     {
-      "backgroundColor": "#FFFFFF",
-      "borderBottomColor": "#E7E7EF",
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(224, 232, 225, 1)",
       "borderBottomLeftRadius": 9,
       "borderBottomRightRadius": 9,
       "borderBottomWidth": 0,
-      "borderLeftColor": "#E7E7EF",
+      "borderLeftColor": "rgba(224, 232, 225, 1)",
       "borderLeftWidth": 0,
-      "borderRightColor": "#E7E7EF",
+      "borderRightColor": "rgba(224, 232, 225, 1)",
       "borderRightWidth": 0,
       "borderStyle": "solid",
-      "borderTopColor": "#E7E7EF",
+      "borderTopColor": "rgba(224, 232, 225, 1)",
       "borderTopLeftRadius": 9,
       "borderTopRightRadius": 9,
       "borderTopWidth": 0,
@@ -25,7 +26,7 @@ exports[`Card matches forest theme snapshot 1`] = `
       "paddingLeft": 16,
       "paddingRight": 16,
       "paddingTop": 16,
-      "shadowColor": "rgb(24,24,31)",
+      "shadowColor": "rgb(20,40,26)",
       "shadowOffset": {
         "height": 4,
         "width": 0,
@@ -41,6 +42,11 @@ exports[`Card matches forest theme snapshot 1`] = `
   }
 >
   <Text
+    style={
+      {
+        "color": "#14281A",
+      }
+    }
     suppressHighlighting={true}
   >
     Hi
@@ -51,19 +57,20 @@ exports[`Card matches forest theme snapshot 1`] = `
 exports[`Card matches midnight theme snapshot 1`] = `
 <View
   accessible={false}
+  collapsable={false}
   style={
     {
-      "backgroundColor": "transparent",
-      "borderBottomColor": "#E7E7EF",
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderBottomColor": "rgba(39, 39, 42, 1)",
       "borderBottomLeftRadius": 9,
       "borderBottomRightRadius": 9,
       "borderBottomWidth": 1,
-      "borderLeftColor": "#E7E7EF",
+      "borderLeftColor": "rgba(39, 39, 42, 1)",
       "borderLeftWidth": 1,
-      "borderRightColor": "#E7E7EF",
+      "borderRightColor": "rgba(39, 39, 42, 1)",
       "borderRightWidth": 1,
       "borderStyle": "solid",
-      "borderTopColor": "#E7E7EF",
+      "borderTopColor": "rgba(39, 39, 42, 1)",
       "borderTopLeftRadius": 9,
       "borderTopRightRadius": 9,
       "borderTopWidth": 1,
@@ -73,7 +80,7 @@ exports[`Card matches midnight theme snapshot 1`] = `
       "paddingLeft": 16,
       "paddingRight": 16,
       "paddingTop": 16,
-      "shadowColor": "rgb(24,24,31)",
+      "shadowColor": "rgb(250,250,250)",
       "shadowOffset": {
         "height": 4,
         "width": 0,
@@ -89,6 +96,11 @@ exports[`Card matches midnight theme snapshot 1`] = `
   }
 >
   <Text
+    style={
+      {
+        "color": "#FAFAFA",
+      }
+    }
     suppressHighlighting={true}
   >
     Hi
@@ -99,19 +111,20 @@ exports[`Card matches midnight theme snapshot 1`] = `
 exports[`Card matches sunrise theme snapshot 1`] = `
 <View
   accessible={false}
+  collapsable={false}
   style={
     {
-      "backgroundColor": "#FFFFFF",
-      "borderBottomColor": "transparent",
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
       "borderBottomLeftRadius": 9,
       "borderBottomRightRadius": 9,
       "borderBottomWidth": 1,
-      "borderLeftColor": "transparent",
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
       "borderLeftWidth": 1,
-      "borderRightColor": "transparent",
+      "borderRightColor": "rgba(0, 0, 0, 0)",
       "borderRightWidth": 1,
       "borderStyle": "solid",
-      "borderTopColor": "transparent",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
       "borderTopLeftRadius": 9,
       "borderTopRightRadius": 9,
       "borderTopWidth": 1,
@@ -121,7 +134,7 @@ exports[`Card matches sunrise theme snapshot 1`] = `
       "paddingLeft": 16,
       "paddingRight": 16,
       "paddingTop": 16,
-      "shadowColor": "rgb(24,24,31)",
+      "shadowColor": "rgb(39,31,21)",
       "shadowOffset": {
         "height": 4,
         "width": 0,
@@ -137,6 +150,11 @@ exports[`Card matches sunrise theme snapshot 1`] = `
   }
 >
   <Text
+    style={
+      {
+        "color": "#271F15",
+      }
+    }
     suppressHighlighting={true}
   >
     Hi

@@ -20,18 +20,31 @@ export class ThemeResolver {
     }
 
     // Apply any modifications to the theme based on context if necessary
-    // For example, if highContrast is true, we could dynamically adjust colors here,
-    // or if reducedMotion is true, we could zero out the animation durations in the resolved theme.
-    
+    // For example, if highContrast is true, we could dynamically adjust colors here.
+
     // We create a copy to avoid mutating the cached resolved theme
     const finalTheme = { ...resolvedTheme };
 
     if (context.reducedMotion) {
+      // Zero every duration-bearing field, not just the generic fast/normal/
+      // slow tier — buttonPress/cardEntrance/pageTransition/listAnimation are
+      // the fields components actually read (see ThemeMotion's doc comment,
+      // COMMITMENT_EXPERIENCE_GUIDE.md §5). Spring configs (spring/
+      // modalTransition) are left as physical params, not zeroed — a
+      // near-zero spring isn't a meaningful "off" state the way duration: 0
+      // is; consumers of spring-driven motion should check
+      // ResolvedAppearance.isReducedMotion directly and skip the animation
+      // entirely instead, same as AppearanceProvider's own crossfade already
+      // does.
       finalTheme.motion = {
         ...finalTheme.motion,
         fast: 0,
         normal: 0,
         slow: 0,
+        pageTransition: 0,
+        buttonPress: 0,
+        cardEntrance: 0,
+        listAnimation: 0,
       };
     }
 

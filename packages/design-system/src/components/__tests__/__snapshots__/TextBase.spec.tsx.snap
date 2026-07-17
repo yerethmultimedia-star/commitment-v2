@@ -6,7 +6,7 @@ exports[`Typography Primitives applies semantic roles correctly 1`] = `
   maxFontSizeMultiplier={1.5}
   style={
     {
-      "color": "#18181F",
+      "color": "#271F15",
       "fontFamily": "Inter_600SemiBold",
       "fontSize": 17,
       "letterSpacing": -0.2,

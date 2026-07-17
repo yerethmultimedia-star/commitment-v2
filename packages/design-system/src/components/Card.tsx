@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, YStackProps } from 'tamagui';
+import { useTranslation } from '@commitment/localization';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface CardProps extends YStackProps {
   variant?: 'elevated' | 'outlined' | 'flat';
@@ -13,6 +15,9 @@ export interface CardProps extends YStackProps {
   testID?: string;
   onPress?: () => void;
   children?: React.ReactNode;
+  /** i18nKey resolved to accessibilityLabel — lets Features avoid calling t() themselves for a Card's a11y label. */
+  accessibilityLabelI18nKey?: string;
+  accessibilityLabelI18nParams?: Record<string, any>;
 }
 
 export const Card = React.forwardRef<any, CardProps>(({
@@ -26,8 +31,18 @@ export const Card = React.forwardRef<any, CardProps>(({
   testID,
   onPress,
   children,
+  accessibilityLabelI18nKey,
+  accessibilityLabelI18nParams,
+  accessibilityLabel: rawAccessibilityLabel,
+  accessibilityHint: rawAccessibilityHint,
+  accessibilityRole: rawAccessibilityRole,
+  accessibilityState: rawAccessibilityState,
   ...props
 }, ref) => {
+  const { t } = useTranslation();
+  const resolvedAccessibilityLabel = accessibilityLabelI18nKey
+    ? t(accessibilityLabelI18nKey, accessibilityLabelI18nParams)
+    : (rawAccessibilityLabel as string | undefined);
   const isInteractive = clickable || selectable;
   const isActuallyDisabled = disabled || loading;
 
@@ -75,10 +90,15 @@ export const Card = React.forwardRef<any, CardProps>(({
     <View
       ref={ref as any}
       testID={testID}
-      role={isInteractive ? 'button' : undefined}
-      accessibilityRole={isInteractive ? 'button' : undefined}
       accessible={isInteractive}
-      accessibilityState={isInteractive ? { disabled: isActuallyDisabled, selected, busy: loading } : undefined}
+      {...toPlatformAccessibilityProps({
+        accessibilityLabel: resolvedAccessibilityLabel,
+        accessibilityHint: rawAccessibilityHint as string | undefined,
+        accessibilityRole: isInteractive ? 'button' : (rawAccessibilityRole as string | undefined),
+        accessibilityState: isInteractive
+          ? { disabled: isActuallyDisabled, selected, busy: loading }
+          : (rawAccessibilityState as Record<string, unknown> | undefined),
+      })}
       backgroundColor={bg as any}
       borderColor={borderColor as any}
       borderWidth={borderWidth}
@@ -90,6 +110,7 @@ export const Card = React.forwardRef<any, CardProps>(({
       shadowOffset={{ width: 0, height: 4 }}
       opacity={isInteractive ? animationStyle.opacity : 1}
       scale={isInteractive ? animationStyle.scale : 1}
+      transition={isInteractive ? animationStyle.transition : undefined}
       cursor={isInteractive ? (isActuallyDisabled ? 'not-allowed' : 'pointer') : 'default'}
       onPress={isInteractive ? handlePress : undefined}
       onPressIn={isInteractive ? handlers.onPressIn : undefined}

@@ -12,6 +12,8 @@ export interface TaskModel {
   actualMinutes: number;
   dueDate?: string | null;
   commitmentId?: string | null;
+  /** Direct Goal link — mutually exclusive with commitmentId (see Task.relinkGoal domain invariant). */
+  goalId?: string | null;
   createdAt: string;
   completedAt?: string | null;
 }

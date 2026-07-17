@@ -4,6 +4,7 @@ exports[`Screen Primitives AppScreen renders scrollable screen by default 1`] = 
 <View
   style={
     {
+      "backgroundColor": "#FFFDF5",
       "flex": 1,
       "height": "100%",
       "width": "100%",
@@ -67,6 +68,11 @@ exports[`Screen Primitives AppScreen renders scrollable screen by default 1`] = 
         >
           <View>
             <Text
+              style={
+                {
+                  "color": "#271F15",
+                }
+              }
               suppressHighlighting={true}
             >
               Content
@@ -83,6 +89,7 @@ exports[`Screen Primitives AppScreen renders static screen when scrollable=false
 <View
   style={
     {
+      "backgroundColor": "#FFFDF5",
       "flex": 1,
       "height": "100%",
       "width": "100%",
@@ -128,6 +135,11 @@ exports[`Screen Primitives AppScreen renders static screen when scrollable=false
         }
       >
         <Text
+          style={
+            {
+              "color": "#271F15",
+            }
+          }
           suppressHighlighting={true}
         >
           Static Content
@@ -178,6 +190,11 @@ exports[`Screen Primitives StaticScreen renders static content correctly 1`] = `
       }
     >
       <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
         suppressHighlighting={true}
       >
         Static Content

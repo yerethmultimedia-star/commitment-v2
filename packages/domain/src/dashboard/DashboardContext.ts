@@ -33,18 +33,28 @@ export interface DashboardHabitSummary {
 }
 
 /**
- * Today's single highest-priority pending task, plus its parent commitment's
- * identity/progress — backs the "priority of the day" hero card. Null when
- * no pending-today task has a parent commitment (nothing honest to show).
+ * Today's single highest-scoring pending task — backs the "priority of the
+ * day" hero card. Candidates are scored regardless of origin (commitment,
+ * direct goal, or fully independent); the highest score wins. Null only
+ * when there is no pending task due today at all.
+ *
+ * `contextLabel` is always present so the hero card never has to branch its
+ * visual structure by origin: resolved Goal title > Commitment title >
+ * generic fallback. `commitmentId`/`goalId` and their titles are mutually
+ * exclusive on the winning task itself — a commitment-linked task's Goal (if
+ * any) is resolved for display via the commitment, not stored twice.
  */
 export interface DashboardPriorityTask {
   readonly taskId: string;
   readonly title: string;
   readonly priority: 'high' | 'medium' | 'low';
-  readonly commitmentId: string;
-  readonly commitmentTitle: string;
-  /** 0..1 — completed/total tasks under the parent commitment, not the task's own binary state. */
-  readonly commitmentProgressRatio: number;
+  readonly contextLabel: string;
+  readonly commitmentId?: string;
+  readonly commitmentTitle?: string;
+  /** 0..1 — completed/total tasks under the parent commitment. Only present when commitment-linked. */
+  readonly commitmentProgressRatio?: number;
+  readonly goalId?: string;
+  readonly goalTitle?: string;
 }
 
 export interface DashboardContext {

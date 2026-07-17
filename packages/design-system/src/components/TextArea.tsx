@@ -3,6 +3,7 @@ import { View, TextArea as TamaguiTextArea, YStack, XStack } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface TextAreaProps {
   value: string;
@@ -95,7 +96,7 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
             disabled={isActuallyDisabled}
             numberOfLines={numberOfLines}
             minHeight={numberOfLines * 24}
-            accessibilityState={{ disabled: isActuallyDisabled }}
+            {...toPlatformAccessibilityProps({ accessibilityState: { disabled: isActuallyDisabled } })}
             aria-describedby={helperI18nKey ? helperId : undefined}
             onFocus={handlers.onFocus}
             onBlur={handlers.onBlur}

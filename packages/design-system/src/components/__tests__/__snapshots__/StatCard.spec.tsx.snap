@@ -1,0 +1,343 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatCard matches forest theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 8,
+      "opacity": 1,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+      "shadowColor": "rgb(20,40,26)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#567A5E",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 11,
+        "letterSpacing": 0,
+        "lineHeight": 20,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Productivity
+  </Text>
+  <View
+    style={
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+        "gap": 8,
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 4,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#14281A",
+            "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+            "fontSize": 20,
+            "fontWeight": "bold",
+            "letterSpacing": -0.2,
+            "lineHeight": 22,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        84
+      </Text>
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#22C55E",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 11,
+            "letterSpacing": 0,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        +12%
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`StatCard matches midnight theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(24, 24, 27, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 8,
+      "opacity": 1,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+      "shadowColor": "rgb(250,250,250)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#A1A1AA",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 11,
+        "letterSpacing": 0,
+        "lineHeight": 20,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Productivity
+  </Text>
+  <View
+    style={
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+        "gap": 8,
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 4,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#FAFAFA",
+            "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+            "fontSize": 20,
+            "fontWeight": "bold",
+            "letterSpacing": -0.2,
+            "lineHeight": 22,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        84
+      </Text>
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#22C55E",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 11,
+            "letterSpacing": 0,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        +12%
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`StatCard matches sunrise theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 8,
+      "opacity": 1,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+      "shadowColor": "rgb(39,31,21)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#786E5D",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 11,
+        "letterSpacing": 0,
+        "lineHeight": 20,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Productivity
+  </Text>
+  <View
+    style={
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+        "gap": 8,
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 4,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#271F15",
+            "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+            "fontSize": 20,
+            "fontWeight": "bold",
+            "letterSpacing": -0.2,
+            "lineHeight": 22,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        84
+      </Text>
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#22C55E",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 11,
+            "letterSpacing": 0,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        +12%
+      </Text>
+    </View>
+  </View>
+</View>
+`;

@@ -1,13 +1,11 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { YStack, XStack } from 'tamagui';
-import { Card, Body } from '@commitment/design-system';
+import { Card, Body, EmptyState, LoadingState } from '@commitment/design-system';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useGoals } from '../hooks/useGoals';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
 import { CommitmentPriorityBadge } from '@/features/commitments/components/CommitmentPriorityBadge';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { useTranslation } from 'react-i18next';
 
 /**
  * "Tasks" sub-tab — every Commitment across every Goal, flat. Labeled
@@ -17,7 +15,6 @@ import { useTranslation } from 'react-i18next';
  * features/tasks TasksScreen (individual to-do items) — that stays as is.
  */
 export function GoalTasksTab() {
-  const { t } = useTranslation('common');
   const router = useRouter();
   const { data: commitments = [], isLoading } = useCommitments();
   const { data: goals = [] } = useGoals();
@@ -25,11 +22,17 @@ export function GoalTasksTab() {
   const goalTitleById = useMemo(() => new Map(goals.map((g: any) => [g.id, g.title])), [goals]);
 
   if (isLoading) {
-    return <Body i18nKey="goals.list.loading" tone="secondary" />;
+    return <LoadingState fullscreen={false} title={{ i18nKey: 'goals.list.loading' }} />;
   }
 
   if (commitments.length === 0) {
-    return <EmptyState title={t('goals.tasksTab.empty.title')} description={t('goals.tasksTab.empty.description')} />;
+    return (
+      <EmptyState
+        fullscreen={false}
+        title={{ i18nKey: 'goals.tasksTab.empty.title' }}
+        description={{ i18nKey: 'goals.tasksTab.empty.description' }}
+      />
+    );
   }
 
   return (
@@ -45,7 +48,7 @@ export function GoalTasksTab() {
         >
           <XStack justifyContent="space-between" alignItems="center" gap="$2">
             <YStack flex={1}>
-              <Body fontWeight="600" numberOfLines={1} ellipsizeMode="tail">{c.title}</Body>
+              <Body fontWeight="600" numberOfLines={2} ellipsizeMode="tail">{c.title}</Body>
               {c.goalId && goalTitleById.has(c.goalId) && (
                 <Body tone="secondary" fontSize="$2" numberOfLines={1} ellipsizeMode="tail">{goalTitleById.get(c.goalId)}</Body>
               )}

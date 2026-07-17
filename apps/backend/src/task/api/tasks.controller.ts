@@ -27,6 +27,8 @@ import { RestoreTaskCommand } from '../application/commands/restore-task.command
 import { DeleteTaskCommand } from '../application/commands/delete-task.command';
 import { ChangePriorityTaskCommand } from '../application/commands/change-priority-task.command';
 import { DuplicateTaskCommand } from '../application/commands/duplicate-task.command';
+import { RelinkTaskGoalCommand } from '../application/commands/relink-task-goal.command';
+import { RelinkTaskCommitmentCommand } from '../application/commands/relink-task-commitment.command';
 import { RegisterTaskResult } from '../application/commands/register-task.result';
 import { ListTasksQuery } from '../application/queries/list-tasks.query';
 import { GetDashboardQuery } from '../application/queries/get-dashboard.query';
@@ -44,6 +46,7 @@ import {
   TaskAlreadyDeletedError,
   TaskCannotBeReopenedError,
   TaskCannotBeRestoredError,
+  TaskCannotBeArchivedError,
 } from '@commitment/domain';
 
 const uuidSchema = z.string().uuid('Invalid UUID format');
@@ -84,6 +87,15 @@ const completeSchema = z.object({
 
 const changePrioritySchema = z.object({
   priority: z.enum(['low', 'medium', 'high']),
+});
+
+const relinkGoalSchema = z.object({
+  // Explicit null clears the link (goal-independent) — omitting the field entirely is a validation error, not "leave unchanged", since this endpoint's only job is to set this one relationship.
+  goalId: z.string().nullable(),
+});
+
+const relinkCommitmentSchema = z.object({
+  commitmentId: z.string().uuid().nullable(),
 });
 
 @ApiTags('tasks')
@@ -334,6 +346,60 @@ export class TasksController {
     } catch (err) {
       if (err instanceof TaskNotFoundError)
         throw new NotFoundException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch(':id/goal')
+  @ApiOperation({ summary: "Change (or remove) a task's directly linked Goal" })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async relinkGoal(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    const idParsed = uuidSchema.safeParse(id);
+    if (!idParsed.success) throw new BadRequestException('Invalid task ID');
+
+    const parsed = relinkGoalSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.taskAppService.relinkGoal(
+        new RelinkTaskGoalCommand(id, parsed.data.goalId),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotBeArchivedError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch(':id/commitment')
+  @ApiOperation({ summary: "Change (or remove) a task's linked Commitment" })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async relinkCommitment(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    const idParsed = uuidSchema.safeParse(id);
+    if (!idParsed.success) throw new BadRequestException('Invalid task ID');
+
+    const parsed = relinkCommitmentSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.taskAppService.relinkCommitment(
+        new RelinkTaskCommitmentCommand(id, parsed.data.commitmentId),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotBeArchivedError)
+        throw new ConflictException(err.message);
       throw err;
     }
   }

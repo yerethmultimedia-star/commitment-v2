@@ -10,6 +10,7 @@ import {
   HabitEnabledEvent,
   HabitDisabledEvent,
   HabitArchivedEvent,
+  HabitRelinkedToGoalEvent,
   HabitState,
 } from '@commitment/domain';
 import { InMemoryHabitProjectionStore } from '../../infrastructure/in-memory-habit-projection.store';
@@ -198,6 +199,23 @@ export class HabitArchivedProjector implements IEventHandler<HabitArchivedEvent>
   }
 }
 
+@EventsHandler(HabitRelinkedToGoalEvent)
+export class HabitRelinkedToGoalProjector implements IEventHandler<HabitRelinkedToGoalEvent> {
+  constructor(
+    @Inject('HabitProjectionStore')
+    private readonly store: InMemoryHabitProjectionStore,
+  ) {}
+
+  public handle(event: HabitRelinkedToGoalEvent): void {
+    const view = this.store.findById(event.payload.habitId);
+    if (!view) return;
+    view.goalId = event.payload.goalId;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
 export const HabitProjectors = [
   HabitRegisteredProjector,
   HabitEditedProjector,
@@ -208,4 +226,5 @@ export const HabitProjectors = [
   HabitEnabledProjector,
   HabitDisabledProjector,
   HabitArchivedProjector,
+  HabitRelinkedToGoalProjector,
 ];

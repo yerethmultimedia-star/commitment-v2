@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { YStack, XStack } from 'tamagui';
 import { ChevronRight } from '@tamagui/lucide-icons';
 import { useTranslation } from 'react-i18next';
-import { AppScreen, Card, Title, Body } from '@commitment/design-system';
+import { AppScreen, Card, Title, Body, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { appThemeRegistry } from '../providers/theme-registry';
 import { useAppearanceStore } from '../store/use-appearance-store';
 
@@ -46,8 +46,10 @@ export const SettingsScreen: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
             pressStyle={{ opacity: 0.7 }}
-            accessibilityRole="button"
-            accessibilityLabel={`${t('settings.rows.theme')}: ${themeName}`}
+            {...toPlatformAccessibilityProps({
+              accessibilityRole: 'button',
+              accessibilityLabel: `${t('settings.rows.theme')}: ${themeName}`,
+            })}
           >
             <Body fontSize="$4">{t('settings.rows.theme')}</Body>
             <XStack alignItems="center" gap="$2">
@@ -64,8 +66,10 @@ export const SettingsScreen: React.FC = () => {
             borderTopWidth={1}
             borderTopColor="$divider"
             pressStyle={{ opacity: 0.7 }}
-            accessibilityRole="button"
-            accessibilityLabel={`${t('settings.rows.language')}: ${languageName}`}
+            {...toPlatformAccessibilityProps({
+              accessibilityRole: 'button',
+              accessibilityLabel: `${t('settings.rows.language')}: ${languageName}`,
+            })}
           >
             <Body fontSize="$4">{t('settings.rows.language')}</Body>
             <XStack alignItems="center" gap="$2">

@@ -15,7 +15,7 @@ export function CommitmentHistory({ commitmentId }: CommitmentHistoryProps) {
   if (isLoading) {
     return (
       <YStack padding="$4" alignItems="center">
-        <Spinner size="small" color="$color" />
+        <Spinner size="small" color="$accent" />
       </YStack>
     );
   }

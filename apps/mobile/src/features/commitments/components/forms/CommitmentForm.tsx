@@ -1,11 +1,12 @@
 import { useForm, FieldValues } from 'react-hook-form';
 import { zodResolver } from '@/shared/forms/zodResolver';
-import { YStack, Button, Text } from 'tamagui';
+import { YStack } from 'tamagui';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@commitment/design-system';
 import { createCommitmentSchema, CommitmentFormValues } from '../../models/commitment.schema';
-import { ControlledInput } from './ControlledInput';
-import { ControlledDatePicker } from './ControlledDatePicker';
-import { ControlledSelect } from './ControlledSelect';
+import { ControlledInput } from '@/shared/forms/ControlledInput';
+import { ControlledDatePicker } from '@/shared/forms/ControlledDatePicker';
+import { ControlledSelect } from '@/shared/forms/ControlledSelect';
 
 interface Props {
   initialValues?: Partial<CommitmentFormValues>;
@@ -13,11 +14,11 @@ interface Props {
   isSubmitting?: boolean;
   /** Fields to render as read-only. Driven by getEditableFields(status). */
   disabledFields?: string[];
-  /** Override the submit button label (defaults to form.submit) */
-  submitLabel?: string;
+  /** Override the submit button's i18n key (defaults to 'commitments:form.submit'). */
+  submitLabelI18nKey?: string;
 }
 
-export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabledFields = [], submitLabel }: Props) {
+export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabledFields = [], submitLabelI18nKey }: Props) {
   const { t } = useTranslation();
   
   const schema = createCommitmentSchema(t);
@@ -97,18 +98,12 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
       />
 
       <Button
-        theme="active"
-        size="$5"
-        marginTop="$4"
-        disabled={isSubmitting}
+        variant="primary"
+        size="large"
+        loading={isSubmitting}
         onPress={control.handleSubmit(onSubmit)}
-        accessibilityLabel={submitLabel ?? t('form.submit', { ns: 'commitments' })}
-        accessibilityState={{ disabled: !!isSubmitting }}
-      >
-        <Text color="$contentOnAccent" fontWeight="bold">
-          {isSubmitting ? '...' : (submitLabel ?? t('form.submit', { ns: 'commitments' }))}
-        </Text>
-      </Button>
+        i18nKey={submitLabelI18nKey ?? 'commitments:form.submit'}
+      />
     </YStack>
   );
 }

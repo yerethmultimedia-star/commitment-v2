@@ -57,6 +57,11 @@ let demoHabitDTOs: HabitSummary[] = [
   { id: 'h-07', title: 'Weekly meal prep', recurrence: weekly([0]), reminderHour: 11, reminderMinute: 0, recurrenceAnchorDate: ANCHOR, currentStreakDays: 6, completedToday: false, lastCompletedDate: daysAgoStr(7), enabled: true, goalId: 'g-01' },
   { id: 'h-08', title: 'Practice Duolingo', recurrence: daily(), reminderHour: 20, reminderMinute: 0, recurrenceAnchorDate: ANCHOR, currentStreakDays: 8, completedToday: false, lastCompletedDate: daysAgoStr(1), enabled: true, goalId: 'g-05' },
   { id: 'h-09', title: 'Send a check-in message', recurrence: weekly([3]), reminderHour: 18, reminderMinute: 0, recurrenceAnchorDate: ANCHOR, currentStreakDays: 2, completedToday: false, lastCompletedDate: daysAgoStr(7), enabled: true, goalId: 'g-07' },
+  // Goal-independent (2026-07-15 product decision: Goal linkage is opt-in for Habits, not assumed)
+  // — a real, deliberate state, not "orphaned". Kept separate from the 9-habit/7-goal table's
+  // accounting in DEMO_DATASET.md rather than stripping goalId from an existing seed, so every
+  // other doc/screenshot referencing h-01..h-09's existing links stays accurate.
+  { id: 'h-10', title: 'Take vitamins', recurrence: daily(), reminderHour: 8, reminderMinute: 30, recurrenceAnchorDate: ANCHOR, currentStreakDays: 9, completedToday: false, lastCompletedDate: daysAgoStr(1), enabled: true, goalId: undefined },
 ];
 
 function findOrThrow(id: string): HabitSummary {
@@ -78,24 +83,30 @@ export const demoHabitsRepository = {
   create: async (payload: CreateHabitPayload): Promise<{ habitId: string }> => {
     const id = `h-demo-${Date.now()}`;
     const recurrenceType = (payload.recurrenceType as HabitRecurrenceType) ?? HabitRecurrenceType.Daily;
-    demoHabitDTOs.push({
-      id,
-      title: payload.title,
-      recurrence: {
-        type: recurrenceType,
-        daysOfWeek: payload.daysOfWeek ?? [],
-        dayOfMonth: payload.dayOfMonth ?? null,
-        month: payload.month ?? null,
+    // Reassign to a new array (not .push()) — list() returns demoHabitDTOs by
+    // reference, and React Query's refetch-after-invalidate needs a new
+    // reference to actually pick up the change. Same bug class as Tasks' RI-2.
+    demoHabitDTOs = [
+      ...demoHabitDTOs,
+      {
+        id,
+        title: payload.title,
+        recurrence: {
+          type: recurrenceType,
+          daysOfWeek: payload.daysOfWeek ?? [],
+          dayOfMonth: payload.dayOfMonth ?? null,
+          month: payload.month ?? null,
+        },
+        reminderHour: payload.reminderHour ?? 9,
+        reminderMinute: payload.reminderMinute ?? 0,
+        recurrenceAnchorDate: new Date().toISOString(),
+        currentStreakDays: 0,
+        completedToday: false,
+        lastCompletedDate: null,
+        enabled: true,
+        goalId: payload.goalId,
       },
-      reminderHour: payload.reminderHour ?? 9,
-      reminderMinute: payload.reminderMinute ?? 0,
-      recurrenceAnchorDate: new Date().toISOString(),
-      currentStreakDays: 0,
-      completedToday: false,
-      lastCompletedDate: null,
-      enabled: true,
-      goalId: payload.goalId,
-    });
+    ];
     return { habitId: id };
   },
 
@@ -183,6 +194,12 @@ export const demoHabitsRepository = {
   setEnabled: async (id: string, enabled: boolean): Promise<HabitSummary> => {
     const habit = findOrThrow(id);
     return replace({ ...habit, enabled });
+  },
+
+  /** Changes or removes (goalId: null) the habit's linked Goal — mirrors the backend's dedicated `PATCH /habits/:id/goal`, not folded into `edit()`. */
+  relinkGoal: async (id: string, goalId: string | null): Promise<HabitSummary> => {
+    const habit = findOrThrow(id);
+    return replace({ ...habit, goalId: goalId ?? undefined });
   },
 
   archive: async (id: string): Promise<void> => {

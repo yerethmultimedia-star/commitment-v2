@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Spinner } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface IconButtonProps {
   /**
@@ -77,22 +78,13 @@ export const IconButton = React.forwardRef<any, IconButtonProps>(({
       <View
         ref={ref as any}
         testID={testID}
-        role="button"
-        accessibilityRole="button"
         accessible={true}
-        accessibilityState={{ disabled: isActuallyDisabled, busy: loading }}
-        accessibilityLabel={tooltipI18nKey ? t(tooltipI18nKey) : undefined}
-        accessibilityHint={accessibilityHintI18nKey ? t(accessibilityHintI18nKey) : undefined}
-        // Tamagui's web output forwards accessibility* props to the DOM
-        // as-is instead of translating them to ARIA (hence the "React does
-        // not recognize `accessibilityRole`" warnings) — the aria-* props
-        // below are what the browser/screen reader actually reads on web.
-        // RN 0.71+ also accepts aria-* directly, so these are safe on native too.
-        {...({
-          'aria-label': tooltipI18nKey ? t(tooltipI18nKey) : undefined,
-          'aria-disabled': isActuallyDisabled,
-          'aria-busy': loading,
-        } as any)}
+        {...toPlatformAccessibilityProps({
+          accessibilityRole: 'button',
+          accessibilityState: { disabled: isActuallyDisabled, busy: loading },
+          accessibilityLabel: tooltipI18nKey ? t(tooltipI18nKey) : undefined,
+          accessibilityHint: accessibilityHintI18nKey ? t(accessibilityHintI18nKey) : undefined,
+        })}
         width={touchTargetSize}
         height={touchTargetSize}
         borderRadius={touchTargetSize / 2}
@@ -103,6 +95,7 @@ export const IconButton = React.forwardRef<any, IconButtonProps>(({
         justifyContent="center"
         opacity={animationStyle.opacity}
         scale={animationStyle.scale}
+        transition={animationStyle.transition}
         cursor={isActuallyDisabled ? 'not-allowed' : 'pointer'}
         onPress={handlePress}
         onPressIn={handlers.onPressIn}

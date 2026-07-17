@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Text } from 'tamagui';
-import { Card } from '@commitment/design-system';
+import { Card, Body } from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
 
@@ -32,16 +32,23 @@ export const RecentActivityWidget = React.memo(function RecentActivityWidget() {
   return (
     <Card variant="elevated">
       <YStack gap="$3">
-        <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
-          {t('dashboard.widgets.recentActivity.title', { defaultValue: 'Recent Activity' })}
-        </Text>
+        <Body
+          fontSize="$5"
+          fontWeight="600"
+          color="$contentPrimary"
+          i18nKey="dashboard.widgets.recentActivity.title"
+          i18nParams={{ defaultValue: 'Recent Activity' }}
+        />
 
         <YStack gap="$2">
           {activities.length === 0 ? (
             <YStack padding="$4" alignItems="center" backgroundColor="$surface" borderRadius="$3">
-              <Text color="$contentSecondary" fontSize="$3">
-                {t('dashboard.widgets.recentActivity.empty', { defaultValue: 'No recent activity.' })}
-              </Text>
+              <Body
+                color="$contentSecondary"
+                fontSize="$3"
+                i18nKey="dashboard.widgets.recentActivity.empty"
+                i18nParams={{ defaultValue: 'No recent activity.' }}
+              />
             </YStack>
           ) : (
             activities.map((activity) => (

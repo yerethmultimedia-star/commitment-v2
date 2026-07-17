@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Text, Circle } from 'tamagui';
-import { Card } from '@commitment/design-system';
+import { Card, Body, toPlatformAccessibilityProps } from '@commitment/design-system';
 
 export interface QuickAction {
   id: string;
@@ -36,10 +36,8 @@ export const QuickActionsWidget = React.memo(function QuickActionsWidget() {
   return (
     <Card variant="flat" backgroundColor="transparent" borderWidth={0} padding="$0">
       <YStack gap="$3">
-        <Text fontSize="$4" fontWeight="600" color="$contentPrimary" marginLeft="$2" accessibilityRole="header">
-          {t('dashboard.widgets.quickActions.title')}
-        </Text>
-        
+        <Body fontSize="$4" fontWeight="600" color="$contentPrimary" marginLeft="$2" accessibilityRole="header" i18nKey="dashboard.widgets.quickActions.title" />
+
         <XStack gap="$3" flexWrap="wrap">
           {actions.map((action) => (
             <YStack
@@ -51,16 +49,16 @@ export const QuickActionsWidget = React.memo(function QuickActionsWidget() {
               onPress={action.onPress}
               pressStyle={{ opacity: 0.7 }}
               cursor="pointer"
-              accessibilityRole="button"
-              accessibilityLabel={t(action.i18nKey)}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityLabel: t(action.i18nKey),
+              })}
             >
               <Circle size={56} backgroundColor="$surfaceRaised" shadowColor="$contentPrimary" shadowOpacity={0.05} shadowRadius={8}>
                 {/* Temporary placeholder for Icon Token resolution */}
                 <Text fontSize="$5">{action.iconToken === 'plus' ? '➕' : '✨'}</Text>
               </Circle>
-              <Text fontSize="$3" color="$contentSecondary" textAlign="center" numberOfLines={1}>
-                {t(action.i18nKey)}
-              </Text>
+              <Body fontSize="$3" color="$contentSecondary" textAlign="center" numberOfLines={1} i18nKey={action.i18nKey} />
             </YStack>
           ))}
         </XStack>

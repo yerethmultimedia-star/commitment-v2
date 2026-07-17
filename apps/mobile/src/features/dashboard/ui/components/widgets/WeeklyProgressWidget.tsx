@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, XStack, Text } from 'tamagui';
-import { Card } from '@commitment/design-system';
+import { YStack, XStack } from 'tamagui';
+import { Card, Body } from '@commitment/design-system';
 
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
 
@@ -29,23 +29,26 @@ export const WeeklyProgressWidget = React.memo(function WeeklyProgressWidget() {
   return (
     <Card variant="elevated">
       <YStack gap="$2">
-        <Text fontSize="$4" fontWeight="600" color="$contentPrimary" accessibilityRole="header">
-          {t('dashboard.widgets.weeklyProgress.title')}
-        </Text>
-        
+        <Body fontSize="$4" fontWeight="600" color="$contentPrimary" accessibilityRole="header" i18nKey="dashboard.widgets.weeklyProgress.title" />
+
         <XStack justifyContent="space-between" alignItems="flex-end">
           <YStack>
-            <Text fontSize="$6" fontWeight="bold" color="$success" letterSpacing={2}>
+            <Body fontSize="$6" fontWeight="bold" color="$success" letterSpacing={2}>
               {progressData.bar}
-            </Text>
-            <Text fontSize="$3" color="$contentSecondary" marginTop="$1">
+            </Body>
+            <Body fontSize="$3" color="$contentSecondary" marginTop="$1">
               {progressData.percentage}%
-            </Text>
+            </Body>
           </YStack>
-          
-          <Text fontSize="$5" fontWeight="600" color="$contentPrimary" accessibilityLabel={t('dashboard.widgets.weeklyProgress.completedVsTarget', { completed, target })}>
+
+          <Body
+            fontSize="$5"
+            fontWeight="600"
+            color="$contentPrimary"
+            accessibilityLabel={t('dashboard.widgets.weeklyProgress.completedVsTarget', { completed, target })}
+          >
             {completed} / {target}
-          </Text>
+          </Body>
         </XStack>
       </YStack>
     </Card>

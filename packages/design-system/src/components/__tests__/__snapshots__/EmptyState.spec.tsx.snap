@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState matches sunrise theme snapshot 1`] = `
+<View
+  accessibilityLabel="No goals yet"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "flexDirection": "column",
+      "gap": 16,
+      "justifyContent": "center",
+      "paddingBottom": 24,
+      "paddingLeft": 24,
+      "paddingRight": 24,
+      "paddingTop": 24,
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#271F15",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 17,
+        "fontWeight": "bold",
+        "letterSpacing": -0.2,
+        "lineHeight": 22,
+        "textAlign": "center",
+      }
+    }
+    suppressHighlighting={true}
+  >
+    No goals yet
+  </Text>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#786E5D",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 14,
+        "letterSpacing": 0,
+        "lineHeight": 20,
+        "maxWidth": 320,
+        "textAlign": "center",
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Create your first goal
+  </Text>
+</View>
+`;

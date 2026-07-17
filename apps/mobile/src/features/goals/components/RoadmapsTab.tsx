@@ -1,7 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { YStack } from 'tamagui';
+import { EmptyState } from '@commitment/design-system';
 
 /**
  * Roadmaps doesn't exist as a domain concept anywhere yet — no aggregate,
@@ -10,13 +8,11 @@ import { YStack } from 'tamagui';
  * demo-goals.repository.ts) when the concept is actually designed.
  */
 export function RoadmapsTab() {
-  const { t } = useTranslation('common');
   return (
-    <YStack alignItems="center">
-      <EmptyState
-        title={t('goals.roadmaps.empty.title')}
-        description={t('goals.roadmaps.empty.description')}
-      />
-    </YStack>
+    <EmptyState
+      fullscreen={false}
+      title={{ i18nKey: 'goals.roadmaps.empty.title' }}
+      description={{ i18nKey: 'goals.roadmaps.empty.description' }}
+    />
   );
 }

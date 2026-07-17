@@ -55,6 +55,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
               }
             }
             accessible={true}
+            collapsable={false}
             onBlur={[Function]}
             onFocus={[Function]}
             onResponderGrant={[Function]}
@@ -63,21 +64,20 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
             onResponderTerminate={[Function]}
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
-            role="button"
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderBottomColor": "transparent",
+                "backgroundColor": "rgba(255, 255, 255, 1)",
+                "borderBottomColor": "rgba(0, 0, 0, 0)",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
                 "borderBottomWidth": 0,
-                "borderLeftColor": "transparent",
+                "borderLeftColor": "rgba(0, 0, 0, 0)",
                 "borderLeftWidth": 0,
-                "borderRightColor": "transparent",
+                "borderRightColor": "rgba(0, 0, 0, 0)",
                 "borderRightWidth": 0,
                 "borderStyle": "solid",
-                "borderTopColor": "transparent",
+                "borderTopColor": "rgba(0, 0, 0, 0)",
                 "borderTopLeftRadius": 9,
                 "borderTopRightRadius": 9,
                 "borderTopWidth": 0,
@@ -143,6 +143,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
               }
             }
             accessible={true}
+            collapsable={false}
             onBlur={[Function]}
             onFocus={[Function]}
             onResponderGrant={[Function]}
@@ -151,21 +152,20 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
             onResponderTerminate={[Function]}
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
-            role="button"
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFFFFF",
-                "borderBottomColor": "transparent",
+                "backgroundColor": "rgba(255, 255, 255, 1)",
+                "borderBottomColor": "rgba(0, 0, 0, 0)",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
                 "borderBottomWidth": 0,
-                "borderLeftColor": "transparent",
+                "borderLeftColor": "rgba(0, 0, 0, 0)",
                 "borderLeftWidth": 0,
-                "borderRightColor": "transparent",
+                "borderRightColor": "rgba(0, 0, 0, 0)",
                 "borderRightWidth": 0,
                 "borderStyle": "solid",
-                "borderTopColor": "transparent",
+                "borderTopColor": "rgba(0, 0, 0, 0)",
                 "borderTopLeftRadius": 9,
                 "borderTopRightRadius": 9,
                 "borderTopWidth": 0,
@@ -199,7 +199,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#18181F",
+                    "color": "#271F15",
                     "fontFamily": "Inter_600SemiBold",
                     "fontSize": 14,
                     "letterSpacing": 0.1,
@@ -231,6 +231,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
               }
             }
             accessible={true}
+            collapsable={false}
             onBlur={[Function]}
             onFocus={[Function]}
             onResponderGrant={[Function]}
@@ -239,21 +240,20 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
             onResponderTerminate={[Function]}
             onResponderTerminationRequest={[Function]}
             onStartShouldSetResponder={[Function]}
-            role="button"
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "transparent",
-                "borderBottomColor": "#E7E7EF",
+                "backgroundColor": "rgba(0, 0, 0, 0)",
+                "borderBottomColor": "rgba(235, 228, 213, 1)",
                 "borderBottomLeftRadius": 9,
                 "borderBottomRightRadius": 9,
                 "borderBottomWidth": 1,
-                "borderLeftColor": "#E7E7EF",
+                "borderLeftColor": "rgba(235, 228, 213, 1)",
                 "borderLeftWidth": 1,
-                "borderRightColor": "#E7E7EF",
+                "borderRightColor": "rgba(235, 228, 213, 1)",
                 "borderRightWidth": 1,
                 "borderStyle": "solid",
-                "borderTopColor": "#E7E7EF",
+                "borderTopColor": "rgba(235, 228, 213, 1)",
                 "borderTopLeftRadius": 9,
                 "borderTopRightRadius": 9,
                 "borderTopWidth": 1,
@@ -287,7 +287,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#18181F",
+                    "color": "#271F15",
                     "fontFamily": "Inter_600SemiBold",
                     "fontSize": 14,
                     "letterSpacing": 0.1,
@@ -333,6 +333,11 @@ exports[`Modal Primitives BottomSheet renders bottom sheet modal on Web 1`] = `
       }
     >
       <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
         suppressHighlighting={true}
       >
         BottomSheet Content
@@ -400,7 +405,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(24,24,31)",
+          "shadowColor": "rgb(39,31,21)",
           "shadowOffset": {
             "height": 4,
             "width": 0,
@@ -438,7 +443,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           maxFontSizeMultiplier={1.5}
           style={
             {
-              "color": "#18181F",
+              "color": "#271F15",
               "fontFamily": "Inter_600SemiBold",
               "fontSize": 17,
               "letterSpacing": -0.2,
@@ -455,7 +460,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
           maxFontSizeMultiplier={1.5}
           style={
             {
-              "color": "#6B6B76",
+              "color": "#786E5D",
               "fontFamily": "Inter_400Regular",
               "fontSize": 14,
               "letterSpacing": 0,
@@ -494,6 +499,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                 }
               }
               accessible={true}
+              collapsable={false}
               onBlur={[Function]}
               onFocus={[Function]}
               onResponderGrant={[Function]}
@@ -502,21 +508,20 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
               onResponderTerminate={[Function]}
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
-              role="button"
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "transparent",
-                  "borderBottomColor": "#E7E7EF",
+                  "backgroundColor": "rgba(0, 0, 0, 0)",
+                  "borderBottomColor": "rgba(235, 228, 213, 1)",
                   "borderBottomLeftRadius": 9,
                   "borderBottomRightRadius": 9,
                   "borderBottomWidth": 1,
-                  "borderLeftColor": "#E7E7EF",
+                  "borderLeftColor": "rgba(235, 228, 213, 1)",
                   "borderLeftWidth": 1,
-                  "borderRightColor": "#E7E7EF",
+                  "borderRightColor": "rgba(235, 228, 213, 1)",
                   "borderRightWidth": 1,
                   "borderStyle": "solid",
-                  "borderTopColor": "#E7E7EF",
+                  "borderTopColor": "rgba(235, 228, 213, 1)",
                   "borderTopLeftRadius": 9,
                   "borderTopRightRadius": 9,
                   "borderTopWidth": 1,
@@ -550,7 +555,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   maxFontSizeMultiplier={1.5}
                   style={
                     {
-                      "color": "#18181F",
+                      "color": "#271F15",
                       "fontFamily": "Inter_600SemiBold",
                       "fontSize": 14,
                       "letterSpacing": 0.1,
@@ -582,6 +587,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                 }
               }
               accessible={true}
+              collapsable={false}
               onBlur={[Function]}
               onFocus={[Function]}
               onResponderGrant={[Function]}
@@ -590,21 +596,20 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
               onResponderTerminate={[Function]}
               onResponderTerminationRequest={[Function]}
               onStartShouldSetResponder={[Function]}
-              role="button"
               style={
                 {
                   "alignItems": "center",
-                  "backgroundColor": "#6C4EFF",
-                  "borderBottomColor": "transparent",
+                  "backgroundColor": "rgba(245, 158, 11, 1)",
+                  "borderBottomColor": "rgba(0, 0, 0, 0)",
                   "borderBottomLeftRadius": 9,
                   "borderBottomRightRadius": 9,
                   "borderBottomWidth": 0,
-                  "borderLeftColor": "transparent",
+                  "borderLeftColor": "rgba(0, 0, 0, 0)",
                   "borderLeftWidth": 0,
-                  "borderRightColor": "transparent",
+                  "borderRightColor": "rgba(0, 0, 0, 0)",
                   "borderRightWidth": 0,
                   "borderStyle": "solid",
-                  "borderTopColor": "transparent",
+                  "borderTopColor": "rgba(0, 0, 0, 0)",
                   "borderTopLeftRadius": 9,
                   "borderTopRightRadius": 9,
                   "borderTopWidth": 0,
@@ -638,7 +643,7 @@ exports[`Modal Primitives ConfirmationDialog renders confirmation text and butto
                   maxFontSizeMultiplier={1.5}
                   style={
                     {
-                      "color": "#FFFFFF",
+                      "color": "#271F15",
                       "fontFamily": "Inter_600SemiBold",
                       "fontSize": 14,
                       "letterSpacing": 0.1,
@@ -717,7 +722,7 @@ exports[`Modal Primitives Dialog renders centered Dialog 1`] = `
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(24,24,31)",
+          "shadowColor": "rgb(39,31,21)",
           "shadowOffset": {
             "height": 4,
             "width": 0,
@@ -739,6 +744,11 @@ exports[`Modal Primitives Dialog renders centered Dialog 1`] = `
         }
       />
       <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
         suppressHighlighting={true}
       >
         Dialog Content
@@ -806,7 +816,7 @@ exports[`Modal Primitives ModalPrimitive renders correct content when open 1`] =
           "paddingLeft": 16,
           "paddingRight": 16,
           "paddingTop": 16,
-          "shadowColor": "rgb(24,24,31)",
+          "shadowColor": "rgb(39,31,21)",
           "shadowOffset": {
             "height": 4,
             "width": 0,
@@ -828,6 +838,11 @@ exports[`Modal Primitives ModalPrimitive renders correct content when open 1`] =
         }
       />
       <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
         suppressHighlighting={true}
       >
         Modal Content

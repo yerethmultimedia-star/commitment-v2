@@ -1,0 +1,235 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MetricCard matches forest theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 4,
+      "opacity": 1,
+      "paddingBottom": 12,
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "paddingTop": 12,
+      "shadowColor": "rgb(20,40,26)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#22C55E",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "letterSpacing": -0.2,
+        "lineHeight": 22,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    12
+  </Text>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#567A5E",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Goals
+  </Text>
+</View>
+`;
+
+exports[`MetricCard matches midnight theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(24, 24, 27, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 4,
+      "opacity": 1,
+      "paddingBottom": 12,
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "paddingTop": 12,
+      "shadowColor": "rgb(250,250,250)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#8B5CF6",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "letterSpacing": -0.2,
+        "lineHeight": 22,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    12
+  </Text>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#A1A1AA",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Goals
+  </Text>
+</View>
+`;
+
+exports[`MetricCard matches sunrise theme snapshot 1`] = `
+<View
+  accessible={false}
+  collapsable={false}
+  style={
+    {
+      "backgroundColor": "rgba(255, 255, 255, 1)",
+      "borderBottomColor": "rgba(0, 0, 0, 0)",
+      "borderBottomLeftRadius": 9,
+      "borderBottomRightRadius": 9,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "rgba(0, 0, 0, 0)",
+      "borderLeftWidth": 1,
+      "borderRightColor": "rgba(0, 0, 0, 0)",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "rgba(0, 0, 0, 0)",
+      "borderTopLeftRadius": 9,
+      "borderTopRightRadius": 9,
+      "borderTopWidth": 1,
+      "cursor": "default",
+      "gap": 4,
+      "opacity": 1,
+      "paddingBottom": 12,
+      "paddingLeft": 12,
+      "paddingRight": 12,
+      "paddingTop": 12,
+      "shadowColor": "rgb(39,31,21)",
+      "shadowOffset": {
+        "height": 4,
+        "width": 0,
+      },
+      "shadowOpacity": 0.05,
+      "shadowRadius": 10,
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#F59E0B",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 20,
+        "fontWeight": "bold",
+        "letterSpacing": -0.2,
+        "lineHeight": 22,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    12
+  </Text>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#786E5D",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Goals
+  </Text>
+</View>
+`;

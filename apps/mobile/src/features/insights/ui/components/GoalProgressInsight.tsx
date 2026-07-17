@@ -1,16 +1,13 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
-import { Card, Title, Body } from '@commitment/design-system';
+import { Card, Title, Body, toPlatformAccessibilityProps, EmptyState } from '@commitment/design-system';
 import { useInsightsContext } from '../../hooks/useInsightsContext';
 import { CATEGORY_ICON, GoalCategory } from '@/features/goals/utils/goal-descriptors';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 import { GoalProgressBar } from '@/features/goals/components/GoalProgressBar';
 
 /** Per-Goal progress, real via computeGoalProgress (already computed upstream) — the centerpiece of the Goal-centric redesign. */
 export function GoalProgressInsight() {
-  const { t } = useTranslation('common');
   const router = useRouter();
   const { context } = useInsightsContext();
   const goals = context?.goals ?? [];
@@ -24,7 +21,11 @@ export function GoalProgressInsight() {
   if (sorted.length === 0) {
     return (
       <Card variant="elevated">
-        <EmptyState title={t('insights.goalProgress.empty.title')} description={t('insights.goalProgress.empty.description')} />
+        <EmptyState
+          fullscreen={false}
+          title={{ i18nKey: 'insights.goalProgress.empty.title' }}
+          description={{ i18nKey: 'insights.goalProgress.empty.description' }}
+        />
       </Card>
     );
   }
@@ -40,8 +41,10 @@ export function GoalProgressInsight() {
               key={goal.goalId}
               gap="$2"
               onPress={() => router.push(`/goals/${goal.goalId}` as any)}
-              accessibilityRole="button"
-              accessibilityLabel={goal.title}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityLabel: goal.title,
+              })}
             >
               <XStack gap="$3" alignItems="center">
                 <Circle size={32} backgroundColor="$focus" justifyContent="center" alignItems="center">

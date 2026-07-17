@@ -1,5 +1,6 @@
 {
   "appearance": {
+    "loading": "Cargando tu apariencia…",
     "settings": {
       "theme": {
         "title": "Tema",
@@ -39,6 +40,8 @@
   },
   "profile": {
     "title": "Perfil",
+    "loading": "Cargando tu perfil…",
+    "noName": "Tu cuenta",
     "header": {
       "title": "Mi Perfil"
     },
@@ -108,13 +111,14 @@
     "durationMinutes": "{{count}} min",
     "empty": {
       "title": "No hay nada programado hoy",
-      "description": "Las tareas, compromisos y hábitos con fecha aparecerán aquí."
+      "description": "Las tareas, compromisos, hábitos e hitos con fecha aparecerán aquí."
     },
     "itemA11y": "{{title}}, {{type}}",
     "types": {
       "task": "Tarea",
       "commitment": "Compromiso",
       "habit": "Hábito",
+      "milestone": "Hito",
       "reminder": "Recordatorio"
     }
   },
@@ -351,6 +355,8 @@
       "milestones": "Hitos",
       "commitments": "Compromisos",
       "habits": "Hábitos",
+      "addHabit": "Agregar hábito",
+      "addTask": "Agregar tarea",
       "upcoming": "Próximamente",
       "upcomingEmpty": "Nada próximo para este objetivo.",
       "milestoneA11y": "Hito: {{title}}",
@@ -363,6 +369,24 @@
     }
   },
   "habits": {
+    "hero": {
+      "streakLabel": "Racha actual",
+      "completedLabel": "Completados hoy"
+    },
+    "detail": {
+      "relatedGoal": "Objetivo relacionado",
+      "postpone": "Posponer recordatorio",
+      "archive": "Archivar hábito",
+      "confirmArchive": {
+        "title": "¿Archivar \"{{title}}\"?",
+        "description": "Este hábito dejará de aparecer en tu lista diaria. No puedes deshacer esto desde aquí."
+      }
+    },
+    "empty": {
+      "title": "Aún no tienes hábitos",
+      "description": "Las acciones pequeñas y repetibles generan los cambios más grandes. Agrega tu primer hábito para empezar una racha.",
+      "cta": "Agregar tu primer hábito"
+    },
     "recurrence": {
       "daily": "Diario",
       "workdays": "Días laborables",
@@ -372,16 +396,14 @@
     },
     "enableA11y": "Activar hábito: {{title}}",
     "disableA11y": "Desactivar hábito: {{title}}",
+    "card": {
+      "toggleA11y": "Marcar como hecho: {{title}}"
+    },
     "postpone": {
-      "title": "Posponer recordatorio",
-      "custom": "Personalizado",
-      "customPrompt": "Minutos para posponer",
-      "presets": {
-        "15": "15 min",
-        "30": "30 min",
-        "60": "1 hora",
-        "180": "3 horas"
-      }
+      "title": "Posponer",
+      "hoursLabel": "h",
+      "minutesLabel": "min",
+      "confirm": "Posponer"
     },
     "recurrenceOptions": {
       "Daily": "Diario",
@@ -419,6 +441,7 @@
       "editTitle": "Editar Hábito",
       "fields": {
         "title": { "label": "Título", "placeholder": "p. ej. Beber agua" },
+        "goal": { "label": "Relacionado con", "none": "Ninguno" },
         "recurrenceType": { "label": "Repetir" },
         "daysOfWeek": { "label": "En estos días" },
         "dayOfMonth": { "label": "Día del mes" },
@@ -434,10 +457,18 @@
       },
       "submit": "Guardar",
       "createSubmit": "Crear Hábito"
+    },
+    "workspace": {
+      "loading": "Cargando hábito...",
+      "error": {
+        "title": "No se pudo cargar el hábito",
+        "retry": "Reintentar"
+      }
     }
   },
   "insights": {
     "title": "Insights",
+    "loading": "Cargando tus insights…",
     "error": {
       "description": "No pudimos cargar tus insights. Vuelve a iniciar sesión."
     },
@@ -459,7 +490,12 @@
         "productivity": { "title": "Productividad" },
         "focusMinutes": { "title": "Enfoque promedio" }
       },
-      "deltaVsLastWeek": "{{sign}}{{count}} vs semana anterior"
+      "deltaVsLastWeek": "{{sign}}{{count}} vs semana anterior",
+      "dayStatus": {
+        "completed": "{{weekday}}: completado",
+        "missed": "{{weekday}}: no completado",
+        "upcoming": "{{weekday}}: próximo"
+      }
     },
     "focus": {
       "title": "Enfoque",
@@ -476,9 +512,10 @@
       }
     },
     "habitConsistency": {
-      "title": "Hábitos de Hoy",
-      "completed": "Completados",
-      "dueToday": "Pendientes hoy"
+      "title": "Consistencia de Hábitos",
+      "averageStreak": "Racha promedio",
+      "activeStreaks": "Con racha activa",
+      "fraction": "{{count}}/{{total}}"
     },
     "streakHighlight": {
       "title": "Mejor Racha",
@@ -525,6 +562,7 @@
       },
       "priorityTask": {
         "label": "Prioridad del día",
+        "personalContext": "Personal",
         "priority": {
           "high": "Alta",
           "medium": "Media",

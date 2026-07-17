@@ -5,24 +5,36 @@
  * Receives a pure descriptor — no data fetching, no store reads.
  *
  * Two kinds share this component: 'priorityTask' (today's single
- * highest-priority task + its parent commitment's real progress — the
- * primary Today anchor) and 'generic' (the original recommendation-driven,
- * i18n-templated hero, kept as a fallback for when there's no real priority
- * task to show — see DashboardLayoutEngine.resolveHero()).
+ * highest-scoring task, regardless of origin — commitment, direct goal, or
+ * independent — the primary Today anchor) and 'generic' (the original
+ * recommendation-driven, i18n-templated hero, kept as a fallback for when
+ * there's no pending task today — see DashboardLayoutEngine.resolveHero()).
+ *
+ * The 'priorityTask' structure is always Title/Subtitle(contextLabel),
+ * regardless of the task's origin — the progress metric is the only element
+ * that varies (shown only when the task is commitment-linked), so origin
+ * never changes the card's visual shape.
  */
 
 import React from 'react';
 import { XStack, YStack, Circle } from 'tamagui';
-import { Title, Body, Card } from '@commitment/design-system';
+import { Title, Body, Card, Badge, ProgressMetric, BadgeTone } from '@commitment/design-system';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { HeroCardDescriptor } from '../../engine/layout/DashboardLayoutDescriptor';
-import { CircularProgress } from '@/features/goals/components/CircularProgress';
-import { PRIORITY_COLOR } from '@/features/tasks/utils/task-descriptors';
 
 export interface DashboardHeroCardProps {
   descriptor: HeroCardDescriptor;
 }
+
+// Same 3-level mapping CommitmentPriorityBadge.tsx defines for its own
+// bounded context — kept as a local literal here too rather than a
+// cross-feature import (this is Task's priority, a different context).
+const PRIORITY_TONE: Record<'high' | 'medium' | 'low', BadgeTone> = {
+  high: 'danger',
+  medium: 'warning',
+  low: 'neutral',
+};
 
 export const DashboardHeroCard = React.memo(function DashboardHeroCard({
   descriptor,
@@ -32,7 +44,6 @@ export const DashboardHeroCard = React.memo(function DashboardHeroCard({
 
   if (descriptor.kind === 'priorityTask') {
     const priority = descriptor.priority!;
-    const priorityColor = PRIORITY_COLOR[priority];
 
     return (
       <YStack gap="$2">
@@ -53,21 +64,14 @@ export const DashboardHeroCard = React.memo(function DashboardHeroCard({
               </Title>
               <XStack gap="$2" alignItems="center">
                 <Body tone="secondary" fontSize="$3" numberOfLines={1} flex={1}>
-                  {descriptor.commitmentTitle}
+                  {descriptor.contextLabel}
                 </Body>
-                <XStack
-                  backgroundColor={priorityColor.bg as any}
-                  paddingHorizontal="$2"
-                  paddingVertical="$1"
-                  borderRadius="$2"
-                >
-                  <Body fontSize="$2" fontWeight="600" color={priorityColor.text as any}>
-                    {t(`dashboard.hero.priorityTask.priority.${priority}`)}
-                  </Body>
-                </XStack>
+                <Badge tone={PRIORITY_TONE[priority]} size="small" i18nKey={`dashboard.hero.priorityTask.priority.${priority}`} i18nParams={{ ns: 'common' }} />
               </XStack>
             </YStack>
-            <CircularProgress progress={descriptor.progressRatio ?? 0} size={56} strokeWidth={6} />
+            {descriptor.progressRatio !== undefined && (
+              <ProgressMetric progress={descriptor.progressRatio} size="small" />
+            )}
           </XStack>
         </Card>
       </YStack>
@@ -98,12 +102,10 @@ export const DashboardHeroCard = React.memo(function DashboardHeroCard({
       accessibilityLabel={descriptor.titleKey}
     >
       <XStack gap="$3" alignItems="center">
-        <Circle
-          size={50}
-          backgroundColor="rgba(255, 255, 255, 0.2)"
-          justifyContent="center"
-          alignItems="center"
-        >
+        <Circle size={50} justifyContent="center" alignItems="center">
+          {/* Translucent backing layer kept separate from the emoji sibling
+              below — opacity on a shared parent would fade the emoji too. */}
+          <Circle position="absolute" size={50} backgroundColor={heroTextColor as any} opacity={0.2} />
           <Body fontSize="$6">{descriptor.illustration}</Body>
         </Circle>
 

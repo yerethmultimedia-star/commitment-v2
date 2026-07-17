@@ -1,23 +1,21 @@
-import { Text, YStack } from 'tamagui';
-import { useTranslation } from 'react-i18next';
+import { Badge, BadgeTone } from '@commitment/design-system';
 import { CommitmentPriority } from '../models/commitment.model';
-import { PRIORITY_COLOR } from '@/features/tasks/utils/task-descriptors';
+
+// Same three levels, same meaning, same tone mapping as Task's priority
+// (see task-descriptors.ts's PRIORITY_TONE) — kept as a literal map here too
+// rather than a cross-feature import, since Commitment and Task are
+// different bounded contexts that happen to share a priority vocabulary,
+// not a shared priority concept that should be imported across contexts.
+const PRIORITY_TONE: Record<CommitmentPriority, BadgeTone> = {
+  high: 'danger',
+  medium: 'warning',
+  low: 'neutral',
+};
 
 interface Props {
   priority: CommitmentPriority;
 }
 
-// Reuses Task's priority color map — same three levels, same meaning,
-// same visual language across the app (see task-descriptors.ts).
 export function CommitmentPriorityBadge({ priority }: Props) {
-  const { t } = useTranslation();
-  const { bg, text } = PRIORITY_COLOR[priority];
-
-  return (
-    <YStack backgroundColor={bg as any} paddingHorizontal="$2" paddingVertical="$1" borderRadius="$4">
-      <Text color={text as any} fontSize="$2" fontWeight="bold">
-        {t(`form.fields.priority.options.${priority}`, { ns: 'commitments' })}
-      </Text>
-    </YStack>
-  );
+  return <Badge tone={PRIORITY_TONE[priority]} i18nKey={`commitments:form.fields.priority.options.${priority}`} />;
 }

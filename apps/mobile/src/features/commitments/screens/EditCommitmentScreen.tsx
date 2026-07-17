@@ -77,7 +77,7 @@ export function EditCommitmentScreen() {
             onSubmit={handleSubmit}
             isSubmitting={isPending}
             disabledFields={disabledFields}
-            submitLabel={t('edit.submit', { ns: 'commitments' })}
+            submitLabelI18nKey="commitments:edit.submit"
           />
         </YStack>
       </ScrollView>

@@ -24,6 +24,7 @@ import { PostponeHabitCommand } from '../application/commands/postpone-habit.com
 import { EnableHabitCommand } from '../application/commands/enable-habit.command';
 import { DisableHabitCommand } from '../application/commands/disable-habit.command';
 import { ArchiveHabitCommand } from '../application/commands/archive-habit.command';
+import { RelinkHabitGoalCommand } from '../application/commands/relink-habit-goal.command';
 import { RegisterHabitResult } from '../application/commands/register-habit.result';
 import { ListHabitsQuery } from '../application/queries/list-habits.query';
 import { HabitNotFoundQueryError } from '../application/queries/get-habit-by-id.handler';
@@ -79,6 +80,11 @@ const completeSchema = z.object({
 
 const postponeSchema = z.object({
   minutes: z.number().int().positive(),
+});
+
+const relinkGoalSchema = z.object({
+  // Explicit null clears the link (goal-independent) — omitting the field entirely is a validation error, not "leave unchanged", since this endpoint's only job is to set this one relationship.
+  goalId: z.string().nullable(),
 });
 
 @ApiTags('habits')
@@ -282,6 +288,33 @@ export class HabitsController {
     } catch (err) {
       if (err instanceof HabitNotFoundError)
         throw new NotFoundException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch(':id/goal')
+  @ApiOperation({ summary: "Change (or remove) a habit's linked Goal" })
+  @ApiParam({ name: 'id', description: 'Habit UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async relinkGoal(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    const idParsed = uuidSchema.safeParse(id);
+    if (!idParsed.success) throw new BadRequestException('Invalid habit ID');
+
+    const parsed = relinkGoalSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.habitAppService.relinkHabitGoal(
+        new RelinkHabitGoalCommand(id, parsed.data.goalId),
+      );
+    } catch (err) {
+      if (err instanceof HabitNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof HabitCannotBeEditedError)
+        throw new ConflictException(err.message);
       throw err;
     }
   }

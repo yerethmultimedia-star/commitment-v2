@@ -27,6 +27,8 @@ export { HabitDisabledEvent } from './events/habit-disabled.event.js';
 export type { HabitDisabledEventPayload } from './events/habit-disabled.event.js';
 export { HabitArchivedEvent } from './events/habit-archived.event.js';
 export type { HabitArchivedEventPayload } from './events/habit-archived.event.js';
+export { HabitRelinkedToGoalEvent } from './events/habit-relinked-to-goal.event.js';
+export type { HabitRelinkedToGoalEventPayload } from './events/habit-relinked-to-goal.event.js';
 
 // Repository
 export type { HabitRepository } from './repositories/habit-repository.interface.js';

@@ -1,5 +1,6 @@
 import React from 'react';
 import { XStack, View } from 'tamagui';
+import { toPlatformAccessibilityProps } from '@commitment/design-system';
 
 export interface GoalProgressBarProps {
   /** 0..1 */
@@ -16,7 +17,7 @@ export function GoalProgressBar({ progress, height = 8, color = '$accent' }: Goa
       borderRadius={height / 2}
       backgroundColor="$surfaceRaised"
       overflow="hidden"
-      accessibilityRole="progressbar"
+      {...toPlatformAccessibilityProps({ accessibilityRole: 'progressbar' })}
       aria-valuenow={Math.round(clamped * 100)}
       aria-valuemin={0}
       aria-valuemax={100}

@@ -36,6 +36,7 @@ const makeContext = (overrides: Partial<{
     atRiskCount: overrides.atRiskCount ?? 0,
   },
   snapshotAt: '2026-01-01T10:00:00.000Z',
+  priorityTask: null,
 });
 
 describe('RecommendationEngine', () => {

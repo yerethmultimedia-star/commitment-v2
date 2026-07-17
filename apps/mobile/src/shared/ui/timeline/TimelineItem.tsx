@@ -1,4 +1,5 @@
 import { XStack, YStack } from 'tamagui';
+import { toPlatformAccessibilityProps } from '@commitment/design-system';
 
 export interface TimelineItemProps {
   accessibilityLabel: string;
@@ -10,7 +11,11 @@ export interface TimelineItemProps {
 
 export function TimelineItem({ accessibilityLabel, icon, content, date, isLast }: TimelineItemProps) {
   return (
-    <XStack gap="$3" accessibilityRole="text" accessibilityLabel={accessibilityLabel} focusable={true}>
+    <XStack
+      gap="$3"
+      {...toPlatformAccessibilityProps({ accessibilityRole: 'text', accessibilityLabel })}
+      focusable={true}
+    >
       <YStack alignItems="center">
         {icon}
         {!isLast && (

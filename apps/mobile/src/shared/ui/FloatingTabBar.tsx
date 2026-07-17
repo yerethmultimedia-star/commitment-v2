@@ -1,5 +1,6 @@
 import React from 'react';
 import { XStack, YStack, Text as TamaguiText } from 'tamagui';
+import { toPlatformAccessibilityProps } from '@commitment/design-system';
 import { useTabBarHeightStore } from '../store/use-tab-bar-height-store';
 
 /**
@@ -41,7 +42,7 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: any) 
       shadowOffset={{ width: 0, height: 6 }}
       elevation={8}
       onLayout={(e: any) => setReservedHeight(e.nativeEvent.layout.height + bottomOffset)}
-      accessibilityRole="tablist"
+      {...toPlatformAccessibilityProps({ accessibilityRole: 'tablist' })}
     >
       {state.routes.map((route: any, index: number) => {
         const { options } = descriptors[route.key];
@@ -76,9 +77,11 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: any) 
               paddingVertical="$2"
               alignItems="center"
               gap="$2"
-              accessibilityRole="tab"
-              accessibilityState={{ selected: true }}
-              accessibilityLabel={label}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'tab',
+                accessibilityState: { selected: true },
+                accessibilityLabel: label,
+              })}
             >
               {icon}
               <TamaguiText color="$contentOnAccent" fontSize="$3" fontWeight="600">
@@ -96,9 +99,11 @@ export function FloatingTabBar({ state, descriptors, navigation, insets }: any) 
             gap="$1"
             paddingHorizontal="$2"
             paddingVertical="$1"
-            accessibilityRole="tab"
-            accessibilityState={{ selected: false }}
-            accessibilityLabel={label}
+            {...toPlatformAccessibilityProps({
+              accessibilityRole: 'tab',
+              accessibilityState: { selected: false },
+              accessibilityLabel: label,
+            })}
           >
             {icon}
             <TamaguiText color="$contentSecondary" fontSize="$1">

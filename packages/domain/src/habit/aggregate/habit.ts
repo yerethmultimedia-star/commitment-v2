@@ -17,6 +17,7 @@ import { HabitOccurrenceMissedEvent } from '../events/habit-occurrence-missed.ev
 import { HabitEnabledEvent } from '../events/habit-enabled.event.js';
 import { HabitDisabledEvent } from '../events/habit-disabled.event.js';
 import { HabitArchivedEvent } from '../events/habit-archived.event.js';
+import { HabitRelinkedToGoalEvent } from '../events/habit-relinked-to-goal.event.js';
 
 import { HabitAlreadyArchivedError, HabitCannotBeEditedError, InvalidPostponeDurationError } from '../errors/habit-errors.js';
 
@@ -219,6 +220,28 @@ export class Habit extends AggregateRoot<HabitId> {
     this.recordEvent(event);
   }
 
+  /**
+   * Changes (or removes) the habit's linked Goal. A dedicated command, not
+   * folded into `edit()` — same reasoning as `postpone()`/`enable()`/
+   * `archive()` being their own methods: this is a distinct business
+   * operation (a relationship change), not a field edit, and deserves its
+   * own event in the activity/audit trail rather than riding along inside
+   * a generic "habit.edited". `goalId: null` is a legitimate target state
+   * (goal-independent), not an omitted parameter — always pass it
+   * explicitly.
+   */
+  public relinkGoal(goalId: string | null, now: Date): void {
+    this.ensureNotArchived();
+    if (goalId === this._props.goalId) return; // no-op, already linked (or unlinked) this way
+
+    const event = new HabitRelinkedToGoalEvent(
+      this.id.value,
+      { habitId: this.id.value, goalId },
+      now.toISOString()
+    );
+    this.recordEvent(event);
+  }
+
   public enable(): void {
     this.ensureNotArchived();
     if (this._props.state === HabitState.Active) return;
@@ -305,6 +328,10 @@ export class Habit extends AggregateRoot<HabitId> {
       this._props.currentStreakDays = payload.streakDays;
       this._props.missedStreakGrace = payload.graceUsed ? 1 : 0;
       this._props.postponedUntil = null;
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'habit.relinked_to_goal') {
+      const payload = (event as HabitRelinkedToGoalEvent).payload;
+      this._props.goalId = payload.goalId;
       this._props.updatedAt = new Date(event.metadata.occurredAt);
     } else if (event.name === 'habit.enabled') {
       this._props.state = HabitState.Active;

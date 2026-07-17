@@ -97,6 +97,7 @@ describe('DashboardLayoutEngine', () => {
         taskId: 't-01',
         title: 'Finish onboarding',
         priority: 'high',
+        contextLabel: 'Commitment Project',
         commitmentId: 'c-01',
         commitmentTitle: 'Commitment Project',
         commitmentProgressRatio: 0.72,
@@ -110,10 +111,26 @@ describe('DashboardLayoutEngine', () => {
       const layout = resolve(priorityContext, recs);
       expect(layout.hero.kind).toBe('priorityTask');
       expect(layout.hero.taskTitle).toBe('Finish onboarding');
-      expect(layout.hero.commitmentTitle).toBe('Commitment Project');
+      expect(layout.hero.contextLabel).toBe('Commitment Project');
       expect(layout.hero.priority).toBe('high');
       expect(layout.hero.progressRatio).toBe(0.72);
       expect(layout.hero.actionRoute).toBe('/(tabs)/tasks?taskId=t-01');
+    });
+
+    it('shows a resolved goal/independent context without a progress ratio', () => {
+      const goalOnlyContext: DashboardContext = {
+        ...baseContext,
+        priorityTask: {
+          taskId: 't-02',
+          title: 'Buy groceries',
+          priority: 'medium',
+          contextLabel: 'Personal',
+        },
+      };
+      const layout = resolve(goalOnlyContext, noRecs);
+      expect(layout.hero.kind).toBe('priorityTask');
+      expect(layout.hero.contextLabel).toBe('Personal');
+      expect(layout.hero.progressRatio).toBeUndefined();
     });
 
     it('falls back to the generic hero when priorityTask is null', () => {

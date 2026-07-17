@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusIndicator matches forest theme snapshot 1`] = `
+<View
+  accessibilityLabel="Online"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "flexDirection": "row",
+      "gap": 4,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#22C55E",
+        "borderBottomLeftRadius": 100000000,
+        "borderBottomRightRadius": 100000000,
+        "borderTopLeftRadius": 100000000,
+        "borderTopRightRadius": 100000000,
+        "flexDirection": "column",
+        "height": 8,
+        "justifyContent": "center",
+        "maxHeight": 8,
+        "maxWidth": 8,
+        "minHeight": 8,
+        "minWidth": 8,
+        "width": 8,
+      }
+    }
+  />
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#22C55E",
+        "fontFamily": "Inter_600SemiBold",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Online
+  </Text>
+</View>
+`;
+
+exports[`StatusIndicator matches midnight theme snapshot 1`] = `
+<View
+  accessibilityLabel="Online"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "flexDirection": "row",
+      "gap": 4,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#22C55E",
+        "borderBottomLeftRadius": 100000000,
+        "borderBottomRightRadius": 100000000,
+        "borderTopLeftRadius": 100000000,
+        "borderTopRightRadius": 100000000,
+        "flexDirection": "column",
+        "height": 8,
+        "justifyContent": "center",
+        "maxHeight": 8,
+        "maxWidth": 8,
+        "minHeight": 8,
+        "minWidth": 8,
+        "width": 8,
+      }
+    }
+  />
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#22C55E",
+        "fontFamily": "Inter_600SemiBold",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Online
+  </Text>
+</View>
+`;
+
+exports[`StatusIndicator matches sunrise theme snapshot 1`] = `
+<View
+  accessibilityLabel="Online"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "flexDirection": "row",
+      "gap": 4,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#22C55E",
+        "borderBottomLeftRadius": 100000000,
+        "borderBottomRightRadius": 100000000,
+        "borderTopLeftRadius": 100000000,
+        "borderTopRightRadius": 100000000,
+        "flexDirection": "column",
+        "height": 8,
+        "justifyContent": "center",
+        "maxHeight": 8,
+        "maxWidth": 8,
+        "minHeight": 8,
+        "minWidth": 8,
+        "width": 8,
+      }
+    }
+  />
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#22C55E",
+        "fontFamily": "Inter_600SemiBold",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Online
+  </Text>
+</View>
+`;

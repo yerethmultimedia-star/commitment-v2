@@ -30,6 +30,10 @@ export { TaskDueDateChangedEvent } from './events/task-due-date-changed.event.js
 export type { TaskDueDateChangedEventPayload } from './events/task-due-date-changed.event.js';
 export { TaskDuplicatedEvent } from './events/task-duplicated.event.js';
 export type { TaskDuplicatedEventPayload } from './events/task-duplicated.event.js';
+export { TaskRelinkedToGoalEvent } from './events/task-relinked-to-goal.event.js';
+export type { TaskRelinkedToGoalEventPayload } from './events/task-relinked-to-goal.event.js';
+export { TaskRelinkedToCommitmentEvent } from './events/task-relinked-to-commitment.event.js';
+export type { TaskRelinkedToCommitmentEventPayload } from './events/task-relinked-to-commitment.event.js';
 
 // Repository
 export type { TaskRepository } from './repositories/task-repository.interface.js';

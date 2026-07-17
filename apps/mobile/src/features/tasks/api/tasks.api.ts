@@ -11,6 +11,7 @@ export interface CreateTaskPayload {
   priority?: TaskPriority;
   dueDate?: string;
   commitmentId?: string;
+  goalId?: string;
 }
 
 // Demo Mode is a data-source switch checked here, at the API boundary — the
@@ -51,6 +52,16 @@ export const tasksApi = {
   changePriority: async (id: string, priority: TaskPriority): Promise<{ taskId: string }> => {
     if (isDemoModeActive()) return demoTasksRepository.changePriority(id, priority);
     await apiClient.patch(`tasks/${id}/priority`, { json: { priority } });
+    return { taskId: id };
+  },
+  relinkGoal: async (id: string, goalId: string | null): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.relinkGoal(id, goalId);
+    await apiClient.patch(`tasks/${id}/goal`, { json: { goalId } });
+    return { taskId: id };
+  },
+  relinkCommitment: async (id: string, commitmentId: string | null): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.relinkCommitment(id, commitmentId);
+    await apiClient.patch(`tasks/${id}/commitment`, { json: { commitmentId } });
     return { taskId: id };
   },
 };

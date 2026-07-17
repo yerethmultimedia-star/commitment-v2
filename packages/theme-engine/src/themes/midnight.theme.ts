@@ -81,16 +81,19 @@ export const midnightResolvedTheme: ResolvedTheme = {
     '1': 'xs',
     '2': 'sm',
   },
+  // Real values as of COMMITMENT_EXPERIENCE_GUIDE.md §5 — identical across
+  // all 4 themes on purpose (Motion is a product-level standard, not a
+  // per-theme aesthetic). See ResolvedTheme.ts's ThemeMotion doc comment.
   motion: {
-    fast: 150,
-    normal: 300,
-    slow: 500,
-    spring: null,
-    pageTransition: null,
-    modalTransition: null,
-    buttonPress: null,
-    cardEntrance: null,
-    listAnimation: null
+    fast: 120,
+    normal: 220,
+    slow: 300,
+    spring: { mass: 1, damping: 26, stiffness: 300 },
+    pageTransition: 300,
+    modalTransition: { mass: 1, damping: 26, stiffness: 300 },
+    buttonPress: 120,
+    cardEntrance: 220,
+    listAnimation: 40
   },
   icons: {
     style: 'outline'

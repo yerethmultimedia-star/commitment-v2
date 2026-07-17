@@ -176,7 +176,11 @@ function buildTasksForCommitment(seed: DemoCommitmentSeed): TaskModel[] {
 }
 
 // A handful of standalone tasks not tied to any commitment — general to-dos.
-const GENERAL_TASKS: Array<{ title: string; priority: TaskPriority; dueOffset: number; status: TaskModel['status'] }> = [
+// `goalId` is set on exactly one (Goal-direct, no Commitment in between) so
+// the priority-of-the-day scoring algorithm (useDashboardContext.ts) has a
+// real, visually-verifiable case of a non-commitment task winning Today's
+// hero — see engineering/governance's Fase 2 design doc §"Demo Dataset".
+const GENERAL_TASKS: Array<{ title: string; priority: TaskPriority; dueOffset: number; status: TaskModel['status']; goalId?: string }> = [
   { title: 'Reply to unanswered emails', priority: 'medium', dueOffset: 0, status: 'pending' },
   { title: 'Book the dentist appointment', priority: 'low', dueOffset: 1, status: 'pending' },
   { title: 'Pay the internet bill', priority: 'high', dueOffset: -1, status: 'pending' },
@@ -185,6 +189,10 @@ const GENERAL_TASKS: Array<{ title: string; priority: TaskPriority; dueOffset: n
   { title: 'Water the plants', priority: 'low', dueOffset: -2, status: 'completed' },
   { title: 'Back up the laptop', priority: 'medium', dueOffset: -10, status: 'completed' },
   { title: 'Schedule the car service', priority: 'medium', dueOffset: 5, status: 'pending' },
+  // Goal-direct (no Commitment): high priority + Active high-priority Goal
+  // outscores every commitment-linked task due today in the current seed —
+  // deliberately makes this the one that wins the Hero, not a coincidence.
+  { title: 'Book the physical therapy assessment', priority: 'high', dueOffset: 0, status: 'pending', goalId: 'g-01' },
 ];
 
 function buildGeneralTasks(): TaskModel[] {
@@ -199,6 +207,7 @@ function buildGeneralTasks(): TaskModel[] {
     actualMinutes: g.status === 'completed' ? ESTIMATED_MINUTES_BY_PRIORITY[g.priority] : 0,
     dueDate: daysFromNow(g.dueOffset),
     commitmentId: null,
+    goalId: g.goalId ?? null,
     createdAt: daysAgo(Math.abs(g.dueOffset) + 2),
     completedAt: g.status === 'completed' ? daysFromNow(g.dueOffset) : null,
   }));
@@ -210,7 +219,22 @@ function buildDemoTasks(): TaskModel[] {
   return [...linked, ...buildGeneralTasks()];
 }
 
-export const demoTasks: TaskModel[] = buildDemoTasks();
+// `let`, not `const` — demoTasksRepository must be able to swap in a new
+// array reference on every mutation (see replaceDemoTasks below). Mutating
+// this array in place (push/unshift/property writes) would keep the same
+// reference forever, which silently breaks React Query's + useMemo's
+// referential-equality change detection: a refetch() would "succeed" but
+// every memoized selector reading this array would keep returning its
+// stale cached result until some unrelated dependency happened to change
+// too. Found live 2026-07-15 (VS-032 Fase 2 Tasks functional audit) —
+// demoHabitDTOs already avoided this by reassigning via .map() in its own
+// replace() helper; demoTasks did not.
+export let demoTasks: TaskModel[] = buildDemoTasks();
+
+/** The only way demoTasksRepository may update the task list — always a new array reference, never an in-place mutation. */
+export function replaceDemoTasks(next: TaskModel[]): void {
+  demoTasks = next;
+}
 
 /**
  * A Commitment's progress, derived from its own Tasks — never a stored

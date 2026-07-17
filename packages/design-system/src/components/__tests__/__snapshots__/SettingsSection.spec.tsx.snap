@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SettingsSection matches sunrise theme snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "gap": 12,
+    }
+  }
+>
+  <View
+    accessibilityLabel="Cuenta"
+    accessible={true}
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "flexDirection": "column",
+          "gap": 4,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={true}
+        maxFontSizeMultiplier={1.5}
+        style={
+          {
+            "color": "#786E5D",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": 11,
+            "letterSpacing": 0,
+            "lineHeight": 20,
+            "textTransform": "uppercase",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Cuenta
+      </Text>
+    </View>
+  </View>
+  <View
+    accessible={false}
+    collapsable={false}
+    style={
+      {
+        "backgroundColor": "rgba(255, 255, 255, 1)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
+        "borderBottomLeftRadius": 9,
+        "borderBottomRightRadius": 9,
+        "borderBottomWidth": 1,
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
+        "borderLeftWidth": 1,
+        "borderRightColor": "rgba(0, 0, 0, 0)",
+        "borderRightWidth": 1,
+        "borderStyle": "solid",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
+        "borderTopLeftRadius": 9,
+        "borderTopRightRadius": 9,
+        "borderTopWidth": 1,
+        "cursor": "default",
+        "opacity": 1,
+        "overflow": "hidden",
+        "paddingBottom": 0,
+        "paddingLeft": 0,
+        "paddingRight": 0,
+        "paddingTop": 0,
+        "shadowColor": "rgb(39,31,21)",
+        "shadowOffset": {
+          "height": 4,
+          "width": 0,
+        },
+        "shadowOpacity": 0.05,
+        "shadowRadius": 10,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "borderStyle": "solid",
+          "borderTopColor": "#EBE4D5",
+          "borderTopWidth": 0,
+          "flexDirection": "column",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Preferencias
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "borderStyle": "solid",
+          "borderTopColor": "#EBE4D5",
+          "borderTopWidth": 1,
+          "flexDirection": "column",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#271F15",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Notificaciones
+      </Text>
+    </View>
+  </View>
+</View>
+`;

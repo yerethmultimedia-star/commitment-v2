@@ -75,7 +75,17 @@ export const AppScreen: React.FC<AppScreenProps> = ({
 
   return (
     <KeyboardProvider>
-      <View style={styles.container}>
+      {/* backgroundColor lives here, not on each consumer's own top-level
+          wrapper, because ScreenScroll's contentContainerStyle is
+          flexGrow:1 (fills at least the viewport) but a consumer's own
+          YStack only ever sizes to its own content — on a screen shorter
+          than the viewport, the gap below that YStack showed whatever
+          this container defaulted to (nothing), not the theme's
+          background. Found live 2026-07-16 auditing Insights' Focus
+          detail screen under Midnight. Consumers still set their own
+          $background too (harmless, same token) — that's what makes tall
+          screens look correct without waiting on this fix. */}
+      <View style={styles.container} backgroundColor="$background">
         <StatusBar barStyle={statusBarStyle} hidden={statusBarHidden} />
         {screenContent}
       </View>

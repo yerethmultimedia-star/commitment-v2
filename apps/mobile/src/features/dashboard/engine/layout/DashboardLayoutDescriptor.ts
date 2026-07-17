@@ -27,8 +27,9 @@ export const LAYOUT_SCHEMA_VERSION = 3 as const;
  *
  * - 'generic': the original recommendation-driven hero (default/dailyFocus/
  *   streak) — i18n-templated, no real user data.
- * - 'priorityTask': today's single highest-priority task + its parent
- *   commitment's real title/progress — takes precedence over 'generic'
+ * - 'priorityTask': today's single highest-scoring task + a resolved
+ *   context label (Goal/Commitment/generic fallback) and, when
+ *   commitment-linked, its progress — takes precedence over 'generic'
  *   whenever DashboardContext.priorityTask is non-null (see resolveHero()).
  */
 export interface HeroCardDescriptor {
@@ -52,9 +53,10 @@ export interface HeroCardDescriptor {
 
   // --- 'priorityTask' fields ---
   readonly taskTitle?: string;
-  readonly commitmentTitle?: string;
+  /** Always present for this kind — resolved Goal title, Commitment title, or a generic fallback. */
+  readonly contextLabel?: string;
   readonly priority?: 'high' | 'medium' | 'low';
-  /** 0..1 — the parent commitment's overall progress, not the task's own binary state. */
+  /** 0..1 — the parent commitment's overall progress. Only present when commitment-linked. */
   readonly progressRatio?: number;
 
   /** Route to push when the hero is tapped — always present, both kinds. */

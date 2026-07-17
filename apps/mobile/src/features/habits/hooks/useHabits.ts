@@ -84,3 +84,11 @@ export function useArchiveHabit() {
     onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.habits.all }),
   });
 }
+
+export function useRelinkHabitGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, goalId }: { id: string; goalId: string | null }) => habitsApi.relinkGoal(id, goalId),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.habits.all }),
+  });
+}

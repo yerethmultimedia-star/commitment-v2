@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Badge matches forest theme snapshot 1`] = `
+<View
+  accessibilityLabel="[TR] commitments:status.active"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "backgroundColor": "#22C55E",
+      "borderBottomColor": "transparent",
+      "borderBottomLeftRadius": "full",
+      "borderBottomRightRadius": "full",
+      "borderBottomWidth": 0,
+      "borderLeftColor": "transparent",
+      "borderLeftWidth": 0,
+      "borderRightColor": "transparent",
+      "borderRightWidth": 0,
+      "borderStyle": "solid",
+      "borderTopColor": "transparent",
+      "borderTopLeftRadius": "full",
+      "borderTopRightRadius": "full",
+      "borderTopWidth": 0,
+      "flexDirection": "row",
+      "gap": 4,
+      "height": 24,
+      "justifyContent": "center",
+      "paddingLeft": 8,
+      "paddingRight": 8,
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#14281A",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 11,
+        "fontWeight": "bold",
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    [TR] commitments:status.active
+  </Text>
+</View>
+`;
+
+exports[`Badge matches midnight theme snapshot 1`] = `
+<View
+  accessibilityLabel="[TR] commitments:status.active"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "backgroundColor": "#22C55E",
+      "borderBottomColor": "transparent",
+      "borderBottomLeftRadius": "full",
+      "borderBottomRightRadius": "full",
+      "borderBottomWidth": 0,
+      "borderLeftColor": "transparent",
+      "borderLeftWidth": 0,
+      "borderRightColor": "transparent",
+      "borderRightWidth": 0,
+      "borderStyle": "solid",
+      "borderTopColor": "transparent",
+      "borderTopLeftRadius": "full",
+      "borderTopRightRadius": "full",
+      "borderTopWidth": 0,
+      "flexDirection": "row",
+      "gap": 4,
+      "height": 24,
+      "justifyContent": "center",
+      "paddingLeft": 8,
+      "paddingRight": 8,
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#18181A",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 11,
+        "fontWeight": "bold",
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    [TR] commitments:status.active
+  </Text>
+</View>
+`;
+
+exports[`Badge matches sunrise theme snapshot 1`] = `
+<View
+  accessibilityLabel="[TR] commitments:status.active"
+  accessibilityRole="text"
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "alignSelf": "flex-start",
+      "backgroundColor": "#22C55E",
+      "borderBottomColor": "transparent",
+      "borderBottomLeftRadius": "full",
+      "borderBottomRightRadius": "full",
+      "borderBottomWidth": 0,
+      "borderLeftColor": "transparent",
+      "borderLeftWidth": 0,
+      "borderRightColor": "transparent",
+      "borderRightWidth": 0,
+      "borderStyle": "solid",
+      "borderTopColor": "transparent",
+      "borderTopLeftRadius": "full",
+      "borderTopRightRadius": "full",
+      "borderTopWidth": 0,
+      "flexDirection": "row",
+      "gap": 4,
+      "height": 24,
+      "justifyContent": "center",
+      "paddingLeft": 8,
+      "paddingRight": 8,
+    }
+  }
+>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#271F15",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 11,
+        "fontWeight": "bold",
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    [TR] commitments:status.active
+  </Text>
+</View>
+`;

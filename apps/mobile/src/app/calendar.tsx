@@ -1,20 +1,40 @@
 import React, { useMemo, useState } from 'react';
-import { Stack as ExpoStack } from 'expo-router';
+import { Stack as ExpoStack, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Circle, ScrollView } from 'tamagui';
 import { ChevronLeft, ChevronRight, Plus } from '@tamagui/lucide-icons';
-import { AppScreen, Card, Title, Body, IconButton, Button } from '@commitment/design-system';
+import { AppScreen, Card, Body, IconButton, Button, EmptyState, LoadingState, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { formatDate, formatWeekday, formatWeekdayNarrow } from '@commitment/localization';
+import { AgendaItem, AgendaItemType } from '@commitment/domain';
 import { useDayAgenda } from '@/features/calendar/hooks/useDayAgenda';
 import { useUiStore } from '@/core/store/use-ui-store';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 
-const TYPE_DOT_COLOR: Record<string, string> = {
+const TYPE_DOT_COLOR: Record<AgendaItemType, string> = {
   task: '$accent',
   commitment: '$success',
   habit: '$warning',
+  milestone: '$interactive',
   reminder: '$danger',
 };
+
+/** Where tapping an agenda item navigates — Milestones have no screen of
+ * their own, so their `sourceId` is the owning Goal's id (see
+ * `buildDayAgenda`). Tasks have no per-item detail route yet, so they land
+ * on the Tasks list rather than a dead link. */
+function routeFor(item: AgendaItem): string | null {
+  switch (item.type) {
+    case 'commitment':
+      return `/commitments/${item.sourceId}`;
+    case 'habit':
+      return `/habits/${item.sourceId}/edit`;
+    case 'milestone':
+      return `/goals/${item.sourceId}`;
+    case 'task':
+      return '/(tabs)/tasks';
+    default:
+      return null;
+  }
+}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -48,6 +68,7 @@ export default function CalendarScreen() {
   // here subscribes this component to react-i18next's languageChanged event,
   // forcing a re-render (and a fresh format*() call) once it's ready.
   void i18n.language;
+  const router = useRouter();
   const openQuickCapture = useUiStore((s) => s.openQuickCapture);
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfDay(new Date()));
 
@@ -89,9 +110,11 @@ export default function CalendarScreen() {
                     gap="$1"
                     onPress={() => setSelectedDate(startOfDay(day))}
                     pressStyle={{ opacity: 0.7 }}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={`${formatWeekday(day)}, ${formatDate(day)}`}
+                    {...toPlatformAccessibilityProps({
+                      accessibilityRole: 'button',
+                      accessibilityState: { selected },
+                      accessibilityLabel: `${formatWeekday(day)}, ${formatDate(day)}`,
+                    })}
                   >
                     <Body fontSize="$2" tone="secondary" textTransform="uppercase">
                       {formatWeekdayNarrow(day)}
@@ -113,38 +136,46 @@ export default function CalendarScreen() {
           </ScrollView>
 
           {isLoading ? (
-            <Body i18nKey="calendar.loading" tone="secondary" />
+            <LoadingState fullscreen={false} title={{ i18nKey: 'calendar.loading' }} />
           ) : items.length === 0 ? (
-            <EmptyState title={t('calendar.empty.title')} description={t('calendar.empty.description')} />
+            <EmptyState
+              fullscreen={false}
+              title={{ i18nKey: 'calendar.empty.title' }}
+              description={{ i18nKey: 'calendar.empty.description' }}
+            />
           ) : (
             <YStack gap="$3">
-              {items.map((item) => (
-                <Card
-                  key={item.id}
-                  variant="elevated"
-                  accessibilityRole="text"
-                  accessibilityLabel={t('calendar.itemA11y', { title: item.title, type: t(`calendar.types.${item.type}`) })}
-                >
-                  <XStack gap="$3" alignItems="center">
-                    <Circle size={10} backgroundColor={TYPE_DOT_COLOR[item.type] as any} />
-                    <Body fontWeight="600" width={48} tone="secondary">
-                      {item.time ?? ''}
-                    </Body>
-                    <Body
-                      flex={1}
-                      fontWeight="600"
-                      textDecorationLine={item.completed ? 'line-through' : 'none'}
-                    >
-                      {item.title}
-                    </Body>
-                    {item.durationMinutes && (
-                      <Body tone="secondary" fontSize="$2">
-                        {t('calendar.durationMinutes', { count: item.durationMinutes })}
+              {items.map((item) => {
+                const route = routeFor(item);
+                return (
+                  <Card
+                    key={item.id}
+                    variant="elevated"
+                    clickable={!!route}
+                    onPress={route ? () => router.push(route as any) : undefined}
+                    accessibilityLabel={t('calendar.itemA11y', { title: item.title, type: t(`calendar.types.${item.type}`) })}
+                  >
+                    <XStack gap="$3" alignItems="center">
+                      <Circle size={10} backgroundColor={TYPE_DOT_COLOR[item.type] as any} />
+                      <Body fontWeight="600" width={48} tone="secondary">
+                        {item.time ?? ''}
                       </Body>
-                    )}
-                  </XStack>
-                </Card>
-              ))}
+                      <Body
+                        flex={1}
+                        fontWeight="600"
+                        textDecorationLine={item.completed ? 'line-through' : 'none'}
+                      >
+                        {item.title}
+                      </Body>
+                      {item.durationMinutes && (
+                        <Body tone="secondary" fontSize="$2">
+                          {t('calendar.durationMinutes', { count: item.durationMinutes })}
+                        </Body>
+                      )}
+                    </XStack>
+                  </Card>
+                );
+              })}
             </YStack>
           )}
 

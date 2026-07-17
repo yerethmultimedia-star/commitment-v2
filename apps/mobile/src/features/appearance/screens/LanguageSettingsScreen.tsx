@@ -2,7 +2,7 @@ import React from 'react';
 import { YStack, XStack } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
 import { useTranslation } from 'react-i18next';
-import { AppScreen, Card, Title, Body } from '@commitment/design-system';
+import { AppScreen, Card, Title, Body, LoadingState, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { useAppearanceStore } from '../store/use-appearance-store';
 
 const LANGUAGES: { code: string; nameKey: string }[] = [
@@ -12,10 +12,12 @@ const LANGUAGES: { code: string; nameKey: string }[] = [
 
 export const LanguageSettingsScreen: React.FC = () => {
   const { t } = useTranslation('common');
-  const { appearance, updateSettings } = useAppearanceStore();
+  const { appearance, isLoading, updateSettings } = useAppearanceStore();
   const settings = appearance?.settings;
 
-  if (!settings) return null;
+  if (isLoading || !settings) {
+    return <LoadingState title={{ i18nKey: 'appearance.loading' }} />;
+  }
 
   return (
     <AppScreen scrollable>
@@ -35,8 +37,10 @@ export const LanguageSettingsScreen: React.FC = () => {
                 borderTopWidth={index === 0 ? 0 : 1}
                 borderTopColor="$divider"
                 pressStyle={{ opacity: 0.7 }}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
+                {...toPlatformAccessibilityProps({
+                  accessibilityRole: 'button',
+                  accessibilityState: { selected: active },
+                })}
               >
                 <Body fontSize="$4">{t(lang.nameKey)}</Body>
                 {active && <Check size={20} color="$accent" />}

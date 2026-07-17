@@ -58,6 +58,11 @@ exports[`Scroll Primitives ScreenScroll renders scroll content correctly 1`] = `
       >
         <View>
           <Text
+            style={
+              {
+                "color": "#271F15",
+              }
+            }
             suppressHighlighting={true}
           >
             Scroll Item
@@ -149,7 +154,7 @@ exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
             <View
               style={
                 {
-                  "backgroundColor": "#F5F5F8",
+                  "backgroundColor": "#FFFDF5",
                   "paddingBottom": 8,
                   "paddingLeft": 16,
                   "paddingRight": 16,
@@ -162,7 +167,7 @@ exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
                 maxFontSizeMultiplier={1.5}
                 style={
                   {
-                    "color": "#18181F",
+                    "color": "#271F15",
                     "fontFamily": "Inter_600SemiBold",
                     "fontSize": 17,
                     "letterSpacing": -0.2,
@@ -181,6 +186,11 @@ exports[`Scroll Primitives SectionList renders sections correctly 1`] = `
             style={null}
           >
             <Text
+              style={
+                {
+                  "color": "#271F15",
+                }
+              }
               suppressHighlighting={true}
             >
               Sub Item 1
@@ -315,6 +325,11 @@ exports[`Scroll Primitives VirtualizedScreen renders data items correctly 1`] = 
                 }
               >
                 <Text
+                  style={
+                    {
+                      "color": "#271F15",
+                    }
+                  }
                   suppressHighlighting={true}
                 >
                   Item 1

@@ -2,6 +2,7 @@
 
 exports[`Switch matches forest theme snapshot 1`] = `
 <View
+  collapsable={false}
   style={
     {
       "alignItems": "center",
@@ -46,24 +47,25 @@ exports[`Switch matches forest theme snapshot 1`] = `
         accessible={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#22C55E66",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
         }
-        id="_r_u_"
+        id="_r_11_"
         style={
           {
-            "backgroundColor": "hsl(0, 0%, 96.3%)",
-            "borderBottomColor": "#6C4EFF",
+            "backgroundColor": "#22C55E",
+            "borderBottomColor": "#22C55E",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#6C4EFF",
+            "borderLeftColor": "#22C55E",
             "borderLeftWidth": 1,
-            "borderRightColor": "#6C4EFF",
+            "borderRightColor": "#22C55E",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#6C4EFF",
+            "borderTopColor": "#22C55E",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,
@@ -114,6 +116,7 @@ exports[`Switch matches forest theme snapshot 1`] = `
 
 exports[`Switch matches midnight theme snapshot 1`] = `
 <View
+  collapsable={false}
   style={
     {
       "alignItems": "center",
@@ -158,11 +161,12 @@ exports[`Switch matches midnight theme snapshot 1`] = `
         accessible={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#8B5CF666",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
         }
-        id="_r_l_"
+        id="_r_n_"
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
@@ -171,17 +175,17 @@ exports[`Switch matches midnight theme snapshot 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#FFFFFF",
-            "borderBottomColor": "#E7E7EF",
+            "backgroundColor": "#18181B",
+            "borderBottomColor": "#27272A",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#E7E7EF",
+            "borderLeftColor": "#27272A",
             "borderLeftWidth": 1,
-            "borderRightColor": "#E7E7EF",
+            "borderRightColor": "#27272A",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#E7E7EF",
+            "borderTopColor": "#27272A",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,
@@ -232,6 +236,7 @@ exports[`Switch matches midnight theme snapshot 1`] = `
 
 exports[`Switch matches sunrise theme snapshot 1`] = `
 <View
+  collapsable={false}
   style={
     {
       "alignItems": "center",
@@ -276,11 +281,12 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
         accessible={true}
         focusVisibleStyle={
           {
+            "outlineColor": "#F59E0B66",
             "outlineStyle": "solid",
             "outlineWidth": 2,
           }
         }
-        id="_r_c_"
+        id="_r_d_"
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
@@ -289,17 +295,17 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "hsl(0, 0%, 96.3%)",
-            "borderBottomColor": "#6C4EFF",
+            "backgroundColor": "#F59E0B",
+            "borderBottomColor": "#F59E0B",
             "borderBottomLeftRadius": 1000,
             "borderBottomRightRadius": 1000,
             "borderBottomWidth": 1,
-            "borderLeftColor": "#6C4EFF",
+            "borderLeftColor": "#F59E0B",
             "borderLeftWidth": 1,
-            "borderRightColor": "#6C4EFF",
+            "borderRightColor": "#F59E0B",
             "borderRightWidth": 1,
             "borderStyle": "solid",
-            "borderTopColor": "#6C4EFF",
+            "borderTopColor": "#F59E0B",
             "borderTopLeftRadius": 1000,
             "borderTopRightRadius": 1000,
             "borderTopWidth": 1,

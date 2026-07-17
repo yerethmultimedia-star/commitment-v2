@@ -1,9 +1,9 @@
 # Risk Register
 
-Version: 1.1.0
+Version: 1.3.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-14
+Last Updated: 2026-07-15
 
 ---
 
@@ -38,11 +38,32 @@ Last Updated: 2026-07-14
   - _Mitigation:_ Recommended: disable iCloud Drive sync for Desktop & Documents, or move the repo
     outside `~/Desktop`. Until resolved, any commit prep should include a repo-wide sweep for
     stray `" 2."`-suffixed files as a standard pre-commit check.
+  - _New variant found (2026-07-15):_ the same hazard also produces `.icloud` placeholder files —
+    `packages/localization/.tsconfig.jest 2.json.icloud`, a binary-plist stub for a duplicate that
+    was never even fully downloaded locally. Confirmed harmless this time (the correctly-named
+    `tsconfig.jest.json` was intact), but it means the standard sweep needs to also catch
+    `*.icloud` files, not just `" 2."`-suffixed ones — updated the recommended sweep command to
+    `find . -type f \( -name "* 2.*" -o -name "*.icloud" \) -not -path "*/node_modules/*" -not
+-path "*/.git/*" -not -path "*/dist/*"`.
+  - _Proposed CI guard (2026-07-15, not implemented — registered for future action only):_ add a
+    CI step that fails the build if the repository contains any `*.icloud` file, any `" 2."`- (or
+    similarly numbered-) suffixed file, or any file matching common "conflicted copy"/"resolved
+    conflict" naming patterns other sync tools produce. This would catch a corrupted/duplicated
+    file _before_ it reaches a PR, rather than relying on a human remembering to run the manual
+    sweep every time. Deliberately not built now — this is a process/tooling change that deserves
+    its own review (where should it run, what should the failure message tell the contributor to
+    do, does it need an escape hatch for legitimately-named files that happen to match) rather than
+    being bundled into an unrelated Design System session.
 
 ---
 
 ## 📜 Change History
 
+- **v1.3.0 (2026-07-15):** Registered a proposed (not implemented) CI guard for Risk 3 — fail the
+  build on `*.icloud`/`" 2."`-suffixed/conflicted-copy files, so a corrupted file can't reach a PR
+  undetected.
+- **v1.2.0 (2026-07-15):** Found and documented a new variant of Risk 3 — `.icloud` placeholder
+  stub files, not just `" 2."`-suffixed duplicates. Updated the recommended sweep command.
 - **v1.1.0 (2026-07-14):** Registered Risk 3 (iCloud Desktop sync corrupting files, discovered
   this session), and logged two materialized instances of Risk 1 (Documentation Drift): a stale
   `ARCHITECTURE_OVERVIEW.md` missing several shipped engines plus a possibly-false SQLite/

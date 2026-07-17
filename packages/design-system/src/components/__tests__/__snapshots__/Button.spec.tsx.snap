@@ -19,6 +19,7 @@ exports[`Button matches forest theme snapshot 1`] = `
       }
     }
     accessible={true}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -27,21 +28,20 @@ exports[`Button matches forest theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#6C4EFF",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(34, 197, 94, 1)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 9,
         "borderTopRightRadius": 9,
         "borderTopWidth": 0,
@@ -74,7 +74,7 @@ exports[`Button matches forest theme snapshot 1`] = `
         maxFontSizeMultiplier={1.5}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#14281A",
             "fontFamily": "Inter_600SemiBold",
             "fontSize": 14,
             "letterSpacing": 0.1,
@@ -109,6 +109,7 @@ exports[`Button matches midnight theme snapshot 1`] = `
       }
     }
     accessible={true}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -117,21 +118,20 @@ exports[`Button matches midnight theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#6C4EFF",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(139, 92, 246, 1)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 9,
         "borderTopRightRadius": 9,
         "borderTopWidth": 0,
@@ -164,7 +164,7 @@ exports[`Button matches midnight theme snapshot 1`] = `
         maxFontSizeMultiplier={1.5}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#09090B",
             "fontFamily": "Inter_600SemiBold",
             "fontSize": 14,
             "letterSpacing": 0.1,
@@ -199,6 +199,7 @@ exports[`Button matches sunrise theme snapshot 1`] = `
       }
     }
     accessible={true}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -207,21 +208,20 @@ exports[`Button matches sunrise theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "#6C4EFF",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(245, 158, 11, 1)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 9,
         "borderBottomRightRadius": 9,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 9,
         "borderTopRightRadius": 9,
         "borderTopWidth": 0,
@@ -254,7 +254,7 @@ exports[`Button matches sunrise theme snapshot 1`] = `
         maxFontSizeMultiplier={1.5}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#271F15",
             "fontFamily": "Inter_600SemiBold",
             "fontSize": 14,
             "letterSpacing": 0.1,

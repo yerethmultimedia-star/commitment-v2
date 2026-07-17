@@ -3,6 +3,7 @@ import { View, Switch as TamaguiSwitch, XStack, YStack } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label, Caption } from './typography/index.js';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface SwitchProps {
   checked: boolean;
@@ -51,7 +52,7 @@ export const Switch = React.forwardRef<any, SwitchProps>(({
   const descriptionId = `${id}-desc`;
 
   return (
-    <XStack gap="$3" alignItems="center" opacity={animationStyle.opacity} scale={animationStyle.scale}>
+    <XStack gap="$3" alignItems="center" opacity={animationStyle.opacity} scale={animationStyle.scale} transition={animationStyle.transition}>
       <FocusRing state={state} borderRadius="$4" offset={2}>
         <View
           onPressIn={handlers.onPressIn}
@@ -72,10 +73,12 @@ export const Switch = React.forwardRef<any, SwitchProps>(({
             backgroundColor={checked ? '$interactive' : '$surfaceRaised'}
             borderColor={checked ? '$interactive' : '$divider'}
             borderWidth={1}
-            accessibilityRole="switch"
-            accessibilityState={{ checked, disabled: isActuallyDisabled, busy: loading }}
-            accessibilityLabel={labelI18nKey ? t(labelI18nKey) : undefined}
-            accessibilityValue={accessibilityValue ? { text: accessibilityValue } : undefined}
+            {...toPlatformAccessibilityProps({
+              accessibilityRole: 'switch',
+              accessibilityState: { checked, disabled: isActuallyDisabled, busy: loading },
+              accessibilityLabel: labelI18nKey ? t(labelI18nKey) : undefined,
+              accessibilityValue: accessibilityValue ? { text: accessibilityValue } : undefined,
+            })}
             aria-describedby={descriptionI18nKey ? descriptionId : undefined}
           >
             <TamaguiSwitch.Thumb backgroundColor="#FFFFFF" />

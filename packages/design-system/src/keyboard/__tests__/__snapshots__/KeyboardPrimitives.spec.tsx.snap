@@ -59,6 +59,11 @@ exports[`Keyboard Primitives renders KeyboardAwareScroll correctly 1`] = `
       >
         <View>
           <Text
+            style={
+              {
+                "color": "#271F15",
+              }
+            }
             suppressHighlighting={true}
           >
             Content
@@ -99,6 +104,11 @@ exports[`Keyboard Primitives renders KeyboardDismissArea correctly 1`] = `
   }
 >
   <Text
+    style={
+      {
+        "color": "#271F15",
+      }
+    }
     suppressHighlighting={true}
   >
     Content

@@ -1,0 +1,416 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProgressMetric matches circular midnight theme snapshot 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 100,
+      "min": 0,
+      "now": 72,
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "column",
+      "gap": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "height": 96,
+        "justifyContent": "center",
+        "width": 96,
+      }
+    }
+  >
+    <RNSVGSvgView
+      bbHeight={96}
+      bbWidth={96}
+      focusable={false}
+      height={96}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "position": "absolute",
+            "transform": [
+              {
+                "rotate": "-90deg",
+              },
+            ],
+          },
+          {
+            "flex": 0,
+            "height": 96,
+            "width": 96,
+          },
+        ]
+      }
+      transform={
+        [
+          {
+            "rotate": "-90deg",
+          },
+        ]
+      }
+      width={96}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={48}
+          cy={48}
+          fill={null}
+          propList={
+            [
+              "fill",
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          r={43}
+          stroke={
+            {
+              "payload": 1720409334,
+              "type": 0,
+            }
+          }
+          strokeWidth={10}
+        />
+        <RNSVGCircle
+          cx={48}
+          cy={48}
+          fill={null}
+          propList={
+            [
+              "fill",
+              "stroke",
+              "strokeWidth",
+              "strokeDasharray",
+              "strokeDashoffset",
+              "strokeLinecap",
+            ]
+          }
+          r={43}
+          stroke={
+            {
+              "payload": 4287323382,
+              "type": 0,
+            }
+          }
+          strokeDasharray={
+            [
+              270.1769682087222,
+              270.1769682087222,
+            ]
+          }
+          strokeDashoffset={75.64955109844222}
+          strokeLinecap={1}
+          strokeWidth={10}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#FAFAFA",
+          "fontFamily": "Inter_600SemiBold",
+          "fontSize": 17,
+          "letterSpacing": -0.2,
+          "lineHeight": 22,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      72%
+    </Text>
+  </View>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#A1A1AA",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Weekly Goal
+  </Text>
+</View>
+`;
+
+exports[`ProgressMetric matches circular sunrise theme snapshot 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 100,
+      "min": 0,
+      "now": 72,
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "column",
+      "gap": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "height": 96,
+        "justifyContent": "center",
+        "width": 96,
+      }
+    }
+  >
+    <RNSVGSvgView
+      bbHeight={96}
+      bbWidth={96}
+      focusable={false}
+      height={96}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "position": "absolute",
+            "transform": [
+              {
+                "rotate": "-90deg",
+              },
+            ],
+          },
+          {
+            "flex": 0,
+            "height": 96,
+            "width": 96,
+          },
+        ]
+      }
+      transform={
+        [
+          {
+            "rotate": "-90deg",
+          },
+        ]
+      }
+      width={96}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={48}
+          cy={48}
+          fill={null}
+          propList={
+            [
+              "fill",
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          r={43}
+          stroke={
+            {
+              "payload": 1727372811,
+              "type": 0,
+            }
+          }
+          strokeWidth={10}
+        />
+        <RNSVGCircle
+          cx={48}
+          cy={48}
+          fill={null}
+          propList={
+            [
+              "fill",
+              "stroke",
+              "strokeWidth",
+              "strokeDasharray",
+              "strokeDashoffset",
+              "strokeLinecap",
+            ]
+          }
+          r={43}
+          stroke={
+            {
+              "payload": 4294286859,
+              "type": 0,
+            }
+          }
+          strokeDasharray={
+            [
+              270.1769682087222,
+              270.1769682087222,
+            ]
+          }
+          strokeDashoffset={75.64955109844222}
+          strokeLinecap={1}
+          strokeWidth={10}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#271F15",
+          "fontFamily": "Inter_600SemiBold",
+          "fontSize": 17,
+          "letterSpacing": -0.2,
+          "lineHeight": 22,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      72%
+    </Text>
+  </View>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#786E5D",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.1,
+        "lineHeight": 18,
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Weekly Goal
+  </Text>
+</View>
+`;
+
+exports[`ProgressMetric matches linear forest theme snapshot 1`] = `
+<View
+  style={
+    {
+      "flexDirection": "column",
+      "gap": 4,
+      "width": "100%",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+      }
+    }
+  >
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#567A5E",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.1,
+          "lineHeight": 18,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Weekly Goal
+    </Text>
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#567A5E",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.1,
+          "lineHeight": 18,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      72%
+    </Text>
+  </View>
+  <View
+    accessibilityRole="progressbar"
+    accessibilityValue={
+      {
+        "max": 100,
+        "min": 0,
+        "now": 72,
+      }
+    }
+    style={
+      {
+        "backgroundColor": "#22C55E66",
+        "borderBottomLeftRadius": "full",
+        "borderBottomRightRadius": "full",
+        "borderTopLeftRadius": "full",
+        "borderTopRightRadius": "full",
+        "flexDirection": "column",
+        "height": 8,
+        "overflow": "hidden",
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "#22C55E",
+          "borderBottomLeftRadius": "full",
+          "borderBottomRightRadius": "full",
+          "borderTopLeftRadius": "full",
+          "borderTopRightRadius": "full",
+          "flexDirection": "column",
+          "height": "100%",
+          "width": "72%",
+        }
+      }
+    />
+  </View>
+</View>
+`;

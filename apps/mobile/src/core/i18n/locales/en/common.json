@@ -1,5 +1,6 @@
 {
   "appearance": {
+    "loading": "Loading your appearance settings…",
     "settings": {
       "theme": {
         "title": "Theme",
@@ -39,6 +40,8 @@
   },
   "profile": {
     "title": "Profile",
+    "loading": "Loading your profile…",
+    "noName": "Your account",
     "header": {
       "title": "My Profile"
     },
@@ -108,13 +111,14 @@
     "durationMinutes": "{{count}} min",
     "empty": {
       "title": "Nothing scheduled today",
-      "description": "Tasks, commitments and habits with a date will show up here."
+      "description": "Tasks, commitments, habits and milestones with a date will show up here."
     },
     "itemA11y": "{{title}}, {{type}}",
     "types": {
       "task": "Task",
       "commitment": "Commitment",
       "habit": "Habit",
+      "milestone": "Milestone",
       "reminder": "Reminder"
     }
   },
@@ -351,6 +355,8 @@
       "milestones": "Milestones",
       "commitments": "Commitments",
       "habits": "Habits",
+      "addHabit": "Add habit",
+      "addTask": "Add task",
       "upcoming": "Upcoming",
       "upcomingEmpty": "Nothing upcoming for this goal.",
       "milestoneA11y": "Milestone: {{title}}",
@@ -363,6 +369,24 @@
     }
   },
   "habits": {
+    "hero": {
+      "streakLabel": "Current streak",
+      "completedLabel": "Completed today"
+    },
+    "detail": {
+      "relatedGoal": "Related goal",
+      "postpone": "Postpone reminder",
+      "archive": "Archive habit",
+      "confirmArchive": {
+        "title": "Archive \"{{title}}\"?",
+        "description": "This habit will stop appearing in your daily list. You can't undo this from here."
+      }
+    },
+    "empty": {
+      "title": "No habits yet",
+      "description": "Small, repeatable actions build the biggest changes. Add your first habit to start a streak.",
+      "cta": "Add your first habit"
+    },
     "recurrence": {
       "daily": "Daily",
       "workdays": "Workdays",
@@ -372,16 +396,14 @@
     },
     "enableA11y": "Enable habit: {{title}}",
     "disableA11y": "Disable habit: {{title}}",
+    "card": {
+      "toggleA11y": "Mark done: {{title}}"
+    },
     "postpone": {
-      "title": "Snooze reminder",
-      "custom": "Custom",
-      "customPrompt": "Minutes to snooze",
-      "presets": {
-        "15": "15 min",
-        "30": "30 min",
-        "60": "1 hour",
-        "180": "3 hours"
-      }
+      "title": "Postpone",
+      "hoursLabel": "hr",
+      "minutesLabel": "min",
+      "confirm": "Postpone"
     },
     "recurrenceOptions": {
       "Daily": "Daily",
@@ -419,6 +441,7 @@
       "editTitle": "Edit Habit",
       "fields": {
         "title": { "label": "Title", "placeholder": "e.g. Drink water" },
+        "goal": { "label": "Related to", "none": "None" },
         "recurrenceType": { "label": "Repeat" },
         "daysOfWeek": { "label": "On these days" },
         "dayOfMonth": { "label": "Day of month" },
@@ -434,10 +457,18 @@
       },
       "submit": "Save",
       "createSubmit": "Create Habit"
+    },
+    "workspace": {
+      "loading": "Loading habit...",
+      "error": {
+        "title": "Could not load habit",
+        "retry": "Try again"
+      }
     }
   },
   "insights": {
     "title": "Insights",
+    "loading": "Loading your insights…",
     "error": {
       "description": "We couldn't load your insights. Please sign in again."
     },
@@ -459,7 +490,12 @@
         "productivity": { "title": "Productivity" },
         "focusMinutes": { "title": "Avg. focus" }
       },
-      "deltaVsLastWeek": "{{sign}}{{count}} vs last week"
+      "deltaVsLastWeek": "{{sign}}{{count}} vs last week",
+      "dayStatus": {
+        "completed": "{{weekday}}: completed",
+        "missed": "{{weekday}}: not completed",
+        "upcoming": "{{weekday}}: upcoming"
+      }
     },
     "focus": {
       "title": "Focus",
@@ -476,9 +512,10 @@
       }
     },
     "habitConsistency": {
-      "title": "Today's Habits",
-      "completed": "Completed",
-      "dueToday": "Due today"
+      "title": "Habit Consistency",
+      "averageStreak": "Avg. streak",
+      "activeStreaks": "With an active streak",
+      "fraction": "{{count}}/{{total}}"
     },
     "streakHighlight": {
       "title": "Best Streak",
@@ -525,6 +562,7 @@
       },
       "priorityTask": {
         "label": "Priority of the day",
+        "personalContext": "Personal",
         "priority": {
           "high": "High",
           "medium": "Medium",

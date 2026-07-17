@@ -15,6 +15,8 @@ import { RestoreTaskNestjsHandler } from './nestjs/restore-task.nestjs-handler';
 import { DeleteTaskNestjsHandler } from './nestjs/delete-task.nestjs-handler';
 import { ChangePriorityTaskNestjsHandler } from './nestjs/change-priority-task.nestjs-handler';
 import { DuplicateTaskNestjsHandler } from './nestjs/duplicate-task.nestjs-handler';
+import { RelinkTaskGoalNestjsHandler } from './nestjs/relink-task-goal.nestjs-handler';
+import { RelinkTaskCommitmentNestjsHandler } from './nestjs/relink-task-commitment.nestjs-handler';
 
 // Query Handlers
 import { ListTasksQueryHandler } from './application/queries/list-tasks.handler';
@@ -53,6 +55,8 @@ import { QuickCaptureApplicationService } from './application/services/quick-cap
     DeleteTaskNestjsHandler,
     ChangePriorityTaskNestjsHandler,
     DuplicateTaskNestjsHandler,
+    RelinkTaskGoalNestjsHandler,
+    RelinkTaskCommitmentNestjsHandler,
 
     // Query Handlers
     ListTasksQueryHandler,

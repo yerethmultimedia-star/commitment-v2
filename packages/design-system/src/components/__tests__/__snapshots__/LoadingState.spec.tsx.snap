@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingState matches sunrise theme snapshot 1`] = `
+<View
+  accessibilityLabel="Loading..."
+  accessible={true}
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "flexDirection": "column",
+      "gap": 16,
+      "justifyContent": "center",
+      "paddingBottom": 24,
+      "paddingLeft": 24,
+      "paddingRight": 24,
+      "paddingTop": 24,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+      }
+    }
+  >
+    <ActivityIndicator
+      color="#F59E0B"
+      size="large"
+    />
+  </View>
+  <Text
+    allowFontScaling={true}
+    maxFontSizeMultiplier={1.5}
+    style={
+      {
+        "color": "#271F15",
+        "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+        "fontSize": 17,
+        "fontWeight": "bold",
+        "letterSpacing": -0.2,
+        "lineHeight": 22,
+        "textAlign": "center",
+      }
+    }
+    suppressHighlighting={true}
+  >
+    Loading...
+  </Text>
+</View>
+`;

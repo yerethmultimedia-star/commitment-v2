@@ -17,17 +17,16 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { YStack, XStack, Text } from 'tamagui';
-import { Title, AppScreen } from '@commitment/design-system';
+import { YStack, XStack } from 'tamagui';
+import { Title, AppScreen, StatCard, LoadingState, ErrorState } from '@commitment/design-system';
 import { Calendar } from '@tamagui/lucide-icons';
 import { useInsightsOverview } from '@/features/insights/hooks/useInsightsOverview';
 import { TimeRangeTabs } from '@/features/insights/ui/components/TimeRangeTabs';
-import { StatCard } from '@/features/insights/ui/components/StatCard';
+import { Sparkline } from '@/features/insights/ui/components/Sparkline';
 import { WeekActivityRow } from '@/features/insights/ui/components/WeekActivityRow';
 import { GoalProgressInsight } from '@/features/insights/ui/components/GoalProgressInsight';
 import { HabitConsistencyInsight } from '@/features/insights/ui/components/HabitConsistencyInsight';
 import { StreakHighlightInsight } from '@/features/insights/ui/components/StreakHighlightInsight';
-import { LoadingState } from '@/shared/ui/feedback/LoadingState';
 import { useTabBarHeightStore } from '@/shared/store/use-tab-bar-height-store';
 
 const STAT_CARD_META: Record<string, { titleKey: string; valueFormatter: (v: number) => string }> = {
@@ -51,12 +50,10 @@ export default function InsightsScreen() {
           <Title i18nKey="insights.overview.title" fontSize="$7" fontWeight="bold" />
         </XStack>
 
-        {isLoading && <LoadingState />}
+        {isLoading && <LoadingState fullscreen={false} title={{ i18nKey: 'insights.loading' }} />}
         {/* isError only reflects a genuine auth failure (no identityId) — same policy as Dashboard's own error state, nothing retry-able here without re-authenticating. */}
         {isError && (
-          <Text color="$danger" fontSize="$5" fontWeight="600" textAlign="center">
-            {t('insights.error.description')}
-          </Text>
+          <ErrorState fullscreen={false} title={{ i18nKey: 'insights.error.description' }} />
         )}
 
         {!isLoading && !isError && overview && (
@@ -74,14 +71,16 @@ export default function InsightsScreen() {
             <YStack gap="$3">
               {overview.statCards.map((card) => {
                 const meta = STAT_CARD_META[card.id];
+                const signPrefix = card.delta > 0 ? '+' : '';
+                const deltaTone = card.delta > 0 ? 'positive' : card.delta < 0 ? 'negative' : 'neutral';
                 return (
                   <StatCard
                     key={card.id}
-                    titleKey={meta.titleKey}
-                    value={card.value}
-                    valueFormatter={meta.valueFormatter}
-                    delta={card.delta}
-                    sparklinePoints={card.sparkline}
+                    i18nKey={meta.titleKey}
+                    value={meta.valueFormatter(card.value)}
+                    deltaLabel={t('insights.overview.deltaVsLastWeek', { sign: signPrefix, count: card.delta })}
+                    deltaTone={deltaTone}
+                    visual={<Sparkline points={card.sparkline} />}
                     onPress={card.id === 'focusMinutes' ? () => router.push('/insights/focus' as any) : undefined}
                     testID={`stat-card-${card.id}`}
                   />

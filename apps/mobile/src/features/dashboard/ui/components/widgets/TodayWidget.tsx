@@ -1,12 +1,15 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, XStack, Text } from 'tamagui';
-import { Card } from '@commitment/design-system';
+import { YStack, XStack } from 'tamagui';
+import { Card, Body, toPlatformAccessibilityProps } from '@commitment/design-system';
 
 import { useRouter } from 'expo-router';
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
 
 export const TodayWidget = React.memo(function TodayWidget() {
+  // Still needed for the two accessibilityLabel sites below — Card supports
+  // accessibilityLabelI18nKey, but the plain XStack task row doesn't have an
+  // i18nKey-aware wrapper yet (see i18n Rule 2 audit finding).
   const { t } = useTranslation();
   const router = useRouter();
   const { data: dashboard } = useDashboardQuery();
@@ -22,23 +25,21 @@ export const TodayWidget = React.memo(function TodayWidget() {
     <Card variant="elevated">
       <YStack gap="$3">
         <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
-            {t('dashboard.widgets.today.title')}
-          </Text>
-          <Text fontSize="$4" color="$contentTertiary" accessibilityLabel={t('dashboard.widgets.today.remaining', { count: tasks.length })}>
+          <Body fontSize="$5" fontWeight="600" color="$contentPrimary" i18nKey="dashboard.widgets.today.title" />
+          <Body
+            fontSize="$4"
+            color="$contentTertiary"
+            accessibilityLabel={t('dashboard.widgets.today.remaining', { count: tasks.length })}
+          >
             {tasks.length}
-          </Text>
+          </Body>
         </XStack>
 
         <YStack gap="$2">
           {tasks.length === 0 ? (
             <YStack padding="$4" alignItems="center" backgroundColor="$surface" borderRadius="$3">
-              <Text color="$contentPrimary" fontWeight="bold" fontSize="$4">
-                {t('dashboard.widgets.today.empty.title')}
-              </Text>
-              <Text color="$contentSecondary" fontSize="$3" marginTop="$1">
-                {t('dashboard.widgets.today.empty.description')}
-              </Text>
+              <Body color="$contentPrimary" fontWeight="bold" fontSize="$4" i18nKey="dashboard.widgets.today.empty.title" />
+              <Body color="$contentSecondary" fontSize="$3" marginTop="$1" i18nKey="dashboard.widgets.today.empty.description" />
             </YStack>
           ) : (
             tasks.slice(0, 3).map((task) => (
@@ -52,13 +53,15 @@ export const TodayWidget = React.memo(function TodayWidget() {
                 alignItems="center"
                 onPress={onTaskPress}
                 pressStyle={{ opacity: 0.7 }}
-                accessibilityLabel={t('dashboard.widgets.today.itemA11y', { title: task.title })}
-                accessibilityRole="button"
+                {...toPlatformAccessibilityProps({
+                  accessibilityLabel: t('dashboard.widgets.today.itemA11y', { title: task.title }),
+                  accessibilityRole: 'button',
+                })}
               >
                 <YStack width={12} height={12} borderRadius={6} backgroundColor="$accent" marginRight="$3" />
-                <Text color="$contentPrimary" fontSize="$4" numberOfLines={1} flex={1}>
+                <Body color="$contentPrimary" fontSize="$4" numberOfLines={1} flex={1}>
                   {task.title}
-                </Text>
+                </Body>
               </XStack>
             ))
           )}

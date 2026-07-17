@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Text, YStack } from 'tamagui';
+import { YStack } from 'tamagui';
+import { Body } from '@commitment/design-system';
+import { useTranslation } from 'react-i18next';
 import { WidgetDefinition } from '../../registry/WidgetRegistry';
 
 export interface WidgetRendererProps {
@@ -8,23 +10,27 @@ export interface WidgetRendererProps {
 }
 
 import type { FallbackProps } from 'react-error-boundary';
-import { useTranslation } from 'react-i18next';
 
+// This fallback composes a translated label with a raw (non-translatable)
+// runtime error message on the same line — genuinely can't be expressed as
+// a single declarative i18nKey prop, so it keeps its own t() call rather
+// than force an awkward split across two sibling Text nodes.
 const WidgetErrorFallback = ({ error }: FallbackProps) => {
   const { t } = useTranslation();
   return (
     <YStack padding="$4" backgroundColor="$danger" borderRadius="$4" opacity={0.8}>
-      <Text color="$contentOnSemantic" fontWeight="bold" accessibilityRole="header">{t('dashboard.error.title')}</Text>
-      <Text color="$contentOnSemantic" fontSize="$2">{t('dashboard.error.description')}: {error instanceof Error ? error.message : String(error)}</Text>
+      <Body color="$contentOnSemantic" fontWeight="bold" accessibilityRole="header" i18nKey="dashboard.error.title" />
+      <Body color="$contentOnSemantic" fontSize="$2">
+        {t('dashboard.error.description')}: {error instanceof Error ? error.message : String(error)}
+      </Body>
     </YStack>
   );
 };
 
 const WidgetSuspenseFallback = () => {
-  const { t } = useTranslation();
   return (
     <YStack padding="$4" backgroundColor="$surface" borderRadius="$4" minHeight={100} justifyContent="center" alignItems="center">
-      <Text color="$contentSecondary">{t('dashboard.loading')}</Text>
+      <Body color="$contentSecondary" i18nKey="dashboard.loading" />
     </YStack>
   );
 };

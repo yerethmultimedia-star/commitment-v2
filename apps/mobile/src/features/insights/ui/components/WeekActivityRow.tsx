@@ -1,8 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
 import { Check } from '@tamagui/lucide-icons';
-import { Body } from '@commitment/design-system';
-import { formatWeekdayIndexShort } from '@commitment/localization';
+import { Body, toPlatformAccessibilityProps } from '@commitment/design-system';
+import { formatWeekdayIndexShort, formatWeekdayIndexFull } from '@commitment/localization';
 
 export interface WeekActivityFlagLike {
   readonly date: string;
@@ -16,6 +17,8 @@ export interface WeekActivityRowProps {
 
 /** "RACHA ACTUAL" — Mon-Sun app-wide activity streak (at least one task completed that day). Future days render neutral, never as "missed." */
 export function WeekActivityRow({ flags }: WeekActivityRowProps) {
+  const { t } = useTranslation('common');
+
   return (
     <XStack justifyContent="space-between" paddingHorizontal="$2">
       {flags.map((flag) => {
@@ -23,6 +26,12 @@ export function WeekActivityRow({ flags }: WeekActivityRowProps) {
         const date = new Date(y!, (m ?? 1) - 1, d);
         const bg = flag.completed ? '$success' : flag.isFuture ? '$surface' : '$surfaceRaised';
         const borderColor = flag.isFuture ? '$divider' : 'transparent';
+        const weekdayFull = formatWeekdayIndexFull(date.getDay());
+        const statusKey = flag.isFuture
+          ? 'insights.overview.dayStatus.upcoming'
+          : flag.completed
+          ? 'insights.overview.dayStatus.completed'
+          : 'insights.overview.dayStatus.missed';
 
         return (
           <YStack key={flag.date} alignItems="center" gap="$2">
@@ -33,6 +42,9 @@ export function WeekActivityRow({ flags }: WeekActivityRowProps) {
               borderColor={borderColor as any}
               justifyContent="center"
               alignItems="center"
+              {...toPlatformAccessibilityProps({
+                accessibilityLabel: t(statusKey, { weekday: weekdayFull }),
+              })}
             >
               {flag.completed && <Check color="$contentOnAccent" size={18} />}
             </Circle>

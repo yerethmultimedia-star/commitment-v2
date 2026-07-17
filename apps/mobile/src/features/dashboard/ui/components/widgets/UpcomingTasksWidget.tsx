@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'expo-router';
-import { Card } from '@commitment/design-system';
+import { Card, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { Text, XStack, YStack } from 'tamagui';
 import { formatDate } from '@commitment/localization';
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
@@ -44,8 +44,10 @@ export const UpcomingTasksWidget = React.memo(function UpcomingTasksWidget() {
                 borderWidth={1}
                 borderColor="$divider"
                 alignItems="center"
-                accessibilityRole="button"
-                accessibilityLabel={task.title}
+                {...toPlatformAccessibilityProps({
+                  accessibilityRole: 'button',
+                  accessibilityLabel: task.title,
+                })}
               >
                 <Text color="$contentPrimary" fontSize="$4" numberOfLines={1} flex={1} marginRight="$2">
                   {task.title}

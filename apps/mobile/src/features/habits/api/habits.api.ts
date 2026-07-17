@@ -125,4 +125,14 @@ export const habitsApi = {
     await apiClient.delete(`habits/${id}`);
     return { habitId: id };
   },
+
+  /** goalId: null removes the link (goal-independent) — a real target state, not "leave unchanged". */
+  relinkGoal: async (id: string, goalId: string | null): Promise<{ habitId: string }> => {
+    if (isDemoModeActive()) {
+      await demoHabitsRepository.relinkGoal(id, goalId);
+      return { habitId: id };
+    }
+    await apiClient.patch(`habits/${id}/goal`, { json: { goalId } });
+    return { habitId: id };
+  },
 };

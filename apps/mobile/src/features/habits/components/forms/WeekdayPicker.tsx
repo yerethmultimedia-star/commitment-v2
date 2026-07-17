@@ -2,6 +2,7 @@ import { useController, Control, FieldValues } from 'react-hook-form';
 import { Text, YStack, XStack, Button } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 import { formatWeekdayIndexFull } from '@commitment/localization';
+import { toPlatformAccessibilityProps } from '@commitment/design-system';
 
 interface Props {
   name: string;
@@ -48,9 +49,11 @@ export function WeekdayPicker({ name, control, label, disabled }: Props) {
               disabled={disabled}
               opacity={disabled ? 0.6 : 1}
               onPress={() => toggleDay(day)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected, disabled }}
-              accessibilityLabel={formatWeekdayIndexFull(day)}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityState: { selected: isSelected, disabled },
+                accessibilityLabel: formatWeekdayIndexFull(day),
+              })}
             >
               {t(`habits.weekdayShort.${day}`)}
             </Button>

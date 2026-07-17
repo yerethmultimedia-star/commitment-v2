@@ -1,34 +1,33 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { View, Text, Switch, YStack, XStack, Separator } from 'tamagui';
+import { YStack, XStack, Separator } from 'tamagui';
+import { AppScreen, Body, LoadingState, SectionHeader, Switch } from '@commitment/design-system';
 import { useTranslation } from 'react-i18next';
 import { appThemeRegistry } from '../providers/theme-registry';
 import { useAppearanceStore } from '../store/use-appearance-store';
-import { ThemeMetadata } from '@commitment/theme-engine';
 import { ThemePreviewCard } from '../components/ThemePreviewCard';
 
 export const AppearanceSettingsScreen: React.FC = () => {
   const { t } = useTranslation();
-  const { appearance, updateSettings } = useAppearanceStore();
+  const { appearance, isLoading, updateSettings } = useAppearanceStore();
   const settings = appearance?.settings;
 
   const metadataList = appThemeRegistry.getAllMetadata();
 
-  if (!settings) return null;
+  if (isLoading || !settings) {
+    return <LoadingState title={{ i18nKey: 'appearance.loading' }} />;
+  }
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <AppScreen>
       <YStack padding="$4" gap="$6">
-        
+
         <YStack gap="$4">
-          <YStack gap="$1">
-            <Text fontSize="$6" fontWeight="bold" color="$contentPrimary">
-              {t('appearance.settings.theme.title')}
-            </Text>
-            <Text fontSize="$3" color="$contentSecondary">
-              {t('appearance.settings.theme.description')}
-            </Text>
-          </YStack>
+          <SectionHeader
+            size="screen"
+            title={{ i18nKey: 'appearance.settings.theme.title' }}
+            subtitle={{ i18nKey: 'appearance.settings.theme.description' }}
+          />
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <XStack gap="$4" paddingBottom="$4">
@@ -44,13 +43,13 @@ export const AppearanceSettingsScreen: React.FC = () => {
                       isSelected={isSelected}
                       onSelect={(id: string) => updateSettings({ themeId: id })}
                     />
-                    <Text 
-                      fontSize="$3" 
+                    <Body
+                      fontSize="$3"
                       fontWeight={isSelected ? 'bold' : 'normal'}
                       color={isSelected ? '$contentPrimary' : '$contentSecondary'}
                     >
                       {t(meta.nameKey)}
-                    </Text>
+                    </Body>
                   </YStack>
                 );
               })}
@@ -61,56 +60,29 @@ export const AppearanceSettingsScreen: React.FC = () => {
         <Separator borderColor="$divider" />
 
         <YStack gap="$4">
-          <YStack gap="$1">
-            <Text fontSize="$6" fontWeight="bold" color="$contentPrimary">
-              {t('appearance.settings.accessibility.title')}
-            </Text>
-            <Text fontSize="$3" color="$contentSecondary">
-              {t('appearance.settings.accessibility.description')}
-            </Text>
-          </YStack>
+          <SectionHeader
+            size="screen"
+            title={{ i18nKey: 'appearance.settings.accessibility.title' }}
+            subtitle={{ i18nKey: 'appearance.settings.accessibility.description' }}
+          />
 
-          <XStack alignItems="center" justifyContent="space-between">
-            <YStack flex={1} paddingRight="$4">
-              <Text fontSize="$4" color="$contentPrimary">
-                {t('appearance.settings.reducedMotion.label')}
-              </Text>
-              <Text fontSize="$2" color="$contentSecondary" marginTop="$1">
-                {t('appearance.settings.reducedMotion.description')}
-              </Text>
-            </YStack>
-            <Switch
-              size="$3"
-              checked={settings.reducedMotion}
-              onCheckedChange={(checked) => updateSettings({ reducedMotion: checked })}
-              accessibilityLabel={t('appearance.settings.reducedMotion.label')}
-            >
-              <Switch.Thumb {...{ animation: "bouncy" } as any} />
-            </Switch>
-          </XStack>
+          <Switch
+            checked={settings.reducedMotion}
+            onCheckedChange={(checked) => updateSettings({ reducedMotion: checked })}
+            labelI18nKey="appearance.settings.reducedMotion.label"
+            descriptionI18nKey="appearance.settings.reducedMotion.description"
+          />
 
-          <XStack alignItems="center" justifyContent="space-between">
-            <YStack flex={1} paddingRight="$4">
-              <Text fontSize="$4" color="$contentPrimary">
-                {t('appearance.settings.highContrast.label')}
-              </Text>
-              <Text fontSize="$2" color="$contentSecondary" marginTop="$1">
-                {t('appearance.settings.highContrast.description')}
-              </Text>
-            </YStack>
-            <Switch
-              size="$3"
-              checked={settings.highContrast}
-              onCheckedChange={(checked) => updateSettings({ highContrast: checked })}
-              accessibilityLabel={t('appearance.settings.highContrast.label')}
-            >
-              <Switch.Thumb {...{ animation: "bouncy" } as any} />
-            </Switch>
-          </XStack>
+          <Switch
+            checked={settings.highContrast}
+            onCheckedChange={(checked) => updateSettings({ highContrast: checked })}
+            labelI18nKey="appearance.settings.highContrast.label"
+            descriptionI18nKey="appearance.settings.highContrast.description"
+          />
 
         </YStack>
 
       </YStack>
-    </ScrollView>
+    </AppScreen>
   );
 };

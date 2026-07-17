@@ -50,7 +50,10 @@ export const CoachMessageWidget = React.memo(function CoachMessageWidget() {
               i18nParams={topRecommendation.metadata as Record<string, any>}
             />
           </YStack>
-          <Circle size={56} backgroundColor="rgba(255,255,255,0.2)" justifyContent="center" alignItems="center">
+          <Circle size={56} justifyContent="center" alignItems="center">
+            {/* Translucent backing layer kept separate from the icon sibling
+                below — opacity on a shared parent would fade the icon too. */}
+            <Circle position="absolute" size={56} backgroundColor="$contentOnAccent" opacity={0.2} />
             <Bot color="$contentOnAccent" size={28} />
           </Circle>
         </XStack>

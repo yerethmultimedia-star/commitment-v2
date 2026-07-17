@@ -13,6 +13,7 @@ import { PostponeHabitNestjsHandler } from './nestjs/postpone-habit.nestjs-handl
 import { EnableHabitNestjsHandler } from './nestjs/enable-habit.nestjs-handler';
 import { DisableHabitNestjsHandler } from './nestjs/disable-habit.nestjs-handler';
 import { ArchiveHabitNestjsHandler } from './nestjs/archive-habit.nestjs-handler';
+import { RelinkHabitGoalNestjsHandler } from './nestjs/relink-habit-goal.nestjs-handler';
 
 // Query Handlers
 import { ListHabitsQueryHandler } from './application/queries/list-habits.handler';
@@ -44,6 +45,7 @@ import { HabitApplicationService } from './application/services/habit-applicatio
     EnableHabitNestjsHandler,
     DisableHabitNestjsHandler,
     ArchiveHabitNestjsHandler,
+    RelinkHabitGoalNestjsHandler,
 
     // Query Handlers
     ListHabitsQueryHandler,

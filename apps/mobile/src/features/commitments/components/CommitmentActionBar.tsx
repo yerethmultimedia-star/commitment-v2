@@ -1,5 +1,5 @@
-import { YStack, Text, Button, XStack } from 'tamagui';
-import { useTranslation } from 'react-i18next';
+import { YStack, XStack } from 'tamagui';
+import { Button } from '@commitment/design-system';
 import type { ActionConfig } from '@/shared/domain/commitmentActions';
 
 interface Props {
@@ -9,41 +9,26 @@ interface Props {
 }
 
 export function CommitmentActionBar({ actions, onAction, pendingAction }: Props) {
-  const { t } = useTranslation();
-
   if (actions.length === 0) return null;
 
   const primaryActions = actions.filter((a) => a.variant !== 'destructive');
   const destructiveActions = actions.filter((a) => a.variant === 'destructive');
-
-  const getTheme = (action: ActionConfig) => {
-    if (action.variant === 'primary') return 'active';
-    return undefined;
-  };
 
   return (
     <YStack gap="$3">
       {primaryActions.length > 0 && (
         <XStack gap="$3" flexWrap="wrap">
           {primaryActions.map((action) => (
-            <Button
-              key={action.id}
-              flex={1}
-              size="$4"
-              theme={getTheme(action)}
-              disabled={pendingAction != null}
-              opacity={pendingAction === action.id ? 0.6 : 1}
-              onPress={() => onAction(action)}
-              accessibilityRole="button"
-              accessibilityLabel={t(action.labelKey, { ns: 'commitments' })}
-              accessibilityState={{ disabled: pendingAction != null }}
-            >
-              <Text fontWeight="bold">
-                {pendingAction === action.id
-                  ? '...'
-                  : t(action.labelKey, { ns: 'commitments' })}
-              </Text>
-            </Button>
+            <YStack key={action.id} flex={1}>
+              <Button
+                variant={action.variant === 'primary' ? 'primary' : 'secondary'}
+                disabled={pendingAction != null}
+                loading={pendingAction === action.id}
+                fullWidth
+                onPress={() => onAction(action)}
+                i18nKey={`commitments:${action.labelKey}`}
+              />
+            </YStack>
           ))}
         </XStack>
       )}
@@ -51,19 +36,13 @@ export function CommitmentActionBar({ actions, onAction, pendingAction }: Props)
       {destructiveActions.map((action) => (
         <Button
           key={action.id}
-          variant="outlined"
-          borderColor="$danger"
-          size="$4"
+          variant="outline"
+          destructive
           disabled={pendingAction != null}
+          loading={pendingAction === action.id}
           onPress={() => onAction(action)}
-          accessibilityRole="button"
-          accessibilityLabel={t(action.labelKey, { ns: 'commitments' })}
-          accessibilityState={{ disabled: pendingAction != null }}
-        >
-          <Text color="$danger" fontWeight="bold">
-            {t(action.labelKey, { ns: 'commitments' })}
-          </Text>
-        </Button>
+          i18nKey={`commitments:${action.labelKey}`}
+        />
       ))}
     </YStack>
   );

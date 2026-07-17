@@ -19,4 +19,7 @@ export const queryKeys = {
     list: ['goals', 'list'] as const,
     detail: (id: string) => ['goals', 'detail', id] as const,
   },
+  profile: {
+    detail: (identityId: string) => ['profile', 'detail', identityId] as const,
+  },
 };

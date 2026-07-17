@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, ViewProps } from 'tamagui';
 import { useInteractionState, useHapticBehavior, FocusRing, useInteractionAnimation } from '../interaction/index.js';
+import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export type SurfaceVariant = 'flat' | 'elevated' | 'interactive' | 'selected' | 'outlined' | 'danger' | 'success';
 
@@ -20,6 +21,10 @@ export const Surface = React.forwardRef<any, SurfaceProps>(({
   haptic = true,
   onPress,
   children,
+  accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole: rawAccessibilityRole,
+  accessibilityState: rawAccessibilityState,
   ...props
 }, ref) => {
   const isInteractive = variant === 'interactive' || variant === 'selected' || !!onPress;
@@ -86,8 +91,14 @@ export const Surface = React.forwardRef<any, SurfaceProps>(({
   const innerContent = (
     <View
       ref={ref as any}
-      accessibilityRole={isInteractive ? 'button' : undefined}
-      accessibilityState={isInteractive ? { disabled: isActuallyDisabled, busy: loading, selected: variant === 'selected' } : undefined}
+      {...toPlatformAccessibilityProps({
+        accessibilityLabel,
+        accessibilityHint,
+        accessibilityRole: isInteractive ? 'button' : rawAccessibilityRole,
+        accessibilityState: isInteractive
+          ? { disabled: isActuallyDisabled, busy: loading, selected: variant === 'selected' }
+          : rawAccessibilityState,
+      })}
       backgroundColor={bg as any}
       borderColor={borderColor as any}
       borderWidth={borderWidth}
@@ -98,6 +109,7 @@ export const Surface = React.forwardRef<any, SurfaceProps>(({
       shadowOffset={{ width: 0, height: 4 }}
       opacity={isInteractive ? animationStyle.opacity : 1}
       scale={isInteractive ? animationStyle.scale : 1}
+      transition={isInteractive ? animationStyle.transition : undefined}
       cursor={isInteractive ? (isActuallyDisabled ? 'not-allowed' : 'pointer') : 'default'}
       onPress={isInteractive ? handlePress : undefined}
       onPressIn={isInteractive ? handlers.onPressIn : undefined}

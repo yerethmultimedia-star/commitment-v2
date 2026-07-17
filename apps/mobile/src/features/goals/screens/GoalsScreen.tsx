@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { XStack, YStack, ScrollView } from 'tamagui';
+import { XStack, YStack } from 'tamagui';
 import { Plus } from '@tamagui/lucide-icons';
 import { AppScreen, Title, Body, IconButton } from '@commitment/design-system';
 import { ObjectivesTab } from '../components/ObjectivesTab';
 import { GoalTasksTab } from '../components/GoalTasksTab';
 import { HabitsTab } from '../components/HabitsTab';
 import { RoadmapsTab } from '../components/RoadmapsTab';
+import { GoalTabStrip } from '../components/GoalTabStrip';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { useTabBarHeightStore } from '@/shared/store/use-tab-bar-height-store';
 
@@ -40,9 +41,17 @@ export function GoalsScreen() {
   }, [tabParam]);
 
   const handleCreate = () => {
-    // Habits get the full recurrence/reminder-time form (richer than Quick Capture supports); everything else still uses Quick Capture.
+    // Habits get the full recurrence/reminder-time form (richer than Quick Capture supports).
+    // Objectives/Tasks route to Quick Capture with a source matching the active
+    // sub-tab, so it opens pre-selected to the right type (see
+    // QuickCaptureDialog's SOURCE_DEFAULT_TYPE) instead of always defaulting
+    // as if the user were on Objetivos. Roadmaps has no capture concept yet
+    // (see RoadmapsTab) — its FAB is hidden below rather than opening a
+    // dialog with no correct default.
     if (tab === 'habits') {
       router.push('/habits/create' as any);
+    } else if (tab === 'tasks') {
+      openQuickCapture('tasks');
     } else {
       openQuickCapture('goals');
     }
@@ -56,34 +65,18 @@ export function GoalsScreen() {
             <Title i18nKey="goals.list.title" />
             <Body tone="secondary" i18nKey="goals.list.subtitle" />
           </YStack>
-          <IconButton
-            variant="primary"
-            iconToken={<Plus color="$contentOnAccent" />}
-            tooltipI18nKey="goals.list.fab.create"
-            accessibilityHintI18nKey="goals.list.fab.createHint"
-            onPress={handleCreate}
-          />
+          {tab !== 'roadmaps' && (
+            <IconButton
+              variant="primary"
+              iconToken={<Plus color="$contentOnAccent" />}
+              tooltipI18nKey="goals.list.fab.create"
+              accessibilityHintI18nKey="goals.list.fab.createHint"
+              onPress={handleCreate}
+            />
+          )}
         </XStack>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <XStack gap="$md" borderBottomWidth={1} borderBottomColor="$divider">
-            {TABS.map((tb) => (
-              <YStack
-                key={tb}
-                onPress={() => setTab(tb)}
-                paddingBottom="$2"
-                borderBottomWidth={2}
-                borderBottomColor={tab === tb ? '$accent' : 'transparent'}
-                accessibilityRole="button"
-                accessibilityState={{ selected: tab === tb }}
-              >
-                <Body fontWeight={tab === tb ? '700' : '500'} color={tab === tb ? '$accent' : '$contentSecondary'}>
-                  {t(`goals.tabs.${tb}`)}
-                </Body>
-              </YStack>
-            ))}
-          </XStack>
-        </ScrollView>
+        <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.tabs.${tb}`)} />
 
         {tab === 'objectives' && <ObjectivesTab />}
         {tab === 'tasks' && <GoalTasksTab />}

@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, ScrollView, Text, View, XStack, YStack } from 'tamagui';
+import { Button, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui';
 import { useLocalSearchParams } from 'expo-router';
 import { TaskForm } from '../components/TaskForm';
 import { useTaskActions, useTasks } from '../hooks/useTasks';
 import { useTranslation } from 'react-i18next';
 import { TaskModel } from '../models/task.model';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { IconButton, Card, Title, Body } from '@commitment/design-system';
+import { IconButton, Card, Title, Body, toPlatformAccessibilityProps, Portal } from '@commitment/design-system';
 import { Plus } from '@tamagui/lucide-icons';
 import { useUiStore } from '@/core/store/use-ui-store';
+import { useAppearanceStore } from '@/features/appearance/store/use-appearance-store';
 import { PRIORITY_COLOR } from '../utils/task-descriptors';
 
 type Bucket = 'inbox' | 'today' | 'upcoming' | 'completed' | 'archived';
@@ -32,19 +33,24 @@ export function TasksScreen() {
   const { t } = useTranslation('tasks');
   const { complete, archive, duplicate } = useTaskActions();
   const openQuickCapture = useUiStore((s) => s.openQuickCapture);
-  const { taskId: deepLinkedTaskId } = useLocalSearchParams<{ taskId?: string }>();
+  const themeId = useAppearanceStore((s) => s.appearance?.settings.themeId ?? 'DefaultLight');
+  const { taskId: deepLinkedTaskId, prefillGoalId } = useLocalSearchParams<{ taskId?: string; prefillGoalId?: string }>();
 
   const [editingTask, setEditingTask] = useState<TaskModel | null>(null);
+  const [creatingWithGoalId, setCreatingWithGoalId] = useState<string | null>(null);
   const [bucket, setBucket] = useState<Bucket>('today');
   const consumedDeepLinkTaskId = useRef<string | null>(null);
+  const consumedPrefillGoalId = useRef<string | null>(null);
 
   const handleSaved = () => {
     setEditingTask(null);
+    setCreatingWithGoalId(null);
     refetch();
   };
 
   const handleCancel = () => {
     setEditingTask(null);
+    setCreatingWithGoalId(null);
   };
 
   const todayEnd = useMemo(() => endOfToday(), []);
@@ -61,6 +67,16 @@ export function TasksScreen() {
     setBucket(bucketOf(task, todayEnd));
     setEditingTask(task);
   }, [deepLinkedTaskId, tasks, todayEnd]);
+
+  // Deep link from Goal Workspace's "Add task" — opens the create form with
+  // that Goal preloaded, mirroring the taskId deep-link above. Only
+  // consumed once per goalId so cancelling doesn't immediately reopen it.
+  useEffect(() => {
+    if (!prefillGoalId || prefillGoalId === consumedPrefillGoalId.current) return;
+    consumedPrefillGoalId.current = prefillGoalId;
+    setEditingTask(null);
+    setCreatingWithGoalId(prefillGoalId);
+  }, [prefillGoalId]);
 
   const bucketCounts = useMemo(() => {
     const counts: Record<Bucket, number> = { inbox: 0, today: 0, upcoming: 0, completed: 0, archived: 0 };
@@ -79,7 +95,7 @@ export function TasksScreen() {
       <ScrollView flex={1} contentContainerStyle={{ padding: 16, paddingBottom: 96, gap: 12 }}>
         <Title fontSize="$7" fontWeight="700" marginBottom="$2">{t('title')}</Title>
 
-        {!editingTask && (
+        {!editingTask && !creatingWithGoalId && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} marginBottom="$2">
             <XStack gap="$2" alignItems="center" paddingBottom="$3" borderBottomWidth={1} borderBottomColor="$divider">
               {BUCKETS.map((b) => (
@@ -88,8 +104,10 @@ export function TasksScreen() {
                   size="$3"
                   theme={bucket === b ? 'active' : undefined}
                   onPress={() => setBucket(b)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: bucket === b }}
+                  {...toPlatformAccessibilityProps({
+                    accessibilityRole: 'button',
+                    accessibilityState: { selected: bucket === b },
+                  })}
                 >
                   {t(`buckets.${b}`)} ({bucketCounts[b]})
                 </Button>
@@ -102,9 +120,13 @@ export function TasksScreen() {
           <TaskForm task={editingTask} onSaved={handleSaved} onCancel={handleCancel} />
         )}
 
+        {!editingTask && creatingWithGoalId && (
+          <TaskForm initialGoalId={creatingWithGoalId} onSaved={handleSaved} onCancel={handleCancel} />
+        )}
+
         {isLoading ? (
           <Body tone="secondary">{t('loading')}</Body>
-        ) : bucketTasks.length === 0 && !editingTask ? (
+        ) : bucketTasks.length === 0 && !editingTask && !creatingWithGoalId ? (
           <EmptyState title={t(`buckets.empty.${bucket}.title`)} description={t(`buckets.empty.${bucket}.description`)} />
         ) : (
         bucketTasks.map(task => {
@@ -153,32 +175,40 @@ export function TasksScreen() {
                     size="$2"
                     disabled={task.status === 'completed'}
                     onPress={() => complete.mutate(task.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('actions.complete')}
+                    {...toPlatformAccessibilityProps({
+                      accessibilityRole: 'button',
+                      accessibilityLabel: t('actions.complete'),
+                    })}
                   >
                     {t('actions.complete')}
                   </Button>
                   <Button
                     size="$2"
                     onPress={() => setEditingTask(task)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('actions.edit')}
+                    {...toPlatformAccessibilityProps({
+                      accessibilityRole: 'button',
+                      accessibilityLabel: t('actions.edit'),
+                    })}
                   >
                     {t('actions.edit')}
                   </Button>
                   <Button
                     size="$2"
                     onPress={() => duplicate.mutate(task.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('actions.duplicate')}
+                    {...toPlatformAccessibilityProps({
+                      accessibilityRole: 'button',
+                      accessibilityLabel: t('actions.duplicate'),
+                    })}
                   >
                     {t('actions.duplicate')}
                   </Button>
                   <Button
                     size="$2"
                     onPress={() => archive.mutate(task.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel={t('actions.archive')}
+                    {...toPlatformAccessibilityProps({
+                      accessibilityRole: 'button',
+                      accessibilityLabel: t('actions.archive'),
+                    })}
                   >
                     {t('actions.archive')}
                   </Button>
@@ -190,16 +220,32 @@ export function TasksScreen() {
         )}
       </ScrollView>
 
-      {!editingTask && (
-        <View position="absolute" bottom="$6" right="$6" zIndex={100}>
-          <IconButton
-            variant="primary"
-            iconToken={<Plus color="$contentOnAccent" />}
-            tooltipI18nKey="tasks:fab"
-            accessibilityHintI18nKey="tasks:fabHint"
-            onPress={() => openQuickCapture('tasks')}
-          />
-        </View>
+      {!editingTask && !creatingWithGoalId && (
+        // Rendered via Portal, not inline: a plain `position:absolute` +
+        // `zIndex` here is trapped inside this ScrollView's own nested
+        // stacking contexts on web and can never out-rank the FloatingTabBar
+        // (a later, unrelated sibling rendered by (tabs)/_layout.tsx with no
+        // stacking context of its own — DOM paint order alone lets it win
+        // every hit-test in this corner, regardless of this z-index). Portal
+        // escapes to the app-root-level PortalHost, the same mechanism
+        // Dialog/BottomSheet/ActionSheet already rely on to render above
+        // everything. Portal content sits outside AppearanceProvider's
+        // `<Theme>` wrapper (TECH_DEBT Item 20), so the active experience
+        // theme is re-applied explicitly here rather than silently falling
+        // back to the default theme.
+        <Portal>
+          <Theme name={themeId as any}>
+            <View position="absolute" bottom="$6" right="$6" zIndex={100}>
+              <IconButton
+                variant="primary"
+                iconToken={<Plus color="$contentOnAccent" />}
+                tooltipI18nKey="tasks:fab"
+                accessibilityHintI18nKey="tasks:fabHint"
+                onPress={() => openQuickCapture('tasks')}
+              />
+            </View>
+          </Theme>
+        </Portal>
       )}
     </View>
   );

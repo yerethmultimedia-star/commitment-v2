@@ -10,6 +10,8 @@ import {
   TaskDeletedEvent,
   TaskPriorityChangedEvent,
   TaskDueDateChangedEvent,
+  TaskRelinkedToGoalEvent,
+  TaskRelinkedToCommitmentEvent,
 } from '@commitment/domain';
 import { InMemoryTaskProjectionStore } from '../../infrastructure/in-memory-task-projection.store';
 
@@ -194,6 +196,40 @@ export class TaskDueDateChangedProjector implements IEventHandler<TaskDueDateCha
   }
 }
 
+@EventsHandler(TaskRelinkedToGoalEvent)
+export class TaskRelinkedToGoalProjector implements IEventHandler<TaskRelinkedToGoalEvent> {
+  constructor(
+    @Inject('TaskProjectionStore')
+    private readonly store: InMemoryTaskProjectionStore,
+  ) {}
+
+  public handle(event: TaskRelinkedToGoalEvent): void {
+    const view = this.store.findById(event.payload.taskId);
+    if (!view) return;
+    view.goalId = event.payload.goalId;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
+@EventsHandler(TaskRelinkedToCommitmentEvent)
+export class TaskRelinkedToCommitmentProjector implements IEventHandler<TaskRelinkedToCommitmentEvent> {
+  constructor(
+    @Inject('TaskProjectionStore')
+    private readonly store: InMemoryTaskProjectionStore,
+  ) {}
+
+  public handle(event: TaskRelinkedToCommitmentEvent): void {
+    const view = this.store.findById(event.payload.taskId);
+    if (!view) return;
+    view.commitmentId = event.payload.commitmentId;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
 export const TaskProjectors = [
   TaskRegisteredProjector,
   TaskEditedProjector,
@@ -204,4 +240,6 @@ export const TaskProjectors = [
   TaskDeletedProjector,
   TaskPriorityChangedProjector,
   TaskDueDateChangedProjector,
+  TaskRelinkedToGoalProjector,
+  TaskRelinkedToCommitmentProjector,
 ];

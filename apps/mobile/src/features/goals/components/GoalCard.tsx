@@ -2,8 +2,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
-import { Card, Title, Body } from '@commitment/design-system';
-import { GoalProgressBar } from './GoalProgressBar';
+import { Card, Title, Body, ProgressMetric } from '@commitment/design-system';
 import { CATEGORY_ICON, PRIORITY_COLOR, GoalCategory, GoalPriority } from '../utils/goal-descriptors';
 
 export interface GoalCardProps {
@@ -33,10 +32,14 @@ export function GoalCard({ id, title, category, priority, progress }: GoalCardPr
             <Icon color="$accent" size={20} />
           </Circle>
           <YStack flex={1}>
-            {/* numberOfLines keeps every card the same height regardless of
-                title length — without it, long titles wrap to 2 lines and
-                short ones stay at 1, breaking the list's visual rhythm. */}
-            <Title fontSize="$subtitle" lineHeight="$subtitle" numberOfLines={1} ellipsizeMode="tail">{title}</Title>
+            {/* minHeight reserves 2 lines' worth of space so every card is
+                still the same height whether the title takes 1 or 2 lines —
+                numberOfLines=2 (not 1) per TECH_DEBT P5: single-line
+                ellipsis was cutting titles mid-word ("Learn conversational
+                Portugu..."). */}
+            <YStack minHeight={42} justifyContent="center">
+              <Title fontSize="$subtitle" lineHeight="$subtitle" numberOfLines={2} ellipsizeMode="tail">{title}</Title>
+            </YStack>
             <XStack gap="$2" alignItems="center">
               <Body tone="secondary" fontSize="$2">{t(`goals.categories.${category}`)}</Body>
               <Circle size={4} backgroundColor="$divider" />
@@ -51,7 +54,7 @@ export function GoalCard({ id, title, category, priority, progress }: GoalCardPr
           </YStack>
           <Body fontWeight="700" color="$accent">{Math.round(progress * 100)}%</Body>
         </XStack>
-        <GoalProgressBar progress={progress} />
+        <ProgressMetric progress={progress} variant="linear" size="medium" showPercentage={false} />
       </YStack>
     </Card>
   );

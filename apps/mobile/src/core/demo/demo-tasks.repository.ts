@@ -1,16 +1,25 @@
-import { demoTasks, getDemoDashboard, DEMO_IDENTITY_ID } from './demo-data';
+import { demoTasks, replaceDemoTasks, getDemoDashboard, DEMO_IDENTITY_ID } from './demo-data';
 import { TaskModel, TaskPriority } from '@/features/tasks/models/task.model';
 
 /**
- * Demo-mode implementation mirroring tasks.api.ts. Mutates the in-memory
- * demo dataset directly so the Tasks screen (create/complete/archive/
- * duplicate/reprioritize) stays interactive during a demo, without a
- * backend.
+ * Demo-mode implementation mirroring tasks.api.ts. Every mutating method
+ * builds a NEW array via replaceDemoTasks() rather than mutating demoTasks
+ * or a task object in place — required for React Query's refetch() and
+ * React's useMemo (both keyed on referential equality) to actually detect
+ * the change (see replaceDemoTasks's doc comment in demo-data.ts for the
+ * bug this avoids).
  */
 function findOrThrow(id: string): TaskModel {
   const task = demoTasks.find((t) => t.id === id);
   if (!task) throw new Error(`Demo task not found: ${id}`);
   return task;
+}
+
+/** Replaces one task by id with an updated copy, via a new array reference. */
+function replace(id: string, updates: Partial<TaskModel>): TaskModel {
+  const updated = { ...findOrThrow(id), ...updates };
+  replaceDemoTasks(demoTasks.map((t) => (t.id === id ? updated : t)));
+  return updated;
 }
 
 let demoTaskCounter = demoTasks.length;
@@ -20,10 +29,10 @@ export const demoTasksRepository = {
 
   dashboard: async () => getDemoDashboard(),
 
-  create: async (payload: { id?: string; title: string; description?: string; priority?: TaskPriority; dueDate?: string; commitmentId?: string }) => {
+  create: async (payload: { id?: string; title: string; description?: string; priority?: TaskPriority; dueDate?: string; commitmentId?: string; goalId?: string }) => {
     demoTaskCounter += 1;
     const id = payload.id ?? `t-demo-${demoTaskCounter}`;
-    demoTasks.unshift({
+    const task: TaskModel = {
       id,
       identityId: DEMO_IDENTITY_ID,
       title: payload.title,
@@ -34,30 +43,34 @@ export const demoTasksRepository = {
       actualMinutes: 0,
       dueDate: payload.dueDate ?? new Date().toISOString(),
       commitmentId: payload.commitmentId ?? null,
+      goalId: payload.goalId ?? null,
       createdAt: new Date().toISOString(),
       completedAt: null,
-    });
+    };
+    replaceDemoTasks([task, ...demoTasks]);
     return { taskId: id };
   },
 
   edit: async (id: string, payload: Partial<Pick<TaskModel, 'title' | 'description'>>) => {
-    const task = findOrThrow(id);
-    if (payload.title !== undefined) task.title = payload.title;
-    if (payload.description !== undefined) task.description = payload.description ?? '';
+    const updates: Partial<TaskModel> = {};
+    if (payload.title !== undefined) updates.title = payload.title;
+    if (payload.description !== undefined) updates.description = payload.description ?? '';
+    replace(id, updates);
     return { taskId: id };
   },
 
   complete: async (id: string) => {
     const task = findOrThrow(id);
-    task.status = 'completed';
-    task.completedAt = new Date().toISOString();
-    task.actualMinutes = task.estimatedMinutes;
+    replace(id, {
+      status: 'completed',
+      completedAt: new Date().toISOString(),
+      actualMinutes: task.estimatedMinutes,
+    });
     return { taskId: id };
   },
 
   archive: async (id: string) => {
-    const task = findOrThrow(id);
-    task.status = 'archived';
+    replace(id, { status: 'archived' });
     return { taskId: id };
   },
 
@@ -65,20 +78,34 @@ export const demoTasksRepository = {
     const source = findOrThrow(id);
     demoTaskCounter += 1;
     const id2 = `t-demo-${demoTaskCounter}`;
-    demoTasks.unshift({
+    const copy: TaskModel = {
       ...source,
       id: id2,
       status: 'pending',
       completedAt: null,
       actualMinutes: 0,
       createdAt: new Date().toISOString(),
-    });
+    };
+    replaceDemoTasks([copy, ...demoTasks]);
     return { taskId: id2 };
   },
 
   changePriority: async (id: string, priority: TaskPriority) => {
-    const task = findOrThrow(id);
-    task.priority = priority;
+    replace(id, { priority });
+    return { taskId: id };
+  },
+
+  // Mutually exclusive with commitmentId, mirroring the Task domain
+  // invariant — linking a Goal directly clears any Commitment link, since
+  // a Commitment's own Goal (if any) is resolved for display, never stored
+  // on the task twice. See relinkCommitment() below for the reverse case.
+  relinkGoal: async (id: string, goalId: string | null) => {
+    replace(id, { goalId, ...(goalId !== null ? { commitmentId: null } : {}) });
+    return { taskId: id };
+  },
+
+  relinkCommitment: async (id: string, commitmentId: string | null) => {
+    replace(id, { commitmentId, ...(commitmentId !== null ? { goalId: null } : {}) });
     return { taskId: id };
   },
 };

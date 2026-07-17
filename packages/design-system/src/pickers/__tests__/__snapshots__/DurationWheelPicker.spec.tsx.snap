@@ -1,0 +1,923 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DurationWheelPicker matches midnight theme snapshot 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flexDirection": "row",
+      "gap": 20,
+      "justifyContent": "center",
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "gap": 8,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "height": 200,
+          "overflow": "hidden",
+          "position": "relative",
+          "width": 64,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#8B5CF666",
+            "borderBottomLeftRadius": 7,
+            "borderBottomRightRadius": 7,
+            "borderTopLeftRadius": 7,
+            "borderTopRightRadius": 7,
+            "flexDirection": "column",
+            "height": 40,
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 80,
+          }
+        }
+      />
+      <RCTScrollView
+        accessibilityLabel="h: 0"
+        contentContainerStyle={
+          {
+            "paddingBottom": 80,
+            "paddingTop": 80,
+          }
+        }
+        contentOffset={
+          {
+            "x": 0,
+            "y": 0,
+          }
+        }
+        decelerationRate="fast"
+        onMomentumScrollEnd={[Function]}
+        scrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={40}
+        style={
+          {
+            "height": 200,
+          }
+        }
+      >
+        <View>
+          <View
+            accessibilityLabel="0"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": true,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+                  "fontSize": 24,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 1,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              0
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="1"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              1
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="2"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              2
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="3"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              3
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="4"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              4
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="5"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              5
+            </Text>
+          </View>
+        </View>
+      </RCTScrollView>
+    </View>
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#A1A1AA",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.1,
+          "lineHeight": 18,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      h
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "column",
+        "gap": 8,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "height": 200,
+          "overflow": "hidden",
+          "position": "relative",
+          "width": 64,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#8B5CF666",
+            "borderBottomLeftRadius": 7,
+            "borderBottomRightRadius": 7,
+            "borderTopLeftRadius": 7,
+            "borderTopRightRadius": 7,
+            "flexDirection": "column",
+            "height": 40,
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 80,
+          }
+        }
+      />
+      <RCTScrollView
+        accessibilityLabel="min: 30"
+        contentContainerStyle={
+          {
+            "paddingBottom": 80,
+            "paddingTop": 80,
+          }
+        }
+        contentOffset={
+          {
+            "x": 0,
+            "y": 240,
+          }
+        }
+        decelerationRate="fast"
+        onMomentumScrollEnd={[Function]}
+        scrollEnabled={true}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={40}
+        style={
+          {
+            "height": 200,
+          }
+        }
+      >
+        <View>
+          <View
+            accessibilityLabel="00"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              00
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="05"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              05
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="10"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              10
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="15"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              15
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="20"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              20
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="25"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              25
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="30"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": true,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter, Helvetica, Arial, sans-serif",
+                  "fontSize": 24,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 1,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              30
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="35"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              35
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="40"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              40
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="45"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              45
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="50"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              50
+            </Text>
+          </View>
+          <View
+            accessibilityLabel="55"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "selected": false,
+              }
+            }
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "column",
+                "height": 40,
+                "justifyContent": "center",
+              }
+            }
+          >
+            <Text
+              allowFontScaling={true}
+              maxFontSizeMultiplier={1.5}
+              style={
+                {
+                  "color": "#FAFAFA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 17,
+                  "letterSpacing": -0.2,
+                  "lineHeight": 22,
+                  "opacity": 0.35,
+                }
+              }
+              suppressHighlighting={true}
+            >
+              55
+            </Text>
+          </View>
+        </View>
+      </RCTScrollView>
+    </View>
+    <Text
+      allowFontScaling={true}
+      maxFontSizeMultiplier={1.5}
+      style={
+        {
+          "color": "#A1A1AA",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.1,
+          "lineHeight": 18,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      min
+    </Text>
+  </View>
+</View>
+`;

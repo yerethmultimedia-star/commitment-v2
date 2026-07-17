@@ -11,6 +11,8 @@ import { TaskRegisteredEvent } from '../events/task-registered.event.js';
 import { TaskCompletedEvent } from '../events/task-completed.event.js';
 import { TaskPriorityChangedEvent } from '../events/task-priority-changed.event.js';
 import { TaskDueDateChangedEvent } from '../events/task-due-date-changed.event.js';
+import { TaskRelinkedToGoalEvent } from '../events/task-relinked-to-goal.event.js';
+import { TaskRelinkedToCommitmentEvent } from '../events/task-relinked-to-commitment.event.js';
 import {
   InvalidTaskTitleError,
   InvalidTaskDescriptionError,
@@ -418,6 +420,108 @@ describe('Task Domain', () => {
         task.delete();
         const newId = new TaskId('018f6b5c-0004-7000-8000-444444444444');
         expect(() => task.duplicate(newId)).toThrow(TaskAlreadyDeletedError);
+      });
+    });
+
+    describe('relinkGoal() / relinkCommitment()', () => {
+      const commitmentId = new CommitmentId('018f0000-0000-7000-8000-cccccccccccc');
+      const goalId = '018f0000-0000-7000-8000-999999999999';
+
+      it('links a goal-independent, commitment-independent task to a Goal', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.clearUncommittedEvents();
+
+        task.relinkGoal(goalId, new Date());
+
+        expect(task.goalId).toBe(goalId);
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        const e = events[0] as TaskRelinkedToGoalEvent;
+        expect(e.name).toBe('task.relinked_to_goal');
+        expect(e.payload.goalId).toBe(goalId);
+      });
+
+      it('relinkGoal(null) removes an existing goal link', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority, 0, null, null, goalId);
+        task.clearUncommittedEvents();
+
+        task.relinkGoal(null, new Date());
+
+        expect(task.goalId).toBeNull();
+      });
+
+      it('is a no-op and records no event when the goal is unchanged', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority, 0, null, null, goalId);
+        task.clearUncommittedEvents();
+
+        task.relinkGoal(goalId, new Date());
+
+        expect(task.getUncommittedEvents()).toHaveLength(0);
+      });
+
+      it('links a task to a Commitment', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.clearUncommittedEvents();
+
+        task.relinkCommitment(commitmentId, new Date());
+
+        expect(task.commitmentId?.value).toBe(commitmentId.value);
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        const e = events[0] as TaskRelinkedToCommitmentEvent;
+        expect(e.name).toBe('task.relinked_to_commitment');
+        expect(e.payload.commitmentId).toBe(commitmentId.value);
+      });
+
+      it('relinkCommitment(null) removes an existing commitment link', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority, 0, null, commitmentId);
+        task.clearUncommittedEvents();
+
+        task.relinkCommitment(null, new Date());
+
+        expect(task.commitmentId).toBeNull();
+      });
+
+      it('linking to a Goal clears an existing Commitment link (mutual exclusivity)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority, 0, null, commitmentId);
+        task.clearUncommittedEvents();
+
+        task.relinkGoal(goalId, new Date());
+
+        expect(task.goalId).toBe(goalId);
+        expect(task.commitmentId).toBeNull();
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(2);
+        expect(events[0]?.name).toBe('task.relinked_to_goal');
+        expect(events[1]?.name).toBe('task.relinked_to_commitment');
+        expect((events[1] as TaskRelinkedToCommitmentEvent).payload.commitmentId).toBeNull();
+      });
+
+      it('linking to a Commitment clears an existing direct Goal link (mutual exclusivity)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority, 0, null, null, goalId);
+        task.clearUncommittedEvents();
+
+        task.relinkCommitment(commitmentId, new Date());
+
+        expect(task.commitmentId?.value).toBe(commitmentId.value);
+        expect(task.goalId).toBeNull();
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(2);
+        expect(events[0]?.name).toBe('task.relinked_to_commitment');
+        expect(events[1]?.name).toBe('task.relinked_to_goal');
+        expect((events[1] as TaskRelinkedToGoalEvent).payload.goalId).toBeNull();
+      });
+
+      it('blocks relinkGoal on an archived task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.archive();
+        expect(() => task.relinkGoal(goalId, new Date())).toThrow(TaskCannotBeArchivedError);
+      });
+
+      it('blocks relinkCommitment on a deleted task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.delete();
+        expect(() => task.relinkCommitment(commitmentId, new Date())).toThrow(TaskAlreadyDeletedError);
       });
     });
 

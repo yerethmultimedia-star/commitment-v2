@@ -42,5 +42,15 @@ export function useTaskActions() {
         tasksApi.edit(id, { title, description }),
       onSuccess: invalidate,
     }),
+    relinkGoal: useMutation({
+      mutationFn: ({ id, goalId }: { id: string; goalId: string | null }) =>
+        tasksApi.relinkGoal(id, goalId),
+      onSuccess: invalidate,
+    }),
+    relinkCommitment: useMutation({
+      mutationFn: ({ id, commitmentId }: { id: string; commitmentId: string | null }) =>
+        tasksApi.relinkCommitment(id, commitmentId),
+      onSuccess: invalidate,
+    }),
   };
 }

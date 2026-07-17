@@ -9,6 +9,7 @@ import { PostponeHabitCommand } from '../commands/postpone-habit.command';
 import { EnableHabitCommand } from '../commands/enable-habit.command';
 import { DisableHabitCommand } from '../commands/disable-habit.command';
 import { ArchiveHabitCommand } from '../commands/archive-habit.command';
+import { RelinkHabitGoalCommand } from '../commands/relink-habit-goal.command';
 import { GetHabitByIdQuery } from '../queries/get-habit-by-id.query';
 import { ListHabitsQuery } from '../queries/list-habits.query';
 import { PaginatedHabits, HabitView } from '../queries/habit-view.dto';
@@ -51,6 +52,10 @@ export class HabitApplicationService {
   }
 
   async archiveHabit(cmd: ArchiveHabitCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async relinkHabitGoal(cmd: RelinkHabitGoalCommand): Promise<void> {
     await this.commandBus.execute(cmd);
   }
 

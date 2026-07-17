@@ -17,51 +17,103 @@ import { DashboardContext, DashboardPriorityTask, isHabitDueOn } from '@commitme
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useDashboardQuery, useTasks } from '@/features/tasks/hooks/useTasks';
 import { useHabits } from '@/features/habits/hooks/useHabits';
+import { useGoals } from '@/features/goals/hooks/useGoals';
 import { useSession } from '@/core/auth/use-session';
-
-const PRIORITY_RANK: Record<'high' | 'medium' | 'low', number> = { high: 0, medium: 1, low: 2 };
+import { useTranslation } from 'react-i18next';
 
 /**
- * Picks a task from today's single highest-priority ACTIVE commitment — the
- * commitment's own priority drives which "project" today's focus comes from,
- * not the task's. Within that one commitment, the highest-priority pending
- * task today is shown (falls back to any of its pending-today tasks if none
- * carry a priority that breaks the tie). If the top commitment has no
- * pending task today, this returns null rather than reaching into a
- * lower-priority commitment — a task from a lesser priority wouldn't
- * honestly represent "today's top priority." Ties (commitment or task) keep
- * array order — neither model has a time-of-day field to break ties more
- * precisely than that.
+ * Weights driving which pending-today task wins the "priority of the day"
+ * hero. Deliberately not a fixed origin hierarchy (commitment > goal >
+ * independent) — every candidate scores on the same scale regardless of
+ * where it comes from, so a genuinely urgent independent task can outrank a
+ * low-priority commitment task. Kept as one auditable constant rather than
+ * scattered magic numbers, per VS-032 Fase 2 design doc §2.
+ */
+export const PRIORITY_TASK_SCORE_WEIGHTS = {
+  priority: { high: 30, medium: 15, low: 0 } as Record<'high' | 'medium' | 'low', number>,
+  activeCommitmentBonus: 10,
+  goalBonus: { high: 5, medium: 2, low: 0 } as Record<'high' | 'medium' | 'low', number>,
+};
+
+interface PriorityTaskCandidate {
+  id: string;
+  title: string;
+  priority: 'high' | 'medium' | 'low';
+  commitmentId?: string | null;
+  goalId?: string | null;
+  status: string;
+}
+
+/**
+ * Scores every pending-today task regardless of origin (commitment-linked,
+ * goal-linked directly, or fully independent) and returns the highest
+ * scorer. Ties keep array order — neither model has a time-of-day field to
+ * break ties more precisely than that. Returns null only when there is no
+ * pending task due today at all.
  */
 function computePriorityTask(
-  todayTasks: { id: string; title: string; priority: 'high' | 'medium' | 'low'; commitmentId?: string | null; status: string }[],
+  todayTasks: PriorityTaskCandidate[],
   allTasks: { commitmentId?: string | null; status: string }[],
-  commitments: { id: string; title: string; status: string; priority: 'high' | 'medium' | 'low' }[],
+  commitments: { id: string; title: string; status: string }[],
+  goals: { id: string; title: string; state: string; priority: 'high' | 'medium' | 'low'; commitmentIds: readonly string[] }[],
+  personalFallbackLabel: string,
 ): DashboardPriorityTask | null {
-  const activeCommitments = commitments.filter((c) => c.status === 'active');
-  if (activeCommitments.length === 0) return null;
+  if (todayTasks.length === 0) return null;
 
-  const topCommitment = [...activeCommitments].sort(
-    (a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority],
-  )[0]!;
+  const commitmentsById = new Map(commitments.map((c) => [c.id, c]));
+  const goalsById = new Map(goals.map((g) => [g.id, g]));
+  const goalByCommitmentId = new Map<string, (typeof goals)[number]>();
+  for (const goal of goals) {
+    for (const commitmentId of goal.commitmentIds) goalByCommitmentId.set(commitmentId, goal);
+  }
 
-  const candidates = todayTasks.filter((t) => t.commitmentId === topCommitment.id);
-  if (candidates.length === 0) return null;
+  // Only resolves a Commitment's Goal when the Commitment itself is active —
+  // a task on a cancelled/paused commitment shouldn't inherit its (possibly
+  // still-active) parent Goal's priority boost or context label, since the
+  // task's own path to that Goal is no longer live.
+  const resolveGoal = (task: PriorityTaskCandidate) => {
+    if (task.goalId) return goalsById.get(task.goalId) ?? null;
+    if (task.commitmentId) {
+      const commitment = commitmentsById.get(task.commitmentId);
+      if (!commitment || commitment.status !== 'active') return null;
+      return goalByCommitmentId.get(task.commitmentId) ?? null;
+    }
+    return null;
+  };
 
-  const top = [...candidates].sort((a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority])[0]!;
+  const score = (task: PriorityTaskCandidate): number => {
+    let s = PRIORITY_TASK_SCORE_WEIGHTS.priority[task.priority];
+    const commitment = task.commitmentId ? commitmentsById.get(task.commitmentId) : undefined;
+    if (commitment && commitment.status === 'active') s += PRIORITY_TASK_SCORE_WEIGHTS.activeCommitmentBonus;
+    const goal = resolveGoal(task);
+    if (goal && goal.state === 'Active') s += PRIORITY_TASK_SCORE_WEIGHTS.goalBonus[goal.priority];
+    return s;
+  };
 
-  const commitmentTasks = allTasks.filter((t) => t.commitmentId === topCommitment.id);
-  const commitmentProgressRatio = commitmentTasks.length > 0
-    ? commitmentTasks.filter((t) => t.status === 'completed').length / commitmentTasks.length
-    : 0;
+  const top = todayTasks.reduce((best, candidate) => (score(candidate) > score(best) ? candidate : best));
+
+  const commitment = top.commitmentId ? commitmentsById.get(top.commitmentId) : undefined;
+  const goal = resolveGoal(top);
+
+  const commitmentProgressRatio = commitment
+    ? (() => {
+        const commitmentTasks = allTasks.filter((t) => t.commitmentId === commitment.id);
+        return commitmentTasks.length > 0
+          ? commitmentTasks.filter((t) => t.status === 'completed').length / commitmentTasks.length
+          : 0;
+      })()
+    : undefined;
 
   return {
     taskId: top.id,
     title: top.title,
     priority: top.priority,
-    commitmentId: topCommitment.id,
-    commitmentTitle: topCommitment.title,
+    contextLabel: goal?.title ?? commitment?.title ?? personalFallbackLabel,
+    commitmentId: commitment?.id,
+    commitmentTitle: commitment?.title,
     commitmentProgressRatio,
+    goalId: goal?.id,
+    goalTitle: goal?.title,
   };
 }
 
@@ -74,6 +126,7 @@ export interface UseDashboardContextResult {
 
 export function useDashboardContext(): UseDashboardContextResult {
   const { identityId, isHydrated } = useSession();
+  const { t } = useTranslation('common');
   const {
     data: commitments = [],
     isLoading: commitmentsLoading,
@@ -90,6 +143,10 @@ export function useDashboardContext(): UseDashboardContextResult {
     data: habits = [],
     isLoading: habitsLoading,
   } = useHabits();
+  const {
+    data: goals = [],
+    isLoading: goalsLoading,
+  } = useGoals();
 
   // Bootstrap gate: both queries below are `enabled: Boolean(identityId)`, so
   // while Zustand is still rehydrating identityId from storage they report
@@ -99,7 +156,7 @@ export function useDashboardContext(): UseDashboardContextResult {
   // has already gone false — showing the Error state before auth ever gets a
   // chance to resolve. Treating "auth not yet hydrated" as its own loading
   // state closes that race.
-  const isLoading = !isHydrated || commitmentsLoading || tasksLoading || allTasksLoading || habitsLoading;
+  const isLoading = !isHydrated || commitmentsLoading || tasksLoading || allTasksLoading || habitsLoading || goalsLoading;
 
   // Only treat missing identity as a hard error, and only once hydration has
   // definitely finished. API connection errors degrade gracefully (show empty
@@ -136,10 +193,16 @@ export function useDashboardContext(): UseDashboardContextResult {
         completedTodayCount: scheduledTodayHabits.filter((h) => h.completedToday).length,
         atRiskCount: scheduledTodayHabits.filter((h) => h.currentStreakDays > 0 && !h.completedToday).length,
       },
-      priorityTask: computePriorityTask(taskData?.today ?? [], allTasks, commitments),
+      priorityTask: computePriorityTask(
+        taskData?.today ?? [],
+        allTasks,
+        commitments,
+        goals,
+        t('dashboard.hero.priorityTask.personalContext'),
+      ),
       snapshotAt: new Date().toISOString(),
     };
-  }, [isLoading, identityId, commitments, taskData, allTasks, habits]);
+  }, [isLoading, identityId, commitments, taskData, allTasks, habits, goals, t]);
 
   return { context, isLoading, isError };
 }

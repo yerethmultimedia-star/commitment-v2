@@ -18,8 +18,7 @@ exports[`IconButton matches forest theme snapshot 1`] = `
       }
     }
     accessible={true}
-    aria-busy={false}
-    aria-disabled={false}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -28,21 +27,20 @@ exports[`IconButton matches forest theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "transparent",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 22,
         "borderBottomRightRadius": 22,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 22,
         "borderTopRightRadius": 22,
         "borderTopWidth": 0,
@@ -60,6 +58,11 @@ exports[`IconButton matches forest theme snapshot 1`] = `
     }
   >
     <Text
+      style={
+        {
+          "color": "#14281A",
+        }
+      }
       suppressHighlighting={true}
     >
       Icon
@@ -86,8 +89,7 @@ exports[`IconButton matches midnight theme snapshot 1`] = `
       }
     }
     accessible={true}
-    aria-busy={false}
-    aria-disabled={false}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -96,21 +98,20 @@ exports[`IconButton matches midnight theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "transparent",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 22,
         "borderBottomRightRadius": 22,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 22,
         "borderTopRightRadius": 22,
         "borderTopWidth": 0,
@@ -128,6 +129,11 @@ exports[`IconButton matches midnight theme snapshot 1`] = `
     }
   >
     <Text
+      style={
+        {
+          "color": "#FAFAFA",
+        }
+      }
       suppressHighlighting={true}
     >
       Icon
@@ -154,8 +160,7 @@ exports[`IconButton matches sunrise theme snapshot 1`] = `
       }
     }
     accessible={true}
-    aria-busy={false}
-    aria-disabled={false}
+    collapsable={false}
     onBlur={[Function]}
     onFocus={[Function]}
     onResponderGrant={[Function]}
@@ -164,21 +169,20 @@ exports[`IconButton matches sunrise theme snapshot 1`] = `
     onResponderTerminate={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
-    role="button"
     style={
       {
         "alignItems": "center",
-        "backgroundColor": "transparent",
-        "borderBottomColor": "transparent",
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "borderBottomColor": "rgba(0, 0, 0, 0)",
         "borderBottomLeftRadius": 22,
         "borderBottomRightRadius": 22,
         "borderBottomWidth": 0,
-        "borderLeftColor": "transparent",
+        "borderLeftColor": "rgba(0, 0, 0, 0)",
         "borderLeftWidth": 0,
-        "borderRightColor": "transparent",
+        "borderRightColor": "rgba(0, 0, 0, 0)",
         "borderRightWidth": 0,
         "borderStyle": "solid",
-        "borderTopColor": "transparent",
+        "borderTopColor": "rgba(0, 0, 0, 0)",
         "borderTopLeftRadius": 22,
         "borderTopRightRadius": 22,
         "borderTopWidth": 0,
@@ -196,6 +200,11 @@ exports[`IconButton matches sunrise theme snapshot 1`] = `
     }
   >
     <Text
+      style={
+        {
+          "color": "#271F15",
+        }
+      }
       suppressHighlighting={true}
     >
       Icon

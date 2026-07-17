@@ -91,10 +91,16 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   },
 ];
 
+/** A Milestone's targetDate, when it has one, is always the date of an existing linked Commitment describing the same real-world event — never an independently invented date (see DEMO_DATASET.md's "no independently-random numbers" rule). */
+function commitmentTargetDate(commitmentId: string): string | undefined {
+  return demoCommitmentDTOs.find((c) => c.id === commitmentId)?.targetDate;
+}
+
 let demoMilestones: Milestone[] = [
   { id: 'm-01', goalId: 'g-01', title: 'Complete a 5K without stopping', completed: true },
   { id: 'm-02', goalId: 'g-01', title: 'Run 15K in training', completed: true },
-  { id: 'm-03', goalId: 'g-01', title: 'Finish the half marathon', completed: false },
+  // Same event as Commitment c-01 ("Run a half marathon").
+  { id: 'm-03', goalId: 'g-01', title: 'Finish the half marathon', completed: false, targetDate: commitmentTargetDate('c-01') },
 
   { id: 'm-04', goalId: 'g-02', title: 'Set up a meditation corner', completed: true },
   { id: 'm-05', goalId: 'g-02', title: 'Meditate 7 days in a row', completed: false },
@@ -106,7 +112,8 @@ let demoMilestones: Milestone[] = [
 
   { id: 'm-10', goalId: 'g-04', title: 'Ship the v2 beta', completed: true },
   { id: 'm-11', goalId: 'g-04', title: 'Complete the onboarding audit', completed: true },
-  { id: 'm-12', goalId: 'g-04', title: 'Launch the redesigned website', completed: false },
+  // Same event as Commitment c-08 ("Ship the mobile redesign").
+  { id: 'm-12', goalId: 'g-04', title: 'Launch the redesigned website', completed: false, targetDate: commitmentTargetDate('c-08') },
 
   { id: 'm-13', goalId: 'g-05', title: 'Finish the beginner course', completed: true },
   { id: 'm-14', goalId: 'g-05', title: 'Hold a 5-minute conversation', completed: false },

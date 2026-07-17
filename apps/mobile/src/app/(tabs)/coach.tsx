@@ -2,13 +2,12 @@ import React, { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { YStack, XStack, Circle } from 'tamagui';
 import { TrendingDown, TrendingUp, Plus, Activity } from '@tamagui/lucide-icons';
-import { AppScreen, Card, Title, Body, IconButton, Button } from '@commitment/design-system';
+import { AppScreen, Card, Title, Body, IconButton, Button, EmptyState, SectionPrimitive } from '@commitment/design-system';
 import { useTranslation } from 'react-i18next';
 import { Recommendation, RecommendationType } from '@commitment/domain';
 import { getRecommendations } from '@/features/dashboard/engine/recommendation/RecommendationEngine';
 import { useDashboardContext } from '@/features/dashboard/hooks/useDashboardContext';
 import { useGoalFocus } from '@/features/goals/hooks/useGoalFocus';
-import { EmptyState } from '@/shared/ui/feedback/EmptyState';
 import { useUiStore, QuickCapturePrefill } from '@/core/store/use-ui-store';
 import { descriptorFor } from '@/features/coach/utils/coach-descriptors';
 import { useTabBarHeightStore } from '@/shared/store/use-tab-bar-height-store';
@@ -113,17 +112,17 @@ export default function CoachScreen() {
         {isLoading ? (
           <Body i18nKey="coach.loading" tone="secondary" />
         ) : recommendations.length === 0 ? (
-          <EmptyState title={t('coach.empty.title')} description={t('coach.empty.description')} />
+          <EmptyState fullscreen={false} title={{ i18nKey: 'coach.empty.title' }} description={{ i18nKey: 'coach.empty.description' }} />
         ) : (
           <YStack gap="$5">
             {topRecommendation && (
-              <YStack gap="$2">
-                <Body fontWeight="600" tone="secondary" textTransform="uppercase" fontSize="$2">
-                  {t('coach.sections.todayRecommendation')}
-                </Body>
+              <SectionPrimitive title={{ i18nKey: 'coach.sections.todayRecommendation' }}>
                 <Card variant="elevated" backgroundColor="$accent" borderColor="transparent">
                   <XStack gap="$3" alignItems="center">
-                    <Circle size={44} backgroundColor="rgba(255,255,255,0.2)" justifyContent="center" alignItems="center">
+                    <Circle size={44} justifyContent="center" alignItems="center">
+                      {/* Translucent backing layer kept separate from the icon
+                          sibling below — opacity on a shared parent would fade the icon too. */}
+                      <Circle position="absolute" size={44} backgroundColor="$contentOnAccent" opacity={0.2} />
                       {(() => {
                         const Icon = descriptorFor(topRecommendation.targetId).icon;
                         return <Icon color="$contentOnAccent" size={22} />;
@@ -146,14 +145,11 @@ export default function CoachScreen() {
                     </YStack>
                   </XStack>
                 </Card>
-              </YStack>
+              </SectionPrimitive>
             )}
 
             {momentum && (
-              <YStack gap="$2">
-                <Body fontWeight="600" tone="secondary" textTransform="uppercase" fontSize="$2">
-                  {t('coach.sections.momentum')}
-                </Body>
+              <SectionPrimitive title={{ i18nKey: 'coach.sections.momentum' }}>
                 <Card variant="elevated">
                   <XStack gap="$3" alignItems="center">
                     <Circle size={44} backgroundColor="$focus" justifyContent="center" alignItems="center">
@@ -165,14 +161,11 @@ export default function CoachScreen() {
                     </YStack>
                   </XStack>
                 </Card>
-              </YStack>
+              </SectionPrimitive>
             )}
 
             {goalFocusItems.length > 0 && (
-              <YStack gap="$2">
-                <Body fontWeight="600" tone="secondary" textTransform="uppercase" fontSize="$2">
-                  {t('coach.sections.goalFocus')}
-                </Body>
+              <SectionPrimitive title={{ i18nKey: 'coach.sections.goalFocus' }}>
                 <YStack gap="$3">
                   {goalFocusItems.map((item) => {
                     const Icon = item.kind === 'needs-attention' ? TrendingDown : TrendingUp;
@@ -208,21 +201,18 @@ export default function CoachScreen() {
                     );
                   })}
                 </YStack>
-              </YStack>
+              </SectionPrimitive>
             )}
 
             {SECTIONS.map((section) => {
               const items = recommendations.filter((rec) => rec.type === section.type);
               if (items.length === 0) return null;
               return (
-                <YStack key={section.type} gap="$2">
-                  <Body fontWeight="600" tone="secondary" textTransform="uppercase" fontSize="$2">
-                    {t(section.titleKey)}
-                  </Body>
+                <SectionPrimitive key={section.type} title={{ i18nKey: section.titleKey }}>
                   <YStack gap="$3">
                     {items.map((rec) => renderRecommendationCard(rec, { suggestion: section.suggestion }))}
                   </YStack>
-                </YStack>
+                </SectionPrimitive>
               );
             })}
           </YStack>

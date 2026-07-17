@@ -1,42 +1,27 @@
 import React from 'react';
-import { YStack, Text } from 'tamagui';
-import { Animated } from 'react-native';
-import { useFadeIn } from '../hooks/useMotion.js';
+import { FeedbackState, FeedbackText, FeedbackSpacing } from './FeedbackState.js';
 
+/**
+ * An illustration/icon + title + optional description + optional action —
+ * for "nothing here yet" states (no Goals, no Habits due today, no search
+ * results). See FeedbackState.tsx for the shared implementation; this file
+ * only fixes fullscreen=true and tone='neutral' as EmptyState's defaults.
+ */
 export interface EmptyStateProps {
-  illustration: React.ReactNode;
-  title: string;
-  description?: string;
-  action?: React.ReactNode;
+  icon?: React.ReactNode;
+  illustration?: React.ReactNode;
+  title?: FeedbackText;
+  description?: FeedbackText;
+  primaryAction?: React.ReactNode;
+  secondaryAction?: React.ReactNode;
+  spacing?: FeedbackSpacing;
+  fullscreen?: boolean;
+  testID?: string;
+  accessibilityLabelI18nKey?: string;
 }
 
-export function EmptyState({ illustration, title, description, action }: EmptyStateProps) {
-  const { opacity } = useFadeIn(500);
+export const EmptyState = React.forwardRef<any, EmptyStateProps>(({ fullscreen = true, ...props }, ref) => (
+  <FeedbackState ref={ref as any} fullscreen={fullscreen} {...props} />
+));
 
-  return (
-    <Animated.View style={{ flex: 1, opacity }}>
-      <YStack
-        flex={1}
-        alignItems="center"
-        justifyContent="center"
-        padding="$6"
-        gap="$4"
-      >
-        {illustration}
-        <Text fontSize="$6" fontWeight="600" color="$contentPrimary" textAlign="center">
-          {title}
-        </Text>
-        {description && (
-          <Text fontSize="$4" color="$contentSecondary" textAlign="center" maxWidth={300}>
-            {description}
-          </Text>
-        )}
-        {action && (
-          <YStack marginTop="$4">
-            {action}
-          </YStack>
-        )}
-      </YStack>
-    </Animated.View>
-  );
-}
+EmptyState.displayName = 'EmptyState';

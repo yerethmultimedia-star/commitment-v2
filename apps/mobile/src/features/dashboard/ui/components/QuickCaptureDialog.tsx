@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { XStack, Button as TamaguiButton } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Dialog, Button, Title, Input, Stack, Inline } from '@commitment/design-system';
+import { Dialog, Button, Title, Input, Stack, Inline, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { useSession } from '@/core/auth/use-session';
+import { queryKeys } from '@/core/query/query-keys';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { goalsApi } from '@/features/goals/api/goals.api';
 import { habitsApi } from '@/features/habits/api/habits.api';
@@ -28,23 +29,37 @@ export interface QuickCaptureDialogProps {
 type CaptureType = 'goal' | 'habit' | 'task' | 'note';
 const CAPTURE_TYPES: CaptureType[] = ['goal', 'habit', 'task', 'note'];
 
+// Screens whose "+" only ever means one obvious type get that type
+// pre-selected — e.g. Goals' FAB should never open on "Tarea" by default.
+// Screens with no single obvious type (Today, Calendar, Coach, Tasks' own
+// FAB already wants 'task') are intentionally left out, falling through to
+// the 'task' default below.
+const SOURCE_DEFAULT_TYPE: Partial<Record<string, CaptureType>> = {
+  goals: 'goal',
+};
+
 export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogProps) {
   const { t } = useTranslation();
   const { identityId } = useSession();
   const queryClient = useQueryClient();
+  const source = useUiStore((s) => s.quickCaptureSource);
   const prefill = useUiStore((s) => s.quickCapturePrefill);
   const [type, setType] = useState<CaptureType>('task');
   const [text, setText] = useState('');
   const [isCapturing, setIsCapturing] = useState(false);
 
-  // Accepting a Coach suggestion opens this dialog pre-populated — sync
-  // local state from the store each time it opens with a prefill set.
+  // Sync local state from the store each time the dialog opens: a prefill
+  // (accepted Coach suggestion) wins outright; otherwise default the type to
+  // whatever the triggering screen's "+" obviously means, per the map above.
   useEffect(() => {
-    if (open && prefill) {
+    if (!open) return;
+    if (prefill) {
       setType(prefill.type);
       setText(prefill.text);
+    } else {
+      setType(SOURCE_DEFAULT_TYPE[source ?? ''] ?? 'task');
     }
-  }, [open, prefill]);
+  }, [open, prefill, source]);
 
   const handleCapture = async () => {
     const trimmed = text.trim();
@@ -54,6 +69,7 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
     try {
       if (type === 'goal') {
         await goalsApi.create({ title: trimmed });
+        queryClient.invalidateQueries({ queryKey: queryKeys.goals.all });
       } else if (type === 'habit') {
         // Sensible defaults for a bare quick-captured habit (Daily, 9:00 AM) — fully editable afterward.
         await habitsApi.create({
@@ -64,6 +80,8 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
           reminderHour: 9,
           reminderMinute: 0,
         });
+        queryClient.invalidateQueries({ queryKey: queryKeys.habits.all });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       } else if (type === 'note') {
         await notesApi.create({ text: trimmed });
       } else {
@@ -93,8 +111,10 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
               theme={type === option ? 'active' : undefined}
               disabled={isCapturing}
               onPress={() => setType(option)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: type === option }}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityState: { selected: type === option },
+              })}
               aria-pressed={type === option}
             >
               {t(`quickCapture.types.${option}`)}

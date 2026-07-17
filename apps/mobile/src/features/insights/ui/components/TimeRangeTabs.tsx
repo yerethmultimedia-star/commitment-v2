@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { XStack, Button as TamaguiButton, ScrollView } from 'tamagui';
+import { toPlatformAccessibilityProps } from '@commitment/design-system';
 
 export type TimeRange = 'week' | 'month' | 'quarter' | 'year';
 
@@ -41,8 +42,10 @@ export function TimeRangeTabs({ activeRange, enabledRanges, onChange }: TimeRang
               disabled={!enabled}
               pressStyle={enabled ? { opacity: 0.85 } : undefined}
               onPress={enabled ? () => onChange(range) : undefined}
-              accessibilityRole="button"
-              accessibilityState={{ selected, disabled: !enabled }}
+              {...toPlatformAccessibilityProps({
+                accessibilityRole: 'button',
+                accessibilityState: { selected, disabled: !enabled },
+              })}
             >
               {t(`insights.overview.range.${range}`)}
               {!enabled ? ` (${t('insights.overview.range.comingSoon')})` : ''}

@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { YStack, XStack, Text } from 'tamagui';
+import { YStack, XStack } from 'tamagui';
 import { useRouter } from 'expo-router';
 import { Check } from '@tamagui/lucide-icons';
-import { Card } from '@commitment/design-system';
+import { Card, Body, EmptyState, toPlatformAccessibilityProps } from '@commitment/design-system';
 import { isHabitDueOn } from '@commitment/domain';
 import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
 
@@ -22,29 +22,28 @@ export const TodayHabitsWidget = React.memo(function TodayHabitsWidget() {
     <Card variant="elevated">
       <YStack gap="$3">
         <XStack justifyContent="space-between" alignItems="center">
-          <Text fontSize="$5" fontWeight="600" color="$contentPrimary">
+          <Body fontSize="$5" fontWeight="600">
             {t('dashboard.widgets.todayHabits.title')}
-          </Text>
-          <Text
+          </Body>
+          <Body
             fontSize="$3"
             fontWeight="600"
             color="$accent"
             onPress={() => router.push('/habits' as any)}
+            accessibilityRole="button"
           >
             {t('dashboard.widgets.todayHabits.viewAll')}
-          </Text>
+          </Body>
         </XStack>
 
         <YStack gap="$2">
           {todayHabits.length === 0 ? (
-            <YStack padding="$4" alignItems="center" backgroundColor="$surface" borderRadius="$3">
-              <Text color="$contentPrimary" fontWeight="bold" fontSize="$4">
-                {t('dashboard.widgets.todayHabits.empty.title')}
-              </Text>
-              <Text color="$contentSecondary" fontSize="$3" marginTop="$1">
-                {t('dashboard.widgets.todayHabits.empty.description')}
-              </Text>
-            </YStack>
+            <EmptyState
+              fullscreen={false}
+              spacing="compact"
+              title={{ i18nKey: 'dashboard.widgets.todayHabits.empty.title' }}
+              description={{ i18nKey: 'dashboard.widgets.todayHabits.empty.description' }}
+            />
           ) : (
             todayHabits.slice(0, 3).map((habit) => (
               <XStack
@@ -54,9 +53,11 @@ export const TodayHabitsWidget = React.memo(function TodayHabitsWidget() {
                 paddingVertical="$1"
                 onPress={() => toggleHabit.mutate({ id: habit.id, completedToday: habit.completedToday })}
                 pressStyle={{ opacity: 0.7 }}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: habit.completedToday }}
-                accessibilityLabel={t('dashboard.widgets.todayHabits.itemA11y', { title: habit.title })}
+                {...toPlatformAccessibilityProps({
+                  accessibilityRole: 'checkbox',
+                  accessibilityState: { checked: habit.completedToday },
+                  accessibilityLabel: t('dashboard.widgets.todayHabits.itemA11y', { title: habit.title }),
+                })}
               >
                 <YStack
                   width={22}
@@ -70,19 +71,18 @@ export const TodayHabitsWidget = React.memo(function TodayHabitsWidget() {
                 >
                   {habit.completedToday && <Check size={14} color="$contentOnSemantic" />}
                 </YStack>
-                <Text
-                  color="$contentPrimary"
+                <Body
                   fontSize="$4"
                   numberOfLines={1}
                   flex={1}
                   textDecorationLine={habit.completedToday ? 'line-through' : 'none'}
                 >
                   {habit.title}
-                </Text>
+                </Body>
                 {habit.currentStreakDays > 0 && (
-                  <Text fontSize="$3" color="$contentTertiary">
+                  <Body fontSize="$3" tone="tertiary">
                     {t('dashboard.widgets.todayHabits.streak', { count: habit.currentStreakDays })}
-                  </Text>
+                  </Body>
                 )}
               </XStack>
             ))

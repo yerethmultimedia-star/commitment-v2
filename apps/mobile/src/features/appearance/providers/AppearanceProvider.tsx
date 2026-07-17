@@ -50,12 +50,17 @@ export const AppearanceProvider = ({ children, userId }: { children: React.React
         viewShotRef.current.capture().then((uri: string) => {
           setSnapshotUri(uri);
           opacity.value = 1;
-          
+
           // Now apply the new theme
           setActiveAppearance(appearance);
-          
-          // Crossfade: 200ms
-          opacity.value = withTiming(0, { duration: 200 }, (finished) => {
+
+          // Crossfade duration: theme.motion.pageTransition
+          // (COMMITMENT_EXPERIENCE_GUIDE.md §5) — was a hardcoded 200ms
+          // matching nothing else in the app; identical across all 4 themes,
+          // so reading it off the pre-transition resolvedAppearance here is
+          // safe even though `activeAppearance` hasn't updated yet.
+          const crossfadeDuration = resolvedAppearance?.theme.motion.pageTransition ?? 300;
+          opacity.value = withTiming(0, { duration: crossfadeDuration }, (finished) => {
             if (finished) {
               runOnJS(setSnapshotUri)(null);
             }

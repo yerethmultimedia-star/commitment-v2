@@ -1,20 +1,23 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Stack as ExpoStack } from 'expo-router';
-import { YStack, XStack, Circle, ScrollView } from 'tamagui';
+import { YStack, XStack, Circle } from 'tamagui';
 import {
-  CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Pencil,
+  CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Plus,
 } from '@tamagui/lucide-icons';
-import { AppScreen, Card, Title, Body, IconButton } from '@commitment/design-system';
+import {
+  AppScreen, Card, Body, IconButton,
+  ProgressMetric, MetricCard, SectionHeader, LoadingState,
+} from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useRouter } from 'expo-router';
 import { useGoal, useToggleMilestone } from '../hooks/useGoals';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
-import { formatRecurrence } from '@/features/habits/utils/format-recurrence';
+import { HabitCard } from '@/features/habits/components/HabitCard';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
-import { CircularProgress } from '../components/CircularProgress';
+import { GoalTabStrip } from '../components/GoalTabStrip';
 import { CATEGORY_ICON } from '../utils/goal-descriptors';
 
 export interface GoalWorkspaceScreenProps {
@@ -50,8 +53,11 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
     [habits, goalId]
   );
   const linkedTasks = useMemo(
-    () => tasks.filter((tk) => tk.commitmentId && goal?.commitmentIds.includes(tk.commitmentId)),
-    [tasks, goal]
+    () => tasks.filter((tk) =>
+      tk.goalId === goalId ||
+      (tk.commitmentId && goal?.commitmentIds.includes(tk.commitmentId))
+    ),
+    [tasks, goal, goalId]
   );
   const upcomingTasks = useMemo(() => {
     const now = new Date();
@@ -79,9 +85,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   if (isLoading || !goal) {
     return (
       <AppScreen scrollable>
-        <YStack padding="$4">
-          <Body i18nKey="goals.workspace.loading" tone="secondary" />
-        </YStack>
+        <LoadingState fullscreen={false} title={{ i18nKey: 'goals.workspace.loading' }} />
       </AppScreen>
     );
   }
@@ -104,31 +108,13 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
             </XStack>
           </XStack>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <XStack gap="$md" borderBottomWidth={1} borderBottomColor="$divider">
-              {TABS.map((tb) => (
-                <YStack
-                  key={tb}
-                  onPress={() => setTab(tb)}
-                  paddingBottom="$2"
-                  borderBottomWidth={2}
-                  borderBottomColor={tab === tb ? '$accent' : 'transparent'}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: tab === tb }}
-                >
-                  <Body fontWeight={tab === tb ? '700' : '500'} color={tab === tb ? '$accent' : '$contentSecondary'}>
-                    {t(`goals.workspace.tabs.${tb}`)}
-                  </Body>
-                </YStack>
-              ))}
-            </XStack>
-          </ScrollView>
+          <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.workspace.tabs.${tb}`)} />
 
           {tab === 'summary' && (
             <YStack gap="$5">
               <Card variant="elevated">
                 <XStack gap="$4" alignItems="center">
-                  <CircularProgress progress={goal.progress} />
+                  <ProgressMetric progress={goal.progress} size="medium" />
                   <YStack flex={1} gap="$1">
                     <Body tone="secondary" fontSize="$2" textTransform="uppercase" fontWeight="600">
                       {t('goals.workspace.progressLabel')}
@@ -160,11 +146,17 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
               </YStack>
 
               <YStack gap="$2">
-                <SectionLabel text={t('goals.workspace.statistics')} />
+                <SectionHeader title={{ i18nKey: 'goals.workspace.statistics' }} />
                 <XStack gap="$3" flexWrap="wrap">
-                  <StatCard icon={ListChecks} label={t('goals.workspace.stats.tasks')} value={`${stats.completedTasks}/${stats.totalTasks}`} />
-                  <StatCard icon={Repeat} label={t('goals.workspace.stats.avgStreak')} value={t('goals.workspace.stats.days', { count: stats.avgStreak })} />
-                  <StatCard icon={CheckCircle2} label={t('goals.workspace.stats.milestones')} value={`${stats.completedMilestones}/${stats.totalMilestones}`} />
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<ListChecks color="$accent" size={20} />} i18nKey="goals.workspace.stats.tasks" value={`${stats.completedTasks}/${stats.totalTasks}`} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgStreak" value={t('goals.workspace.stats.days', { count: stats.avgStreak })} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<CheckCircle2 color="$accent" size={20} />} i18nKey="goals.workspace.stats.milestones" value={`${stats.completedMilestones}/${stats.totalMilestones}`} />
+                  </YStack>
                 </XStack>
               </YStack>
             </YStack>
@@ -174,7 +166,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
             <YStack gap="$5">
               {linkedCommitments.length > 0 && (
                 <YStack gap="$2">
-                  <SectionLabel text={t('goals.workspace.commitments')} />
+                  <SectionHeader title={{ i18nKey: 'goals.workspace.commitments' }} />
                   <YStack gap="$2">
                     {linkedCommitments.map((c) => (
                       <Card
@@ -195,53 +187,44 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                 </YStack>
               )}
 
-              {linkedHabits.length > 0 && (
-                <YStack gap="$2">
-                  <SectionLabel text={t('goals.workspace.habits')} />
+              <YStack gap="$2">
+                <SectionHeader
+                  title={{ i18nKey: 'goals.workspace.habits' }}
+                  action={
+                    <IconButton
+                      iconToken={<Plus size={18} />}
+                      tooltipI18nKey="goals.workspace.addHabit"
+                      accessibilityHintI18nKey="goals.workspace.addHabit"
+                      onPress={() => router.push(`/habits/create?goalId=${goal.id}` as any)}
+                    />
+                  }
+                />
+                {linkedHabits.length > 0 && (
                   <YStack gap="$2">
                     {linkedHabits.map((h) => (
-                      <Card key={h.id} variant="elevated" opacity={h.enabled ? 1 : 0.55}>
-                        <XStack gap="$3" alignItems="center">
-                          <XStack
-                            flex={1}
-                            gap="$3"
-                            alignItems="center"
-                            onPress={h.enabled ? () => toggleHabit.mutate({ id: h.id, completedToday: h.completedToday }) : undefined}
-                            accessibilityRole="checkbox"
-                            accessibilityState={{ checked: h.completedToday, disabled: !h.enabled }}
-                            accessibilityLabel={h.title}
-                          >
-                            <Circle
-                              size={22} height={22} borderRadius={11} borderWidth={2}
-                              borderColor={h.completedToday ? '$success' : '$divider'}
-                              backgroundColor={h.completedToday ? '$success' : 'transparent'}
-                              justifyContent="center" alignItems="center"
-                            >
-                              {h.completedToday && <CheckCircle2 size={14} color="$contentOnSemantic" />}
-                            </Circle>
-                            <YStack flex={1}>
-                              <Body textDecorationLine={h.completedToday ? 'line-through' : 'none'}>{h.title}</Body>
-                              <Body tone="secondary" fontSize="$2">{formatRecurrence(t, h.recurrence)}</Body>
-                            </YStack>
-                            {h.currentStreakDays > 0 && (
-                              <Body tone="secondary" fontSize="$2">{t('goals.workspace.stats.days', { count: h.currentStreakDays })}</Body>
-                            )}
-                          </XStack>
-                          <IconButton
-                            iconToken={<Pencil size={16} />}
-                            tooltipI18nKey="habits.form.editTitle"
-                            accessibilityHintI18nKey="habits.form.editTitle"
-                            onPress={() => router.push(`/habits/${h.id}/edit` as any)}
-                          />
-                        </XStack>
-                      </Card>
+                      <HabitCard
+                        key={h.id}
+                        habit={h}
+                        onToggle={() => toggleHabit.mutate({ id: h.id, completedToday: h.completedToday })}
+                        onPress={() => router.push(`/habits/${h.id}/edit` as any)}
+                      />
                     ))}
                   </YStack>
-                </YStack>
-              )}
+                )}
+              </YStack>
 
               <YStack gap="$2">
-                <SectionLabel text={t('goals.workspace.upcoming')} />
+                <SectionHeader
+                  title={{ i18nKey: 'goals.workspace.upcoming' }}
+                  action={
+                    <IconButton
+                      iconToken={<Plus size={18} />}
+                      tooltipI18nKey="goals.workspace.addTask"
+                      accessibilityHintI18nKey="goals.workspace.addTask"
+                      onPress={() => router.push(`/(tabs)/tasks?prefillGoalId=${goal.id}` as any)}
+                    />
+                  }
+                />
                 {upcomingTasks.length === 0 ? (
                   <Card variant="elevated">
                     <Body tone="secondary" i18nKey="goals.workspace.upcomingEmpty" />
@@ -294,7 +277,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
           {tab === 'notes' && (
             <YStack gap="$5">
               <YStack gap="$2">
-                <SectionLabel text={t('goals.workspace.notes')} />
+                <SectionHeader title={{ i18nKey: 'goals.workspace.notes' }} />
                 <Card variant="elevated">
                   <XStack gap="$3" alignItems="center">
                     <StickyNote color="$contentTertiary" size={20} />
@@ -304,7 +287,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
               </YStack>
 
               <YStack gap="$2">
-                <SectionLabel text={t('goals.workspace.attachments')} />
+                <SectionHeader title={{ i18nKey: 'goals.workspace.attachments' }} />
                 <Card variant="elevated">
                   <XStack gap="$3" alignItems="center">
                     <Paperclip color="$contentTertiary" size={20} />
@@ -314,7 +297,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
               </YStack>
 
               <YStack gap="$2">
-                <SectionLabel text={t('goals.workspace.activity')} />
+                <SectionHeader title={{ i18nKey: 'goals.workspace.activity' }} />
                 <Card variant="elevated">
                   <XStack gap="$3" alignItems="center">
                     <History color="$contentTertiary" size={20} />
@@ -327,25 +310,5 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
         </YStack>
       </AppScreen>
     </>
-  );
-}
-
-function SectionLabel({ text }: { text: string }) {
-  return (
-    <Body fontWeight="600" tone="secondary" textTransform="uppercase" fontSize="$2">
-      {text}
-    </Body>
-  );
-}
-
-function StatCard({ icon: Icon, label, value }: { icon: React.ComponentType<any>; label: string; value: string }) {
-  return (
-    <Card variant="elevated" flex={1} minWidth={100}>
-      <YStack gap="$2" alignItems="center">
-        <Icon color="$accent" size={20} />
-        <Title fontSize="$title" lineHeight="$title">{value}</Title>
-        <Body tone="secondary" fontSize="$2" textAlign="center">{label}</Body>
-      </YStack>
-    </Card>
   );
 }

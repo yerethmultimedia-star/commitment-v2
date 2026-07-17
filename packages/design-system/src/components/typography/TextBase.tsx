@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text as TamaguiText, styled, GetProps } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
+import { toPlatformAccessibilityProps } from '../../accessibility/platformAccessibilityProps.js';
 
 export type TypographyRole = 'display' | 'headline' | 'title' | 'subtitle' | 'body' | 'label' | 'caption' | 'overline';
 export type Tone = 'primary' | 'secondary' | 'tertiary' | 'success' | 'warning' | 'danger' | 'disabled' | 'inverse';
@@ -62,11 +63,16 @@ export const TextBase = React.forwardRef<any, TextProps>((props, ref) => {
     numberOfLines,
     allowFontScaling = true,
     maxFontSizeMultiplier = 1.5,
+    accessibilityLabel,
+    accessibilityHint,
+    accessibilityRole,
+    accessibilityState,
+    accessibilityValue,
     ...rest
   } = props;
 
   const content = i18nKey ? t(i18nKey, i18nParams) : children;
-  
+
   // Handling truncation
   const lines = truncate && !numberOfLines ? 1 : numberOfLines;
 
@@ -78,6 +84,13 @@ export const TextBase = React.forwardRef<any, TextProps>((props, ref) => {
       maxFontSizeMultiplier={maxFontSizeMultiplier}
       // Future-proofing RTL
       // textAlign={isRTL ? 'right' : 'left'}
+      {...toPlatformAccessibilityProps({
+        accessibilityLabel,
+        accessibilityHint,
+        accessibilityRole,
+        accessibilityState,
+        accessibilityValue,
+      })}
       {...rest}
     >
       {content}

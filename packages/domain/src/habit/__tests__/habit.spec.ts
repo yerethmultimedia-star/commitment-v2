@@ -122,4 +122,40 @@ describe('Habit', () => {
     habit.archive();
     expect(() => habit.archive()).toThrow(HabitAlreadyArchivedError);
   });
+
+  it('relinkGoal() links a goal-independent habit to a goal', () => {
+    const habit = register();
+    expect(habit.goalId).toBeNull();
+    habit.relinkGoal('g-01', new Date(2026, 0, 5, 9, 0));
+    expect(habit.goalId).toBe('g-01');
+    expect(habit.getUncommittedEvents().at(-1)?.name).toBe('habit.relinked_to_goal');
+  });
+
+  it('relinkGoal() changes an existing goal link to a different goal', () => {
+    const habit = register();
+    habit.relinkGoal('g-01', new Date(2026, 0, 5, 9, 0));
+    habit.relinkGoal('g-02', new Date(2026, 0, 6, 9, 0));
+    expect(habit.goalId).toBe('g-02');
+  });
+
+  it('relinkGoal(null) removes an existing goal link — goal-independence is a valid target state', () => {
+    const habit = register();
+    habit.relinkGoal('g-01', new Date(2026, 0, 5, 9, 0));
+    habit.relinkGoal(null, new Date(2026, 0, 6, 9, 0));
+    expect(habit.goalId).toBeNull();
+  });
+
+  it('relinkGoal() is a no-op and records no event when the goal is unchanged', () => {
+    const habit = register();
+    habit.relinkGoal('g-01', new Date(2026, 0, 5, 9, 0));
+    habit.clearUncommittedEvents();
+    habit.relinkGoal('g-01', new Date(2026, 0, 6, 9, 0));
+    expect(habit.getUncommittedEvents()).toHaveLength(0);
+  });
+
+  it('relinkGoal() blocks on an archived habit', () => {
+    const habit = register();
+    habit.archive();
+    expect(() => habit.relinkGoal('g-01', new Date())).toThrow(HabitCannotBeEditedError);
+  });
 });
