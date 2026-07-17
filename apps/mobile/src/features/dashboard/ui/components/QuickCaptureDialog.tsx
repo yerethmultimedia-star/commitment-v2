@@ -10,6 +10,7 @@ import { goalsApi } from '@/features/goals/api/goals.api';
 import { habitsApi } from '@/features/habits/api/habits.api';
 import { notesApi } from '@/features/notes/api/notes.api';
 import { tasksApi } from '@/features/tasks/api/tasks.api';
+import { commitmentsApi } from '@/features/commitments/api/commitments.api';
 
 function generateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -23,11 +24,12 @@ export interface QuickCaptureDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Commitment is intentionally not an option here — per VS-031 Product
-// Experience Completion (Revision 2), Commitment is no longer exposed as a
-// primary creation concept; it lives inside a Goal's workspace (Phase 5).
-type CaptureType = 'goal' | 'habit' | 'task' | 'note';
-const CAPTURE_TYPES: CaptureType[] = ['goal', 'habit', 'task', 'note'];
+// Every first-level domain entity is eligible for Quick Capture (ADR-020,
+// "Quick Capture Philosophy") — the default is inclusion, not exclusion.
+// Commitment joined 2026-07-17; previously excluded per a VS-031 assumption
+// ("it lives inside a Goal's workspace") that ADR-019 superseded.
+type CaptureType = 'goal' | 'commitment' | 'habit' | 'task' | 'note';
+const CAPTURE_TYPES: CaptureType[] = ['goal', 'commitment', 'habit', 'task', 'note'];
 
 // Screens whose "+" only ever means one obvious type get that type
 // pre-selected — e.g. Goals' FAB should never open on "Tarea" by default.
@@ -36,6 +38,12 @@ const CAPTURE_TYPES: CaptureType[] = ['goal', 'habit', 'task', 'note'];
 // the 'task' default below.
 const SOURCE_DEFAULT_TYPE: Partial<Record<string, CaptureType>> = {
   goals: 'goal',
+  // Goals screen's "Compromisos" sub-tab. Was 'tasks' pre-rename (TECH_DEBT
+  // Item 34) — but 'tasks' is also the standalone Tasks screen's own source
+  // string, so reusing it here would've wrongly defaulted THAT screen's "+"
+  // to Compromiso too. Gets its own distinct source instead (see
+  // GoalsScreen.tsx's handleCreate) rather than overloading 'tasks'.
+  'goals-commitments': 'commitment',
 };
 
 export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogProps) {
@@ -70,6 +78,12 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
       if (type === 'goal') {
         await goalsApi.create({ title: trimmed });
         queryClient.invalidateQueries({ queryKey: queryKeys.goals.all });
+      } else if (type === 'commitment') {
+        // Minimal capture, same principle as every other type here (ADR-020):
+        // title only, no Goal picker in this dialog. Born unassociated if no
+        // Goal can be inferred — same pattern Task/Habit already follow.
+        await commitmentsApi.create({ title: trimmed });
+        queryClient.invalidateQueries({ queryKey: queryKeys.commitments.list() });
       } else if (type === 'habit') {
         // Sensible defaults for a bare quick-captured habit (Daily, 9:00 AM) — fully editable afterward.
         await habitsApi.create({

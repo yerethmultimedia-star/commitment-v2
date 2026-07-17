@@ -42,16 +42,22 @@ export function GoalsScreen() {
 
   const handleCreate = () => {
     // Habits get the full recurrence/reminder-time form (richer than Quick Capture supports).
-    // Objectives/Tasks route to Quick Capture with a source matching the active
-    // sub-tab, so it opens pre-selected to the right type (see
+    // Objetivos/Compromisos route to Quick Capture with a source matching the
+    // active sub-tab, so it opens pre-selected to the right type (see
     // QuickCaptureDialog's SOURCE_DEFAULT_TYPE) instead of always defaulting
     // as if the user were on Objetivos. Roadmaps has no capture concept yet
     // (see RoadmapsTab) — its FAB is hidden below rather than opening a
     // dialog with no correct default.
+    //
+    // 'goals-commitments', not 'tasks': the standalone Tasks screen already
+    // uses 'tasks' as its own source string, and this sub-tab (still id
+    // 'tasks' internally, labeled "Compromisos" since ADR-019 Fase 1) means
+    // something different now — reusing 'tasks' here would wrongly default
+    // the real Tasks screen's own "+" to Compromiso too (TECH_DEBT Item 34).
     if (tab === 'habits') {
       router.push('/habits/create' as any);
     } else if (tab === 'tasks') {
-      openQuickCapture('tasks');
+      openQuickCapture('goals-commitments');
     } else {
       openQuickCapture('goals');
     }

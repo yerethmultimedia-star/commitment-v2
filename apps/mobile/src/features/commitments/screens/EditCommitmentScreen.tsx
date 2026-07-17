@@ -5,12 +5,15 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Title } from '@commitment/design-system';
 import { useCommitment } from '../hooks/useCommitment';
 import { useEditCommitment } from '../hooks/useEditCommitment';
+import { useRelinkCommitmentGoal } from '../hooks/useRelinkCommitmentGoal';
 import { getEditableFields } from '@/shared/domain/commitmentActions';
 import { CommitmentForm } from '../components/forms/CommitmentForm';
 import { CommitmentFormValues } from '../models/commitment.schema';
 import { LoadingState } from '@/shared/ui/feedback/LoadingState';
 import { ErrorState } from '@/shared/ui/feedback/ErrorState';
 import { CommitmentStatusBadge } from '../components/CommitmentStatusBadge';
+
+const ALL_FIELDS = ['title', 'goalId', 'description', 'targetDate', 'recurrence', 'priority'];
 
 export function EditCommitmentScreen() {
   const { t } = useTranslation();
@@ -19,13 +22,13 @@ export function EditCommitmentScreen() {
 
   const { data: commitment, isLoading, isError, refetch } = useCommitment(id);
   const { mutateAsync, isPending } = useEditCommitment(id);
+  const relinkGoal = useRelinkCommitmentGoal();
 
   // Derive the non-editable fields declaratively — no if/else in the component
   const disabledFields = useMemo(() => {
-    if (!commitment) return ['title', 'description', 'targetDate', 'recurrence', 'priority'];
+    if (!commitment) return ALL_FIELDS;
     const editable = getEditableFields(commitment.status);
-    const allFields = ['title', 'description', 'targetDate', 'recurrence', 'priority'];
-    return allFields.filter((f) => !editable.includes(f as any));
+    return ALL_FIELDS.filter((f) => !editable.includes(f as any));
   }, [commitment]);
 
   if (isLoading) return <LoadingState />;
@@ -44,14 +47,25 @@ export function EditCommitmentScreen() {
     targetDate: commitment.targetDate ? new Date(commitment.targetDate) : null,
     recurrence: (commitment.recurrencePattern as any) ?? 'none',
     priority: commitment.priority,
+    goalId: commitment.goalId ?? null,
   };
 
   const handleSubmit = async (values: CommitmentFormValues) => {
     // Optimistic nav — same pattern as CreateCommitmentScreen
     router.replace(`/commitments/${id}` as any);
-    mutateAsync(values).catch(() => {
-      // Toast in VS-030 (offline/feedback layer)
-    });
+    // Sequential, not Promise.all — both mutations do a read-modify-write
+    // against the same demo-mode record with no locking; firing them
+    // concurrently caused a real lost-update bug for Habits (see
+    // useRelinkHabitGoal), fixed there by always awaiting in order.
+    mutateAsync(values)
+      .then(() => {
+        if (values.goalId !== (commitment.goalId ?? null)) {
+          return relinkGoal.mutateAsync({ id, goalId: values.goalId });
+        }
+      })
+      .catch(() => {
+        // A toast will be shown here in VS-030 (offline/feedback layer)
+      });
   };
 
   return (

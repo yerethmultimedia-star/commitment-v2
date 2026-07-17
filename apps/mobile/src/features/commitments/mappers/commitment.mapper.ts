@@ -13,6 +13,7 @@ export const commitmentMapper = {
     return {
       id: dto.id,
       title: dto.title,
+      description: dto.description || undefined,
       status: statusMap[dto.state] || 'draft',
       priority: (dto.priority as CommitmentPriority) || 'medium',
       targetDate: dto.targetDate || undefined,

@@ -1,9 +1,9 @@
 # Technical Debt Register
 
-Version: 1.32.0
+Version: 1.47.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-16
+Last Updated: 2026-07-17
 
 ---
 
@@ -1320,6 +1320,493 @@ already-built driver object afterward, since the driver's own hooks won't see it
 
 ---
 
+### RI-13: Demo data was teaching the wrong domain model — Commitment titles read as Goal-sized, not sub-Goal-sized
+
+Investigated 2026-07-17, starting from a screenshot comparison (two "Tareas" card layouts looked
+different — Goals' Commitment-tab card vs. the standalone Tasks screen's card) that led to a much
+deeper finding than UI duplication. Full investigation chain, in order:
+
+1. **First finding:** `apps/mobile/src/features/goals/components/GoalTasksTab.tsx` — the Goals
+   screen's "Tareas" sub-tab — renders **`Commitment`** (`useCommitments()`), not `Task`. Its own
+   comment confirms this was a deliberate VS-031 rename ("Labeled 'Tasks' to match how the user
+   thinks about commitments"), predating the standalone `Task` entity/screen that exists today.
+   `GoalWorkspaceScreen.tsx`'s own "Tareas" tab mixes both — a "Commitments" section and an
+   "Upcoming" (real Task) section, in the same view. Three surfaces, one UI word, two domain
+   objects — see `apps/mobile/src/app/(tabs)/_layout.tsx:62-70`, `common.json`'s `tabs.tasks`/
+   `goals.tabs.tasks`/`goals.workspace.tabs.tasks` (all "Tareas"), for the full inventory.
+2. **Second finding, reading the actual domain aggregates:** `Commitment`
+   (`packages/domain/src/commitment/aggregate/commitment.ts`) has `recurrencePattern`/`seriesId`
+   and a `pause()`/`resume()` state machine — genuinely models an ongoing, poss.-recurring effort.
+   `Task` (`packages/domain/src/task/aggregate/Task.ts`) has `estimatedMinutes`/`actualMinutes` and
+   a simple Pending→Completed/Archived lifecycle — genuinely models a finite, measurable action.
+   `Goal.ts`'s own doc comment states the intended hierarchy explicitly: `Goal -> Commitment ->
+Task/Habit, plus Goal -> Habit/Milestone directly`. **The domain model is not the problem** —
+   it's well-designed and was never in question.
+3. **Third finding, the actual root cause:** `demo-data.ts`'s `COMMITMENT_SEEDS` titles ("Run a
+   half marathon", "Save for a house down payment", "Ship the mobile redesign") read at Goal scale,
+   not Commitment scale — several are near-verbatim restatements of what their Goal already implies
+   (`c-06` "Learn conversational Portuguese" under Goal "Learn Portuguese"). Worse, `Task` titles
+   were never bespoke at all: `buildTasksForCommitment()` cycled through 4-6 titles shared across
+   _every_ Commitment in a category (`TASK_TITLES_BY_CATEGORY`), suffixed with `" — {commitment
+title}"` — e.g. "Morning run — Run a half marathon". The dataset was quietly teaching users the
+   wrong model regardless of how correct the underlying domain code was.
+4. **A related, smaller finding:** the mobile `CommitmentModel.goalId` field (used to show "which
+   Goal does this Commitment belong to" in `GoalTasksTab.tsx`) has no real backend support —
+   confirmed by its own comment ("Real backend doesn't have this relationship yet") and by
+   `demo-commitments.repository.ts`'s `create()` always setting `goalId: undefined`. The _forward_
+   link (`Goal.commitmentIds`) is real or the backend; the _reverse_ lookup the UI actually needs is
+   demo-only, propped up by a separate `commitmentGoalId` Map over the 17 seeded records. Logged as
+   Item 31's second half below — this is architecture debt from the domain's own evolution
+   (Commitment predates Goal), not a demo-mode shortcut.
+
+**Solution applied (title rewrite only — see Item 31 for what's still open):** all 17
+`COMMITMENT_SEEDS` titles rewritten to read as ongoing, sub-Goal-scale efforts. Replaced the shared
+`TASK_TITLES_BY_CATEGORY` + suffix mechanism with a bespoke `taskTitles: string[]` per Commitment —
+every Task title is now a concrete, one-off, finite action distinct from its Commitment. Every
+numeric field (`taskCount`/`progressRatio`/`state`/`priority`/`targetDate`/`recurrencePattern`/
+`goalId`) is untouched, so every computed value elsewhere is unaffected. Full rationale and the
+before/after: `docs/03-architecture/DEMO_DATASET.md` "Commitment/Task title rewrite (2026-07-17)".
+
+**Verified:** `tsc --noEmit` clean, `demo-tasks`/`demo-habits` repository tests passing (15/15, no
+title-string assertions existed to break), full `apps/mobile` suite unaffected (same 15 pre-existing
+unrelated `__DEV__` failures). Playwright across Today, Goals (Objetivos + Tareas), the standalone
+Tasks screen, Goal Workspace (Resumen + Tareas), and Insights — titles render correctly everywhere,
+zero console errors, every computed number (goal progress %, weekly deltas, streaks, Hero scoring)
+identical to before the rewrite.
+
+**Deliberately not done in this pass:** no component, route, or i18n key was touched — the language
+decision (should "Tareas" ever mean Commitment?) and the visual-duplication cleanup (4 independent
+inline card implementations across these screens) both explicitly wait for that decision first, per
+the user's own sequencing. See Item 31.
+
+---
+
+## Active Technical Debt Item 31: Product-language collision — "Tareas" means Commitment, Task, or both depending on screen — Fase 1 (Lenguaje) mostly executed, 2026-07-17
+
+- **Description:** Confirmed via `RI-13`'s investigation. Three UI surfaces use the label "Tareas"
+  for two different domain objects: Goals' `GoalTasksTab` (Commitment), the standalone `/(tabs)/
+tasks` screen (Task), and `GoalWorkspaceScreen`'s own "Tareas" tab (both, in the same view). This
+  violates ubiquitous language — the same UI word maps to two different domain concepts depending
+  on which screen the user is on.
+- **Impact:** Medium-High as a product/UX issue (real cognitive load, actively investigated this
+  session), Low as a technical risk (no bug, nothing broken). Explicitly **not** a Product Polish
+  visual-duplication item — deferred _before_ the visual duplication (4 independent inline
+  Task/Commitment card implementations, no shared `TaskCard`/`CommitmentCard`) gets touched, per
+  explicit user direction: naming the concepts correctly first prevents extracting a shared
+  component around a decision that might still change.
+- **Priority:** ADR-019 was **approved 2026-07-17**, and its Fase 1 (Lenguaje) was executed the
+  same day. **Impact inventory (ADR-019 "Paso 0") result:** of the 4 UI surfaces using the label
+  "Tareas"/"Tasks," 2 were already correct (root bottom-nav tab `tabs.tasks` → standalone Tasks
+  screen; `goals.workspace.stats.tasks` → a real-Task completion counter) and needed no change. 1
+  was the actual violation: `goals.tabs.tasks` (Goals screen sub-tab → `GoalTasksTab` → renders
+  `Commitment`) — **fixed**, now "Compromisos"/"Commitments" in both locales, plus the tab's own
+  empty-state copy ("Aún no hay tareas" → "Aún no hay compromisos") and a stale code comment in
+  `GoalTasksTab.tsx` that still cited the old VS-031 rationale for the "Tasks" label. The 4th,
+  `goals.workspace.tabs.tasks` (Goal Workspace's own sub-tab, which bundles Commitments + Habits +
+  Upcoming-Tasks sections under one label), was **explicitly deferred to Fase 3** — user's own
+  call: that tab isn't a terminology problem (its sub-sections already have correct headers), it's
+  an information-architecture problem, and renaming it now to "Plan"/"Actividad" would be a
+  low-evidence guess, exactly the kind of mistake ADR-019 exists to prevent. Verified via
+  `tsc --noEmit` (clean); a live browser click-through wasn't performed this pass — no Playwright
+  tooling was available in this session, flagged honestly rather than assumed.
+- **Resolution (decided, no longer candidates):** distinct concepts get distinct names everywhere.
+  Official table per ADR-019: `Goal → Objetivo`, `Commitment → Compromiso`, `Task → Tarea`,
+  `Habit → Hábito`. "Tarea"/"Tareas" is reserved exclusively for `Task`; it may never again label a
+  `Commitment` view. The "same concept, merge domains" and "Commitment as Task subtype" options
+  considered during the investigation were both ruled out by the domain evidence (`Commitment` and
+  `Task` have genuinely different shapes/lifecycles, and `Goal.ts`'s own hierarchy comment already
+  describes them as siblings, not a subtype relationship) — not part of the final decision.
+- **Second, related, smaller item — real backend gap, now architecturally more load-bearing
+  (2026-07-17):** `CommitmentModel.goalId` (the "which Goal owns this Commitment" reverse lookup
+  `GoalTasksTab.tsx` displays) has no backend support — the _forward_ link (`Goal.commitmentIds`,
+  `Goal.linkCommitment()`) is real domain state; the reverse (`Commitment.goalId`) is a mobile-only
+  adaptation, demo-mode only. Not a demo shortcut to "fix" — genuine architecture debt from
+  Commitment predating Goal in this domain's evolution, parallel to the already-tracked
+  Goal-has-no-backend gap (Item 27/TD-10). **Architectural note (user-requested, 2026-07-17):**
+  until ADR-019 Fase 2A, the mobile app only _read_ this adapted field. Fase 2A's creation flow and
+  `relinkGoal` mutation now _write_ through it too — the app actively depends on the adapted model,
+  not only on the domain aggregate's own Goal-owned direction. This is not considered incorrect,
+  but it is a real, worth-tracking dependency: it should stay temporary, resolved once the backend
+  grows a real projection for the reverse lookup, not become a permanent second source of truth.
+  When that projection ships, `GoalWorkspaceScreen.tsx`'s `c.goalId === goalId` filter and
+  `GoalTasksTab.tsx`'s `c.goalId` check both need no structural changes — they already read the
+  field defensively, they'd just start reading real data instead of demo-only data.
+- **Recommended Resolution:** Fase 1 is done for every unambiguous case. Remaining work on this
+  item is Fase 3 — resolve `goals.workspace.tabs.tasks`'s container naming (or split it into
+  separate tabs) _together with_ designing the shared `TaskCard`/`CommitmentCard` components the
+  visual-duplication side of this investigation found (`TasksScreen.tsx`, `GoalWorkspaceScreen.tsx`,
+  `GoalTasksTab.tsx` each hand-roll their own card JSX today) — after Fase 2 (creation flow, Item 32) lands.
+
+---
+
+## Active Technical Debt Item 32: `Commitment` cannot be created from anywhere in the app UI — RESOLVED, Fase 2A Completed, 2026-07-17
+
+- **Description:** Found 2026-07-17, running the exact walkthrough Item 31's investigation
+  prescribed ("create a new Commitment" from the Goals "Tareas" tab). Confirmed via Playwright, not
+  a code read: tapping "+" from that tab opens Quick Capture pre-selected to **Tarea**, never any
+  Commitment option — `QuickCaptureDialog.tsx`'s own comment confirms this is deliberate ("Commitment
+  is intentionally not an option here... it lives inside a Goal's workspace"). But
+  `GoalWorkspaceScreen.tsx`'s own "Commitments" section (`goals.workspace.commitments`, line ~169)
+  has **no add/create action** — unlike its sibling Habits section (line ~191) and Tasks/"Upcoming"
+  section (line ~217), which both have one. A complete, correctly-built creation screen exists —
+  `apps/mobile/src/app/commitments/create.tsx` → `CreateCommitmentScreen`, i18n namespace
+  `commitments`, title "Crear Compromiso", full form (título/descripción/fecha objetivo/repetición/
+  prioridad) — confirmed rendering correctly via Playwright screenshot. **Zero components anywhere
+  in the app link to it** (`grep -rl "commitments/create"` outside the route file itself: no
+  matches). The route is real, complete, and entirely unreachable.
+- **Notable:** the orphaned screen already uses **"Compromiso"** as its terminology, not "Tarea" —
+  real, concrete evidence (not just a suggestion) that a version of Item 31's naming decision was
+  already underway at some point, most likely during the VS-031 restructure that moved Commitment
+  "into the Goal Workspace" and apparently never finished wiring it back in.
+- **Impact:** High. This isn't a naming/perception issue like Item 31 — it's a genuine dead-end.
+  The only Commitments that can ever exist are the 17 seeded ones (now honestly titled per RI-13);
+  a real user can never add their own. Every "Tareas" tab a user visits under Goals is permanently
+  read-only for its actual content.
+- **Resolution:** ADR-019 approved, Fase 1 (language) shipped, then the creation flow was
+  evaluated (`docs/03-architecture/fase2_creation_flow_evaluation.md`) before touching any code —
+  user approved Decisión A of that evaluation ("conectar el flujo de creación desde Goal
+  Workspace") and split it from Decisión B (Quick Capture support), which stays open, tracked
+  separately as **Fase 2B**, not resolved here. **Fase 2A implemented 2026-07-17:**
+  - `commitments/create.tsx` / `CreateCommitmentScreen.tsx` now accept `?goalId=`, mirroring
+    `habits/create.tsx` exactly (`useLocalSearchParams`, prefilled but user-editable/clearable).
+  - `CommitmentForm.tsx` gained a Goal picker field (`goalId`, default "Ninguno"/`NO_GOAL_VALUE`),
+    identical pattern to `HabitForm.tsx`'s existing one — same `NO_GOAL_VALUE` sentinel convention,
+    added to `commitment.schema.ts`.
+  - `goalId` threaded end-to-end: `CommitmentForm` → `useCreateCommitment` →
+    `commitmentsApi.create()` → `demo-commitments.repository.ts`, which no longer hardcodes
+    `goalId: undefined` — it now respects whatever's passed, same as Habits' `payload.goalId`.
+  - **Found and fixed along the way, not a new problem:** `demoCommitmentDTOs` was `export const`
+    and mutated via `.push()` — the exact same staleness bug class already fixed once for Tasks
+    (RI-2) and designed around for Habits. Changed to `let` + an exported
+    `replaceDemoCommitmentDTOs()` setter (mirrors `replaceDemoTasks()` in `demo-data.ts` exactly),
+    and `create()` now reassigns via spread instead of `.push()`. Without this fix, a newly
+    created Commitment might not reliably appear after the mutation settled.
+  - **Found and fixed, load-bearing for this feature:** `GoalWorkspaceScreen.tsx`'s
+    `linkedCommitments` read from `goal.commitmentIds.includes(c.id)` — the Goal-owned, static-seed
+    direction of the relationship, which never updates for newly created Commitments. Switched to
+    `c.goalId === goalId` (the Commitment-owned direction, matching how Habit/Task linkage already
+    works) — verified by script that this produces an **identical** result set for all 17 seeded
+    Commitments before changing it, so no existing display changed.
+  - Added the missing "+" `IconButton` on the Commitments section header (previously the only one
+    of the three sibling sections without one), i18n key `goals.workspace.addCommitment` added to
+    both locales. The section header itself already said "Compromisos" — no rename needed there.
+  - **Known, deliberately out-of-scope follow-on:** two other reads of the Goal↔Commitment link
+    still use the static, Goal-owned direction — `GoalWorkspaceScreen.tsx`'s own Task-via-Commitment
+    filter (line ~58) and `useDashboardContext.ts`'s Coach-side `commitmentIds` map. Both are
+    unaffected today (no code path yet links a newly created Task to a newly created Commitment —
+    that's the explicitly-deferred Task-from-Commitment work below), but will need the same
+    static→live fix if/when that follow-on ships.
+  - **Explicitly not done, per the evaluation's own scope line:** connecting Task creation from
+    `CommitmentWorkspaceScreen.tsx` (it still shows no Task list at all) — registered as a known
+    next step, not assumed part of this fix.
+  - Verified: `tsc --noEmit` clean; full mobile jest suite run, only pre-existing unrelated
+    failures (`__DEV__ is not defined` in `DashboardLayoutEngine.test.ts`, already tracked
+    elsewhere); no test coverage exists yet for Commitments creation, so nothing regressed there
+    either, but nothing was verified passing live. **No live/browser verification this pass** — no
+    Playwright tooling was available in this session; flagged, not silently skipped.
+  - **Second pass, caught by insisting on E2E-before-closing (user, 2026-07-17) rather than
+    accepting "code complete" as done:** tracing "Open → Edit → Persist" against the actual code
+    surfaced two real bugs the first pass missed, both now fixed:
+    1. `EditCommitmentScreen.tsx`'s `initialValues` never set `goalId` — a linked Commitment would
+       show "Ninguno" in its own edit form regardless of its real Goal.
+    2. `useEditCommitment.ts`'s mutation never sent `goalId` at all — even if a user _did_ change
+       it in the edit form, saving would silently drop the change.
+
+       Fixed by mirroring Habits' already-solved version of this exact problem
+       (`useRelinkHabitGoal`): added `commitmentsApi.relinkGoal()` /
+       `demoCommitmentsRepository.relinkGoal()` / `useRelinkCommitmentGoal()` as a dedicated
+       mutation (a relationship change, not a field edit — same reasoning as Habit's), fired
+       sequentially after the generic edit (never `Promise.all`, per the documented demo-mode
+       concurrent-write hazard). `goalId` also added to `commitmentActions.ts`'s
+       `EditableField`/`EDITABLE_FIELDS`, grouped with `title` as draft-only — locked once Active,
+       so a Commitment's Goal can't be silently re-parented mid-flight.
+  - **Caveat found during this trace, not fixed (pre-existing, out of scope):**
+    `demo-commitments.repository.ts`'s `create()` has always hardcoded `state: 'Active'` for every
+    new Commitment, skipping `Draft` entirely — even though the real domain's state machine starts
+    at `Draft` (`CommitmentState.Draft`, `commitment.ts`). Practical effect: the `goalId`
+    draft-only-editable rule above is correct but **unreachable** through the new creation flow —
+    a freshly created Commitment's Goal is locked immediately. It's still testable today via the
+    one seeded Commitment already in `Draft` (`c-14`). Not fixing this now — changing when
+    Commitments start Active vs. Draft is a lifecycle/UX decision beyond Fase 2A's scope, not a
+    consequence of this feature.
+  - **Golden Path #1 executed 2026-07-17, PASS.** Ran via an ad hoc Playwright script (Chromium,
+    installed on the fly — not yet a checked-in repo spec) driving the actual Expo web build
+    against the exact steps in `docs/07-quality/golden_path_commitment_creation.md`, demo mode
+    seeded per `playwright_verification_demo_mode`. Result:
+    ```
+    Fase 2A
+    Status: Completed
+    Golden Path #1: PASS (2026-07-17, second attempt — first attempt found a real bug, fixed, rerun clean)
+    Known caveats:
+      • Demo persistence is in-memory (expected, applies to every entity type) — confirmed directly:
+        the created Commitment was gone after a full reload, as expected.
+      • Draft→Active initial-lifecycle question remains deferred to its own future decision.
+    ```
+    **First run found one real, in-scope bug — fixed before declaring PASS, per the standing
+    "resolve it, rerun" rule:** `commitment.description` was entirely non-functional. The form
+    collected it, every hook/API layer passed it through, but `demo-commitments.repository.ts`
+    never stored it (`DemoCommitmentDTO` had no `description` field) and
+    `CommitmentMetadata.tsx` never rendered it even if it had been stored — so editing a
+    Commitment's description silently did nothing, confirmed live (saved "Golden Path E2E
+    description edit," detail screen showed "Aún no hay detalles" instead). Fixed end-to-end:
+    `description` added to `DemoCommitmentDTO`, `CommitmentModel`, `commitmentMapper.fromDTO`,
+    `demo-commitments.repository.ts`'s `create()`/`edit()`, both create/edit hooks' optimistic
+    cache updates, and `CommitmentMetadata.tsx` now renders it (and its "no details yet" empty
+    state correctly accounts for it). Rerun after the fix: PASS, description round-tripped
+    correctly on save and reopen.
+    **Second, separate defect found and NOT fixed (correctly out of scope):**
+    `historyApi.getHistory` (`apps/mobile/src/features/commitments/api/history.api.ts`) has no
+    `isDemoModeActive()` branch at all — unlike every other API module in this app — so it always
+    calls the real (not-running) backend and fails with `ERR_CONNECTION_REFUSED`, surfacing as
+    "Failed to load history" on every Commitment's detail screen, seeded ones included. Confirmed
+    this is systemic, not new: it would affect all 17 seeded Commitments too, not just ones created
+    via Fase 2A. Registered as a new item (below), not fixed here — it's unrelated to the creation
+    flow this gate exists to verify.
+    The full walkthrough script lives at `docs/07-quality/golden_path_commitment_creation.md`,
+    coverage tracked in `docs/07-quality/golden_path_coverage.md` (now ✅). **Gate passed — Fase 2A
+    is Completed. Fase 2B (Quick Capture) may now be opened as its own independent product
+    discussion**, per the user's own explicit decision tree for this outcome.
+
+---
+
+## Active Technical Debt Item 33: `historyApi.getHistory` missing demo-mode branch — every Commitment's activity history fails to load in demo mode
+
+- **Description:** Found 2026-07-17, running Golden Path #1 (`docs/07-quality/
+golden_path_commitment_creation.md`). `apps/mobile/src/features/commitments/api/history.api.ts`'s
+  `getHistory()` calls `apiClient.get(...)` unconditionally — it never checks
+  `isDemoModeActive()`, unlike every other API module in this feature (`commitmentsApi`,
+  `tasksApi`, `habitsApi`, etc., which all branch demo vs. real backend at this exact boundary).
+  Confirmed via Playwright: the "Historial" section on a Commitment's detail screen
+  (`CommitmentWorkspaceScreen.tsx` → `CommitmentHistory.tsx`) always shows "Failed to load
+  history," with `ERR_CONNECTION_REFUSED` in the console (the real backend isn't running).
+- **Impact:** Medium. Cosmetic/informational only — doesn't block any CRUD action, the rest of the
+  detail screen (metadata, actions) works correctly regardless. But it's a real, visible defect on
+  every single Commitment's detail screen, not specific to newly-created ones — all 17 seeded
+  Commitments would show the same "Failed to load history" if their detail screen is opened in
+  demo mode.
+- **Priority:** Medium — not blocking, but a real user-visible defect, systemic rather than
+  isolated. Not fixed as part of Golden Path #1's gate since it's unrelated to the creation flow
+  that gate verifies (confirmed: this bug predates Fase 2A entirely, it would have affected the 17
+  seeded Commitments' detail screens just as much before any of this work started).
+- **Recommended Resolution:** add the same `isDemoModeActive()` branch every sibling API module
+  already has, backed by a demo-mode history repository/generator (no such repository currently
+  exists for Commitment activity — would need to be created, likely deriving entries from the
+  existing state-transition/edit actions already tracked elsewhere, or a minimal synthetic history
+  matching each seeded Commitment's `state`).
+- **Addendum (found during VS-037's Visual audit, 2026-07-17):** `CommitmentHistory.tsx` also hand-
+  rolls its own loading spinner instead of using the shared `LoadingState` component — fix
+  alongside the demo-mode gap above when this item is picked up, not as separate Visual debt.
+
+---
+
+## Active Technical Debt Item 34: Quick Capture source mapping inconsistent after ADR-019 — RESOLVED, 2026-07-17
+
+- **Description:** After Fase 1 renamed the Goals sub-tab from "Tareas" to "Compromisos"
+  (`goals.tabs.tasks` i18n value, `GoalsScreen.tsx`), the tab's "+" action still reports
+  `source: 'tasks'` to `openQuickCapture()` (`handleCreate()`'s `else if (tab === 'tasks')` branch
+  — the internal tab id `'tasks'` was never renamed, only its display label was). `QuickCaptureDialog.tsx`'s
+  `SOURCE_DEFAULT_TYPE` map has no entry for `'tasks'`, so it falls through to the hardcoded
+  `'task'` default. Net effect, confirmed by reading the code, not yet re-verified live: **tapping
+  "+" on the tab labeled "Compromisos" opens Quick Capture preselected to "Tarea."** The UI label
+  and the invoked capture type are now inconsistent — found during Fase 2B's Paso 1 investigation
+  (`docs/03-architecture/` Fase 2B thread), not itself part of that investigation's question.
+- **Impact:** Medium. A real, observable defect independent of whatever Fase 2B decides — the tab
+  label and the button's actual behavior contradict each other today, regardless of whether Quick
+  Capture ever gains Commitment support. Not a data-loss bug (no worse than RI-8's original
+  "always defaults to Tarea" behavior, which this partially regressed back toward for one specific
+  entry point), but a visible inconsistency a user could notice immediately.
+- **Resolution:** ADR-020 ("Quick Capture Philosophy") decided Quick Capture supports Commitments
+  as a direct consequence of the Universal Capture philosophy. Fixed as part of that
+  implementation: `GoalsScreen.tsx`'s `handleCreate()` now passes a distinct source,
+  `'goals-commitments'` (not `'tasks'` — see the collision note below), and
+  `QuickCaptureDialog.tsx`'s `SOURCE_DEFAULT_TYPE` maps it to `'commitment'`. **Verified live via
+  Playwright** (not just code trace): tapping "+" on the "Compromisos" tab now opens Quick Capture
+  correctly preselected to "Compromiso" (`aria-pressed=true`), placeholder reads "¿Con qué te estás
+  comprometiendo?", and a real Commitment created this way appears in the Compromisos list
+  immediately.
+- **Found and avoided while fixing, not shipped as a bug:** `GoalsScreen.tsx`'s Compromisos tab and
+  the standalone `TasksScreen.tsx` both already called `openQuickCapture('tasks')` — the exact same
+  source string, coincidentally meaning the same thing before ADR-019 (both were "Task" then) but
+  diverging after. Mapping `'tasks' → 'commitment'` directly would have silently broken the real
+  Tasks screen's own "+" button (defaulting it to Compromiso instead of Tarea). Caught before
+  shipping by checking both call sites, not just the one being fixed. `TasksScreen.tsx` was left
+  completely untouched — still uses `'tasks'`, still correctly falls through to the `'task'`
+  default.
+
+---
+
+## Active Technical Debt Item 35: Two backend spec files broken by an incomplete Reminder generalization (`commitmentId` → `sourceId`/`sourceType`)
+
+- **Description:** Found 2026-07-17, incidentally, while recovering from an iCloud Desktop-sync
+  file-rename incident during Fase 2B implementation (see this entry's own note below — unrelated
+  to Fase 2B itself). Restoring `packages/domain/src/notifications/aggregate/reminder.ts` and
+  `packages/domain/src/notifications/events/reminder-queued.event.ts` to their correct (more
+  advanced) content — which generalizes `Reminder`'s `commitmentId: string` field into
+  `sourceId: string` + `sourceType: ReminderSourceType` (presumably to let Habits have reminders
+  too, not just Commitments) — surfaced that this generalization was left mid-flight: two spec
+  files still reference the old shape and fail `tsc --noEmit`:
+  - `apps/backend/src/commitment/nestjs/__tests__/register-commitment.nestjs-handler.spec.ts` —
+    expects a 2-argument call where the current code requires 3.
+  - `apps/backend/src/notifications/application/handlers/__tests__/schedule-reminder-on-queued.handler.spec.ts`
+    — its `ReminderExecutionEngine` mock is missing a `cancel` method the real interface now
+    requires.
+    Confirmed these files have nothing to do with Commitments/Quick Capture — this is leftover
+    incomplete work from an earlier, unrelated backend refactor, exposed by filesystem corruption
+    recovery, not created by it.
+- **Impact:** Medium. Blocks a clean `apps/backend` `tsc --noEmit` — real signal noise for anyone
+  working in that area next. Does not affect the mobile app, Fase 2B, or any currently-shipping
+  behavior (backend `tsc` failures in test files don't block the running app).
+- **Priority:** Not fixed — genuinely out of scope for Fase 2B (mobile-only, demo-mode-only work).
+  Whoever picks up the Reminder/`ReminderSourceType` generalization next should treat this as their
+  starting point, not rediscover it.
+- **Recommended Resolution:** update both spec files to match the current `Reminder`/
+  `ReminderExecutionEngine` shapes (add the `sourceType` argument, add a `cancel` mock), once
+  someone owns finishing that generalization.
+
+---
+
+## Active Technical Debt Item — recovered, not new: iCloud Desktop-sync corruption during Fase 2B (2026-07-17)
+
+Not a code defect — a filesystem hazard already tracked in project memory
+(`icloud_desktop_sync_corruption_hazard`), recurring mid-session. Logged here for visibility since
+it touched real source files during this work, per this project's transparency standard.
+
+- **What happened:** mid-way through Fase 2B implementation, `CommitmentForm.tsx` (my own
+  in-progress edit) got silently renamed to `CommitmentForm 2.tsx` by iCloud Desktop sync, breaking
+  the build. A broader sweep found 6 more source files similarly renamed —
+  `apps/mobile/.tamagui/tamagui.config.json`, `packages/domain/src/index.ts`,
+  `packages/design-system/src/components/Card.tsx`, `apps/mobile/src/app/(auth)/onboarding.tsx`,
+  `apps/backend/src/notifications/infrastructure/in-memory-reminder-scheduler.ts`,
+  `packages/domain/src/notifications/aggregate/reminder.ts`,
+  `packages/domain/src/notifications/events/reminder-queued.event.ts`, and
+  `apps/backend/src/notifications/application/services/reminder-worker.service.ts` — plus
+  `node_modules` corruption (a package's `index.js` genuinely missing, not renamed), breaking
+  `jest` entirely.
+- **Recovery, following the established protocol (diff before restoring, never assume which copy
+  is correct):** for every renamed file, diffed the " 2" copy against git's staged/HEAD content
+  before touching anything. In all 8 cases this time, the " 2" copy was the clearly more-advanced,
+  correct version (richer exports, a `ReminderSourceType` generalization, newer design-system
+  patterns) — restored by renaming back, nothing discarded. For `node_modules`, `pnpm install
+--force` was required (`pnpm` itself was unreachable via its usual corepack shim in this
+  environment — a signature-verification error — worked around via `npx pnpm@10.34.4` instead of
+  fixing corepack itself, out of scope).
+- **Verified clean after recovery:** `apps/mobile` `tsc --noEmit` and full `jest` suite both clean
+  (only the same pre-existing, already-tracked `DashboardLayoutEngine.test.ts` failures). Backend
+  `tsc --noEmit` surfaced the 2 genuinely pre-existing, unrelated failures now tracked as Item 35
+  above — not new corruption, confirmed by content, not just absence of errors.
+
+---
+
+## Active Technical Debt Item 36: B-001 — "Upcoming" Task cards in Goal Workspace had no way to reach Task's main interaction surface — RESOLVED, 2026-07-17
+
+- **Description:** Found during VS-037's Behavior audit. Within `GoalWorkspaceScreen.tsx`'s
+  "Tareas" tab, three summary sections show three different entities — Commitments, Habits,
+  Upcoming Tasks. Two of them lead somewhere: the Commitment card navigates to its detail screen;
+  the Habit card offers a reversible toggle plus navigation to edit. The Task card had **no
+  `onPress` at all** — not even navigation, fully inert. No comment, ADR, or `DECISION_LOG.md`
+  entry justified this; the only other tracked issue on this section (Item 23) is an unrelated
+  date-filtering bug.
+- **Investigation (not assumed, verified):** confirmed Task has no per-item detail route anywhere
+  in the app (only `(tabs)/tasks.tsx` exists). Compared two real precedents that initially pointed
+  in opposite directions: Today's `UpcomingTasksWidget` (same entity, analogous "summary card"
+  context) navigates to the Tasks screen on tap, no inline actions; Milestone/Habit within this
+  same Workspace tab expose a direct one-tap complete/toggle. Resolved the apparent contradiction
+  by checking `TasksScreen.tsx`'s own `complete` button — a single unconfirmed tap, same
+  irreversible transition — which ruled out "reversibility" as the deciding factor (Task already
+  gets one-tap-no-confirm treatment in its own screen). The rule that actually explains all four
+  entities: **a summary card should always lead somewhere — either a direct reversible action
+  (Milestone, Habit) or the entity's dedicated interaction surface (Commitment's detail screen,
+  Task's list screen)**; Task was the only entity with neither. Full reasoning trail: this
+  session's VS-037 conversation.
+- **Resolution:** `GoalWorkspaceScreen.tsx`'s Upcoming Task cards now navigate to `/(tabs)/tasks`
+  on tap, mirroring `UpcomingTasksWidget.tsx`'s exact established pattern — no new interaction
+  pattern invented, no inline actions added (a checkbox/complete-on-tap was considered and
+  explicitly rejected — would have introduced a fourth, inconsistent pattern rather than
+  reinforcing the one the rest of the product already follows). Verified live via Playwright:
+  tapping a previously-inert Upcoming Task card now lands on the Tasks screen with all 4 real
+  actions available. `tsc --noEmit` and `jest` clean.
+- **Reusable principle surfaced, worth carrying into future work (VS-037's own methodology, not
+  yet promoted to a formal product rule):** _every entity's summary-card representation should
+  offer a path to that entity's own primary interaction surface, whether that's a direct
+  lightweight action (if genuinely reversible) or navigation to where the full action set lives._
+  Worth checking new summary surfaces against this going forward, and worth testing again before
+  treating it as settled — this is one confirmed application, not yet a pattern proven across
+  multiple independent cases the way ADR-019/ADR-020's principles were before being written down.
+
+---
+
+## Active Technical Debt Item 37: T-001 — Coach's "commitments-completed" achievement displays "objetivos completados" — confirmed, batched for VS-037's implementation pass
+
+- **Description:** Found during VS-037's Terminology audit. `CoachRecommendationProvider.ts`'s
+  achievement `targetId: 'commitments-completed'` is driven by `commitments.filter(c => c.status
+=== 'completed').length` (genuinely counting `Commitment` entities) but resolves via
+  `coach-descriptors.ts` to `i18nKey: 'coach.achievements.goalsCompleted'`, displaying **"{{count}}
+  objetivos completados"** — a factual mismatch between what's counted and what's shown. No
+  interpretation needed, unlike two other candidates considered during the same audit
+  (`coach.opportunities.planAhead`'s colloquial "objetivos" usage, and `coach.tips.startFirstGoal`'s
+  onboarding-suggestion design question) — both deliberately left unclassified as terminology,
+  pending separate evaluation (see VS-037 tracking in `PROJECT_STATUS.md`).
+- **Priority:** Confirmed, high confidence, no ADR needed — but **not fixed yet**. VS-037's audit
+  closed 2026-07-17 with T-001 as its only Terminología finding; it now ships together with V-001/
+  V-002 (below) as a single small **"Consistency Cleanup"** batch — queued, not yet scheduled
+  against the main roadmap. See `PROJECT_STATUS.md`'s VS-037 closing entry for the full batch and
+  sequencing status.
+- **Recommended Resolution:** rename the descriptor's `i18nKey` (or add a dedicated
+  `commitmentsCompleted` key) so the displayed text says "compromisos completados," in both
+  locales. Small, isolated, no schema/logic change — the data source is already correct.
+
+---
+
+## Active Technical Debt Item 38: V-001 — Task's priority/status don't use the shared `Badge` component Commitment already uses for the same semantics
+
+- **Description:** Found during VS-037's Visual audit. Two sub-cases:
+  1. **Priority.** `CommitmentPriorityBadge.tsx` uses the Design System's `Badge` component, and its
+     own comment states the intent explicitly: "same three levels, same meaning, same tone mapping
+     as Task's priority." But `TasksScreen.tsx` never migrated — it still hand-rolls a `<Text>` with
+     manual `backgroundColor`/`color`/`padding`/`borderRadius` (`PRIORITY_COLOR` in
+     `task-descriptors.ts`) instead of reusing `Badge`. Tokens happen to match (`$danger`/
+     `$warning`), so it looks nearly identical today, but it's a duplicated implementation of the
+     same visual concept, not a shared one — real risk of future divergence, not just today's
+     coincidental alignment.
+  2. **Status.** Commitment's status is _always_ a colored `Badge` (`CommitmentStatusBadge`,
+     tone per status: success/neutral/warning/accent/danger). Task's status is plain
+     `tone="tertiary"` text — no color, no shape, no visual weight at all. Same semantic concept
+     ("what state is this item in"), different prominence between the two entities' cards. No
+     evidence found that this difference is deliberate.
+- **Priority:** Sub-case 1 (priority) — relatively high: pure implementation duplication, no
+  product decision needed, straightforward fix (swap the hand-rolled `<Text>` for `<Badge
+tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2 (status) —
+  logged as a confirmed visual inconsistency, but **not auto-implemented**: whether a Task's status
+  deserves the same visual prominence as a Commitment's is a small product call, not purely
+  technical — decide that first, then apply consistently.
+- **Recommended Resolution:** migrate `TasksScreen.tsx`'s priority chip to `<Badge>`. For status,
+  decide (quick call, no ADR needed) whether Task status should become a `Badge` too, then apply.
+
+---
+
+## Active Technical Debt Item 39: V-002 — `GoalWorkspaceScreen.tsx` never uses the shared `EmptyState` component; 5 hand-rolled empty states instead
+
+- **Description:** Found during VS-037's Visual audit. `EmptyState` (Design System) renders
+  icon/illustration + title + description + optional action(s) — the established pattern used by
+  `ObjectivesTab.tsx` and `TodayHabitsScreen.tsx` (2 uses each). `GoalWorkspaceScreen.tsx` has 5
+  empty states (Upcoming Tasks, Notes, Attachments, Activity, Milestones) and uses `EmptyState` in
+  **zero** of them — all 5 are a bare `<Card><Body i18nKey=.../></Card>`: no icon, no title/
+  description hierarchy, no action slot. A full screen's worth of empty states fell outside the
+  product's own established pattern, with no apparent reason.
+- **Impact:** Medium — purely a Design System adoption gap (different heights, typography
+  hierarchy, affordance, and CTA-capability than every other empty state in the app), not a
+  functional bug.
+- **Priority:** Clear candidate for normalization — no product decision required, purely a
+  component-adoption fix. Bundled into the same Consistency Cleanup batch as T-001/Item 38.
+- **Recommended Resolution:** replace all 5 hand-rolled empty blocks in `GoalWorkspaceScreen.tsx`
+  with `<EmptyState>`, matching `ObjectivesTab.tsx`'s usage pattern.
+- **Related, not opened as its own item:** `CommitmentHistory.tsx` hand-rolls a loading spinner
+  instead of using the shared `LoadingState` component — found in the same sweep, but not
+  registered separately since it belongs to the same broken, not-yet-demo-mode-aware feature as
+  Item 33; fix alongside that item, not as independent Visual debt.
+
+---
+
 ## Active Technical Debt Item 1: Jest Hybrid Module Warnings (TS151002)
 
 - **Description:** Testing execution in `@commitment/domain` displays warnings: `ts-jest[config] (WARN) message TS151002: Using hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true".`
@@ -1340,6 +1827,166 @@ already-built driver object afterward, since the driver's own hooks won't see it
 
 ## 📜 Change History
 
+- **v1.47.0 (2026-07-17):** **VS-037's audit phase closed.** Visual category swept and closed:
+  V-001 (Item 38, Task's priority/status don't reuse the `Badge` component Commitment already
+  uses for the same semantics — priority sub-case is pure duplication, status sub-case needs a
+  small product call first) and V-002 (Item 39, `GoalWorkspaceScreen.tsx` hand-rolls all 5 of its
+  empty states instead of using the shared `EmptyState` component). A related loading-spinner
+  finding was folded into the existing Item 33 rather than opened separately. T-001 (Item 37),
+  V-001, and V-002 are now grouped into a single queued **"Consistency Cleanup"** batch — same
+  class of work (Design System convergence, no new architectural decisions), not yet scheduled
+  against the main roadmap. Full VS-037 closing summary: `PROJECT_STATUS.md`.
+- **v1.46.0 (2026-07-17):** **VS-037 audit — first implemented finding, B-001 (Item 36) resolved.**
+  Ran the Behavior category of VS-037's product-consistency audit; found the Goal Workspace's
+  "Upcoming" Task cards were fully inert (no `onPress` at all), unlike their Commitment/Habit
+  siblings in the same tab. A short sub-investigation (comparing precedents, checking
+  `TasksScreen.tsx`'s own unconfirmed one-tap `complete`) converged on a reusable rule — summary
+  cards should always lead to the entity's own interaction surface — and ruled out adding an inline
+  complete action, which would have introduced a new, inconsistent pattern rather than reinforcing
+  the existing one. Fixed by adding navigation matching `UpcomingTasksWidget.tsx`'s established
+  pattern; verified live via Playwright. Also confirmed (Item 37, T-001): Coach's
+  `commitments-completed` achievement genuinely counts Commitments but displays "objetivos
+  completados" — confirmed high-confidence, deliberately **not yet fixed**, batched for VS-037's
+  terminology implementation pass per the audit-then-implement methodology the user set for this
+  workstream. Two findings (M-001, M-002) closed as observations requiring no action; one (M-003,
+  Coach's Goal-only onboarding-suggestion logic) left as an open product question, not a bug.
+- **v1.45.0 (2026-07-17):** **ADR-020 ("Quick Capture Philosophy") approved and implemented —
+  Item 34 resolved.** Universal Capture adopted: Quick Capture is the product's universal capture
+  mechanism, every first-level domain entity eligible by default (burden of proof on exclusion, not
+  inclusion). `Commitment` added as `CAPTURE_TYPES`' 5th type, minimal capture (title only, no Goal
+  picker, same pattern as Task/Habit). A real source-string collision was caught and avoided before
+  shipping: the renamed "Compromisos" tab and the standalone Tasks screen both used
+  `source: 'tasks'` — mapping it directly to `'commitment'` would have silently broken the real
+  Tasks screen's own "+" button. Fixed by giving the Compromisos tab its own distinct source
+  (`'goals-commitments'`) instead. **Verified live via Playwright**, not just typecheck/code trace:
+  all 5 type buttons render correctly, "Compromiso" is correctly preselected from the renamed tab,
+  and a real Commitment created via Quick Capture appears immediately in the Compromisos list.
+  Coach's `QuickCapturePrefill['type']` extended to include `'commitment'` too (heuristics for when
+  Coach would actually suggest one left unchanged, per ADR-020's explicit scope).
+  **Also this entry:** recovered from a mid-session iCloud Desktop-sync file-rename incident
+  (8 source files + node_modules) — see the dedicated entry below for detail — and found+logged
+  (not fixed) 2 pre-existing, unrelated backend spec failures as new **Item 35**.
+- **v1.44.0 (2026-07-17):** Fase 2B (Quick Capture for Commitments) kicked off as its own product
+  workstream — Paso 1 investigation found: Quick Capture supports exactly 4 types (Goal/Habit/
+  Task/Note), all single-text-field, all fire-and-forget with no post-creation enrichment flow; its
+  only "philosophy" statement is a now-partly-stale code comment; and its screen-to-default-type
+  mapping (`SOURCE_DEFAULT_TYPE`) only started working at all one day before ADR-019 (RI-8,
+  2026-07-16) — organic evolution, not deliberate design. Registered new **Item 34**: the Goals
+  tab renamed "Compromisos" in Fase 1 still reports `source: 'tasks'`, so its "+" opens Quick
+  Capture defaulted to "Tarea" — a real, present-day UI/behavior contradiction. Explicitly
+  **Blocked by Fase 2B** and not fixed — per direct user instruction, the correct resolution
+  depends entirely on what Fase 2B decides, and fixing it now would risk pre-deciding that question
+  by implementation default. No code changed this entry — pure investigation and logging.
+- **v1.43.0 (2026-07-17):** **Golden Path #1 executed — Item 32 RESOLVED, Fase 2A Completed.** Ran
+  via an ad hoc Playwright script (Chromium installed on the fly in this session, not yet a
+  checked-in repo spec) driving the actual running app, demo mode seeded per
+  `playwright_verification_demo_mode`. First attempt found a real, in-scope bug — `commitment.
+description` was entirely non-functional end-to-end (never stored by the demo repository, never
+  rendered by `CommitmentMetadata.tsx`) — fixed (`DemoCommitmentDTO`, `CommitmentModel`,
+  `commitmentMapper`, `demo-commitments.repository.ts`'s `create()`/`edit()`, both hooks'
+  optimistic updates, and the metadata component), then the full walkthrough was rerun clean.
+  Second attempt: PASS, 0 findings. A separate, pre-existing, systemic bug was found and
+  deliberately NOT fixed — `historyApi.getHistory` has no demo-mode branch, breaking "Historial" on
+  every Commitment's detail screen, not just new ones — registered as new Item 33. `docs/07-quality/
+golden_path_coverage.md` updated: Commitment Creation is now ✅. Fase 2B (Quick Capture) is now
+  open to start as its own independent product discussion, per the user's own decision tree.
+- **v1.42.0 (2026-07-17):** Closing entry for the ADR-019 / Product Polish "Commitment vs. Task"
+  arc (VS-032 → "two task lists" finding → domain investigation → dataset fix → ADR-019 → Fase 1 →
+  Fase 2A → Golden Path → E2E gate). Added a new standing governance indicator,
+  `docs/07-quality/golden_path_coverage.md` — a coverage table (Status: ☐/⏳/✅, Execution:
+  Manual/Automated/CI) tracking how much of the product's core experience has a living Golden Path
+  spec, not framed as a QA metric but as project-governance visibility. Currently: Commitment
+  Creation is the only entry (⏳, Manual); Goal Creation, Task Completion, Habit Check-in, and Quick
+  Capture are named placeholders (☐), not yet written. No code changed. Remaining work on Item 32
+  depends on nothing further except running the Golden Path itself — no open architecture or
+  implementation decisions remain on this thread.
+- **v1.41.0 (2026-07-17):** User declined to close Fase 2A even after the two Edit-screen bugs
+  were fixed — formalized its status verbatim as `Implemented / Pending End-to-End Verification`,
+  with an explicit gate: Fase 2A → Completed only after the walkthrough runs clean; **Fase 2B does
+  not start before that gate passes.** The walkthrough script itself moved out of chat-only form
+  into `docs/07-quality/golden_path_commitment_creation.md`, flagged as a candidate permanent
+  regression test (not yet automated — no Playwright installed in this repo), on the reasoning that
+  this exact path already caught two real bugs once and is likely to catch regressions from future
+  navigation/form/relationship refactors too. The Draft→Active initial-lifecycle caveat was
+  confirmed explicitly out of scope for Fase 2A — registered as its own future ADR/lifecycle
+  decision candidate, not a quick fix.
+- **v1.40.0 (2026-07-17):** User held the line on the standing E2E-verification standard rather
+  than accepting last entry's "RESOLVED" as final — correctly so: tracing the full walkthrough
+  (Open → Edit → Persist) surfaced two real bugs the first pass missed. `EditCommitmentScreen.tsx`
+  never prefilled `goalId` (a linked Commitment showed "Ninguno" in its own edit form) and
+  `useEditCommitment.ts` silently dropped any Goal change on save. Fixed by mirroring Habits'
+  already-solved pattern: a dedicated `relinkGoal` mutation (`commitmentsApi`/demo
+  repository/`useRelinkCommitmentGoal`), fired sequentially after the generic edit, never
+  `Promise.all` (documented demo-mode concurrent-write hazard). `goalId` added to
+  `commitmentActions.ts`'s editable-fields model, draft-only like `title`. Also documented, not
+  fixed: `demo-commitments.repository.ts`'s `create()` has always hardcoded new Commitments to
+  `Active`, skipping `Draft` — making the new draft-only-editable rule correct but practically
+  unreachable through the new creation flow (still testable via the one seeded Draft Commitment,
+  `c-14`); out of scope, a pre-existing lifecycle shortcut, not caused by this change. Added the
+  architectural note the user requested to `CommitmentModel.goalId`'s own comment and to Item 31:
+  the mobile app now _writes_ through the adapted `goalId` field (not just reads it), a real,
+  intentionally-temporary dependency worth tracking until the backend gets a real projection for
+  this relationship. Item 32's title walked back from "RESOLVED" to "Implemented, Pending E2E
+  Verification" — a real end-to-end walkthrough still hasn't run; no browser tooling was available
+  this session. A manual walkthrough script was handed to the user to run themselves.
+- **v1.39.0 (2026-07-17):** **Item 32 RESOLVED — Fase 2A implemented.** User approved the
+  evaluation's Decisión A (connect creation from Goal Workspace) while keeping Decisión B (Quick
+  Capture) open as a separate, later PR (Fase 2B). `commitments/create.tsx` now accepts `?goalId=`,
+  mirroring Habits exactly; `CommitmentForm.tsx` gained an editable Goal picker; `goalId` threaded
+  end-to-end into the demo repository. Along the way, fixed a real staleness bug in
+  `demoCommitmentDTOs` (was `const` + `.push()`, same class as Tasks' already-fixed RI-2 — now
+  `let` + `replaceDemoCommitmentDTOs()`, mirroring `demo-data.ts`'s existing `replaceDemoTasks()`),
+  and switched `GoalWorkspaceScreen.tsx`'s Commitments read from the static, Goal-owned
+  `commitmentIds` array to the live, Commitment-owned `goalId` field — verified script-side to
+  produce an identical list for all 17 seeded Commitments before changing it. Added the Commitments
+  section's missing "+" button. `tsc --noEmit` clean; full jest suite has only pre-existing
+  unrelated failures. No live Playwright verification — tooling unavailable this session, flagged
+  honestly. Two known static-read follow-ons left explicitly unfixed (out of scope): the Task-via-
+  Commitment filter in the same screen, and `useDashboardContext.ts`'s Coach-side map. Connecting
+  Task creation from `CommitmentWorkspaceScreen.tsx` remains a separate, not-yet-done step.
+- **v1.38.0 (2026-07-17):** User paused Fase 2 implementation to evaluate the creation-flow design
+  first — connecting `commitments/create.tsx` changes the interaction model, not just language.
+  Wrote `docs/03-architecture/fase2_creation_flow_evaluation.md`, separating two decisions the user
+  correctly identified as distinct: (A) how a user enters Commitment creation — evaluated,
+  recommends a "+" on Goal Workspace's Commitments section following the exact pattern already
+  used for Habits; (B) whether Quick Capture should support Commitment creation — deliberately left
+  open, evidence gathered on both sides but not resolved, per explicit user instruction not to
+  treat it as automatic. Confirmed via domain code that `Commitment.register()` has no `goalId`
+  parameter at all (the link is entirely Goal-owned), and that `TaskForm.tsx` already has working
+  `commitmentId` relation support unreachable only for lack of a wired entry point — so the
+  eventual implementation is mechanical, not a design problem. No code changed. Item 32 now
+  "Evaluation Done, Implementation Paused Pending Approval."
+- **v1.37.0 (2026-07-17):** **ADR-019 Fase 1 (Lenguaje) executed.** Ran the impact inventory
+  (ADR's "Paso 0"): of 4 UI surfaces labeled "Tareas"/"Tasks," 2 were already correct (root
+  bottom-nav Tasks tab, Goal Workspace's real-Task completion stat), 1 was the actual violation and
+  is now fixed (`goals.tabs.tasks` → "Compromisos"/"Commitments" in both locales, its empty-state
+  copy, and a stale code comment in `GoalTasksTab.tsx`), and 1 (`goals.workspace.tabs.tasks`,
+  which bundles Commitments + Habits + Upcoming-Tasks under one label) was explicitly deferred to
+  Fase 3 per user direction — that tab is an information-architecture problem, not a terminology
+  one, and renaming it now would be an unfounded guess. `tsc --noEmit` clean; no live
+  Playwright verification this pass (tooling unavailable in this session — flagged, not hidden).
+  Files touched: `apps/mobile/src/core/i18n/locales/{en,es}/common.json`,
+  `apps/mobile/src/features/goals/components/GoalTasksTab.tsx` (comment only).
+- **v1.36.0 (2026-07-17):** **ADR-019 approved.** Decisión 1 = Sí (`Commitment` stays
+  user-visible), Decisión 2 = the language table (`Objetivo`/`Compromiso`/`Tarea`/`Hábito`) is now
+  normative. Added a "Restricciones normativas" subsection to the ADR (reserved terminology,
+  ubiquitous-language obligation for future features, demo-dataset fidelity requirement) and a
+  "Próximos pasos" section registering the agreed 4-phase implementation plan (Fase 1 Lenguaje →
+  Fase 2 Creación → Fase 3 Unificación visual → Fase 4 Product Polish) plus an impact-surface
+  inventory table. Items 31 and 32 reclassified again — no longer "Blocked by ADR," now "Ready for
+  Phase 1"/"Ready for Phase 2" respectively. One open product question flagged explicitly as NOT
+  resolved by this approval: whether Quick Capture should gain a Commitment-creation option —
+  requires independent evaluation before Fase 2 is designed. No code changed; this is still purely
+  a decision-and-planning update.
+- **v1.35.0 (2026-07-17):** Wrote `docs/03-architecture/adr_019_commitment_user_model.md` —
+  formal ADR answering the two questions Items 31/32 left open: (1) should `Commitment` remain
+  user-visible, (2) if so, what's the official UI-language table (`Objetivo`/`Compromiso`/`Tarea`/
+  `Hábito` recommended). Status: Propuesta, pending explicit user approval — no code changed as a
+  result of writing it. Items 31 and 32 reclassified in framing from ordinary tech debt to
+  **"Blocked by ADR"**: both are completed investigations/implementations awaiting a product
+  decision, not open engineering tasks. Explicitly out of ADR-019's scope: connecting
+  `commitments/create.tsx`, renaming any label/i18n key, extracting shared card components — all
+  deferred until approval.
 - **v1.22.0 (2026-07-15):** Item 18 fully resolved — Habit↔Goal linkage is now genuinely optional
   end-to-end (domain `relinkGoal()` method + event, backend CQRS command + endpoint + projector,
   mobile picker + hook + demo repository, demo dataset gained a goal-independent habit). Found and

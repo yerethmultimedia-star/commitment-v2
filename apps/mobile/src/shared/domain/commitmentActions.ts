@@ -75,14 +75,20 @@ export function getAllowedActions(status: CommitmentStatus): ActionConfig[] {
 
 // ─── Editable Fields ─────────────────────────────────────────────────────────
 
-export type EditableField = 'title' | 'description' | 'targetDate' | 'recurrence' | 'priority';
+export type EditableField = 'title' | 'description' | 'targetDate' | 'recurrence' | 'priority' | 'goalId';
 
 /**
  * Returns which form fields may be edited for a given status.
  * The UI must NEVER contain status conditionals; always call this function.
+ *
+ * `goalId` is grouped with `title` (draft-only) rather than with the
+ * always-editable detail fields — like the title, which Goal a Commitment
+ * belongs to is a structural/identity property, not a day-to-day detail.
+ * Locking it once Active avoids quietly re-parenting a Commitment's history
+ * to a different Goal mid-flight (ADR-019 Fase 2A).
  */
 const EDITABLE_FIELDS: Record<CommitmentStatus, EditableField[]> = {
-  draft:     ['title', 'description', 'targetDate', 'recurrence', 'priority'],
+  draft:     ['title', 'goalId', 'description', 'targetDate', 'recurrence', 'priority'],
   active:    ['description', 'targetDate', 'priority'],
   paused:    ['description', 'targetDate', 'priority'],
   completed: [],

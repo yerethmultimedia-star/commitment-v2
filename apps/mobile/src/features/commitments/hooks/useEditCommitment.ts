@@ -31,6 +31,7 @@ export function useEditCommitment(commitmentId: string) {
             ? {
                 ...old,
                 title: newValues.title,
+                description: newValues.description || undefined,
                 targetDate: newValues.targetDate?.toISOString() ?? old.targetDate,
                 recurrencePattern:
                   newValues.recurrence !== 'none' ? newValues.recurrence ?? old.recurrencePattern : undefined,

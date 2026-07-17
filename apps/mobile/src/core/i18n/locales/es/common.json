@@ -126,7 +126,7 @@
     "title": "Coach",
     "subtitle": "Consejos según tu progreso actual.",
     "quickCapture": "Captura rápida",
-    "quickCaptureHint": "Abre Captura Rápida para agregar un nuevo objetivo, hábito, tarea o nota.",
+    "quickCaptureHint": "Abre Captura Rápida para agregar un nuevo objetivo, compromiso, hábito, tarea o nota.",
     "loading": "Cargando...",
     "addSuggestion": "Agregar",
     "empty": {
@@ -269,7 +269,7 @@
     },
     "tabs": {
       "objectives": "Objetivos",
-      "tasks": "Tareas",
+      "tasks": "Compromisos",
       "habits": "Hábitos",
       "roadmaps": "Roadmaps"
     },
@@ -294,7 +294,7 @@
     },
     "tasksTab": {
       "empty": {
-        "title": "Aún no hay tareas",
+        "title": "Aún no hay compromisos",
         "description": "Los compromisos enlazados a tus objetivos aparecerán aquí."
       }
     },
@@ -354,6 +354,7 @@
       "type": "Tipo",
       "milestones": "Hitos",
       "commitments": "Compromisos",
+      "addCommitment": "Agregar compromiso",
       "habits": "Hábitos",
       "addHabit": "Agregar hábito",
       "addTask": "Agregar tarea",
@@ -526,12 +527,14 @@
     "title": "Captura Rápida",
     "types": {
       "goal": "Objetivo",
+      "commitment": "Compromiso",
       "habit": "Hábito",
       "task": "Tarea",
       "note": "Nota"
     },
     "placeholders": {
       "goal": "¿Qué quieres lograr?",
+      "commitment": "¿Con qué te estás comprometiendo?",
       "habit": "¿Qué harás de forma repetida?",
       "task": "¿Qué necesitas hacer?",
       "note": "Escribe una nota rápida..."

@@ -34,6 +34,10 @@
         "label": "Title",
         "placeholder": "What do you want to achieve?"
       },
+      "goal": {
+        "label": "Goal (Optional)",
+        "none": "None"
+      },
       "description": {
         "label": "Description (Optional)",
         "placeholder": "Add more details..."

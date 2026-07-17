@@ -8,6 +8,8 @@ interface CreateCommitmentPayload {
   targetDate?: string;
   recurrencePattern?: string;
   priority?: string;
+  /** Owning Goal, when linked. Goal linkage is opt-in, not assumed (ADR-019 Fase 2A). */
+  goalId?: string | null;
 }
 
 interface EditCommitmentPayload {
@@ -44,6 +46,19 @@ export const commitmentsApi = {
   edit: async (id: string, payload: EditCommitmentPayload) => {
     if (isDemoModeActive()) return demoCommitmentsRepository.edit(id, payload);
     return apiClient.patch(`commitments/${id}`, { json: payload }).json<{ commitmentId: string }>();
+  },
+  // Mirrors habitsApi.relinkGoal — a relationship change, not a field edit,
+  // fired as its own mutation alongside the generic edit (same reasoning as
+  // Habit's dedicated PATCH .../goal). The real backend route doesn't exist
+  // yet — Commitment↔Goal is demo-only today (TECH_DEBT Item 31's backend
+  // gap) — so this is a no-op placeholder outside demo mode until that ships.
+  relinkGoal: async (id: string, goalId: string | null): Promise<{ commitmentId: string }> => {
+    if (isDemoModeActive()) {
+      await demoCommitmentsRepository.relinkGoal(id, goalId);
+      return { commitmentId: id };
+    }
+    await apiClient.patch(`commitments/${id}/goal`, { json: { goalId } });
+    return { commitmentId: id };
   },
   activate: async (id: string) => {
     if (isDemoModeActive()) return demoCommitmentsRepository.transition(id, 'activate') as Promise<TransitionResult>;

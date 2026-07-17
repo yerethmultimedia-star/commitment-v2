@@ -37,6 +37,12 @@ export function CommitmentMetadata({ commitment }: Props) {
       padding="$4"
       gap="$1"
     >
+      {commitment.description && (
+        <Body color="$contentPrimary" fontSize="$3" paddingBottom="$2">
+          {commitment.description}
+        </Body>
+      )}
+
       {commitment.targetDate && (
         <MetadataRow
           labelI18nKey="workspace.metadata.targetDate"
@@ -54,7 +60,7 @@ export function CommitmentMetadata({ commitment }: Props) {
         />
       )}
 
-      {!commitment.targetDate && !commitment.recurrencePattern && (
+      {!commitment.description && !commitment.targetDate && !commitment.recurrencePattern && (
         <Body
           color="$contentSecondary"
           fontSize="$3"

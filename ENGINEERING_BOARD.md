@@ -1,9 +1,9 @@
 # Engineering Board
 
-Version: 1.31.0
+Version: 1.46.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-16
+Last Updated: 2026-07-17
 
 ---
 
@@ -343,6 +343,105 @@ v1.1.0 change history.)
 
 ## 📜 Change History
 
+- **v1.46.0 (2026-07-17):** **VS-037's audit phase closed.** 6 findings across 4 categories, 1
+  already fixed (B-001), 3 queued into a "Consistency Cleanup" batch (T-001, V-001, V-002), 2
+  closed with no action, 1 left open as a genuine product question. Full results table:
+  `PROJECT_STATUS.md` v1.49.0.
+- **v1.45.0 (2026-07-17):** **VS-037 — Product Consistency Initiative opened.** Return to the
+  higher-level roadmap after closing ADR-019/ADR-020, auditing the product against that new
+  baseline before structural backend work begins. Numbering corrected twice before registering
+  (VS-032 and VS-035 both already taken) — verified against a full sweep of every `VS-0XX`
+  reference in the repo, next free number is VS-037. Full detail: `PROJECT_STATUS.md` v1.47.0.
+- **v1.44.0 (2026-07-17):** **ADR-020 approved and implemented — Fase 2B (Quick Capture for
+  Commitments) shipped and verified live.** Universal Capture philosophy adopted (every
+  first-level domain entity eligible by default). `Commitment` added to Quick Capture; the renamed
+  "Compromisos" tab's stale default-type mapping fixed (`TECH_DEBT.md` Item 34, Resolved) — with a
+  real source-string collision against the standalone Tasks screen caught and avoided before
+  shipping. Recovered from a mid-session iCloud sync corruption incident (8 files); found and
+  logged 2 unrelated pre-existing backend spec failures as new Item 35. Full detail: `TECH_DEBT.md`
+  v1.45.0.
+- **v1.43.0 (2026-07-17):** Fase 2B (Quick Capture for Commitments) opened as its own product
+  workstream, per ADR-019's "close phase → next phase" discipline. Paso 1 investigation found Quick
+  Capture's design was never formalized (organic evolution, confirmed via RI-8's history) and
+  surfaced a real, present-day bug — the renamed "Compromisos" tab still opens Quick Capture
+  defaulted to "Tarea" — registered as `TECH_DEBT.md` Item 34, explicitly Blocked by Fase 2B, not
+  fixed. Full detail: `TECH_DEBT.md` v1.44.0.
+- **v1.42.0 (2026-07-17):** **Golden Path #1 PASS — Fase 2A Completed, Item 32 Resolved.** First
+  run found and fixed a real bug (`commitment.description` never persisted end-to-end); rerun
+  clean. A separate, pre-existing, systemic bug (`historyApi.getHistory` missing demo-mode branch,
+  affects all Commitments not just new ones) was found and deliberately left unfixed as out of
+  scope — new Item 33. Fase 2B (Quick Capture) may now open as its own independent discussion.
+  `docs/07-quality/golden_path_coverage.md` updated to ✅. Full detail: `TECH_DEBT.md` v1.43.0.
+- **v1.41.0 (2026-07-17):** Closing entry for the ADR-019 arc — new standing governance indicator
+  added, `docs/07-quality/golden_path_coverage.md`, tracking Golden Path status (☐/⏳/✅) and
+  execution mode (Manual/Automated/CI) across the product's core flows. No open architecture or
+  implementation decisions remain; next work is purely operational (run the Golden Path). Full
+  detail: `TECH_DEBT.md` v1.42.0.
+- **v1.40.0 (2026-07-17):** Fase 2A stays open on purpose — formalized as `Implemented / Pending
+End-to-End Verification` with an explicit gate blocking Fase 2B until the walkthrough runs clean.
+  Script promoted to `docs/07-quality/golden_path_commitment_creation.md`, a candidate permanent
+  regression test. Full detail: `TECH_DEBT.md` v1.41.0.
+- **v1.39.0 (2026-07-17):** User's insistence on real E2E verification (not just typecheck/jest)
+  before closing Fase 2A caught two real bugs in `EditCommitmentScreen.tsx` (goalId not prefilled,
+  Goal changes silently dropped on save) — fixed with a dedicated `relinkGoal` mutation mirroring
+  Habits' already-solved pattern. Item 32 walked back from "resolved" to "implemented, pending
+  E2E" — no browser tooling available this session to actually run the walkthrough. Full detail:
+  `TECH_DEBT.md` v1.40.0.
+- **v1.38.0 (2026-07-17):** **TECH_DEBT Item 32 resolved — Fase 2A implemented.** Commitment
+  creation now connects to Goal Workspace's "+" button, mirroring Habits' existing pattern exactly
+  (`?goalId=`, editable Goal picker, `NO_GOAL_VALUE` sentinel). Fixed a real demo-data staleness
+  bug found along the way (`demoCommitmentDTOs` needed the same `let` + setter-function fix already
+  used for Tasks/Habits). Quick Capture support (Fase 2B) stays a separate, explicitly open
+  decision. Full detail: `TECH_DEBT.md` v1.39.0.
+- **v1.37.0 (2026-07-17):** Fase 2 implementation paused, per user direction, to evaluate the
+  creation-flow design first — separated "how does a user create a Commitment" (evaluated,
+  recommended) from "should Quick Capture create Commitments" (deliberately left open). Written up
+  in `docs/03-architecture/fase2_creation_flow_evaluation.md`. No code changed. Full detail:
+  `TECH_DEBT.md` v1.38.0.
+- **v1.36.0 (2026-07-17):** ADR-019 Fase 1 (Lenguaje) executed. Goals screen's Commitment-showing
+  tab renamed "Tareas"→"Compromisos" (both locales, empty state, stale comment). Goal Workspace's
+  mixed tab (Commitments+Habits+Tasks under one "Tareas" label) explicitly deferred to Fase 3 — an
+  information-architecture call, not a naming one. Full detail: `TECH_DEBT.md` v1.37.0.
+- **v1.35.0 (2026-07-17):** **ADR-019 approved.** `Commitment` stays user-visible; official
+  UI-language table (`Objetivo`/`Compromiso`/`Tarea`/`Hábito`) is now normative. Implementation
+  plan registered in the ADR: Fase 1 (Lenguaje) → Fase 2 (Creación, connects
+  `commitments/create.tsx`) → Fase 3 (Unificación visual, shared cards) → Fase 4 (Product Polish).
+  `TECH_DEBT.md` Items 31/32 now "Ready for Phase 1/2." Open question NOT resolved by this
+  approval: whether Quick Capture should support creating a Commitment — separate evaluation
+  needed. Full detail: `TECH_DEBT.md` v1.36.0.
+- **v1.34.0 (2026-07-17):** Wrote `docs/03-architecture/adr_019_commitment_user_model.md` —
+  formal ADR answering whether `Commitment` should remain user-visible and, if so, its official
+  UI-language table (`Objetivo`/`Compromiso`/`Tarea`/`Hábito` recommended). Status: Propuesta,
+  pending explicit approval — no code touched. `TECH_DEBT.md` Items 31 and 32 reclassified in
+  framing from ordinary tech debt to "Blocked by ADR." Full detail: `TECH_DEBT.md` v1.35.0.
+- **v1.33.0 (2026-07-17):** Ran the exact walkthrough the previous entry's investigation
+  prescribed — create a Goal, read the re-seeded Commitments under "Tareas," try to create a new
+  one. Confirmed the naming confusion is real even with honest demo data (as predicted). Trying to
+  complete "create a new Commitment" surfaced something more severe: **`Commitment` cannot be
+  created from anywhere in the app UI** — Quick Capture excludes it by design, Goal Workspace's own
+  Commitments section has no add button (unlike its Habits/Tasks siblings), and a fully-built
+  `commitments/create.tsx` screen ("Crear Compromiso") exists but is completely unlinked from any
+  navigation. That orphaned screen already uses "Compromiso" as its terminology — real evidence a
+  version of the naming decision was already underway once, likely during VS-031's move of
+  Commitment into Goal Workspace, and never finished. Logged as `TECH_DEBT.md` Item 32 (High
+  priority, deliberately not fixed — wiring it up now using its current copy would decide Item 31's
+  naming question by default rather than by explicit choice). Full detail: `TECH_DEBT.md` v1.34.0.
+- **v1.32.0 (2026-07-17):** A screenshot comparison of two "Tareas" card layouts (Goals'
+  Commitment-tab vs. the standalone Tasks screen) led to a deeper investigation than component
+  duplication: `GoalTasksTab.tsx` actually renders `Commitment`, not `Task` — three UI surfaces
+  (Goals, Goal Workspace, the standalone Tasks screen) all use the label "Tareas" for two different
+  domain objects. Read both aggregates (`Commitment`: recurrence/pause-resume; `Task`:
+  estimated/actual minutes, simple lifecycle) and `Goal.ts`'s own doc comment (`Goal -> Commitment
+-> Task/Habit`) — the domain model is well-designed and was never the problem. The actual root
+  cause: `demo-data.ts`'s Commitment titles read at Goal scale ("Run a half marathon"), and Task
+  titles were never bespoke (shared per-category filler suffixed with the Commitment's own title).
+  Per explicit user sequencing — fix the data honesty first, decide the language question next,
+  extract shared components only after that — rewrote all 17 Commitment titles and replaced the
+  shared-filler Task-title mechanism with bespoke per-Commitment titles; every numeric field
+  untouched, verified unaffected across 5 screens via Playwright. The naming decision itself
+  (should "Tareas" ever mean Commitment?) and the 4-way visual card duplication remain open,
+  logged as `TECH_DEBT.md` Item 31 — explicitly not resolved this pass. Full detail: `TECH_DEBT.md`
+  v1.33.0 (RI-13, Item 31), `docs/03-architecture/DEMO_DATASET.md`.
 - **v1.31.0 (2026-07-16):** `TECH_DEBT.md` Item 30 closed same day it was opened, per explicit user
   direction to run one short, targeted investigation before resuming screen audits — a single
   concrete diagnostic question ("disabled by config, or never implemented for this renderer?"),

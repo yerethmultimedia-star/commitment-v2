@@ -126,7 +126,7 @@
     "title": "Coach",
     "subtitle": "Tips based on your current progress.",
     "quickCapture": "Quick Capture",
-    "quickCaptureHint": "Opens Quick Capture to add a new goal, habit, task or note.",
+    "quickCaptureHint": "Opens Quick Capture to add a new goal, commitment, habit, task or note.",
     "loading": "Loading...",
     "addSuggestion": "Add",
     "empty": {
@@ -269,7 +269,7 @@
     },
     "tabs": {
       "objectives": "Goals",
-      "tasks": "Tasks",
+      "tasks": "Commitments",
       "habits": "Habits",
       "roadmaps": "Roadmaps"
     },
@@ -294,7 +294,7 @@
     },
     "tasksTab": {
       "empty": {
-        "title": "No tasks yet",
+        "title": "No commitments yet",
         "description": "Commitments linked to your goals will show up here."
       }
     },
@@ -354,6 +354,7 @@
       "type": "Type",
       "milestones": "Milestones",
       "commitments": "Commitments",
+      "addCommitment": "Add commitment",
       "habits": "Habits",
       "addHabit": "Add habit",
       "addTask": "Add task",
@@ -526,12 +527,14 @@
     "title": "Quick Capture",
     "types": {
       "goal": "Goal",
+      "commitment": "Commitment",
       "habit": "Habit",
       "task": "Task",
       "note": "Note"
     },
     "placeholders": {
       "goal": "What do you want to achieve?",
+      "commitment": "What are you committing to?",
       "habit": "What will you do repeatedly?",
       "task": "What needs doing?",
       "note": "Write a quick note..."

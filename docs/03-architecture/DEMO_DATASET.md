@@ -4,8 +4,10 @@
 extended per that contract in Phase 9 (2026-07-14) and again on 2026-07-15
 (Habit `h-10`, goal-independent; and again same day — Task `t-058`,
 Goal-direct with no Commitment — see "The 7 Goals" below for the current
-counts). Every new feature that needs demo content extends this dataset —
-it does not create a parallel one.
+counts), and again on 2026-07-17 (all 17 Commitment titles rewritten to
+honestly read as sub-Goal-scale ongoing efforts, not Goal-scale events —
+see "Commitment/Task title rewrite" below). Every new feature that needs
+demo content extends this dataset — it does not create a parallel one.
 
 ## Why this document exists
 
@@ -92,6 +94,40 @@ in particular had zero linked Habits — and got one more Commitment + Habit
 - Milestone each, following the same rules as everything else here (computed
   progress, no independent random numbers, day-granularity dates via the
   existing `daysFromNow`/`daysAgo`/`ANCHOR` helpers).
+
+## Commitment/Task title rewrite (2026-07-17)
+
+Found during a Product Polish investigation (`TECH_DEBT.md` RI-13): the dataset's original
+Commitment titles ("Run a half marathon", "Save for a house down payment", "Ship the mobile
+redesign"...) read at the same scale as a Goal, not as a sub-Goal ongoing effort — even though the
+domain model (`packages/domain/src/commitment`, `packages/domain/src/goal`) already cleanly
+distinguishes them (Commitment has `recurrencePattern`/`pause()`/`resume()`; Task has
+`estimatedMinutes`/`actualMinutes` and a simple pending→completed lifecycle). The dataset was
+quietly teaching the wrong model. All 17 `COMMITMENT_SEEDS` titles were rewritten to read as
+ongoing behaviors in support of their Goal ("Train for the half marathon", "Save part of every
+paycheck", "Push the mobile redesign forward"), never a restatement of the Goal itself.
+
+**The Task generation mechanism changed too, not just Commitment titles.** Previously,
+`buildTasksForCommitment()` pulled from `TASK_TITLES_BY_CATEGORY` — 4-6 generic titles ("Morning
+run", "Stretch routine") _shared across every Commitment in that category_, suffixed with `" — {commitment
+title}"` at render time. That's a second reason Commitment and Task read as the same kind of thing:
+Tasks were never really distinct concrete actions, just filler. Each `DemoCommitmentSeed` now
+carries its own `taskTitles: string[]` — exactly `taskCount` bespoke, concrete, one-off titles
+("Buy new running shoes", "Register for the race") that support _that specific_ Commitment and
+never restate it. `TASK_TITLES_BY_CATEGORY` was deleted.
+
+**Every numeric field is untouched** — `id`/`state`/`category`/`priority`/`targetDate`/
+`recurrencePattern`/`progressRatio`/`taskCount`/`goalId` are identical to before this rewrite, so
+every computed value elsewhere (Insights deltas, Hero scoring, streak counts, task-ID sequencing
+like `t-050`/`t-058`) is unaffected — only the illustrative text content changed. Verified via
+Playwright across Today, Goals (Objetivos + Tareas tabs), the standalone Tasks screen, Goal
+Workspace (Resumen + Tareas), and Insights — all render correctly, no console errors, no numeric
+drift.
+
+**Explicitly not addressed by this rewrite:** the product-language collision this same
+investigation found (the UI label "Tareas" is used for Goals' Commitment-tab, the standalone Task
+screen, _and_ Goal Workspace's mixed tab — three different things under one word) is a separate,
+larger decision the rewrite doesn't resolve on its own — see `TECH_DEBT.md` RI-13 and Item 31.
 
 ## Consistency rules (never violate these when extending)
 

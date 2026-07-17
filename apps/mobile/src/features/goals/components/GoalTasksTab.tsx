@@ -8,11 +8,12 @@ import { CommitmentStatusBadge } from '@/features/commitments/components/Commitm
 import { CommitmentPriorityBadge } from '@/features/commitments/components/CommitmentPriorityBadge';
 
 /**
- * "Tasks" sub-tab — every Commitment across every Goal, flat. Labeled
- * "Tasks" to match how the user thinks about commitments (VS-031 product
- * feedback); still reads the same Commitment data as the Goal Workspace,
- * nothing new fetched here. Not to be confused with the separate
- * features/tasks TasksScreen (individual to-do items) — that stays as is.
+ * "Commitments" sub-tab — every Commitment across every Goal, flat. Reads
+ * the same Commitment data as the Goal Workspace, nothing new fetched here.
+ * Not to be confused with the separate features/tasks TasksScreen
+ * (individual to-do items) — that stays as is. Renamed from "Tasks" per
+ * ADR-019 (docs/03-architecture/adr_019_commitment_user_model.md), which
+ * reserves "Tarea"/"Task" exclusively for the Task aggregate.
  */
 export function GoalTasksTab() {
   const router = useRouter();

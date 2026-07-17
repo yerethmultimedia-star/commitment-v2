@@ -45,8 +45,8 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const [tab, setTab] = useState<WorkspaceTab>('summary');
 
   const linkedCommitments = useMemo(
-    () => commitments.filter((c) => goal?.commitmentIds.includes(c.id)),
-    [commitments, goal]
+    () => commitments.filter((c) => c.goalId === goalId),
+    [commitments, goalId]
   );
   const linkedHabits = useMemo(
     () => habits.filter((h) => h.goalId === goalId),
@@ -164,9 +164,19 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
 
           {tab === 'tasks' && (
             <YStack gap="$5">
-              {linkedCommitments.length > 0 && (
-                <YStack gap="$2">
-                  <SectionHeader title={{ i18nKey: 'goals.workspace.commitments' }} />
+              <YStack gap="$2">
+                <SectionHeader
+                  title={{ i18nKey: 'goals.workspace.commitments' }}
+                  action={
+                    <IconButton
+                      iconToken={<Plus size={18} />}
+                      tooltipI18nKey="goals.workspace.addCommitment"
+                      accessibilityHintI18nKey="goals.workspace.addCommitment"
+                      onPress={() => router.push(`/commitments/create?goalId=${goal.id}` as any)}
+                    />
+                  }
+                />
+                {linkedCommitments.length > 0 && (
                   <YStack gap="$2">
                     {linkedCommitments.map((c) => (
                       <Card
@@ -184,8 +194,8 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                       </Card>
                     ))}
                   </YStack>
-                </YStack>
-              )}
+                )}
+              </YStack>
 
               <YStack gap="$2">
                 <SectionHeader
@@ -232,7 +242,21 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                 ) : (
                   <YStack gap="$2">
                     {upcomingTasks.map((tk) => (
-                      <Card key={tk.id} variant="elevated">
+                      // Navigates to the Tasks screen (Task has no per-item detail
+                      // route anywhere in the app) rather than exposing an inline
+                      // action here — matches the entity's own summary-card
+                      // pattern already established by UpcomingTasksWidget on
+                      // Today, and the "summary cards lead to the entity's main
+                      // surface" rule Commitment's own card in this same tab
+                      // already follows (TECH_DEBT.md B-001, VS-037).
+                      <Card
+                        key={tk.id}
+                        variant="elevated"
+                        clickable
+                        onPress={() => router.push('/(tabs)/tasks' as any)}
+                        pressStyle={{ opacity: 0.9 }}
+                        accessibilityLabel={tk.title}
+                      >
                         <XStack gap="$3" alignItems="center">
                           <Clock color="$contentSecondary" size={18} />
                           <Body flex={1}>{tk.title}</Body>

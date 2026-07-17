@@ -59,31 +59,68 @@ interface DemoCommitmentSeed {
   taskCount: number;
   /** Owning Goal — see demo-goals.repository.ts. Every commitment belongs to exactly one Goal in the canonical dataset. */
   goalId: string;
+  /**
+   * Bespoke titles for this Commitment's own Tasks — exactly `taskCount`
+   * entries. Replaced the old shared TASK_TITLES_BY_CATEGORY + " — {title}"
+   * suffix mechanism (2026-07-17): that produced generic, category-wide
+   * filler ("Morning run — Run a half marathon") reused across every
+   * Commitment in a category, which is exactly what made Commitment and
+   * Task read as the same kind of thing at a glance. Every title here is a
+   * concrete, finite, one-off step that concretely supports its parent
+   * Commitment — never a restatement of the Commitment itself.
+   */
+  taskTitles: string[];
 }
 
+// Titles below were rewritten 2026-07-17 to honor Goal -> Commitment -> Task
+// as three genuinely different scales, not three names for the same thing
+// (see TECH_DEBT.md for the finding this responds to). A Commitment reads
+// as an ongoing effort or ongoing behavior in support of its Goal — several
+// gained recurring language even where recurrencePattern stays 'None',
+// since "ongoing" doesn't require a formal recurrence rule to read that way.
+// A Task under it is a concrete, finite, one-off action — never a
+// restatement of the Commitment. Goal titles are unchanged; they were
+// already correctly Goal-scaled.
 const COMMITMENT_SEEDS: DemoCommitmentSeed[] = [
-  { id: 'c-01', title: 'Run a half marathon', state: 'Active', category: 'health', priority: 'medium', targetDate: daysFromNow(45), progressRatio: 0.6, taskCount: 5, goalId: 'g-01' },
-  { id: 'c-02', title: 'Launch Commitment v2', state: 'Active', category: 'career', priority: 'medium', targetDate: daysFromNow(20), recurrencePattern: 'weekly', progressRatio: 0.72, taskCount: 6, goalId: 'g-04' },
-  { id: 'c-03', title: 'Build a healthy morning routine', state: 'Active', category: 'health', priority: 'high', recurrencePattern: 'daily', progressRatio: 0.48, taskCount: 4, goalId: 'g-01' },
-  { id: 'c-04', title: 'Save for a house down payment', state: 'Active', category: 'finance', priority: 'low', targetDate: daysFromNow(300), progressRatio: 0.28, taskCount: 3, goalId: 'g-03' },
-  { id: 'c-05', title: 'Read 24 books this year', state: 'Active', category: 'learning', priority: 'low', targetDate: daysFromNow(180), progressRatio: 0.33, taskCount: 4, goalId: 'g-06' },
-  { id: 'c-06', title: 'Learn conversational Portuguese', state: 'Active', category: 'learning', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.2, taskCount: 3, goalId: 'g-05' },
-  { id: 'c-07', title: 'Reconnect with old friends', state: 'Active', category: 'personal', priority: 'low', progressRatio: 0.5, taskCount: 2, goalId: 'g-07' },
-  { id: 'c-08', title: 'Ship the mobile redesign', state: 'Active', category: 'career', priority: 'high', targetDate: daysFromNow(10), progressRatio: 0.85, taskCount: 4, goalId: 'g-04' },
-  { id: 'c-09', title: 'Meditate consistently', state: 'Paused', category: 'health', priority: 'medium', recurrencePattern: 'daily', progressRatio: 0.4, taskCount: 2, goalId: 'g-02' },
-  { id: 'c-10', title: 'Declutter the apartment', state: 'Paused', category: 'personal', priority: 'low', progressRatio: 0.15, taskCount: 2, goalId: 'g-02' },
-  { id: 'c-11', title: 'Finish the onboarding audit', state: 'Completed', category: 'career', priority: 'medium', targetDate: daysAgo(5), progressRatio: 1, taskCount: 3, goalId: 'g-04' },
-  { id: 'c-12', title: 'Complete a 30-day fitness challenge', state: 'Completed', category: 'health', priority: 'high', targetDate: daysAgo(12), progressRatio: 1, taskCount: 3, goalId: 'g-01' },
-  { id: 'c-13', title: 'Set up the emergency fund', state: 'Completed', category: 'finance', priority: 'medium', targetDate: daysAgo(30), progressRatio: 1, taskCount: 2, goalId: 'g-03' },
-  { id: 'c-14', title: 'Redesign the personal website', state: 'Draft', category: 'career', priority: 'low', progressRatio: 0, taskCount: 0, goalId: 'g-04' },
-  { id: 'c-15', title: 'Train for a triathlon', state: 'Cancelled', category: 'health', priority: 'low', progressRatio: 0.1, taskCount: 1, goalId: 'g-01' },
-  { id: 'c-16', title: 'Watch Portuguese shows with subtitles', state: 'Active', category: 'learning', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.33, taskCount: 3, goalId: 'g-05' },
-  { id: 'c-17', title: 'Send a thoughtful message weekly', state: 'Active', category: 'personal', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.5, taskCount: 2, goalId: 'g-07' },
+  { id: 'c-01', title: 'Train for the half marathon', state: 'Active', category: 'health', priority: 'medium', targetDate: daysFromNow(45), progressRatio: 0.6, taskCount: 5, goalId: 'g-01',
+    taskTitles: ['Buy new running shoes', 'Register for the race', 'Book a physiotherapy check-up', 'Map out the training route', 'Replace the water bottle'] },
+  { id: 'c-02', title: 'Ship a product update every week', state: 'Active', category: 'career', priority: 'medium', targetDate: daysFromNow(20), recurrencePattern: 'weekly', progressRatio: 0.72, taskCount: 6, goalId: 'g-04',
+    taskTitles: ['Review the bug backlog', 'Write the release notes', 'Prep the team demo', 'Sync with design', 'Update the roadmap', 'Record the feature walkthrough'] },
+  { id: 'c-03', title: 'Follow a daily morning routine', state: 'Active', category: 'health', priority: 'high', recurrencePattern: 'daily', progressRatio: 0.48, taskCount: 4, goalId: 'g-01',
+    taskTitles: ['Lay out workout clothes the night before', 'Buy a sunrise alarm clock', 'Set a recurring morning reminder', 'Look up a beginner stretching routine'] },
+  { id: 'c-04', title: 'Save part of every paycheck', state: 'Active', category: 'finance', priority: 'low', targetDate: daysFromNow(300), progressRatio: 0.28, taskCount: 3, goalId: 'g-03',
+    taskTitles: ['Open a dedicated savings account', 'Compare mortgage rates', 'Automate the monthly transfer'] },
+  { id: 'c-05', title: 'Read a little every day', state: 'Active', category: 'learning', priority: 'low', targetDate: daysFromNow(180), progressRatio: 0.33, taskCount: 4, goalId: 'g-06',
+    taskTitles: ['Join a book club', 'Build a to-read list', 'Buy a reading lamp', 'Set a reading goal in the app'] },
+  { id: 'c-06', title: 'Practice Portuguese every week', state: 'Active', category: 'learning', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.2, taskCount: 3, goalId: 'g-05',
+    taskTitles: ['Buy a grammar book', 'Find a language exchange partner', 'Subscribe to a vocabulary app'] },
+  { id: 'c-07', title: 'Reach out to a friend every month', state: 'Active', category: 'personal', priority: 'low', progressRatio: 0.5, taskCount: 2, goalId: 'g-07',
+    taskTitles: ['List friends to reconnect with', 'Plan a group video call'] },
+  { id: 'c-08', title: 'Push the mobile redesign forward', state: 'Active', category: 'career', priority: 'high', targetDate: daysFromNow(10), progressRatio: 0.85, taskCount: 4, goalId: 'g-04',
+    taskTitles: ['Review the new design system', 'Test the app on different devices', 'Collect feedback from the beta group', 'Prepare the launch announcement'] },
+  { id: 'c-09', title: 'Meditate every morning', state: 'Paused', category: 'health', priority: 'medium', recurrencePattern: 'daily', progressRatio: 0.4, taskCount: 2, goalId: 'g-02',
+    taskTitles: ['Download a meditation app', 'Set up a quiet corner at home'] },
+  { id: 'c-10', title: 'Declutter a little every week', state: 'Paused', category: 'personal', priority: 'low', progressRatio: 0.15, taskCount: 2, goalId: 'g-02',
+    taskTitles: ['Buy storage boxes', 'Donate clothes I no longer wear'] },
+  { id: 'c-11', title: 'Complete the onboarding audit', state: 'Completed', category: 'career', priority: 'medium', targetDate: daysAgo(5), progressRatio: 1, taskCount: 3, goalId: 'g-04',
+    taskTitles: ['Record new-user sessions', 'Document friction points', 'Present findings to the team'] },
+  { id: 'c-12', title: 'Follow the 30-day fitness challenge', state: 'Completed', category: 'health', priority: 'high', targetDate: daysAgo(12), progressRatio: 1, taskCount: 3, goalId: 'g-01',
+    taskTitles: ['Buy workout clothes', 'Download the challenge app', 'Prep healthy snacks for the week'] },
+  { id: 'c-13', title: 'Build the emergency fund', state: 'Completed', category: 'finance', priority: 'medium', targetDate: daysAgo(30), progressRatio: 1, taskCount: 2, goalId: 'g-03',
+    taskTitles: ['Research high-yield savings accounts', 'Set up an automatic monthly transfer'] },
+  { id: 'c-14', title: 'Redesign my personal website', state: 'Draft', category: 'career', priority: 'low', progressRatio: 0, taskCount: 0, goalId: 'g-04', taskTitles: [] },
+  { id: 'c-15', title: 'Train weekly for a triathlon', state: 'Cancelled', category: 'health', priority: 'low', progressRatio: 0.1, taskCount: 1, goalId: 'g-01',
+    taskTitles: ['Buy a wetsuit'] },
+  { id: 'c-16', title: 'Watch Portuguese shows every week', state: 'Active', category: 'learning', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.33, taskCount: 3, goalId: 'g-05',
+    taskTitles: ['Find recommended Portuguese shows', 'Create a watch list', 'Jot down new words while watching'] },
+  { id: 'c-17', title: 'Send a thoughtful message every week', state: 'Active', category: 'personal', priority: 'medium', recurrencePattern: 'weekly', progressRatio: 0.5, taskCount: 2, goalId: 'g-07',
+    taskTitles: ["Note down friends' and family's important dates", 'Draft a few messages to send'] },
 ];
 
 export interface DemoCommitmentDTO {
   id: string;
   title: string;
+  description?: string;
   state: DemoCommitmentSeed['state'];
   priority: DemoCommitmentSeed['priority'];
   targetDate?: string;
@@ -92,7 +129,11 @@ export interface DemoCommitmentDTO {
   goalId?: string;
 }
 
-export const demoCommitmentDTOs: DemoCommitmentDTO[] = COMMITMENT_SEEDS.map((c) => ({
+// `let`, not `const` — demoCommitmentsRepository must be able to swap in a
+// new array reference on every mutation, same reasoning as demoTasks above
+// (see replaceDemoTasks): mutating in place would keep React Query's
+// referential-equality change detection from ever noticing a create.
+export let demoCommitmentDTOs: DemoCommitmentDTO[] = COMMITMENT_SEEDS.map((c) => ({
   id: c.id,
   title: c.title,
   state: c.state,
@@ -102,18 +143,15 @@ export const demoCommitmentDTOs: DemoCommitmentDTO[] = COMMITMENT_SEEDS.map((c) 
   goalId: c.goalId,
 }));
 
+/** The only way demoCommitmentsRepository may update the commitment list — always a new array reference, never an in-place mutation. */
+export function replaceDemoCommitmentDTOs(next: DemoCommitmentDTO[]): void {
+  demoCommitmentDTOs = next;
+}
+
 /** commitmentId -> goalId, for reverse lookups (Task -> Commitment -> Goal). */
 export const commitmentGoalId = new Map(COMMITMENT_SEEDS.map((c) => [c.id, c.goalId]));
 
 // --- Tasks -------------------------------------------------------------
-
-const TASK_TITLES_BY_CATEGORY: Record<DemoCommitmentSeed['category'], string[]> = {
-  health: ['Morning run', 'Stretch routine', 'Meal prep for the week', 'Track macros', 'Sleep by 10:30pm', 'Hydration check-in'],
-  career: ['Review pull requests', 'Write sprint update', 'Sync with design', 'Ship the release notes', 'Prep demo script', 'Audit onboarding flow'],
-  finance: ['Review monthly budget', 'Automate the savings transfer', 'Compare mortgage rates', 'Cancel unused subscriptions'],
-  learning: ['Read for 30 minutes', 'Finish chapter 4', 'Practice Portuguese flashcards', 'Watch course module', 'Take notes on today\'s reading'],
-  personal: ['Call a friend', 'Plan the weekend', 'Write in journal', 'Organize the closet'],
-};
 
 const PRIORITY_CYCLE: TaskPriority[] = ['high', 'medium', 'medium', 'low'];
 // Duration derives from priority rather than being independently random —
@@ -141,13 +179,12 @@ function nextCompletedTaskOffset(): number {
 }
 
 function buildTasksForCommitment(seed: DemoCommitmentSeed): TaskModel[] {
-  const titles = TASK_TITLES_BY_CATEGORY[seed.category];
   const completedCount = Math.round(seed.taskCount * seed.progressRatio);
   const tasks: TaskModel[] = [];
 
   for (let i = 0; i < seed.taskCount; i++) {
     const isCompleted = i < completedCount;
-    const title = titles[i % titles.length];
+    const title = seed.taskTitles[i];
     const priority = PRIORITY_CYCLE[i % PRIORITY_CYCLE.length];
     // Spread due dates: completed ones across the last 14 days (real
     // week-over-week deltas need density in both weeks, not just this one),
@@ -157,7 +194,7 @@ function buildTasksForCommitment(seed: DemoCommitmentSeed): TaskModel[] {
     tasks.push({
       id: nextTaskId(),
       identityId: DEMO_IDENTITY_ID,
-      title: `${title} — ${seed.title}`,
+      title,
       description: '',
       status: isCompleted ? 'completed' : 'pending',
       priority,

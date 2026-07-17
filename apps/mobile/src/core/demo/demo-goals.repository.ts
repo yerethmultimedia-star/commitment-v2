@@ -99,7 +99,7 @@ function commitmentTargetDate(commitmentId: string): string | undefined {
 let demoMilestones: Milestone[] = [
   { id: 'm-01', goalId: 'g-01', title: 'Complete a 5K without stopping', completed: true },
   { id: 'm-02', goalId: 'g-01', title: 'Run 15K in training', completed: true },
-  // Same event as Commitment c-01 ("Run a half marathon").
+  // Same event as Commitment c-01 ("Train for the half marathon").
   { id: 'm-03', goalId: 'g-01', title: 'Finish the half marathon', completed: false, targetDate: commitmentTargetDate('c-01') },
 
   { id: 'm-04', goalId: 'g-02', title: 'Set up a meditation corner', completed: true },
@@ -112,7 +112,7 @@ let demoMilestones: Milestone[] = [
 
   { id: 'm-10', goalId: 'g-04', title: 'Ship the v2 beta', completed: true },
   { id: 'm-11', goalId: 'g-04', title: 'Complete the onboarding audit', completed: true },
-  // Same event as Commitment c-08 ("Ship the mobile redesign").
+  // Same event as Commitment c-08 ("Push the mobile redesign forward").
   { id: 'm-12', goalId: 'g-04', title: 'Launch the redesigned website', completed: false, targetDate: commitmentTargetDate('c-08') },
 
   { id: 'm-13', goalId: 'g-05', title: 'Finish the beginner course', completed: true },

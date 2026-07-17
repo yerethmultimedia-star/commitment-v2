@@ -1,9 +1,9 @@
 # Commitment v2 — Project Status
 
-Version: 1.33.0
+Version: 1.50.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-16
+Last Updated: 2026-07-17
 
 ---
 
@@ -163,7 +163,66 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
 4. **VS-034 — Recurrence Management**
 5. **VS-035 — Offline First & Sync**
 6. **VS-036 — Search / Filters** (reprogrammed from VS-031 per ADR-015)
-7. **Candidate, not yet numbered — Historical/Analytics Engine.** Flagged 2026-07-16 during the
+7. ✅ **VS-037 — Product Consistency Initiative** (opened 2026-07-17, **audit phase Closed
+   2026-07-17**). Follows ADR-019 (visible domain model) and ADR-020 (Universal Capture) — both
+   closed and treated as the architectural baseline. Run as a category-by-category audit
+   (Terminología → Modelo mental → Comportamiento → Visual), sweeping each category fully before
+   implementing, to batch related fixes instead of many single-string PRs — explicit user
+   methodology for this workstream, distinct from the find→decide→implement rhythm of
+   ADR-019/ADR-020.
+
+   **Final results:**
+
+   | Categoría      | Resultado                                                                                        |
+   | -------------- | ------------------------------------------------------------------------------------------------ |
+   | Terminología   | 1 corrección directa confirmada (**T-001**, `TECH_DEBT.md` Item 37)                              |
+   | Modelo Mental  | 2 observaciones sin acción (**M-001**, **M-002**) + 1 decisión de producto pendiente (**M-003**) |
+   | Comportamiento | 1 inconsistencia importante, **ya resuelta** (**B-001**, Item 36)                                |
+   | Visual         | 2 inconsistencias de Design System confirmadas (**V-001** Item 38, **V-002** Item 39)            |
+   - **T-001:** Coach's `commitments-completed` achievement counts Commitments but displays
+     "objetivos completados." Confirmed, no ADR needed.
+   - **M-001:** entity creation-flow richness varies (3 distinct secondary patterns across
+     Goal/Commitment+Habit/Task) — closed, no evidence of friction, a reasonable hypothesis
+     (different entities need different upfront configuration) explains it.
+   - **M-002:** Commitment has no top-level nav, lives nested under Goals — closed as _consistent_
+     with ADR-019 (containment, not invisibility), not a residue of the old model.
+   - **M-003:** Coach's onboarding-style suggestions always point to creating a Goal, never a
+     Commitment directly, even when driven by Commitment data — left open as a genuine product
+     question, not resolved.
+   - **B-001 (resolved):** Goal Workspace's "Upcoming" Task cards had zero interaction, unlike
+     their Commitment/Habit siblings in the same tab. A small sub-investigation (precedent
+     comparison, ruling out "reversibility" as the deciding factor via `TasksScreen.tsx`'s own
+     unconfirmed one-tap complete) converged on a reusable rule — _a summary card should lead to
+     the entity's own interaction surface_ — and was implemented immediately as an exception to the
+     batch-at-the-end plan. Verified live via Playwright.
+   - **V-001:** Task's priority/status don't reuse the `Badge` component Commitment already uses
+     for the same semantics. Priority sub-case is pure implementation duplication (fix is
+     mechanical). Status sub-case needs one small product call (should Task status get the same
+     visual prominence as Commitment status?) before applying.
+   - **V-002:** `GoalWorkspaceScreen.tsx` hand-rolls all 5 of its empty states instead of using the
+     shared `EmptyState` component every other screen already uses.
+
+   **Process observation (user's own closing read):** each category revealed a different _class_
+   of finding — Terminología found language debt inherited from ADR-019; Modelo Mental found
+   architecture questions, not errors; Comportamiento found one real UX break, now fixed; Visual
+   found Design System adoption gaps, not conceptual issues. Read together, this suggests the
+   product's architecture is fairly consolidated — remaining inconsistencies are convergence debt
+   (screens/components that haven't caught up to the current pattern), not conceptual gaps.
+
+   **Sequencing, confirmed 2026-07-17:** VS-037 was a cross-cutting audit inserted between two
+   strategic roadmap initiatives — now that it's closed, the roadmap resumes where it was
+   interrupted. **Goal Backend / CQRS / Event Store is next**, not the Consistency Cleanup batch.
+   Explicit reasoning: T-001/V-001/V-002 are convergence debt (terminology + Design System
+   adoption) — the product functions correctly without them, they don't block or unlock anything.
+   Goal Backend/CQRS/Event Store affects core domain evolution and gates future capability
+   (history, audit, sync, projections) — higher architectural impact, keeps priority. Consistency
+   Cleanup stays **queued, unscheduled**, deferred to a later window — with one explicit escalation
+   condition: if any of the three items starts generating real friction _while_ Goal Backend work
+   is underway (e.g. V-001 blocks reusing a component in a new screen, V-002 forces duplicating an
+   empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
+   waiting for a dedicated cleanup window.
+
+8. **Candidate, not yet numbered — Historical/Analytics Engine.** Flagged 2026-07-16 during the
    Insights audit: almost everything Insights shows is computed live off _current_ state
    (`currentStreakDays`, `completedAt`, etc.) — there's no persisted daily/event history, which is
    exactly why "últimos 7 días"/"peor día de la semana" for Habits couldn't be built honestly this
@@ -195,6 +254,127 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
 
 ## 📜 Change History
 
+- **v1.50.0 (2026-07-17):** **Roadmap sequencing confirmed post-VS-037.** Goal Backend / CQRS /
+  Event Store resumes as the next strategic initiative (VS-037 was a cross-cutting audit inserted
+  between two roadmap items, not a replacement for either). Consistency Cleanup (T-001/V-001/V-002)
+  stays queued and unscheduled — deferred, not urgent, none of the three block or unlock anything —
+  with an explicit escalation condition if any starts causing real friction during the Goal Backend
+  work.
+- **v1.49.0 (2026-07-17):** **VS-037's audit phase formally closed.** Final tally: 1 direct fix
+  (T-001), 2 no-action observations + 1 open product question (Modelo Mental), 1 resolved UX break
+  (B-001), 2 Design System adoption gaps (V-001, V-002). T-001/V-001/V-002 grouped into a queued
+  "Consistency Cleanup" batch, not yet scheduled — sequencing against the next roadmap initiative
+  still an open question. Full closing summary and results table in this document's VS-037 entry.
+  Full detail: `TECH_DEBT.md` v1.47.0 (Items 38/39 registered).
+- **v1.48.0 (2026-07-17):** **VS-037's Terminología and Modelo Mental categories swept; Comportamiento
+  in progress.** First implemented finding: B-001 (`TECH_DEBT.md` Item 36) — Goal Workspace's
+  "Upcoming" Task cards were fully inert; fixed via a small sub-investigation that converged on a
+  reusable rule (summary cards should lead to the entity's own interaction surface) rather than
+  copying either of two conflicting precedents outright. One terminology finding confirmed but
+  deliberately batched, not yet fixed: T-001 (Item 37, Coach's Commitment-count mislabeled as
+  "objetivos"). Two observations closed with no action (M-001, M-002); one open product question
+  parked, not a bug (M-003, Coach's Goal-only suggestion logic). Full detail: `TECH_DEBT.md`
+  v1.46.0.
+- **v1.47.0 (2026-07-17):** **VS-037 — Product Consistency Initiative opened.** With ADR-019 and
+  ADR-020 both closed and treated as the architectural baseline, the user directed a return to
+  the higher-level roadmap rather than starting backend/structural work immediately — a
+  product-wide audit for inconsistencies against that baseline first. Corrected a real numbering
+  error before registering it: the user's first proposal was "VS-032," already taken (Design
+  System Adoption, closed); the immediate correction, "VS-035," was also already reserved
+  (Offline First & Sync), caught only after a full sweep of every `VS-0XX` reference across
+  `PROJECT_STATUS.md`/`ENGINEERING_BOARD.md`/`TECH_DEBT.md`/`DECISION_LOG.md`/`RISK_REGISTER.md` —
+  highest existing reference was VS-036, so **VS-037** is the genuine next free number. Opening
+  question: whether the current product experience has inconsistencies with ADR-019/ADR-020 that
+  should resolve before structural backend work (Goal Backend/CQRS/Event Store) begins. Follows the
+  same lifecycle validated twice already (ADR-019, ADR-020): Investigation → ADR if needed →
+  Implementation → Golden Path → Quality Gate → Close.
+- **v1.46.0 (2026-07-17):** **ADR-020 approved — Quick Capture is now Universal Capture.**
+  Commitment joins Goal/Habit/Task/Note as a fully supported Quick Capture type, minimal
+  capture (title only, enriched later — same pattern the other types already use). Fase 2B closes
+  the ADR-019 arc's last open thread: the "Compromisos" tab's "+" button now correctly opens on
+  "Compromiso" instead of the stale "Tarea" default, verified live end-to-end (Playwright: create,
+  appears immediately, no console errors beyond an already-tracked dev-only warning). Recovered
+  from an iCloud sync corruption incident mid-session (8 files, transparently logged) and
+  discovered (not caused) 2 unrelated pre-existing backend test failures, now tracked. Full detail:
+  `TECH_DEBT.md` v1.45.0, `ENGINEERING_BOARD.md` v1.44.0.
+- **v1.45.0 (2026-07-17):** Fase 2B (Quick Capture for Commitments) opened as a fresh product
+  workstream — investigation-first, per the validated lifecycle. Current state of Quick Capture
+  documented: 4 supported types, all single-field/fire-and-forget, no formalized philosophy behind
+  which entities are included. One real bug found and logged (not fixed): the Goals tab renamed
+  "Compromisos" in Fase 1 still opens Quick Capture defaulted to "Tarea" (`TECH_DEBT.md` Item 34,
+  Blocked by Fase 2B). Full detail: `TECH_DEBT.md` v1.44.0, `ENGINEERING_BOARD.md` v1.43.0.
+- **v1.44.0 (2026-07-17):** **Golden Path #1 executed — PASS.** Fase 2A (Commitment creation)
+  formally reached Completed. First run surfaced and drove the fix of a real bug (Commitment
+  descriptions were silently never saved anywhere); a separate pre-existing "Historial fails to
+  load" defect (affects all Commitments, not just new ones) was found and correctly left as its own
+  tracked item rather than folded into this fix. ADR-019's full arc (Investigation → ADR →
+  Language → Creation → Golden Path → Gate) is now closed end to end with a real pass, not just a
+  documented plan. Fase 2B (Quick Capture) is open to start as its own topic. Full detail:
+  `TECH_DEBT.md` v1.43.0, `ENGINEERING_BOARD.md` v1.42.0.
+- **v1.43.0 (2026-07-17):** Thread closed — VS-032 → Product Polish → "two task lists" finding →
+  domain investigation → dataset fix → ADR-019 → Fase 1 (language) → Fase 2A (creation) → Golden
+  Path → E2E gate. New governance indicator introduced: `docs/07-quality/golden_path_coverage.md`,
+  tracking Golden Path status/execution mode across core flows — currently one entry (Commitment
+  Creation, ⏳). No open architecture or implementation decisions remain on this thread; the only
+  remaining work is operational (run the Golden Path), after which Fase 2B (Quick Capture) opens as
+  its own independent product discussion. Full detail: `TECH_DEBT.md` v1.42.0, `ENGINEERING_BOARD.md`
+  v1.41.0.
+- **v1.42.0 (2026-07-17):** Fase 2A formally kept open — `Implemented / Pending End-to-End
+Verification`, gated explicitly before Fase 2B can start. The verification script is now a
+  standing doc, `docs/07-quality/golden_path_commitment_creation.md`, proposed as a future
+  permanent regression test. Full detail: `TECH_DEBT.md` v1.41.0, `ENGINEERING_BOARD.md` v1.40.0.
+- **v1.41.0 (2026-07-17):** Insisting on a real end-to-end walkthrough before calling Fase 2A done
+  (not just typecheck/jest) caught two real Edit-screen bugs — Commitment's Goal link wasn't
+  showing correctly and any change to it was silently dropped on save. Both fixed. Item 32 status
+  corrected from "resolved" to "implemented, pending E2E" — the actual walkthrough still hasn't run
+  (no browser tooling this session); a manual script was handed to the user. Full detail:
+  `TECH_DEBT.md` v1.40.0, `ENGINEERING_BOARD.md` v1.39.0.
+- **v1.40.0 (2026-07-17):** Commitment can now be created from the app — `TECH_DEBT.md` Item 32
+  resolved. Fase 2A connects the previously-orphaned `commitments/create.tsx` from a new "+" button
+  on Goal Workspace's Commitments section, mirroring Habits' existing creation pattern exactly.
+  Quick Capture support (Fase 2B) stays a separate, deliberately unresolved decision. Full detail:
+  `TECH_DEBT.md` v1.39.0, `ENGINEERING_BOARD.md` v1.38.0.
+- **v1.39.0 (2026-07-17):** Fase 2 implementation paused for a design evaluation, per user
+  direction — "how a user creates a Commitment" evaluated and recommended; "should Quick Capture
+  create Commitments" deliberately left open, not resolved. See
+  `docs/03-architecture/fase2_creation_flow_evaluation.md`. No code changed. Full detail:
+  `TECH_DEBT.md` v1.38.0, `ENGINEERING_BOARD.md` v1.37.0.
+- **v1.38.0 (2026-07-17):** ADR-019 Fase 1 (Lenguaje) executed same day as approval. Goals
+  screen's Commitment-showing tab renamed "Tareas"→"Compromisos." Goal Workspace's mixed tab
+  deferred to Fase 3 (information-architecture question, not naming). Full detail: `TECH_DEBT.md`
+  v1.37.0, `ENGINEERING_BOARD.md` v1.36.0.
+- **v1.37.0 (2026-07-17):** **ADR-019 approved** — `Commitment` remains a user-visible concept;
+  official language table (`Objetivo`/`Compromiso`/`Tarea`/`Hábito`) is now normative across the
+  app. 4-phase implementation plan registered: Lenguaje → Creación → Unificación visual → Product
+  Polish. `TECH_DEBT.md` Items 31/32 unblocked, ready for Fase 1/Fase 2 respectively. Whether Quick
+  Capture should support Commitment creation remains an explicitly open, separate question. Full
+  detail: `TECH_DEBT.md` v1.36.0, `ENGINEERING_BOARD.md` v1.35.0.
+- **v1.36.0 (2026-07-17):** Wrote `docs/03-architecture/adr_019_commitment_user_model.md`,
+  answering whether `Commitment` should stay user-visible and, if so, its official UI-language
+  table (`Objetivo`/`Compromiso`/`Tarea`/`Hábito` recommended). Status: Propuesta, pending explicit
+  approval — no code changed. `TECH_DEBT.md` Items 31/32 reclassified from ordinary tech debt to
+  "Blocked by ADR." Full detail: `TECH_DEBT.md` v1.35.0, `ENGINEERING_BOARD.md` v1.34.0.
+- **v1.35.0 (2026-07-17):** Following the demo-data rewrite, ran a real walkthrough (create a Goal,
+  read the re-seeded Commitments, try to create a new one) to test whether the "Tareas" naming
+  confusion was really a data problem or a language problem — confirmed language, as predicted.
+  Trying to complete the walkthrough's own "create a Commitment" step surfaced a more severe,
+  separate finding: **Commitment has no creation path anywhere in the app UI**, despite a fully-
+  built `commitments/create.tsx` screen ("Crear Compromiso") existing in the codebase, completely
+  orphaned from navigation. That screen's existing "Compromiso" terminology is real evidence a
+  version of the naming decision was already underway once. Logged as `TECH_DEBT.md` Item 32 (High
+  priority, deliberately not fixed — connecting it now would decide the still-open naming question
+  by default). Full detail: `TECH_DEBT.md` v1.34.0, `ENGINEERING_BOARD.md` v1.33.0.
+- **v1.34.0 (2026-07-17):** Investigation into two differently-shaped "Tareas" cards surfaced a
+  product-language collision, not just UI duplication — Goals' Commitment-tab, the standalone Tasks
+  screen, and Goal Workspace's own tab all label themselves "Tareas" for two different domain
+  objects (`Commitment` and `Task`). The domain model itself is well-designed (`Goal.ts`'s own
+  comment states `Goal -> Commitment -> Task/Habit`); the actual root cause was the demo dataset
+  teaching the wrong model (Commitment titles read Goal-sized, Task titles were shared generic
+  filler). Rewrote all 17 Commitment titles and gave every Commitment bespoke Task titles, with
+  every numeric field untouched — verified across 5 screens via Playwright. The naming decision and
+  visual-duplication cleanup are explicitly deferred, logged as `TECH_DEBT.md` Item 31. Full detail:
+  `TECH_DEBT.md` v1.33.0 (RI-13), `ENGINEERING_BOARD.md` v1.32.0, `docs/03-architecture/
+DEMO_DATASET.md`.
 - **v1.33.0 (2026-07-16):** `TECH_DEBT.md` Item 30 (Tamagui animations producing no visible CSS
   transition) resolved same day it was opened, via a short targeted investigation per user
   direction. Root cause: the installed Tamagui version's activating prop is `transition`, not

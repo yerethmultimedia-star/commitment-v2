@@ -3,10 +3,11 @@ import { zodResolver } from '@/shared/forms/zodResolver';
 import { YStack } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@commitment/design-system';
-import { createCommitmentSchema, CommitmentFormValues } from '../../models/commitment.schema';
+import { createCommitmentSchema, CommitmentFormValues, NO_GOAL_VALUE } from '../../models/commitment.schema';
 import { ControlledInput } from '@/shared/forms/ControlledInput';
 import { ControlledDatePicker } from '@/shared/forms/ControlledDatePicker';
 import { ControlledSelect } from '@/shared/forms/ControlledSelect';
+import { useGoals } from '@/features/goals/hooks/useGoals';
 
 interface Props {
   initialValues?: Partial<CommitmentFormValues>;
@@ -20,9 +21,10 @@ interface Props {
 
 export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabledFields = [], submitLabelI18nKey }: Props) {
   const { t } = useTranslation();
-  
+  const { data: goals = [] } = useGoals();
+
   const schema = createCommitmentSchema(t);
-  
+
   const control = useForm<CommitmentFormValues>({
     resolver: zodResolver<CommitmentFormValues>(schema),
     defaultValues: {
@@ -31,11 +33,18 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
       targetDate: initialValues?.targetDate || null,
       recurrence: initialValues?.recurrence || 'none',
       priority: initialValues?.priority || 'medium',
+      // "Ninguno" (NO_GOAL_VALUE) is the default — Goal linkage is opt-in, not assumed, same as Habit.
+      goalId: initialValues?.goalId ?? NO_GOAL_VALUE,
     },
   });
 
   // Cast to FieldValues-compatible control for generic child components
   const untypedControl = control.control as unknown as import('react-hook-form').Control<FieldValues>;
+
+  const goalOptions = [
+    { value: NO_GOAL_VALUE, labelKey: 'form.fields.goal.none' },
+    ...goals.map((g: any) => ({ value: g.id, label: g.title })),
+  ];
 
   const recurrenceOptions = [
     { value: 'none', labelKey: 'form.fields.recurrence.options.none' },
@@ -60,7 +69,15 @@ export function CommitmentForm({ initialValues, onSubmit, isSubmitting, disabled
         disabled={disabledFields.includes('title')}
         accessibilityHint={disabledFields.includes('title') ? t('form.fields.readOnly', { ns: 'commitments' }) : undefined}
       />
-      
+
+      <ControlledSelect
+        name="goalId"
+        control={untypedControl}
+        label={t('form.fields.goal.label', { ns: 'commitments' })}
+        options={goalOptions}
+        disabled={disabledFields.includes('goalId')}
+      />
+
       <ControlledInput
         name="description"
         control={untypedControl}

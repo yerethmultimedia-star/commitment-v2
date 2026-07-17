@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export interface QuickCapturePrefill {
-  type: 'goal' | 'habit' | 'task' | 'note';
+  type: 'goal' | 'commitment' | 'habit' | 'task' | 'note';
   text: string;
 }
 

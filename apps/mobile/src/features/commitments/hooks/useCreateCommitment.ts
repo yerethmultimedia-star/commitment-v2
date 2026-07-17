@@ -16,6 +16,7 @@ export function useCreateCommitment() {
         targetDate: values.targetDate ? values.targetDate.toISOString() : undefined,
         recurrencePattern: values.recurrence !== 'none' ? values.recurrence || undefined : undefined,
         priority: values.priority,
+        goalId: values.goalId ?? undefined,
       });
     },
     onMutate: async (newCommitment) => {
@@ -29,9 +30,11 @@ export function useCreateCommitment() {
       const optimisticCommitment: CommitmentModel = {
         id: Math.random().toString(), // temporary ID
         title: newCommitment.title,
+        description: newCommitment.description || undefined,
         status: 'active', // default status
         priority: newCommitment.priority || 'medium',
         targetDate: newCommitment.targetDate ? newCommitment.targetDate.toISOString() : undefined,
+        goalId: newCommitment.goalId ?? undefined,
       };
 
       queryClient.setQueryData(queryKeys.commitments.list(), (old: any) => {
