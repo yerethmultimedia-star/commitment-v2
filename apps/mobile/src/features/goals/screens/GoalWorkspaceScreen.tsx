@@ -8,7 +8,7 @@ import {
 } from '@tamagui/lucide-icons';
 import {
   AppScreen, Card, Body, Title, IconButton, Button,
-  ProgressMetric, MetricCard, SectionHeader, LoadingState, ConfirmationDialog,
+  ProgressMetric, MetricCard, SectionHeader, LoadingState, ConfirmationDialog, EmptyState,
 } from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useRouter } from 'expo-router';
@@ -266,9 +266,11 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   }
                 />
                 {upcomingTasks.length === 0 ? (
-                  <Card variant="elevated">
-                    <Body tone="secondary" i18nKey="goals.workspace.upcomingEmpty" />
-                  </Card>
+                  <EmptyState
+                    fullscreen={false}
+                    icon={<Clock color="$contentTertiary" size={32} />}
+                    title={{ i18nKey: 'goals.workspace.upcomingEmpty' }}
+                  />
                 ) : (
                   <YStack gap="$2">
                     {upcomingTasks.map((tk) => (
@@ -303,9 +305,11 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
           {tab === 'milestones' && (
             <YStack gap="$2">
               {goal.milestones.length === 0 ? (
-                <Card variant="elevated">
-                  <Body tone="secondary" i18nKey="goals.workspace.upcomingEmpty" />
-                </Card>
+                <EmptyState
+                  fullscreen={false}
+                  icon={<CheckCircle2 color="$contentTertiary" size={32} />}
+                  title={{ i18nKey: 'goals.workspace.milestonesEmpty' }}
+                />
               ) : (
                 goal.milestones.map((m) => (
                   <Card
@@ -332,32 +336,29 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
             <YStack gap="$5">
               <YStack gap="$2">
                 <SectionHeader title={{ i18nKey: 'goals.workspace.notes' }} />
-                <Card variant="elevated">
-                  <XStack gap="$3" alignItems="center">
-                    <StickyNote color="$contentTertiary" size={20} />
-                    <Body tone="secondary" flex={1} i18nKey="goals.workspace.notesEmpty" />
-                  </XStack>
-                </Card>
+                <EmptyState
+                  fullscreen={false}
+                  icon={<StickyNote color="$contentTertiary" size={32} />}
+                  title={{ i18nKey: 'goals.workspace.notesEmpty' }}
+                />
               </YStack>
 
               <YStack gap="$2">
                 <SectionHeader title={{ i18nKey: 'goals.workspace.attachments' }} />
-                <Card variant="elevated">
-                  <XStack gap="$3" alignItems="center">
-                    <Paperclip color="$contentTertiary" size={20} />
-                    <Body tone="secondary" flex={1} i18nKey="goals.workspace.attachmentsEmpty" />
-                  </XStack>
-                </Card>
+                <EmptyState
+                  fullscreen={false}
+                  icon={<Paperclip color="$contentTertiary" size={32} />}
+                  title={{ i18nKey: 'goals.workspace.attachmentsEmpty' }}
+                />
               </YStack>
 
               <YStack gap="$2">
                 <SectionHeader title={{ i18nKey: 'goals.workspace.activity' }} />
-                <Card variant="elevated">
-                  <XStack gap="$3" alignItems="center">
-                    <History color="$contentTertiary" size={20} />
-                    <Body tone="secondary" flex={1} i18nKey="goals.workspace.activityEmpty" />
-                  </XStack>
-                </Card>
+                <EmptyState
+                  fullscreen={false}
+                  icon={<History color="$contentTertiary" size={32} />}
+                  title={{ i18nKey: 'goals.workspace.activityEmpty' }}
+                />
               </YStack>
             </YStack>
           )}

@@ -14,7 +14,11 @@ export const DESCRIPTORS: Record<string, { icon: React.ComponentType<any>; i18nK
   'no-habits-today': { icon: Lightbulb, i18nKey: 'coach.opportunities.noHabitsToday' },
   'plan-ahead': { icon: Lightbulb, i18nKey: 'coach.opportunities.planAhead' },
   'week-streak': { icon: Award, i18nKey: 'coach.achievements.weekStreak' },
-  'commitments-completed': { icon: Award, i18nKey: 'coach.achievements.goalsCompleted' },
+  // TECH_DEBT.md Item 37 (T-001) — this targetId counts Commitment entities
+  // (CoachRecommendationProvider.ts), so its copy must say "commitments," not
+  // "goals" — a genuine goalsCompleted achievement key already exists above
+  // for whatever eventually needs it.
+  'commitments-completed': { icon: Award, i18nKey: 'coach.achievements.commitmentsCompleted' },
   'all-habits-done': { icon: Award, i18nKey: 'coach.achievements.allHabitsDone' },
   'habit-streaks-at-risk': { icon: AlertTriangle, i18nKey: 'coach.risks.habitStreaksAtRisk' },
   'heavy-day': { icon: AlertTriangle, i18nKey: 'coach.risks.heavyDay' },

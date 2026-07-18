@@ -222,6 +222,18 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
+   **Consistency Cleanup batch executed, 2026-07-18.** Goal Backend paused on Decisión A (Commitment
+   Draft UX) / Decisión B (Goal `Active` state), meeting the escalation condition (queued cleanup
+   work can proceed without competing with the paused strategic initiative). Implemented: **T-001**
+   (`TECH_DEBT.md` Item 37, RESOLVED), **V-001 priority sub-case** (Item 38, RESOLVED), **V-002**
+   (Item 39, RESOLVED). **V-001 status sub-case explicitly deferred**, not implemented — still
+   requires the product call on whether Task status deserves the same `Badge` prominence as
+   Commitment status. Verified: `tsc --noEmit` clean, 79/79 jest passing, live Playwright
+   verification in Demo Mode (Tasks priority badges, Goal Workspace Notes/Attachments/Activity empty
+   states). Also fixed in passing: a copy-paste bug where Milestones' empty state reused Upcoming
+   Tasks' copy. Net effect: mechanical consistency debt is now clear; remaining open product
+   questions are concentrated in two fronts — Draft Lifecycle (Commitment/Goal) and V-001 (status).
+
 8. 🔄 **Goal Backend / CQRS / Event Store — Backend + Mobile Integration (incl. Fase 4B) CLOSED,
    Golden Path ⛔ Blocked on a product decision (2026-07-18).** **Correction to the prior "ADR-021
    implementation CLOSED" entry**: actually running the Golden Path (not just `tsc`/jest/e2e) found
@@ -435,6 +447,14 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.62.0 (2026-07-18):** **Consistency Cleanup batch (T-001/V-001 priority/V-002) implemented.**
+  With Goal Backend paused on Decisión A/B, executed the deferred VS-037 cleanup batch: T-001
+  (`TECH_DEBT.md` Item 37, Coach achievement copy mismatch), V-001 priority sub-case (Item 38, Task
+  now reuses `Badge`), V-002 (Item 39, `GoalWorkspaceScreen.tsx` now uses `EmptyState` in all 5
+  spots) — all RESOLVED. V-001's status sub-case explicitly left open, pending a product decision.
+  Also fixed a discovered copy-paste bug (Milestones empty state wrongly reused Upcoming Tasks'
+  copy). Verified: `tsc --noEmit` clean, 79/79 jest passing, live Playwright verification in Demo
+  Mode.
 - **v1.61.0 (2026-07-18):** **Draft Lifecycle UX reframed: two questions, not one.** Follow-up
   check on `GoalState.Active` (exhaustive grep, git history of `goal.ts`, ADR-019/021 and Goal
   Backend docs) found exactly one reference anywhere in the codebase, inside dead code, on a file

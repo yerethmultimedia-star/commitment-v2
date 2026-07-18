@@ -1914,7 +1914,7 @@ it touched real source files during this work, per this project's transparency s
 
 ---
 
-## Active Technical Debt Item 37: T-001 — Coach's "commitments-completed" achievement displays "objetivos completados" — confirmed, batched for VS-037's implementation pass
+## Active Technical Debt Item 37: T-001 — Coach's "commitments-completed" achievement displays "objetivos completados" — RESOLVED, 2026-07-18
 
 - **Description:** Found during VS-037's Terminology audit. `CoachRecommendationProvider.ts`'s
   achievement `targetId: 'commitments-completed'` is driven by `commitments.filter(c => c.status
@@ -1925,18 +1925,17 @@ it touched real source files during this work, per this project's transparency s
   (`coach.opportunities.planAhead`'s colloquial "objetivos" usage, and `coach.tips.startFirstGoal`'s
   onboarding-suggestion design question) — both deliberately left unclassified as terminology,
   pending separate evaluation (see VS-037 tracking in `PROJECT_STATUS.md`).
-- **Priority:** Confirmed, high confidence, no ADR needed — but **not fixed yet**. VS-037's audit
-  closed 2026-07-17 with T-001 as its only Terminología finding; it now ships together with V-001/
-  V-002 (below) as a single small **"Consistency Cleanup"** batch — queued, not yet scheduled
-  against the main roadmap. See `PROJECT_STATUS.md`'s VS-037 closing entry for the full batch and
-  sequencing status.
-- **Recommended Resolution:** rename the descriptor's `i18nKey` (or add a dedicated
-  `commitmentsCompleted` key) so the displayed text says "compromisos completados," in both
-  locales. Small, isolated, no schema/logic change — the data source is already correct.
+- **Resolution:** added a dedicated `coach.achievements.commitmentsCompleted` i18n key (both
+  locales) and pointed `coach-descriptors.ts`'s `'commitments-completed'` entry at it instead of the
+  pre-existing `goalsCompleted` key (left untouched — it's used correctly by a separate Insights
+  stat card). No changes needed where the achievement is rendered
+  (`CoachMessageWidget.tsx` already passes `i18nParams` dynamically). Verified via `tsc --noEmit`
+  (clean) and `jest` (79/79 passing); part of the Consistency Cleanup batch alongside V-001
+  (priority sub-case) and V-002 — see `PROJECT_STATUS.md`'s VS-037 closing entry.
 
 ---
 
-## Active Technical Debt Item 38: V-001 — Task's priority/status don't use the shared `Badge` component Commitment already uses for the same semantics
+## Active Technical Debt Item 38: V-001 — Task's priority/status don't use the shared `Badge` component Commitment already uses for the same semantics — priority sub-case RESOLVED 2026-07-18, status sub-case OPEN (blocked on product decision)
 
 - **Description:** Found during VS-037's Visual audit. Two sub-cases:
   1. **Priority.** `CommitmentPriorityBadge.tsx` uses the Design System's `Badge` component, and its
@@ -1952,18 +1951,21 @@ it touched real source files during this work, per this project's transparency s
      `tone="tertiary"` text — no color, no shape, no visual weight at all. Same semantic concept
      ("what state is this item in"), different prominence between the two entities' cards. No
      evidence found that this difference is deliberate.
-- **Priority:** Sub-case 1 (priority) — relatively high: pure implementation duplication, no
-  product decision needed, straightforward fix (swap the hand-rolled `<Text>` for `<Badge
-tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2 (status) —
-  logged as a confirmed visual inconsistency, but **not auto-implemented**: whether a Task's status
-  deserves the same visual prominence as a Commitment's is a small product call, not purely
-  technical — decide that first, then apply consistently.
-- **Recommended Resolution:** migrate `TasksScreen.tsx`'s priority chip to `<Badge>`. For status,
-  decide (quick call, no ADR needed) whether Task status should become a `Badge` too, then apply.
+- **Resolution (priority sub-case only):** `TasksScreen.tsx` now renders priority via `<Badge
+tone={PRIORITY_TONE[task.priority]} i18nKey={...}>`, with a local `PRIORITY_TONE` map mirroring
+  `CommitmentPriorityBadge.tsx`'s tone mapping (high→danger, medium→warning, low→neutral) kept
+  local per-feature rather than cross-imported, consistent with Commitment/Task being separate
+  bounded contexts that share vocabulary, not a shared concept. `task-descriptors.ts` (which held
+  only the now-fully-unused `PRIORITY_COLOR`) was deleted. Verified live via Playwright in Demo
+  Mode — priority badges render identically in style to Commitment's. `tsc --noEmit` and `jest`
+  clean.
+- **Status sub-case — still open, explicitly not implemented:** whether Task's status deserves the
+  same visual `Badge` prominence as Commitment's is a small product call, not purely technical —
+  deliberately left untouched pending that decision. Do not implement without it.
 
 ---
 
-## Active Technical Debt Item 39: V-002 — `GoalWorkspaceScreen.tsx` never uses the shared `EmptyState` component; 5 hand-rolled empty states instead
+## Active Technical Debt Item 39: V-002 — `GoalWorkspaceScreen.tsx` never uses the shared `EmptyState` component; 5 hand-rolled empty states instead — RESOLVED, 2026-07-18
 
 - **Description:** Found during VS-037's Visual audit. `EmptyState` (Design System) renders
   icon/illustration + title + description + optional action(s) — the established pattern used by
@@ -1975,10 +1977,14 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 - **Impact:** Medium — purely a Design System adoption gap (different heights, typography
   hierarchy, affordance, and CTA-capability than every other empty state in the app), not a
   functional bug.
-- **Priority:** Clear candidate for normalization — no product decision required, purely a
-  component-adoption fix. Bundled into the same Consistency Cleanup batch as T-001/Item 38.
-- **Recommended Resolution:** replace all 5 hand-rolled empty blocks in `GoalWorkspaceScreen.tsx`
-  with `<EmptyState>`, matching `ObjectivesTab.tsx`'s usage pattern.
+- **Resolution:** all 5 hand-rolled empty blocks in `GoalWorkspaceScreen.tsx` (Upcoming Tasks,
+  Notes, Attachments, Activity, Milestones) now use `<EmptyState fullscreen={false} icon={...}
+title={{ i18nKey: ... }}>`, matching `ObjectivesTab.tsx`'s established usage pattern. Also fixed a
+  copy-paste bug discovered while migrating: the Milestones empty state was wrongly reusing the
+  Upcoming Tasks copy (`upcomingEmpty`, "Nothing upcoming for this goal.") — added a dedicated
+  `milestonesEmpty` key in both locales. Verified live via Playwright in Demo Mode (Notes/
+  Attachments/Activity empty states render correctly with icon+title). `tsc --noEmit` and `jest`
+  clean.
 - **Related, not opened as its own item:** `CommitmentHistory.tsx` hand-rolls a loading spinner
   instead of using the shared `LoadingState` component — found in the same sweep, but not
   registered separately since it belongs to the same broken, not-yet-demo-mode-aware feature as

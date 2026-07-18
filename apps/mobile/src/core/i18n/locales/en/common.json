@@ -196,6 +196,10 @@
         "title": "{{count}} goals completed",
         "description": "Great work following through."
       },
+      "commitmentsCompleted": {
+        "title": "{{count}} commitments completed",
+        "description": "Great work following through."
+      },
       "allHabitsDone": {
         "title": "All habits done today",
         "description": "A clean sweep — nice work."
@@ -360,6 +364,7 @@
       "addTask": "Add task",
       "upcoming": "Upcoming",
       "upcomingEmpty": "Nothing upcoming for this goal.",
+      "milestonesEmpty": "No milestones yet.",
       "milestoneA11y": "Milestone: {{title}}",
       "notes": "Notes",
       "notesEmpty": "No notes yet.",

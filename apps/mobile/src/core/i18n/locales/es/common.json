@@ -196,6 +196,10 @@
         "title": "{{count}} objetivos completados",
         "description": "Excelente trabajo de seguimiento."
       },
+      "commitmentsCompleted": {
+        "title": "{{count}} compromisos completados",
+        "description": "Excelente trabajo de seguimiento."
+      },
       "allHabitsDone": {
         "title": "Todos los hábitos completados hoy",
         "description": "Barrida perfecta — buen trabajo."
@@ -360,6 +364,7 @@
       "addTask": "Agregar tarea",
       "upcoming": "Próximamente",
       "upcomingEmpty": "Nada próximo para este objetivo.",
+      "milestonesEmpty": "Aún no hay hitos.",
       "milestoneA11y": "Hito: {{title}}",
       "notes": "Notas",
       "notesEmpty": "Aún no hay notas.",

@@ -1,16 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui';
+import { Button, ScrollView, Theme, View, XStack, YStack } from 'tamagui';
 import { useLocalSearchParams } from 'expo-router';
 import { TaskForm } from '../components/TaskForm';
 import { useTaskActions, useTasks } from '../hooks/useTasks';
 import { useTranslation } from 'react-i18next';
 import { TaskModel } from '../models/task.model';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { IconButton, Card, Title, Body, toPlatformAccessibilityProps, Portal } from '@commitment/design-system';
+import { IconButton, Card, Title, Body, Badge, BadgeTone, toPlatformAccessibilityProps, Portal } from '@commitment/design-system';
 import { Plus } from '@tamagui/lucide-icons';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { useAppearanceStore } from '@/features/appearance/store/use-appearance-store';
-import { PRIORITY_COLOR } from '../utils/task-descriptors';
+
+// Same three levels, same meaning, same tone mapping as Commitment's priority
+// (see CommitmentPriorityBadge.tsx) — TECH_DEBT.md Item 38 (V-001): this used
+// to hand-roll its own <Text> instead of reusing the shared Badge component.
+const PRIORITY_TONE: Record<TaskModel['priority'], BadgeTone> = {
+  high: 'danger',
+  medium: 'warning',
+  low: 'neutral',
+};
 
 type Bucket = 'inbox' | 'today' | 'upcoming' | 'completed' | 'archived';
 const BUCKETS: Bucket[] = ['inbox', 'today', 'upcoming', 'completed', 'archived'];
@@ -136,8 +144,6 @@ export function TasksScreen() {
             return null; // Form is already shown at the top
           }
 
-          const priorityColor = PRIORITY_COLOR[task.priority];
-
           return (
             <Card
               key={task.id}
@@ -152,17 +158,10 @@ export function TasksScreen() {
                     <Body tone="secondary" fontSize="$3">{task.description}</Body>
                   )}
                 </YStack>
-                <Text
-                  fontSize="$2"
-                  fontWeight="bold"
-                  paddingHorizontal="$2"
-                  paddingVertical="$1"
-                  borderRadius="$2"
-                  backgroundColor={priorityColor.bg as any}
-                  color={priorityColor.text as any}
-                >
-                  {t(`form.priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`)}
-                </Text>
+                <Badge
+                  tone={PRIORITY_TONE[task.priority]}
+                  i18nKey={`tasks:form.priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`}
+                />
               </XStack>
 
               <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
