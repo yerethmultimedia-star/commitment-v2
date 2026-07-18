@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.59.0
+Version: 1.61.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -387,19 +387,30 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
     evaluation: should Goal own every such relationship uniformly, or does ownership depend
     per-aggregate on invariants/cardinality/lifecycle/query patterns? Explicitly deferred — Fase 4B
     does not touch Habit's working flow. Not started, not yet scoped.
-13. **Candidate, not yet numbered — Draft Lifecycle UX.** Surfaced 2026-07-18 running
-    `docs/07-quality/golden_path_goal_creation.md`: a freshly created Goal starts in `Draft` on the
-    real backend (correct, intentional domain design) but is invisible in the entire Objetivos
-    screen — none of its three chips ("Activos"/"En progreso"/"Completados") match `Draft`. Both the
-    backend and the Fase 4B mobile write-integration worked exactly as built; what's missing is a
-    product decision about what a user should see immediately after creating an aggregate that
-    starts in `Draft`. This is the same underlying question `golden_path_commitment_creation.md`
-    already found and deliberately left open for Commitment (its "Known caveats" section) —
-    consolidated here as one cross-cutting question rather than separate per-aggregate debt, since
-    it will likely recur for Habit or any future aggregate with the same lifecycle shape. Not
-    started, not yet scoped — candidate questions: show Draft explicitly (a new chip/state), start
-    aggregates at `Active` instead (changes the domain), or require an explicit
-    activation step before an aggregate becomes visible.
+13. **Candidate, product evaluation written and reframed — Draft Lifecycle UX.** Surfaced
+    2026-07-18 running `docs/07-quality/golden_path_goal_creation.md`: a freshly created Goal
+    starts in `Draft` on the real backend (correct, intentional domain design) but is invisible in
+    the entire Objetivos screen. Same underlying question `golden_path_commitment_creation.md`
+    already found for Commitment. `docs/03-architecture/draft_lifecycle_ux_assessment.md`
+    (2026-07-18) started as one cross-cutting question, then reframed after evidence: **this is two
+    different questions, not one**, because Commitment and Goal turn out to be in genuinely
+    different states of design:
+    - **Commitment — a UX question.** The domain already fully supports Draft→Active —
+      `Commitment.activate()`, its backend command, and a working "Activar" button in
+      `CommitmentActionBar.tsx` all exist; the Commitments list doesn't even filter by state, so a
+      Draft Commitment is technically reachable today. Never exercised because Demo Mode skips
+      Draft entirely. The question is purely "do we want to use what's already built."
+    - **Goal — a domain question, not a UX question.** `GoalState.Active` is defined but has
+      exactly one reference anywhere in the codebase (inside `Goal.complete()`, in a branch that's
+      only reachable when the state is `Archived` — never load-bearing in practice), no aggregate
+      method ever assigns it, `goal.ts` has a single commit in its entire history (never modified
+      since creation), and zero mentions across ADR-019, ADR-021, or any Goal Backend investigation
+      doc. No evidence of intentional design behind it — plausibly a dead state carried over from
+      Commitment's own enum shape, not a pending transition to build. Not confirmed as removable —
+      that's still a product/domain decision — but the framing shifted from "what UI do we build
+      for activation" to "does `Active` need to exist for `Goal` at all."
+      Not started, not yet scoped for implementation — this remains an analysis checkpoint, not a
+      decision.
 
 ---
 
@@ -424,6 +435,23 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.61.0 (2026-07-18):** **Draft Lifecycle UX reframed: two questions, not one.** Follow-up
+  check on `GoalState.Active` (exhaustive grep, git history of `goal.ts`, ADR-019/021 and Goal
+  Backend docs) found exactly one reference anywhere in the codebase, inside dead code, on a file
+  never modified since its single creating commit, with zero design rationale documented anywhere.
+  Reframed: for Commitment this is a UX question (the domain already supports Draft→Active fully);
+  for Goal it's a domain question (does `Active` need to exist at all, or is it a dead state carried
+  over from Commitment's enum shape) — not confirmed, still a pending decision, but a different kind
+  of decision than originally framed. `docs/03-architecture/draft_lifecycle_ux_assessment.md`
+  updated in place with this evidence.
+- **v1.60.0 (2026-07-18):** **Draft Lifecycle UX product evaluation written.**
+  `docs/03-architecture/draft_lifecycle_ux_assessment.md` — the single question ("what does Draft
+  mean to the user") with evidence, not a decision. Only Commitment and Goal have a `Draft` state
+  (Task/Habit don't). Found a real asymmetry: Commitment already has a working, unexercised
+  Draft→Active path (`activate()`, backend command, "Activar" button, unfiltered list) — just never
+  reachable because Demo Mode skips Draft. Goal has neither the UI nor the domain transition
+  (`GoalState.Active` is structurally unreachable). Three options laid out with consequences,
+  decision left open for product.
 - **v1.59.0 (2026-07-18):** **Fase 4B (Mobile Write Integration) implemented; Golden Path re-run
   hits a new, different blocker.** Rename/Complete/Archive integrated with real UI (dialog +
   confirmations); `Commitment.goalId`/`relinkGoal` replaced with `Goal.linkCommitment` for linking
