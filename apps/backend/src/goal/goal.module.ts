@@ -4,6 +4,8 @@ import { CommitmentModule } from '../commitment/commitment.module';
 import { GoalsController } from './api/goals.controller';
 import { RegisterGoalNestjsHandler } from './nestjs/register-goal.nestjs-handler';
 import { RenameGoalNestjsHandler } from './nestjs/rename-goal.nestjs-handler';
+import { UpdateGoalDescriptionNestjsHandler } from './nestjs/update-goal-description.nestjs-handler';
+import { ActivateGoalNestjsHandler } from './nestjs/activate-goal.nestjs-handler';
 import { CompleteGoalNestjsHandler } from './nestjs/complete-goal.nestjs-handler';
 import { ArchiveGoalNestjsHandler } from './nestjs/archive-goal.nestjs-handler';
 import { LinkCommitmentToGoalNestjsHandler } from './nestjs/link-commitment-to-goal.nestjs-handler';
@@ -25,6 +27,8 @@ import { InMemoryEventStore } from '../infrastructure/event-store/in-memory-even
   providers: [
     RegisterGoalNestjsHandler,
     RenameGoalNestjsHandler,
+    UpdateGoalDescriptionNestjsHandler,
+    ActivateGoalNestjsHandler,
     CompleteGoalNestjsHandler,
     ArchiveGoalNestjsHandler,
     LinkCommitmentToGoalNestjsHandler,

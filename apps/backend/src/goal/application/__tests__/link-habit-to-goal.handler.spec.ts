@@ -7,6 +7,10 @@ import { RegisterGoalCommandHandlerCore } from '../commands/register-goal.handle
 import { RegisterGoalCommand } from '../commands/register-goal.command';
 import { ArchiveGoalCommandHandlerCore } from '../commands/archive-goal.handler';
 import { ArchiveGoalCommand } from '../commands/archive-goal.command';
+import { ActivateGoalCommandHandlerCore } from '../commands/activate-goal.handler';
+import { ActivateGoalCommand } from '../commands/activate-goal.command';
+import { LinkCommitmentToGoalCommandHandlerCore } from '../commands/link-commitment-to-goal.handler';
+import { LinkCommitmentToGoalCommand } from '../commands/link-commitment-to-goal.command';
 import { CompleteGoalCommandHandlerCore } from '../commands/complete-goal.handler';
 import { CompleteGoalCommand } from '../commands/complete-goal.command';
 import { DomainEvent } from '@commitment/domain';
@@ -22,11 +26,14 @@ describe('LinkHabitToGoalCommandHandlerCore', () => {
   let registerHandler: RegisterGoalCommandHandlerCore;
   let linkHandler: LinkHabitToGoalCommandHandlerCore;
   let archiveHandler: ArchiveGoalCommandHandlerCore;
+  let activateHandler: ActivateGoalCommandHandlerCore;
+  let linkCommitmentHandler: LinkCommitmentToGoalCommandHandlerCore;
   let completeHandler: CompleteGoalCommandHandlerCore;
 
   const goalId = '018f6b5c-42e1-7000-8000-999999999999';
   const identityId = '018f6b5c-42e1-7000-8000-111111111111';
   const habitId = '018f6b5c-42e1-7000-8000-444444444444';
+  const commitmentId = '018f6b5c-42e1-7000-8000-555555555555';
 
   beforeEach(async () => {
     repository = new InMemoryGoalRepository();
@@ -59,9 +66,24 @@ describe('LinkHabitToGoalCommandHandlerCore', () => {
       dispatcher,
       eventStore,
     );
+    activateHandler = new ActivateGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
+    linkCommitmentHandler = new LinkCommitmentToGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
 
     await registerHandler.handle(
-      new RegisterGoalCommand(goalId, identityId, 'Run a half marathon'),
+      new RegisterGoalCommand(
+        goalId,
+        identityId,
+        'Run a half marathon',
+        'Train consistently',
+      ),
     );
     dispatchedEvents = [];
   });
@@ -106,6 +128,11 @@ describe('LinkHabitToGoalCommandHandlerCore', () => {
   });
 
   it('should reject linking a habit to a completed goal', async () => {
+    // Decisión B, Goal Lifecycle: complete() now requires Active first.
+    await linkCommitmentHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+    await activateHandler.handle(new ActivateGoalCommand(goalId));
     await completeHandler.handle(new CompleteGoalCommand(goalId));
 
     await expect(

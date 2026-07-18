@@ -7,6 +7,8 @@ import { RegisterGoalCommandHandlerCore } from '../commands/register-goal.handle
 import { RegisterGoalCommand } from '../commands/register-goal.command';
 import { ArchiveGoalCommandHandlerCore } from '../commands/archive-goal.handler';
 import { ArchiveGoalCommand } from '../commands/archive-goal.command';
+import { ActivateGoalCommandHandlerCore } from '../commands/activate-goal.handler';
+import { ActivateGoalCommand } from '../commands/activate-goal.command';
 import { CompleteGoalCommandHandlerCore } from '../commands/complete-goal.handler';
 import { CompleteGoalCommand } from '../commands/complete-goal.command';
 import { DomainEvent } from '@commitment/domain';
@@ -22,6 +24,7 @@ describe('LinkCommitmentToGoalCommandHandlerCore', () => {
   let registerHandler: RegisterGoalCommandHandlerCore;
   let linkHandler: LinkCommitmentToGoalCommandHandlerCore;
   let archiveHandler: ArchiveGoalCommandHandlerCore;
+  let activateHandler: ActivateGoalCommandHandlerCore;
   let completeHandler: CompleteGoalCommandHandlerCore;
 
   const goalId = '018f6b5c-42e1-7000-8000-999999999999';
@@ -59,9 +62,19 @@ describe('LinkCommitmentToGoalCommandHandlerCore', () => {
       dispatcher,
       eventStore,
     );
+    activateHandler = new ActivateGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
 
     await registerHandler.handle(
-      new RegisterGoalCommand(goalId, identityId, 'Run a half marathon'),
+      new RegisterGoalCommand(
+        goalId,
+        identityId,
+        'Run a half marathon',
+        'Train consistently',
+      ),
     );
     dispatchedEvents = [];
   });
@@ -132,6 +145,11 @@ describe('LinkCommitmentToGoalCommandHandlerCore', () => {
   });
 
   it('should reject linking a commitment to a completed goal', async () => {
+    // Decisión B, Goal Lifecycle: complete() now requires Active first.
+    await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+    await activateHandler.handle(new ActivateGoalCommand(goalId));
     await completeHandler.handle(new CompleteGoalCommand(goalId));
 
     await expect(

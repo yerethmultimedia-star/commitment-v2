@@ -51,3 +51,12 @@ export class GoalAlreadyArchivedError extends Error {
     Object.freeze(this);
   }
 }
+
+export class GoalActivationRequirementsNotMetError extends Error {
+  public readonly code = 'GOAL_ACTIVATION_REQUIREMENTS_NOT_MET';
+  constructor(message: string) {
+    super(message);
+    this.name = 'GoalActivationRequirementsNotMetError';
+    Object.freeze(this);
+  }
+}

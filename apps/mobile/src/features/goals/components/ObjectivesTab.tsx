@@ -6,10 +6,15 @@ import { useGoalsView } from '../hooks/useGoalsView';
 import { GoalCard } from './GoalCard';
 import { GoalViewModel } from '../models/goal.model';
 
-type StatusChip = 'active' | 'inProgress' | 'completed';
-const CHIPS: StatusChip[] = ['active', 'inProgress', 'completed'];
+// Decisión B, Goal Lifecycle: 'draft' added so a freshly created Goal (which
+// now genuinely starts in Draft, both in Demo Mode and on the real backend)
+// stays visible somewhere on this screen instead of disappearing until
+// activated (golden_path_goal_creation.md's blocker).
+type StatusChip = 'draft' | 'active' | 'inProgress' | 'completed';
+const CHIPS: StatusChip[] = ['draft', 'active', 'inProgress', 'completed'];
 
 function matchesChip(goal: GoalViewModel, chip: StatusChip): boolean {
+  if (chip === 'draft') return goal.state === 'Draft';
   if (chip === 'active') return goal.state === 'Active';
   if (chip === 'inProgress') return goal.state === 'Active' && goal.progress > 0;
   return goal.state === 'Completed';

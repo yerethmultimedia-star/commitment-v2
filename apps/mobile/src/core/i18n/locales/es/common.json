@@ -278,10 +278,15 @@
       "roadmaps": "Roadmaps"
     },
     "statusChips": {
+      "draft": "Borradores",
       "active": "Activos",
       "inProgress": "En progreso",
       "completed": "Completados",
       "empty": {
+        "draft": {
+          "title": "No hay borradores",
+          "description": "Los objetivos que aún estás configurando aparecen aquí hasta que los actives."
+        },
         "active": {
           "title": "No hay objetivos activos",
           "description": "Los objetivos en los que trabajas activamente aparecen aquí."
@@ -372,13 +377,20 @@
       "attachmentsEmpty": "Aún no hay adjuntos.",
       "activity": "Cronología de Actividad",
       "activityEmpty": "El historial de actividad aún no se registra.",
-      "editTitleTooltip": "Renombrar objetivo",
-      "renameTitle": "Renombrar objetivo",
+      "editTitleTooltip": "Editar objetivo",
+      "renameTitle": "Editar objetivo",
       "renamePlaceholder": "Título del objetivo",
+      "renameDescriptionLabel": "Descripción",
+      "renameDescriptionPlaceholder": "¿Qué significa este objetivo para ti?",
       "renameSave": "Guardar",
       "renameCancel": "Cancelar",
+      "activate": "Activar objetivo",
       "complete": "Completar objetivo",
       "archive": "Archivar objetivo",
+      "confirmActivate": {
+        "title": "¿Activar \"{{title}}\"?",
+        "description": "Esto mueve el objetivo a tu lista activa, donde puede generar progreso."
+      },
       "confirmComplete": {
         "title": "¿Completar \"{{title}}\"?",
         "description": "Esto marca el objetivo como logrado."

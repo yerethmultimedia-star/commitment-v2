@@ -25,6 +25,19 @@ import {
   GoalNotFoundError as RenameGoalNotFoundError,
   GoalStateConflictError as RenameGoalStateConflictError,
 } from '../application/commands/rename-goal.handler';
+import { UpdateGoalDescriptionDto } from './dtos/update-goal-description.dto';
+import { UpdateGoalDescriptionCommand } from '../application/commands/update-goal-description.command';
+import { UpdateGoalDescriptionResult } from '../application/commands/update-goal-description.result';
+import {
+  GoalNotFoundError as UpdateGoalDescriptionNotFoundError,
+  GoalStateConflictError as UpdateGoalDescriptionStateConflictError,
+} from '../application/commands/update-goal-description.handler';
+import { ActivateGoalCommand } from '../application/commands/activate-goal.command';
+import { ActivateGoalResult } from '../application/commands/activate-goal.result';
+import {
+  GoalNotFoundError as ActivateGoalNotFoundError,
+  GoalStateConflictError as ActivateGoalStateConflictError,
+} from '../application/commands/activate-goal.handler';
 import { CompleteGoalCommand } from '../application/commands/complete-goal.command';
 import { CompleteGoalResult } from '../application/commands/complete-goal.result';
 import {
@@ -194,6 +207,93 @@ export class GoalsController {
         throw new NotFoundException(error.message);
       }
       if (error instanceof RenameGoalStateConflictError) {
+        throw new ConflictException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // ─── Update Description ──────────────────────────────────────────────────
+  // Goal Draft Editing (follow-up to Decisión B): the only way a Goal
+  // created via Quick Capture (title only) can ever satisfy activate()'s
+  // description invariant.
+
+  @Patch(':id/description')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Update a goal's description" })
+  @ApiParam({ name: 'id', description: 'Goal UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Goal description updated successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 409, description: 'Goal is immutable' })
+  async updateDescription(
+    @Param('id') id: string,
+    @Body() dto: UpdateGoalDescriptionDto,
+  ) {
+    const parsed = uuidSchema.safeParse(id);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid goal UUID format');
+    }
+
+    try {
+      const command = new UpdateGoalDescriptionCommand(id, dto.description);
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as UpdateGoalDescriptionResult;
+      return {
+        goalId: result.goalId,
+        description: result.description,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof UpdateGoalDescriptionNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof UpdateGoalDescriptionStateConflictError) {
+        throw new ConflictException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // ─── Activate ─────────────────────────────────────────────────────────────
+
+  @Post(':id/activate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Activate a Draft goal' })
+  @ApiParam({ name: 'id', description: 'Goal UUID' })
+  @ApiResponse({ status: 200, description: 'Goal activated successfully' })
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Goal is immutable, in an invalid state, or missing activation requirements (description, at least one linked Commitment)',
+  })
+  async activate(@Param('id') id: string) {
+    const parsed = uuidSchema.safeParse(id);
+    if (!parsed.success) {
+      throw new BadRequestException('Invalid goal UUID format');
+    }
+
+    try {
+      const command = new ActivateGoalCommand(id);
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as ActivateGoalResult;
+      return {
+        goalId: result.goalId,
+        state: result.state,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof ActivateGoalNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof ActivateGoalStateConflictError) {
         throw new ConflictException(error.message);
       }
       const message = error instanceof Error ? error.message : 'Unknown error';

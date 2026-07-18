@@ -9,6 +9,10 @@ function summarize(event: DomainEvent): string {
       return `Goal "${String(payload.title)}" was created`;
     case 'goal.renamed':
       return `Renamed to "${String(payload.title)}"`;
+    case 'goal.description_updated':
+      return 'Description updated';
+    case 'goal.activated':
+      return 'Goal activated';
     case 'goal.completed':
       return 'Goal completed';
     case 'goal.archived':

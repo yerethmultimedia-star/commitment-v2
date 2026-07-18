@@ -142,6 +142,9 @@ export const demoGoalsRepository = {
 
   getById: async (id: string): Promise<GoalSummary> => toSummary(findOrThrow(id)),
 
+  // Decisión B, Goal Lifecycle: matches Goal.register() on the real backend
+  // (starts in Draft, not Active) — no shortcut here, so a Draft Goal is
+  // genuinely reachable and testable in Demo Mode too, same as the real app.
   create: async (payload: { title: string; description?: string }): Promise<{ goalId: string }> => {
     const id = `g-demo-${Date.now()}`;
     demoGoalDTOs.push({
@@ -150,7 +153,7 @@ export const demoGoalsRepository = {
       description: payload.description ?? '',
       category: 'personal',
       priority: 'medium',
-      state: 'Active',
+      state: 'Draft',
       commitmentIds: [],
       habitIds: [],
       createdAt: new Date().toISOString(),
@@ -165,8 +168,42 @@ export const demoGoalsRepository = {
     return { goalId: id, title };
   },
 
+  // Goal Draft Editing (follow-up to Decisión B): mirrors the real backend's
+  // PATCH /goals/:id/description — the only way a Goal created via Quick
+  // Capture (title only) can ever satisfy activate()'s description invariant.
+  updateDescription: async (id: string, description: string): Promise<{ goalId: string; description: string | null }> => {
+    const dto = findOrThrow(id);
+    dto.description = description;
+    return { goalId: id, description: dto.description || null };
+  },
+
+  // Mirrors Goal.activate()'s domain invariants (packages/domain/src/goal/aggregate/goal.ts)
+  // so Demo Mode can't silently diverge from what the real backend enforces.
+  activate: async (id: string): Promise<{ goalId: string; state: string }> => {
+    const dto = findOrThrow(id);
+    if (dto.state === 'Active') {
+      return { goalId: id, state: dto.state }; // Idempotent
+    }
+    if (dto.state !== 'Draft') {
+      throw new Error(`Cannot activate goal from state: ${dto.state}`);
+    }
+    if (!dto.description || dto.description.trim().length === 0) {
+      throw new Error('Goal must have a description before it can be activated.');
+    }
+    if (dto.commitmentIds.length === 0) {
+      throw new Error('Goal must have at least one linked Commitment before it can be activated.');
+    }
+    dto.state = 'Active';
+    return { goalId: id, state: dto.state };
+  },
+
   complete: async (id: string): Promise<{ goalId: string; state: string }> => {
     const dto = findOrThrow(id);
+    // Decisión B, Goal Lifecycle: Draft can no longer complete directly —
+    // it must go through Active first (activate()), same as the real backend.
+    if (dto.state === 'Draft') {
+      throw new Error(`Cannot complete goal from state: ${dto.state}`);
+    }
     dto.state = 'Completed';
     dto.completedAt = new Date().toISOString();
     return { goalId: id, state: dto.state };

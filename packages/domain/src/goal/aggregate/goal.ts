@@ -7,6 +7,8 @@ import { CommitmentId } from '../../commitment/value-objects/commitment-id.js';
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { GoalRegisteredEvent } from '../events/goal-registered.event.js';
 import { GoalRenamedEvent } from '../events/goal-renamed.event.js';
+import { GoalDescriptionUpdatedEvent } from '../events/goal-description-updated.event.js';
+import { GoalActivatedEvent } from '../events/goal-activated.event.js';
 import { GoalCompletedEvent } from '../events/goal-completed.event.js';
 import { GoalArchivedEvent } from '../events/goal-archived.event.js';
 import { GoalCommitmentLinkedEvent } from '../events/goal-commitment-linked.event.js';
@@ -15,7 +17,8 @@ import {
   GoalRequiresIdentityError,
   GoalAlreadyCompletedError,
   GoalAlreadyArchivedError,
-  InvalidGoalStateTransitionError
+  InvalidGoalStateTransitionError,
+  GoalActivationRequirementsNotMetError
 } from '../errors/goal-errors.js';
 
 /**
@@ -117,6 +120,29 @@ export class Goal extends AggregateRoot<GoalId> {
     this.recordEvent(event);
   }
 
+  /**
+   * Goal Draft Editing (follow-up to Decisión B, Goal Lifecycle): the only
+   * way a Draft Goal's description invariant (activate()'s requirement) can
+   * ever be satisfied for a Goal created via Quick Capture (title only, no
+   * description) — mirrors Commitment.updateDescription() exactly.
+   */
+  public updateDescription(newDescription: GoalDescription | null): void {
+    this.ensureNotImmutable();
+    const currentVal = this._description ? this._description.value : '';
+    const newVal = newDescription ? newDescription.value : '';
+    if (currentVal === newVal) {
+      return; // Rule #77 — No Meaningless Events
+    }
+    const event = new GoalDescriptionUpdatedEvent(
+      this.id.value,
+      {
+        goalId: this.id.value,
+        description: newVal
+      }
+    );
+    this.recordEvent(event);
+  }
+
   public linkCommitment(commitmentId: CommitmentId): void {
     this.ensureNotImmutable();
     if (this._commitmentIds.includes(commitmentId.value)) {
@@ -147,11 +173,44 @@ export class Goal extends AggregateRoot<GoalId> {
     this.recordEvent(event);
   }
 
+  /**
+   * Draft -> Active (Decisión B, Goal Lifecycle). Title is guaranteed by
+   * GoalTitle's own constructor and needs no runtime check here; description
+   * and at least one linked Commitment are NOT guaranteed by register() (both
+   * can be empty/absent), so they're the two real invariants enforced below.
+   * Deliberately does NOT require targetDate/milestones/notes/attachments.
+   */
+  public activate(): void {
+    if (this._state === GoalState.Active) {
+      return; // Idempotent: already active, no state change or event
+    }
+    if (this._state !== GoalState.Draft) {
+      this.ensureNotImmutable();
+      throw new InvalidGoalStateTransitionError(`Cannot activate goal from state: ${GoalState[this._state]}`);
+    }
+    if (!this._description || this._description.value.length === 0) {
+      throw new GoalActivationRequirementsNotMetError('Goal must have a description before it can be activated.');
+    }
+    if (this._commitmentIds.length === 0) {
+      throw new GoalActivationRequirementsNotMetError('Goal must have at least one linked Commitment before it can be activated.');
+    }
+    const event = new GoalActivatedEvent(
+      this.id.value,
+      {
+        goalId: this.id.value,
+        identityId: this._identityId.value
+      }
+    );
+    this.recordEvent(event);
+  }
+
   public complete(): void {
     if (this._state === GoalState.Completed) {
       return; // Idempotent
     }
-    if (this._state !== GoalState.Active && this._state !== GoalState.Draft) {
+    // Decisión B, Goal Lifecycle: Draft can no longer complete directly —
+    // it must go through Active first (activate()).
+    if (this._state !== GoalState.Active) {
       this.ensureNotImmutable();
       throw new InvalidGoalStateTransitionError(`Cannot complete goal from state: ${GoalState[this._state]}`);
     }
@@ -202,12 +261,17 @@ export class Goal extends AggregateRoot<GoalId> {
     } else if (event.name === 'goal.renamed') {
       const payload = (event as GoalRenamedEvent).payload;
       this._title = new GoalTitle(payload.title);
+    } else if (event.name === 'goal.description_updated') {
+      const payload = (event as GoalDescriptionUpdatedEvent).payload;
+      this._description = payload.description ? new GoalDescription(payload.description) : null;
     } else if (event.name === 'goal.commitment_linked') {
       const payload = (event as GoalCommitmentLinkedEvent).payload;
       this._commitmentIds = [...this._commitmentIds, payload.commitmentId];
     } else if (event.name === 'goal.habit_linked') {
       const payload = (event as GoalHabitLinkedEvent).payload;
       this._habitIds = [...this._habitIds, payload.habitId];
+    } else if (event.name === 'goal.activated') {
+      this._state = GoalState.Active;
     } else if (event.name === 'goal.completed') {
       const payload = (event as GoalCompletedEvent).payload;
       this._state = GoalState.Completed;

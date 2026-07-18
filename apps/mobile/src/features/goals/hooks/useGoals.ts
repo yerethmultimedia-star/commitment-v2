@@ -44,6 +44,23 @@ export function useRenameGoal() {
   });
 }
 
+export function useUpdateGoalDescription() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, description }: { id: string; description: string }) =>
+      goalsApi.updateDescription(id, description),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}
+
+export function useActivateGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => goalsApi.activate(id),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}
+
 export function useCompleteGoal() {
   const client = useQueryClient();
   return useMutation({

@@ -278,10 +278,15 @@
       "roadmaps": "Roadmaps"
     },
     "statusChips": {
+      "draft": "Drafts",
       "active": "Active",
       "inProgress": "In Progress",
       "completed": "Completed",
       "empty": {
+        "draft": {
+          "title": "No drafts",
+          "description": "Goals you're still setting up show up here until you activate them."
+        },
         "active": {
           "title": "No active goals",
           "description": "Goals you're actively working on show up here."
@@ -372,13 +377,20 @@
       "attachmentsEmpty": "No attachments yet.",
       "activity": "Activity Timeline",
       "activityEmpty": "Activity history isn't tracked yet.",
-      "editTitleTooltip": "Rename goal",
-      "renameTitle": "Rename goal",
+      "editTitleTooltip": "Edit goal",
+      "renameTitle": "Edit goal",
       "renamePlaceholder": "Goal title",
+      "renameDescriptionLabel": "Description",
+      "renameDescriptionPlaceholder": "What does this goal mean to you?",
       "renameSave": "Save",
       "renameCancel": "Cancel",
+      "activate": "Activate goal",
       "complete": "Complete goal",
       "archive": "Archive goal",
+      "confirmActivate": {
+        "title": "Activate \"{{title}}\"?",
+        "description": "This moves the goal into your active list, where it can generate progress."
+      },
       "confirmComplete": {
         "title": "Complete \"{{title}}\"?",
         "description": "This marks the goal as achieved."

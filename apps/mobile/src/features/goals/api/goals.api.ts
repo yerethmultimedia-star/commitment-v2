@@ -44,6 +44,27 @@ export const goalsApi = {
       .json<{ goalId: string; title: string; version: number }>();
     return { goalId: result.goalId, title: result.title };
   },
+  // Goal Draft Editing (follow-up to Decisión B): the only way a Goal
+  // created via Quick Capture (title only) can ever satisfy activate()'s
+  // description invariant.
+  updateDescription: async (id: string, description: string): Promise<{ goalId: string; description: string | null }> => {
+    if (isDemoModeActive()) return demoGoalsRepository.updateDescription(id, description);
+    const result = await apiClient
+      .patch(`goals/${id}/description`, { json: { description } })
+      .json<{ goalId: string; description: string | null; version: number }>();
+    return { goalId: result.goalId, description: result.description };
+  },
+  // Decisión B, Goal Lifecycle: Draft -> Active. The backend rejects this
+  // (409) unless the Goal has a description and at least one linked
+  // Commitment — Demo Mode enforces the same invariants (see
+  // demo-goals.repository.ts) rather than silently diverging.
+  activate: async (id: string): Promise<{ goalId: string; state: string }> => {
+    if (isDemoModeActive()) return demoGoalsRepository.activate(id);
+    const result = await apiClient
+      .post(`goals/${id}/activate`)
+      .json<{ goalId: string; state: string; version: number }>();
+    return { goalId: result.goalId, state: result.state };
+  },
   complete: async (id: string): Promise<{ goalId: string; state: string }> => {
     if (isDemoModeActive()) return demoGoalsRepository.complete(id);
     const result = await apiClient

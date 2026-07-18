@@ -2,6 +2,8 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import {
   GoalRegisteredEvent,
   GoalRenamedEvent,
+  GoalDescriptionUpdatedEvent,
+  GoalActivatedEvent,
   GoalCompletedEvent,
   GoalArchivedEvent,
   GoalCommitmentLinkedEvent,
@@ -43,6 +45,40 @@ export class GoalRenamedProjector implements IEventHandler<GoalRenamedEvent> {
     const view = this.store.findById(event.payload.goalId);
     if (view) {
       view.title = event.payload.title;
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+@EventsHandler(GoalDescriptionUpdatedEvent)
+export class GoalDescriptionUpdatedProjector implements IEventHandler<GoalDescriptionUpdatedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalDescriptionUpdatedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.description = event.payload.description || null;
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+@EventsHandler(GoalActivatedEvent)
+export class GoalActivatedProjector implements IEventHandler<GoalActivatedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalActivatedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.state = 'Active';
       view.version += 1;
       this.store.save(view);
     }
@@ -121,6 +157,8 @@ export class GoalHabitLinkedProjector implements IEventHandler<GoalHabitLinkedEv
 export const GoalProjectors = [
   GoalRegisteredProjector,
   GoalRenamedProjector,
+  GoalDescriptionUpdatedProjector,
+  GoalActivatedProjector,
   GoalCompletedProjector,
   GoalArchivedProjector,
   GoalCommitmentLinkedProjector,

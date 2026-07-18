@@ -9,7 +9,9 @@ import {
   InvalidGoalTitleError,
   InvalidGoalDescriptionError,
   GoalAlreadyCompletedError,
-  GoalAlreadyArchivedError
+  GoalAlreadyArchivedError,
+  GoalActivationRequirementsNotMetError,
+  InvalidGoalStateTransitionError
 } from '../errors/goal-errors.js';
 
 describe('Goal Bounded Context', () => {
@@ -80,9 +82,118 @@ describe('Goal Bounded Context', () => {
     });
   });
 
+  describe('updateDescription', () => {
+    it('does not record an event when the description is unchanged (Rule #77)', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.clearUncommittedEvents();
+
+      goal.updateDescription(new GoalDescription('Train consistently for six months'));
+
+      expect(goal.getUncommittedEvents()).toHaveLength(0);
+    });
+
+    it('records a GoalDescriptionUpdatedEvent when the description changes', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, null);
+      goal.clearUncommittedEvents();
+
+      goal.updateDescription(new GoalDescription('A brand new description'));
+
+      expect(goal.description?.value).toBe('A brand new description');
+      expect(goal.getUncommittedEvents()).toHaveLength(1);
+      expect(goal.getUncommittedEvents()[0]?.name).toBe('goal.description_updated');
+    });
+
+    it('allows clearing the description back to null', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+
+      goal.updateDescription(null);
+
+      expect(goal.description).toBeNull();
+    });
+
+    it('rejects updates after completion or archiving', () => {
+      const completedGoal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      completedGoal.linkCommitment(new CommitmentId('018f6b5c-42e1-7000-8000-333333333333'));
+      completedGoal.activate();
+      completedGoal.complete();
+      expect(() => completedGoal.updateDescription(new GoalDescription('New'))).toThrow(GoalAlreadyCompletedError);
+
+      const archivedGoal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      archivedGoal.archive();
+      expect(() => archivedGoal.updateDescription(new GoalDescription('New'))).toThrow(GoalAlreadyArchivedError);
+    });
+
+    it('unblocks activate() for a Goal that was registered without a description', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, null);
+      const commitmentId = new CommitmentId('018f6b5c-42e1-7000-8000-333333333333');
+      goal.linkCommitment(commitmentId);
+
+      expect(() => goal.activate()).toThrow(GoalActivationRequirementsNotMetError);
+
+      goal.updateDescription(new GoalDescription('Filled in during Draft'));
+
+      expect(() => goal.activate()).not.toThrow();
+      expect(goal.state).toBe(GoalState.Active);
+    });
+  });
+
+  describe('activate', () => {
+    const linkedCommitmentId = new CommitmentId('018f6b5c-42e1-7000-8000-333333333333');
+
+    it('activates a Draft goal that has a description and a linked Commitment', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.linkCommitment(linkedCommitmentId);
+      goal.clearUncommittedEvents();
+
+      goal.activate();
+
+      expect(goal.state).toBe(GoalState.Active);
+      expect(goal.getUncommittedEvents()).toHaveLength(1);
+      expect(goal.getUncommittedEvents()[0]?.name).toBe('goal.activated');
+    });
+
+    it('rejects activation without a description', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, null);
+      goal.linkCommitment(linkedCommitmentId);
+
+      expect(() => goal.activate()).toThrow(GoalActivationRequirementsNotMetError);
+    });
+
+    it('rejects activation without at least one linked Commitment', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+
+      expect(() => goal.activate()).toThrow(GoalActivationRequirementsNotMetError);
+    });
+
+    it('is idempotent when activating twice', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.linkCommitment(linkedCommitmentId);
+      goal.activate();
+
+      expect(() => goal.activate()).not.toThrow();
+      expect(goal.state).toBe(GoalState.Active);
+    });
+
+    it('rejects activating a Completed or Archived goal', () => {
+      const completedGoal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      completedGoal.linkCommitment(linkedCommitmentId);
+      completedGoal.activate();
+      completedGoal.complete();
+      expect(() => completedGoal.activate()).toThrow(GoalAlreadyCompletedError);
+
+      const archivedGoal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      archivedGoal.archive();
+      expect(() => archivedGoal.activate()).toThrow(GoalAlreadyArchivedError);
+    });
+  });
+
   describe('lifecycle', () => {
+    const linkedCommitmentId = new CommitmentId('018f6b5c-42e1-7000-8000-333333333333');
+
     it('completes an active goal', () => {
       const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.linkCommitment(linkedCommitmentId);
+      goal.activate();
       goal.complete();
       expect(goal.state).toBe(GoalState.Completed);
       expect(goal.completedAt).not.toBeNull();
@@ -94,14 +205,23 @@ describe('Goal Bounded Context', () => {
       expect(goal.completedAt).toBeNull();
     });
 
+    it('rejects completing a Draft goal directly (must activate first)', () => {
+      const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      expect(() => goal.complete()).toThrow(InvalidGoalStateTransitionError);
+    });
+
     it('is idempotent when completing twice', () => {
       const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.linkCommitment(linkedCommitmentId);
+      goal.activate();
       goal.complete();
       expect(() => goal.complete()).not.toThrow();
     });
 
     it('rejects mutations after completion', () => {
       const goal = Goal.register(newGoalId(), validIdentityId, validTitle, validDescription);
+      goal.linkCommitment(linkedCommitmentId);
+      goal.activate();
       goal.complete();
       expect(() => goal.rename(new GoalTitle('New title'))).toThrow(GoalAlreadyCompletedError);
     });

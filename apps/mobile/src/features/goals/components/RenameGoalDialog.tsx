@@ -1,25 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, Button, Title, Input, Stack, Inline } from '@commitment/design-system';
+import { Dialog, Button, Title, Input, TextArea, Stack, Inline } from '@commitment/design-system';
 
 export interface RenameGoalDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentTitle: string;
-  onSave: (title: string) => void;
+  currentDescription: string;
+  onSave: (title: string, description: string) => void;
   isSaving?: boolean;
 }
 
-export function RenameGoalDialog({ open, onOpenChange, currentTitle, onSave, isSaving }: RenameGoalDialogProps) {
+// Goal Draft Editing (follow-up to Decisión B): broadened from title-only to
+// title+description — the only way a Goal created via Quick Capture (title
+// only) can ever satisfy activate()'s description invariant. No new entry
+// point added; reuses the existing pencil-icon edit affordance.
+export function RenameGoalDialog({ open, onOpenChange, currentTitle, currentDescription, onSave, isSaving }: RenameGoalDialogProps) {
   const [title, setTitle] = useState(currentTitle);
+  const [description, setDescription] = useState(currentDescription);
 
   useEffect(() => {
-    if (open) setTitle(currentTitle);
-  }, [open, currentTitle]);
+    if (open) {
+      setTitle(currentTitle);
+      setDescription(currentDescription);
+    }
+  }, [open, currentTitle, currentDescription]);
 
   const handleSave = () => {
     const trimmed = title.trim();
     if (!trimmed) return;
-    onSave(trimmed);
+    onSave(trimmed, description.trim());
   };
 
   return (
@@ -34,6 +43,14 @@ export function RenameGoalDialog({ open, onOpenChange, currentTitle, onSave, isS
           onFocus={() => {}}
           onBlur={() => {}}
           disabled={isSaving}
+        />
+        <TextArea
+          value={description}
+          onChangeText={setDescription}
+          labelI18nKey="goals.workspace.renameDescriptionLabel"
+          placeholderI18nKey="goals.workspace.renameDescriptionPlaceholder"
+          disabled={isSaving}
+          numberOfLines={3}
         />
         <Inline gap="$md" justifyContent="flex-end">
           <Button

@@ -12,7 +12,7 @@ import {
 } from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useRouter } from 'expo-router';
-import { useToggleMilestone, useRenameGoal, useCompleteGoal, useArchiveGoal } from '../hooks/useGoals';
+import { useToggleMilestone, useRenameGoal, useUpdateGoalDescription, useActivateGoal, useCompleteGoal, useArchiveGoal } from '../hooks/useGoals';
 import { useGoalWorkspace } from '../hooks/useGoalsView';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
@@ -45,10 +45,13 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const toggleHabit = useToggleHabit();
   const toggleMilestone = useToggleMilestone();
   const renameGoal = useRenameGoal();
+  const updateGoalDescription = useUpdateGoalDescription();
+  const activateGoal = useActivateGoal();
   const completeGoal = useCompleteGoal();
   const archiveGoal = useArchiveGoal();
   const [tab, setTab] = useState<WorkspaceTab>('summary');
   const [renameOpen, setRenameOpen] = useState(false);
+  const [confirmingActivate, setConfirmingActivate] = useState(false);
   const [confirmingComplete, setConfirmingComplete] = useState(false);
   const [confirmingArchive, setConfirmingArchive] = useState(false);
 
@@ -167,16 +170,29 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                 </XStack>
               </YStack>
 
+              {/* Decisión B, Goal Lifecycle: Draft can activate or archive,
+                  but not complete directly — it must go through Active
+                  first (Goal.activate()'s domain invariants). */}
               {(goal.state === 'Active' || goal.state === 'Draft') && (
                 <XStack gap="$3">
                   <YStack flex={1}>
-                    <Button
-                      variant="primary"
-                      fullWidth
-                      i18nKey="goals.workspace.complete"
-                      loading={completeGoal.isPending}
-                      onPress={() => setConfirmingComplete(true)}
-                    />
+                    {goal.state === 'Draft' ? (
+                      <Button
+                        variant="primary"
+                        fullWidth
+                        i18nKey="goals.workspace.activate"
+                        loading={activateGoal.isPending}
+                        onPress={() => setConfirmingActivate(true)}
+                      />
+                    ) : (
+                      <Button
+                        variant="primary"
+                        fullWidth
+                        i18nKey="goals.workspace.complete"
+                        loading={completeGoal.isPending}
+                        onPress={() => setConfirmingComplete(true)}
+                      />
+                    )}
                   </YStack>
                   <YStack flex={1}>
                     <Button
@@ -369,9 +385,30 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
         open={renameOpen}
         onOpenChange={setRenameOpen}
         currentTitle={goal.title}
-        isSaving={renameGoal.isPending}
-        onSave={(title) => {
-          renameGoal.mutate({ id: goal.id, title }, { onSuccess: () => setRenameOpen(false) });
+        currentDescription={goal.description ?? ''}
+        isSaving={renameGoal.isPending || updateGoalDescription.isPending}
+        onSave={async (title, description) => {
+          // Sequenced, not Promise.all-ed — both mutate the same Goal
+          // aggregate (demo-mode concurrent-write hazard: unlocked
+          // read-modify-write can silently lose one of two parallel writes).
+          await renameGoal.mutateAsync({ id: goal.id, title });
+          await updateGoalDescription.mutateAsync({ id: goal.id, description });
+          setRenameOpen(false);
+        }}
+      />
+
+      <ConfirmationDialog
+        open={confirmingActivate}
+        onOpenChange={setConfirmingActivate}
+        titleI18nKey="goals.workspace.confirmActivate.title"
+        titleI18nParams={{ title: goal.title }}
+        descriptionI18nKey="goals.workspace.confirmActivate.description"
+        descriptionI18nParams={{ title: goal.title }}
+        confirmI18nKey="goals.workspace.activate"
+        cancelI18nKey="goals.workspace.renameCancel"
+        onConfirm={() => {
+          setConfirmingActivate(false);
+          activateGoal.mutate(goal.id);
         }}
       />
 

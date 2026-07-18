@@ -4,6 +4,8 @@ export * from './value-objects/goal-title.js';
 export * from './value-objects/goal-description.js';
 export * from './events/goal-registered.event.js';
 export * from './events/goal-renamed.event.js';
+export * from './events/goal-description-updated.event.js';
+export * from './events/goal-activated.event.js';
 export * from './events/goal-completed.event.js';
 export * from './events/goal-archived.event.js';
 export * from './events/goal-commitment-linked.event.js';
