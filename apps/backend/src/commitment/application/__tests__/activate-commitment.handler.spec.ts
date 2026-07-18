@@ -2,6 +2,7 @@ import {
   Commitment,
   CommitmentId,
   CommitmentTitle,
+  CommitmentDescription,
   IdentityId,
 } from '@commitment/domain';
 import { ActivateCommitmentCommandHandlerCore } from '../commands/activate-commitment.handler';
@@ -18,12 +19,18 @@ import { DomainEvent } from '@commitment/domain';
 const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-999999999999';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
 
-function makeCommitment(id = COMMITMENT_ID): Commitment {
+// Commitment Draft Lifecycle: activate() now requires a description, so
+// every fixture here needs one unless the test is specifically exercising
+// that requirement (see "missing description" test below).
+function makeCommitment(
+  id = COMMITMENT_ID,
+  description: string | null = 'Read the blue book',
+): Commitment {
   return Commitment.register(
     new CommitmentId(id),
     new IdentityId(IDENTITY_ID),
     new CommitmentTitle('Learn DDD'),
-    null,
+    description ? new CommitmentDescription(description) : null,
   );
 }
 
@@ -119,6 +126,16 @@ describe('ActivateCommitmentCommandHandlerCore', () => {
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
     commitment.complete();
+    await repository.save(commitment);
+    commitment.clearUncommittedEvents();
+
+    await expect(
+      handler.handle(new ActivateCommitmentCommand(COMMITMENT_ID)),
+    ).rejects.toThrow(CommitmentStateConflictError);
+  });
+
+  it('should throw CommitmentStateConflictError when the commitment has no description', async () => {
+    const commitment = makeCommitment(COMMITMENT_ID, null);
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
 

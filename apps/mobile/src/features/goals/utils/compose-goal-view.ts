@@ -31,7 +31,12 @@ export function composeGoalView(
   tasks: TaskModel[],
   milestones: Milestone[]
 ): GoalViewModel {
-  const commitmentProgressRatios = goal.commitmentIds.map((id) => commitmentProgressRatio(id, tasks));
+  // Commitment Draft Lifecycle: a Draft Commitment must not contribute to
+  // progress metrics — it's still being configured, not executed yet.
+  const activeCommitmentIds = goal.commitmentIds.filter(
+    (id) => commitments.find((c) => c.id === id)?.status !== 'draft'
+  );
+  const commitmentProgressRatios = activeCommitmentIds.map((id) => commitmentProgressRatio(id, tasks));
   const progress = computeGoalProgress({ commitmentProgressRatios, milestones });
   return { ...goal, progress, targetDate: deriveTargetDate(goal, commitments), milestones };
 }

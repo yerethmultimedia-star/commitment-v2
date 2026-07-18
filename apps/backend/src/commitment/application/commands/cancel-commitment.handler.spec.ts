@@ -11,6 +11,7 @@ import {
   CommitmentId,
   IdentityId,
   CommitmentTitle,
+  CommitmentDescription,
 } from '@commitment/domain';
 import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
@@ -19,13 +20,14 @@ const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-999999999991';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-999999999992';
 const MISSING_ID = '018f6b5c-42e1-7000-8000-999999999999';
 
-// Helpers to create commitments in specific states
+// Helpers to create commitments in specific states. Description is always
+// set — Commitment Draft Lifecycle requires it for activate() to succeed.
 function createDraftCommitment(id = COMMITMENT_ID): Commitment {
   return Commitment.register(
     new CommitmentId(id),
     new IdentityId(IDENTITY_ID),
     new CommitmentTitle('Draft'),
-    null,
+    new CommitmentDescription('Test description'),
   );
 }
 

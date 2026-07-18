@@ -6,6 +6,7 @@ import {
   Commitment,
   CommitmentId,
   CommitmentTitle,
+  CommitmentDescription,
   IdentityId,
 } from '@commitment/domain';
 
@@ -21,7 +22,7 @@ describe('ActivateCommitmentNestjsHandler', () => {
       new CommitmentId(id),
       new IdentityId('018f6b5c-42e1-7000-8000-111111111111'),
       new CommitmentTitle('Test'),
-      null,
+      new CommitmentDescription('Test description'),
     );
     await repository.save(commitment);
     commitment.clearUncommittedEvents();

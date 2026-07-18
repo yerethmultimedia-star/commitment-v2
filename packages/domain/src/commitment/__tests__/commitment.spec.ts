@@ -22,7 +22,8 @@ import {
   CommitmentCannotBeResumedError,
   CommitmentCannotBeCompletedError,
   CommitmentCannotBeRenamedError,
-  CommitmentCannotBeDescriptionUpdatedError
+  CommitmentCannotBeDescriptionUpdatedError,
+  CommitmentActivationRequirementsNotMetError
 } from '../errors/commitment-errors.js';
 
 describe('Commitment Bounded Context', () => {
@@ -190,12 +191,39 @@ describe('Commitment Bounded Context', () => {
       expect(activatedEvents).toHaveLength(1);
     });
 
-    it('should pause an active commitment and resume it successfully', () => {
+    it('rejects activation without a description', () => {
       const commitment = Commitment.register(
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
         null
+      );
+
+      expect(() => commitment.activate()).toThrow(CommitmentActivationRequirementsNotMetError);
+    });
+
+    it('unblocks activate() once a description is set via updateDescription()', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        null
+      );
+
+      expect(() => commitment.activate()).toThrow(CommitmentActivationRequirementsNotMetError);
+
+      commitment.updateDescription(validDescription);
+
+      expect(() => commitment.activate()).not.toThrow();
+      expect(commitment.state).toBe(CommitmentState.Active);
+    });
+
+    it('should pause an active commitment and resume it successfully', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        validDescription
       );
       commitment.activate();
       commitment.clearUncommittedEvents();
@@ -221,7 +249,7 @@ describe('pause()', () => {
       new CommitmentId('018f6c00-0000-0000-0000-000000000001'),
       validIdentityId,
       validTitle,
-      null
+      validDescription
     );
     commitment.activate();
     commitment.clearUncommittedEvents();
@@ -244,7 +272,7 @@ describe('pause()', () => {
       new CommitmentId('018f6c00-0000-0000-0000-000000000002'),
       validIdentityId,
       validTitle,
-      null
+      validDescription
     );
     commitment.activate();
     commitment.pause();
@@ -263,7 +291,7 @@ describe('pause()', () => {
       new CommitmentId('018f6c00-0000-0000-0000-000000000003'),
       validIdentityId,
       validTitle,
-      null
+      validDescription
     );
     commitment.activate();
     commitment.complete();
@@ -289,7 +317,7 @@ describe('pause()', () => {
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
-        null
+        validDescription
       );
 
       // Cannot pause a draft
@@ -316,12 +344,12 @@ describe('pause()', () => {
       expect(draft.state).toBe(CommitmentState.Cancelled);
       expect(draft.getUncommittedEvents()[1]?.name).toBe('commitment.cancelled');
 
-      const active = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-200000000000'), validIdentityId, validTitle, null);
+      const active = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-200000000000'), validIdentityId, validTitle, validDescription);
       active.activate();
       active.cancel();
       expect(active.state).toBe(CommitmentState.Cancelled);
 
-      const paused = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-300000000000'), validIdentityId, validTitle, null);
+      const paused = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-300000000000'), validIdentityId, validTitle, validDescription);
       paused.activate();
       paused.pause();
       paused.cancel();
@@ -333,7 +361,7 @@ describe('pause()', () => {
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
-        null
+        validDescription
       );
 
       // Draft cannot complete
@@ -364,7 +392,7 @@ describe('pause()', () => {
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
-        null
+        validDescription
       );
       commitment.activate();
       commitment.pause();
@@ -390,7 +418,7 @@ describe('pause()', () => {
         // Active
         const active = Commitment.register(
           new CommitmentId('018f6b5c-42e1-7000-8000-222222222222'),
-          validIdentityId, validTitle, null
+          validIdentityId, validTitle, validDescription
         );
         active.activate();
         active.clearUncommittedEvents();
@@ -401,7 +429,7 @@ describe('pause()', () => {
         // Paused
         const paused = Commitment.register(
           new CommitmentId('018f6b5c-42e1-7000-8000-333333333333'),
-          validIdentityId, validTitle, null
+          validIdentityId, validTitle, validDescription
         );
         paused.activate();
         paused.pause();
@@ -426,7 +454,7 @@ describe('pause()', () => {
       it('should block cancellation if already completed', () => {
         const commitment = Commitment.register(
           new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
-          validIdentityId, validTitle, null
+          validIdentityId, validTitle, validDescription
         );
         commitment.activate();
         commitment.complete();
@@ -546,7 +574,7 @@ describe('pause()', () => {
         new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
         validIdentityId,
         validTitle,
-        null
+        validDescription
       );
       commitment.activate();
       commitment.pause();

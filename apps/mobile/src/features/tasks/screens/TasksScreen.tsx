@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ScrollView, Theme, View, XStack, YStack } from 'tamagui';
 import { useLocalSearchParams } from 'expo-router';
 import { TaskForm } from '../components/TaskForm';
+import { TaskStatusBadge } from '../components/TaskStatusBadge';
 import { useTaskActions, useTasks } from '../hooks/useTasks';
 import { useTranslation } from 'react-i18next';
 import { TaskModel } from '../models/task.model';
@@ -165,9 +166,7 @@ export function TasksScreen() {
               </XStack>
 
               <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
-                <Body tone="tertiary" fontSize="$2">
-                  {t(`status.${task.status}`)}
-                </Body>
+                <TaskStatusBadge status={task.status} />
 
                 <XStack gap="$2">
                   <Button

@@ -407,11 +407,25 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
     (2026-07-18) started as one cross-cutting question, then reframed after evidence: **this is two
     different questions, not one**, because Commitment and Goal turn out to be in genuinely
     different states of design:
-    - **Commitment — a UX question.** The domain already fully supports Draft→Active —
-      `Commitment.activate()`, its backend command, and a working "Activar" button in
-      `CommitmentActionBar.tsx` all exist; the Commitments list doesn't even filter by state, so a
-      Draft Commitment is technically reachable today. Never exercised because Demo Mode skips
-      Draft entirely. The question is purely "do we want to use what's already built."
+    - **Commitment — a UX question, RESOLVED 2026-07-18.** The domain already fully supported
+      Draft→Active — `Commitment.activate()`, its backend command, and a working "Activar" button in
+      `CommitmentActionBar.tsx` all existed; the Commitments list didn't even filter by state, so a
+      Draft Commitment was technically reachable but never exercised (Demo Mode skipped Draft
+      entirely). Decision: yes, use what's already built. Implemented as "Commitment Draft
+      Lifecycle" — `activate()` now enforces a description-required invariant (mirroring
+      `Goal.activate()`), Demo Mode's `create()` starts in `Draft` instead of forcing `Active`, and
+      Draft Commitments are excluded from a linked Goal's progress computation. No new UI was
+      built — the existing Activate button/confirmation/editable-fields gating already worked.
+      **A second invariant originally proposed ("at least one linked Habit or Task") was explicitly
+      NOT implemented** — reviewed and rejected as written: it would force the `Commitment`
+      aggregate to query `Task`/`Habit` data, breaking aggregate boundaries (and would have required
+      a circular module dependency between `CommitmentModule` and `TaskModule` to implement at all).
+      The real product intent — "an execution plan must exist before activating" — needs its own
+      `Commitment`↔`Task`↔`Habit` relationship model first, which doesn't exist yet (see
+      `Commitment.activate()`'s own doc comment for the in-code TODO). Not scheduled — revisit once
+      that relationship model is designed, don't bolt on an ad hoc cross-aggregate check.
+      Golden Path verified end-to-end against the real backend (live UI clicks): Draft → Activar →
+      Active → Completar → Completed.
     - **Goal — a domain question, not a UX question.** `GoalState.Active` is defined but has
       exactly one reference anywhere in the codebase (inside `Goal.complete()`, in a branch that's
       only reachable when the state is `Archived` — never load-bearing in practice), no aggregate
@@ -423,6 +437,28 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
       for activation" to "does `Active` need to exist for `Goal` at all."
       Not started, not yet scoped for implementation — this remains an analysis checkpoint, not a
       decision.
+14. **Candidate, not yet numbered — Task Lifecycle Expansion.** Surfaced 2026-07-18 implementing
+    V-001 (`TECH_DEBT.md` Item 38): the originally proposed Task status set (Pending/In
+    Progress/Blocked/Deferred/Cancelled/Completed) was descoped from V-001's `TaskStatusBadge`
+    work — the domain aggregate only supports 3 states today (`pending`/`completed`/`archived`, see
+    `packages/domain/src/task/value-objects/task-status.ts`), and no transitions, triggering
+    actions, events, or invariants were ever defined for the 4 new states. Building those would be
+    domain design (an ADR), not a badge-rendering task — explicitly not invented unilaterally.
+    `TaskStatusBadge.tsx` ships now, scoped to the 3 real states; this item tracks the state-machine
+    design work as its own future initiative, separate from and not blocking V-001's closure. Not
+    started, not yet scoped.
+15. **Candidate, not yet numbered — Design System: canonical Time Selection components.** Surfaced
+    2026-07-18: an initial instruction to "reuse Postpone's time picker for all time-of-day
+    selection" conflated two different concepts. `PostponeSheet.tsx`'s `DurationWheelPicker` selects
+    a **duration** (hours+minutes to snooze by — a relative offset), not a time of day; the
+    component that actually selects an **absolute time of day** (e.g., a reminder at 9:00 AM) is
+    `ControlledDatePicker` (`mode="time"`, wraps `@react-native-community/datetimepicker`), used
+    today only for Habit's reminder-time field. Corrected rule, worth keeping for future work: every
+    duration selection reuses `DurationWheelPicker`; every absolute-time-of-day selection reuses
+    `ControlledDatePicker` (`mode="time"`) or an official abstraction built on top of it — neither
+    gets a new component built for it, and the two are never substituted for each other. No code
+    changed as a result (no new time-of-day UI was needed by this session's actual work) — registered
+    here so the distinction isn't lost before the next feature that needs one.
 
 ---
 
@@ -447,6 +483,21 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.63.0 (2026-07-18):** **Commitment Draft Lifecycle implemented; V-001 status sub-case
+  closed at real scope; two follow-up initiatives spun out.** `Commitment.activate()` now enforces
+  a description-required invariant (mirrors `Goal.activate()`); Demo Mode's `create()` starts in
+  `Draft`; Draft Commitments excluded from Goal progress metrics. Existing Activate
+  button/dialog/editable-fields UI reused as-is — no new UI built. `TaskStatusBadge.tsx` ships
+  (Item 38 V-001, RESOLVED) for Task's 3 real states (pending/completed/archived) with icon+tone+
+  text. Golden Path verified end-to-end via live UI clicks against the real backend. Two items
+  explicitly NOT implemented after review, registered as separate future initiatives instead of
+  invented ad hoc: item 14 "Task Lifecycle Expansion" (the originally proposed 6-state Task
+  machine has no defined transitions/events/invariants — needs its own ADR) and the "at least one
+  linked Habit or Task" Commitment-activation invariant (would break aggregate boundaries as
+  originally specified — needs a real `Commitment`↔`Task`↔`Habit` relationship model first, TODO
+  left in `Commitment.activate()`'s doc comment). Also corrected item 15, the Design System Time
+  Selection rule: `DurationWheelPicker` (Postpone) is a duration picker, not a time-of-day picker —
+  `ControlledDatePicker` (`mode="time"`) is the actual existing time-of-day component.
 - **v1.62.0 (2026-07-18):** **Consistency Cleanup batch (T-001/V-001 priority/V-002) implemented.**
   With Goal Backend paused on Decisión A/B, executed the deferred VS-037 cleanup batch: T-001
   (`TECH_DEBT.md` Item 37, Coach achievement copy mismatch), V-001 priority sub-case (Item 38, Task

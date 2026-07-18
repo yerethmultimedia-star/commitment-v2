@@ -24,6 +24,9 @@ export const demoCommitmentsRepository = {
 
   getById: async (id: string) => findOrThrow(id),
 
+  // Commitment Draft Lifecycle: matches Commitment.register() on the real
+  // backend (starts in Draft, not Active) — no shortcut here, mirroring the
+  // same fix already applied to demoGoalsRepository.create().
   create: async (payload: { title: string; description?: string; targetDate?: string; recurrencePattern?: string; priority?: string; goalId?: string | null }) => {
     const id = `c-demo-${Date.now()}`;
     // Reassign to a new array (not .push()) — list() returns demoCommitmentDTOs
@@ -35,7 +38,7 @@ export const demoCommitmentsRepository = {
         id,
         title: payload.title,
         description: payload.description,
-        state: 'Active',
+        state: 'Draft',
         priority: (payload.priority as 'low' | 'medium' | 'high') || 'medium',
         targetDate: payload.targetDate,
         recurrencePattern: payload.recurrencePattern,
@@ -58,6 +61,14 @@ export const demoCommitmentsRepository = {
 
   transition: async (id: string, action: keyof typeof STATE_TRANSITIONS) => {
     const dto = findOrThrow(id) as any;
+    // Mirrors Commitment.activate()'s domain invariant
+    // (packages/domain/src/commitment/aggregate/commitment.ts) so Demo Mode
+    // can't silently diverge from what the real backend enforces. Only
+    // description is required, by design — see that method's own doc
+    // comment for why an execution-plan check (Task/Habit) isn't enforced.
+    if (action === 'activate' && dto.state === 'Draft' && !dto.description) {
+      throw new Error('Commitment must have a description before it can be activated.');
+    }
     dto.state = STATE_TRANSITIONS[action];
     return { commitmentId: id, state: dto.state, version: 1 };
   },

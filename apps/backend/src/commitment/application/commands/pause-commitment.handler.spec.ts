@@ -12,6 +12,7 @@ import {
   CommitmentId,
   IdentityId,
   CommitmentTitle,
+  CommitmentDescription,
 } from '@commitment/domain';
 import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
@@ -29,7 +30,7 @@ function createActiveCommitment(): Commitment {
     id,
     new IdentityId(IDENTITY_ID),
     new CommitmentTitle('Test'),
-    null,
+    new CommitmentDescription('Test description'),
   );
   // Activate the commitment to move to Active state
   commitment.activate();

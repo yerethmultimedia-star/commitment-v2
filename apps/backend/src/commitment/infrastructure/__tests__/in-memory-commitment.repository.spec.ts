@@ -3,18 +3,20 @@ import {
   Commitment,
   CommitmentId,
   CommitmentTitle,
+  CommitmentDescription,
   IdentityId,
 } from '@commitment/domain';
 
 const ID = '018f6b5c-42e1-7000-8000-999999999999';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
 
+// Description is always set — Commitment Draft Lifecycle requires it for activate() to succeed.
 function makeCommitment(id = ID): Commitment {
   return Commitment.register(
     new CommitmentId(id),
     new IdentityId(IDENTITY_ID),
     new CommitmentTitle('Test Title'),
-    null,
+    new CommitmentDescription('Test description'),
   );
 }
 

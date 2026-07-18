@@ -1935,7 +1935,7 @@ it touched real source files during this work, per this project's transparency s
 
 ---
 
-## Active Technical Debt Item 38: V-001 — Task's priority/status don't use the shared `Badge` component Commitment already uses for the same semantics — priority sub-case RESOLVED 2026-07-18, status sub-case OPEN (blocked on product decision)
+## Active Technical Debt Item 38: V-001 — Task's priority/status don't use the shared `Badge` component Commitment already uses for the same semantics — RESOLVED, 2026-07-18
 
 - **Description:** Found during VS-037's Visual audit. Two sub-cases:
   1. **Priority.** `CommitmentPriorityBadge.tsx` uses the Design System's `Badge` component, and its
@@ -1959,9 +1959,17 @@ tone={PRIORITY_TONE[task.priority]} i18nKey={...}>`, with a local `PRIORITY_TONE
   only the now-fully-unused `PRIORITY_COLOR`) was deleted. Verified live via Playwright in Demo
   Mode — priority badges render identically in style to Commitment's. `tsc --noEmit` and `jest`
   clean.
-- **Status sub-case — still open, explicitly not implemented:** whether Task's status deserves the
-  same visual `Badge` prominence as Commitment's is a small product call, not purely technical —
-  deliberately left untouched pending that decision. Do not implement without it.
+- **Resolution (status sub-case):** product call made — Task's status deserves the same visual
+  `Badge` prominence as Commitment's. `TaskStatusBadge.tsx` (new) mirrors
+  `CommitmentStatusBadge.tsx`'s tone-mapping convention, adding an icon on top (Commitment's badge
+  doesn't carry one yet) so state never relies on color alone. Wired into `TasksScreen.tsx`,
+  replacing the plain-text status line. Scope is deliberately limited to the 3 states the Task
+  domain aggregate actually supports today (`pending`/`completed`/`archived`) — an initially
+  proposed 6-state set (Pending/In Progress/Blocked/Deferred/Cancelled/Completed) was **descoped**
+  after review: no transitions, events, or invariants were ever defined for the 4 new states, and
+  inventing them would be domain design, not a badge-rendering task. See "Task Lifecycle Expansion"
+  below for that as its own, separately-tracked initiative. Verified live via Playwright in Demo
+  Mode (all 3 states render with icon+tone+text). `tsc --noEmit` and `jest` clean.
 
 ---
 

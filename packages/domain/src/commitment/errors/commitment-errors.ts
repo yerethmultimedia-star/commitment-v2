@@ -106,6 +106,15 @@ export class CommitmentCannotBeDescriptionUpdatedError extends Error {
   }
 }
 
+export class CommitmentActivationRequirementsNotMetError extends Error {
+  public readonly code = 'COMMITMENT_ACTIVATION_REQUIREMENTS_NOT_MET';
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitmentActivationRequirementsNotMetError';
+    Object.freeze(this);
+  }
+}
+
 export class InvalidCommitmentPriorityError extends Error {
   public readonly code = 'INVALID_COMMITMENT_PRIORITY';
   constructor(message: string) {

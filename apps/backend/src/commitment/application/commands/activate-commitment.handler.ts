@@ -4,6 +4,7 @@ import {
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
   InvalidCommitmentStateTransitionError,
+  CommitmentActivationRequirementsNotMetError,
 } from '@commitment/domain';
 import { ActivateCommitmentCommand } from './activate-commitment.command';
 import { ActivateCommitmentResult } from './activate-commitment.result';
@@ -76,6 +77,13 @@ export class ActivateCommitmentCommandHandlerCore {
       if (error instanceof InvalidCommitmentStateTransitionError) {
         throw new CommitmentStateTransitionError(
           error instanceof Error ? error.message : 'Invalid state transition',
+        );
+      }
+      if (error instanceof CommitmentActivationRequirementsNotMetError) {
+        throw new CommitmentStateConflictError(
+          error instanceof Error
+            ? error.message
+            : 'Commitment cannot be activated',
         );
       }
       throw error;
