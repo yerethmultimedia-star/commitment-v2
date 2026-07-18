@@ -34,6 +34,20 @@ import {
 import { ArchiveGoalCommand } from '../application/commands/archive-goal.command';
 import { ArchiveGoalResult } from '../application/commands/archive-goal.result';
 import { GoalNotFoundError as ArchiveGoalNotFoundError } from '../application/commands/archive-goal.handler';
+import { LinkCommitmentToGoalDto } from './dtos/link-commitment-to-goal.dto';
+import { LinkCommitmentToGoalCommand } from '../application/commands/link-commitment-to-goal.command';
+import { LinkCommitmentToGoalResult } from '../application/commands/link-commitment-to-goal.result';
+import {
+  GoalNotFoundError as LinkCommitmentGoalNotFoundError,
+  GoalStateConflictError as LinkCommitmentGoalStateConflictError,
+} from '../application/commands/link-commitment-to-goal.handler';
+import { LinkHabitToGoalDto } from './dtos/link-habit-to-goal.dto';
+import { LinkHabitToGoalCommand } from '../application/commands/link-habit-to-goal.command';
+import { LinkHabitToGoalResult } from '../application/commands/link-habit-to-goal.result';
+import {
+  GoalNotFoundError as LinkHabitGoalNotFoundError,
+  GoalStateConflictError as LinkHabitGoalStateConflictError,
+} from '../application/commands/link-habit-to-goal.handler';
 import { GetGoalByIdQuery } from '../application/queries/get-goal-by-id.query';
 import { GoalNotFoundQueryError } from '../application/queries/get-goal-by-id.handler';
 import { ListGoalsQuery } from '../application/queries/list-goals.query';
@@ -44,6 +58,14 @@ const registerSchema = z.object({
   identityId: z.string().uuid('Invalid identity id UUID format'),
   title: z.string().min(1, 'Title cannot be empty'),
   description: z.string().optional(),
+});
+
+const linkCommitmentSchema = z.object({
+  commitmentId: z.string().uuid('Invalid commitment id UUID format'),
+});
+
+const linkHabitSchema = z.object({
+  habitId: z.string().uuid('Invalid habit id UUID format'),
 });
 
 const uuidSchema = z.string().uuid('Invalid UUID format');
@@ -225,6 +247,97 @@ export class GoalsController {
     } catch (error: unknown) {
       if (error instanceof ArchiveGoalNotFoundError) {
         throw new NotFoundException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // ─── Link Commitment ──────────────────────────────────────────────────────
+
+  @Post(':id/commitments')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Link an existing Commitment to a Goal' })
+  @ApiParam({ name: 'id', description: 'Goal UUID' })
+  @ApiResponse({ status: 200, description: 'Commitment linked successfully' })
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 409, description: 'Goal is immutable' })
+  async linkCommitment(
+    @Param('id') id: string,
+    @Body() dto: LinkCommitmentToGoalDto,
+  ) {
+    const parsedId = uuidSchema.safeParse(id);
+    if (!parsedId.success) {
+      throw new BadRequestException('Invalid goal UUID format');
+    }
+    const parsedBody = linkCommitmentSchema.safeParse(dto);
+    if (!parsedBody.success) {
+      throw new BadRequestException({
+        message: 'Validation failed',
+        errors: parsedBody.error.format(),
+      });
+    }
+
+    try {
+      const command = new LinkCommitmentToGoalCommand(id, dto.commitmentId);
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as LinkCommitmentToGoalResult;
+      return {
+        goalId: result.goalId,
+        commitmentIds: result.commitmentIds,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof LinkCommitmentGoalNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof LinkCommitmentGoalStateConflictError) {
+        throw new ConflictException(error.message);
+      }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // ─── Link Habit ───────────────────────────────────────────────────────────
+
+  @Post(':id/habits')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Link an existing Habit to a Goal' })
+  @ApiParam({ name: 'id', description: 'Goal UUID' })
+  @ApiResponse({ status: 200, description: 'Habit linked successfully' })
+  @ApiResponse({ status: 404, description: 'Goal not found' })
+  @ApiResponse({ status: 409, description: 'Goal is immutable' })
+  async linkHabit(@Param('id') id: string, @Body() dto: LinkHabitToGoalDto) {
+    const parsedId = uuidSchema.safeParse(id);
+    if (!parsedId.success) {
+      throw new BadRequestException('Invalid goal UUID format');
+    }
+    const parsedBody = linkHabitSchema.safeParse(dto);
+    if (!parsedBody.success) {
+      throw new BadRequestException({
+        message: 'Validation failed',
+        errors: parsedBody.error.format(),
+      });
+    }
+
+    try {
+      const command = new LinkHabitToGoalCommand(id, dto.habitId);
+      const result = (await this.commandBus.execute(
+        command,
+      )) as unknown as LinkHabitToGoalResult;
+      return {
+        goalId: result.goalId,
+        habitIds: result.habitIds,
+        version: result.version,
+      };
+    } catch (error: unknown) {
+      if (error instanceof LinkHabitGoalNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof LinkHabitGoalStateConflictError) {
+        throw new ConflictException(error.message);
       }
       const message = error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(message);

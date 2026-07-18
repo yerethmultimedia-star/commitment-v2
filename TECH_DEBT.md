@@ -1,6 +1,6 @@
 # Technical Debt Register
 
-Version: 1.49.0
+Version: 1.50.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -180,24 +180,37 @@ This document tracks identified technical debt, compilation warnings, and archit
 
 ---
 
-## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 1 Implemented
+## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 2 Implemented
 
-- **Status update (2026-07-17):** Fase 1 ("Goal Backend mínimo," per
-  `docs/03-architecture/goal_backend_implementation_plan.md`) is implemented and verified.
-  `apps/backend/src/goal/` now exists: Register/Rename/Complete/Archive commands, a single
-  `GoalView` read model with projectors for all four events, an in-memory versioned repository
-  (mirroring `InMemoryCommitmentRepository` exactly), `GoalsController` (`/goals` REST endpoints),
-  and `GoalModule` — which reuses `CommitmentModule`'s exported `DomainEventDispatcher` via NestJS
-  DI import inheritance (`imports: [CqrsModule, CommitmentModule]`), the same pattern
-  `task.module.ts` uses, rather than duplicating a Goal-local event dispatcher. Registered in
-  `app.module.ts`. Verified: `apps/backend` `tsc --noEmit` clean (only the 2 pre-existing Item 35
-  errors remain), 7 new unit tests + 10 new e2e tests (`test/goals.e2e-spec.ts`) passing, full
-  `apps/backend` jest suite green (81/81, 17 suites) — no regressions in Commitment/Task/Habit.
-  **Not yet done (remaining ADR-021/plan scope):** LinkCommitment/LinkHabit commands (Fase 3),
-  `InMemoryEventStore` connection + `GoalHistoryProjector` (Fase 4), mobile integration —
-  `goals.api.ts` still routes unconditionally to the demo repository (Fase 5), and a Golden Path +
-  formal closure (Fase 6). `toggleMilestone` remains explicitly out of scope (no backend Milestone
-  aggregate exists by design — see `milestone.model.ts`'s own doc comment).
+- **Status update (2026-07-17, Fase 2):** Goal's aggregate relationships are now exercised through
+  the full CQRS stack. `LinkCommitment`/`LinkHabit` commands added (`link-commitment-to-goal.*`,
+  `link-habit-to-goal.*`, mirroring the Fase 1 command shape exactly), `GoalProjectors` extended
+  with `GoalCommitmentLinkedProjector`/`GoalHabitLinkedProjector` (still one `GoalView`, no new read
+  model), and two new REST endpoints — `POST /goals/:id/commitments`, `POST /goals/:id/habits` —
+  chosen over a generic `PATCH` because they represent explicit domain commands, not a state
+  overwrite. No repository changes were needed (confirms no deviation from the Commitment pattern).
+  Domain invariants confirmed by reading the aggregate before writing infrastructure, not assumed:
+  both `linkCommitment`/`linkHabit` are idempotent (no event, no version bump on a duplicate link),
+  and both reject **both** Completed and Archived goals via `ensureNotImmutable()` — stricter than
+  "archived-only." Covered by 12 new unit tests (idempotency, not-found, both terminal-state
+  rejections, multi-link accumulation) and 6 new e2e tests. Full `apps/backend` suite: 92/92 unit
+  tests, 19 suites, no regressions. `tsc --noEmit` clean (only the 2 pre-existing Item 35 errors).
+  **Note on phase numbering:** the original `goal_backend_implementation_plan.md` called this
+  "Fase 3" (its "Fase 2," query services/read model, was absorbed into Fase 1 via the single-
+  `GoalView` decision) — this entry uses the sequencing actually agreed going forward (Fase 1 done →
+  Fase 2 = relationships, done → Fase 3 = Event Store/history → Fase 4 = mobile integration →
+  Fase 5 = Golden Path/closure).
+  **Not yet done:** `InMemoryEventStore` connection + history projector, mobile integration
+  (`goals.api.ts` still routes unconditionally to the demo repository), and a Golden Path + formal
+  closure. `toggleMilestone` remains explicitly out of scope (no backend Milestone aggregate exists
+  by design — see `milestone.model.ts`'s own doc comment).
+- **Fase 1 status (2026-07-17):** "Goal Backend mínimo" implemented and verified.
+  `apps/backend/src/goal/` built: Register/Rename/Complete/Archive commands, a single `GoalView`
+  read model with projectors for all four events, an in-memory versioned repository (mirroring
+  `InMemoryCommitmentRepository` exactly), `GoalsController` (`/goals` REST endpoints), and
+  `GoalModule` — which reuses `CommitmentModule`'s exported `DomainEventDispatcher` via NestJS DI
+  import inheritance (`imports: [CqrsModule, CommitmentModule]`), the same pattern `task.module.ts`
+  uses, rather than duplicating a Goal-local event dispatcher. Registered in `app.module.ts`.
 - **Description:** `packages/domain/src/goal/` is a full Aggregate Root with its own domain events
   (`GoalRegisteredEvent`, `GoalArchivedEvent`, etc.) and a `GoalRepository` interface — but
   `apps/backend/src/` has no `goal/` module at all. `goal.repository.ts` and
@@ -1861,6 +1874,13 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ## 📜 Change History
 
+- **v1.50.0 (2026-07-17):** **Item 10 — Fase 2 (Goal aggregate relationships) implemented and
+  verified.** `LinkCommitment`/`LinkHabit` commands added on the same pattern as Fase 1, `GoalView`
+  projectors extended (no new read model), two explicit REST endpoints
+  (`POST /goals/:id/commitments`, `POST /goals/:id/habits`) chosen over a generic `PATCH`. Domain
+  invariants read from the aggregate before implementing, not assumed: both link methods are
+  idempotent and reject both Completed and Archived goals. 12 new unit tests + 6 new e2e tests, full
+  suite 92/92, `tsc --noEmit` clean. Commit checkpoint before this phase: `e45c722`.
 - **v1.49.0 (2026-07-17):** **Item 10 — Fase 1 ("Goal Backend mínimo") implemented and verified.**
   `apps/backend/src/goal/` built mirroring Commitment's exact CQRS+versioned-state pattern:
   Register/Rename/Complete/Archive commands, single `GoalView` read model, in-memory versioned

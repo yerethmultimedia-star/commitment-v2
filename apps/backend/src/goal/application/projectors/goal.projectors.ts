@@ -4,6 +4,8 @@ import {
   GoalRenamedEvent,
   GoalCompletedEvent,
   GoalArchivedEvent,
+  GoalCommitmentLinkedEvent,
+  GoalHabitLinkedEvent,
 } from '@commitment/domain';
 import { Inject } from '@nestjs/common';
 import { InMemoryGoalProjectionStore } from '../../infrastructure/in-memory-goal-projection.store';
@@ -82,9 +84,45 @@ export class GoalArchivedProjector implements IEventHandler<GoalArchivedEvent> {
   }
 }
 
+@EventsHandler(GoalCommitmentLinkedEvent)
+export class GoalCommitmentLinkedProjector implements IEventHandler<GoalCommitmentLinkedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalCommitmentLinkedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.commitmentIds = [...view.commitmentIds, event.payload.commitmentId];
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
+@EventsHandler(GoalHabitLinkedEvent)
+export class GoalHabitLinkedProjector implements IEventHandler<GoalHabitLinkedEvent> {
+  constructor(
+    @Inject('GoalProjectionStore')
+    private readonly store: InMemoryGoalProjectionStore,
+  ) {}
+
+  public handle(event: GoalHabitLinkedEvent): void {
+    const view = this.store.findById(event.payload.goalId);
+    if (view) {
+      view.habitIds = [...view.habitIds, event.payload.habitId];
+      view.version += 1;
+      this.store.save(view);
+    }
+  }
+}
+
 export const GoalProjectors = [
   GoalRegisteredProjector,
   GoalRenamedProjector,
   GoalCompletedProjector,
   GoalArchivedProjector,
+  GoalCommitmentLinkedProjector,
+  GoalHabitLinkedProjector,
 ];

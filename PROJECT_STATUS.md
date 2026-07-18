@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.52.0
+Version: 1.53.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,7 +222,7 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 1 implemented
+8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 2 implemented
    (2026-07-17).** Resumed as the strategic initiative after VS-037 closed, following the same
    Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
    deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
@@ -247,9 +247,19 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
      Register/Rename/Complete/Archive commands, a single `GoalView` read model, an in-memory
      versioned repository, `GoalsController`, and `GoalModule` (registered in `app.module.ts`,
      reusing `CommitmentModule`'s exported `DomainEventDispatcher` rather than duplicating it — the
-     same DI pattern `task.module.ts` already uses). Verified clean: `tsc --noEmit`, 81/81 backend
-     jest tests (7 new), 10 new e2e tests. Remaining: LinkCommitment/LinkHabit (Fase 3), Event Store
-     connection (Fase 4), mobile integration (Fase 5), Golden Path + closure (Fase 6) — none started.
+     same DI pattern `task.module.ts` already uses). Committed as a checkpoint: `e45c722`.
+   - **Fase 2 status (2026-07-17):** implemented and verified. `LinkCommitment`/`LinkHabit` commands
+     added on the exact Fase 1 pattern, `GoalView` projectors extended (still one read model), two
+     explicit REST endpoints (`POST /goals/:id/commitments`, `POST /goals/:id/habits`, preferred
+     over a generic `PATCH` since these are domain commands, not state overwrites). No repository
+     changes needed — confirms no deviation from the Commitment pattern. Domain invariants read from
+     the aggregate before writing infrastructure: both link methods are idempotent (no event, no
+     version bump on a duplicate) and reject **both** Completed and Archived goals, not just
+     Archived. Verified: `tsc --noEmit` clean, 92/92 backend jest tests (12 new), 6 new e2e tests, no
+     regressions. **Renumbering note:** the original plan called this "Fase 3" (its "Fase 2," query
+     services, was absorbed into Fase 1's single-`GoalView` decision) — from here on "Fase 2" means
+     this relationships work, and remaining phases shift down: Fase 3 = Event Store/history, Fase 4
+     = mobile integration, Fase 5 = Golden Path + closure. None of those started.
      Full detail: `TECH_DEBT.md` Item 10.
 9. **Candidate, not yet numbered — Backend Infrastructure Simplification.** Surfaced 2026-07-17
    during the Goal Backend investigation: a single backend command costs ~7 files (command,
@@ -293,6 +303,14 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.53.0 (2026-07-17):** **Goal Backend Fase 2 (aggregate relationships) implemented and
+  verified.** `LinkCommitment`/`LinkHabit` commands added on Fase 1's exact pattern; `GoalView`
+  projectors extended (still one read model, no new views); two explicit REST endpoints
+  (`POST /goals/:id/commitments`, `POST /goals/:id/habits`) over a generic `PATCH`. No repository
+  changes needed. Domain invariants confirmed by reading the aggregate first, not assumed: both link
+  methods are idempotent and reject both Completed and Archived goals (stricter than
+  archived-only). 92/92 backend jest tests (12 new), 6 new e2e tests, `tsc --noEmit` clean, no
+  regressions. Full detail: `TECH_DEBT.md` Item 10.
 - **v1.52.0 (2026-07-17):** **Goal Backend Fase 1 ("Goal Backend mínimo") implemented and
   verified.** Per `docs/03-architecture/goal_backend_implementation_plan.md`:
   `apps/backend/src/goal/` now exists with Register/Rename/Complete/Archive commands, a single

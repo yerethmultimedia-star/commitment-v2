@@ -16,6 +16,18 @@ interface StateResponse {
   version: number;
 }
 
+interface LinkCommitmentResponse {
+  goalId: string;
+  commitmentIds: string[];
+  version: number;
+}
+
+interface LinkHabitResponse {
+  goalId: string;
+  habitIds: string[];
+  version: number;
+}
+
 interface ProblemDetailsResponse {
   title: string;
   status: number;
@@ -24,6 +36,8 @@ interface ProblemDetailsResponse {
 
 const GOAL_ID = '018f6b5c-42e1-7000-8000-999999999999';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
+const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-222222222222';
+const HABIT_ID = '018f6b5c-42e1-7000-8000-444444444444';
 
 describe('GoalsController (e2e)', () => {
   let app: INestApplication<App>;
@@ -192,6 +206,112 @@ describe('GoalsController (e2e)', () => {
 
     await request(app.getHttpServer())
       .post(`/v1/goals/${GOAL_ID}/complete`)
+      .expect(409);
+  });
+
+  // ─── Link Commitment ──────────────────────────────────────────────────────
+
+  it('POST /goals/:id/commitments — should link a commitment idempotently', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+
+    const r1 = await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(200);
+    const r2 = await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(200);
+
+    const b1 = r1.body as LinkCommitmentResponse;
+    const b2 = r2.body as LinkCommitmentResponse;
+    expect(b1.commitmentIds).toEqual([COMMITMENT_ID]);
+    expect(b1.version).toBe(b2.version); // idempotent — no duplicate, no new version
+
+    const view = await request(app.getHttpServer())
+      .get(`/v1/goals/${GOAL_ID}`)
+      .expect(200);
+    expect(view.body).toMatchObject({ commitmentIds: [COMMITMENT_ID] });
+  });
+
+  it('POST /goals/:id/commitments — should return 404 for unknown goal id', async () => {
+    const unknownId = '018f6b5c-42e1-7000-8000-000000000000';
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${unknownId}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(404);
+  });
+
+  it('POST /goals/:id/commitments — should return 409 for an archived goal', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/archive`)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(409);
+  });
+
+  it('POST /goals/:id/commitments — should return 400 on invalid commitment UUID', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: 'not-a-uuid' })
+      .expect(400);
+  });
+
+  // ─── Link Habit ───────────────────────────────────────────────────────────
+
+  it('POST /goals/:id/habits — should link a habit idempotently', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+
+    const r1 = await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/habits`)
+      .send({ habitId: HABIT_ID })
+      .expect(200);
+    const r2 = await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/habits`)
+      .send({ habitId: HABIT_ID })
+      .expect(200);
+
+    const b1 = r1.body as LinkHabitResponse;
+    const b2 = r2.body as LinkHabitResponse;
+    expect(b1.habitIds).toEqual([HABIT_ID]);
+    expect(b1.version).toBe(b2.version); // idempotent
+
+    const view = await request(app.getHttpServer())
+      .get(`/v1/goals/${GOAL_ID}`)
+      .expect(200);
+    expect(view.body).toMatchObject({ habitIds: [HABIT_ID] });
+  });
+
+  it('POST /goals/:id/habits — should return 409 for a completed goal', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/complete`)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/habits`)
+      .send({ habitId: HABIT_ID })
       .expect(409);
   });
 });

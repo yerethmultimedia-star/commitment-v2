@@ -1,0 +1,123 @@
+import {
+  LinkCommitmentToGoalCommandHandlerCore,
+  GoalNotFoundError,
+} from '../commands/link-commitment-to-goal.handler';
+import { LinkCommitmentToGoalCommand } from '../commands/link-commitment-to-goal.command';
+import { RegisterGoalCommandHandlerCore } from '../commands/register-goal.handler';
+import { RegisterGoalCommand } from '../commands/register-goal.command';
+import { ArchiveGoalCommandHandlerCore } from '../commands/archive-goal.handler';
+import { ArchiveGoalCommand } from '../commands/archive-goal.command';
+import { CompleteGoalCommandHandlerCore } from '../commands/complete-goal.handler';
+import { CompleteGoalCommand } from '../commands/complete-goal.command';
+import { DomainEvent } from '@commitment/domain';
+import { InMemoryGoalRepository } from '../../infrastructure/in-memory-goal.repository';
+import { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
+
+describe('LinkCommitmentToGoalCommandHandlerCore', () => {
+  let repository: InMemoryGoalRepository;
+  let dispatcher: DomainEventDispatcher;
+  let dispatchedEvents: DomainEvent[];
+  let registerHandler: RegisterGoalCommandHandlerCore;
+  let linkHandler: LinkCommitmentToGoalCommandHandlerCore;
+  let archiveHandler: ArchiveGoalCommandHandlerCore;
+  let completeHandler: CompleteGoalCommandHandlerCore;
+
+  const goalId = '018f6b5c-42e1-7000-8000-999999999999';
+  const identityId = '018f6b5c-42e1-7000-8000-111111111111';
+  const commitmentId = '018f6b5c-42e1-7000-8000-222222222222';
+
+  beforeEach(async () => {
+    repository = new InMemoryGoalRepository();
+    dispatchedEvents = [];
+    dispatcher = {
+      dispatch: (events) => {
+        dispatchedEvents.push(...events);
+        return Promise.resolve();
+      },
+    };
+
+    registerHandler = new RegisterGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+    );
+    linkHandler = new LinkCommitmentToGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+    );
+    archiveHandler = new ArchiveGoalCommandHandlerCore(repository, dispatcher);
+    completeHandler = new CompleteGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+    );
+
+    await registerHandler.handle(
+      new RegisterGoalCommand(goalId, identityId, 'Run a half marathon'),
+    );
+    dispatchedEvents = [];
+  });
+
+  it('should link a commitment and dispatch goal.commitment_linked', async () => {
+    const result = await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+
+    expect(result.commitmentIds).toEqual([commitmentId]);
+    expect(result.version).toBe(2);
+    expect(dispatchedEvents).toHaveLength(1);
+    expect(dispatchedEvents[0]?.name).toBe('goal.commitment_linked');
+  });
+
+  it('should not change state when linking the same commitment twice', async () => {
+    await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+    dispatchedEvents = [];
+
+    const result = await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+
+    expect(result.commitmentIds).toEqual([commitmentId]); // no duplicate
+    expect(result.version).toBe(2); // unchanged — no new event
+    expect(dispatchedEvents).toHaveLength(0);
+  });
+
+  it('should accumulate multiple distinct commitments consistently', async () => {
+    const secondCommitmentId = '018f6b5c-42e1-7000-8000-333333333333';
+
+    await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, commitmentId),
+    );
+    const result = await linkHandler.handle(
+      new LinkCommitmentToGoalCommand(goalId, secondCommitmentId),
+    );
+
+    expect(result.commitmentIds).toEqual([commitmentId, secondCommitmentId]);
+    expect(result.version).toBe(3);
+  });
+
+  it('should throw GoalNotFoundError for an unknown goal id', async () => {
+    const unknownId = '018f6b5c-42e1-7000-8000-000000000000';
+    await expect(
+      linkHandler.handle(
+        new LinkCommitmentToGoalCommand(unknownId, commitmentId),
+      ),
+    ).rejects.toThrow(GoalNotFoundError);
+  });
+
+  it('should reject linking a commitment to an archived goal', async () => {
+    await archiveHandler.handle(new ArchiveGoalCommand(goalId));
+
+    await expect(
+      linkHandler.handle(new LinkCommitmentToGoalCommand(goalId, commitmentId)),
+    ).rejects.toThrow();
+  });
+
+  it('should reject linking a commitment to a completed goal', async () => {
+    await completeHandler.handle(new CompleteGoalCommand(goalId));
+
+    await expect(
+      linkHandler.handle(new LinkCommitmentToGoalCommand(goalId, commitmentId)),
+    ).rejects.toThrow();
+  });
+});

@@ -6,6 +6,8 @@ import { RegisterGoalNestjsHandler } from './nestjs/register-goal.nestjs-handler
 import { RenameGoalNestjsHandler } from './nestjs/rename-goal.nestjs-handler';
 import { CompleteGoalNestjsHandler } from './nestjs/complete-goal.nestjs-handler';
 import { ArchiveGoalNestjsHandler } from './nestjs/archive-goal.nestjs-handler';
+import { LinkCommitmentToGoalNestjsHandler } from './nestjs/link-commitment-to-goal.nestjs-handler';
+import { LinkHabitToGoalNestjsHandler } from './nestjs/link-habit-to-goal.nestjs-handler';
 import { GetGoalByIdNestjsHandler } from './nestjs/get-goal-by-id.nestjs-handler';
 import { ListGoalsNestjsHandler } from './nestjs/list-goals.nestjs-handler';
 import { InMemoryGoalRepository } from './infrastructure/in-memory-goal.repository';
@@ -23,6 +25,8 @@ import { GoalProjectors } from './application/projectors/goal.projectors';
     RenameGoalNestjsHandler,
     CompleteGoalNestjsHandler,
     ArchiveGoalNestjsHandler,
+    LinkCommitmentToGoalNestjsHandler,
+    LinkHabitToGoalNestjsHandler,
     GetGoalByIdNestjsHandler,
     ListGoalsNestjsHandler,
     ...GoalProjectors,
