@@ -3,7 +3,7 @@ import { buildDayAgenda, DayAgenda } from '@commitment/domain';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useHabits } from '@/features/habits/hooks/useHabits';
-import { useGoals } from '@/features/goals/hooks/useGoals';
+import { useGoalsView } from '@/features/goals/hooks/useGoalsView';
 
 /**
  * Assembles a CalendarContext from the same sources Today/Goals/Tasks
@@ -17,7 +17,7 @@ export function useDayAgenda(date: Date): { agenda: DayAgenda | null; isLoading:
   const { data: tasks, isLoading: tasksLoading } = useTasks();
   const { data: commitments, isLoading: commitmentsLoading } = useCommitments();
   const { data: habits, isLoading: habitsLoading } = useHabits();
-  const { data: goals, isLoading: goalsLoading } = useGoals();
+  const { data: goals, isLoading: goalsLoading } = useGoalsView();
 
   const isLoading = tasksLoading || commitmentsLoading || habitsLoading || goalsLoading;
 

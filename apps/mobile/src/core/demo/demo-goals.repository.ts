@@ -1,19 +1,15 @@
-import { computeGoalProgress, Milestone } from '@commitment/domain';
-import { computeCommitmentProgressRatio, demoCommitmentDTOs, daysAgo } from './demo-data';
+import { Milestone } from '@commitment/domain';
+import { demoCommitmentDTOs, daysAgo } from './demo-data';
+import { GoalSummary } from '@/features/goals/models/goal.model';
 
-export interface DemoGoalDTO {
-  id: string;
-  title: string;
-  description: string;
+export interface DemoGoalDTO extends GoalSummary {
+  /** Dataset content only (see DEMO_DATASET.md's "The 7 Goals" table) — not
+   * exposed by list()/getById() since neither is a real domain concept
+   * (goal_view_alignment_assessment.md). Kept here in case a future product
+   * decision reintroduces categorization. */
   category: 'health' | 'career' | 'finance' | 'learning' | 'personal';
   priority: 'high' | 'medium' | 'low';
-  state: 'Draft' | 'Active' | 'Completed' | 'Archived';
-  targetDate?: string;
-  commitmentIds: string[];
-  habitIds: string[];
   createdAt: string;
-  /** ISO, non-null only when state === 'Completed' — mirrors Goal.completedAt on the real aggregate. */
-  completedAt: string | null;
 }
 
 /**
@@ -27,7 +23,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   {
     id: 'g-01', title: 'Improve Physical Health', category: 'health', priority: 'high', state: 'Active',
     description: 'Build a body and a routine that can keep up with everything else.',
-    targetDate: undefined,
     commitmentIds: ['c-01', 'c-03', 'c-12', 'c-15'],
     habitIds: ['h-01', 'h-05', 'h-07'],
     createdAt: '2026-05-01T00:00:00.000Z',
@@ -36,7 +31,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   {
     id: 'g-02', title: 'Improve Mental Wellbeing', category: 'personal', priority: 'medium', state: 'Active',
     description: 'Make space to slow down — a clearer mind and a clearer home.',
-    targetDate: undefined,
     commitmentIds: ['c-09', 'c-10'],
     habitIds: ['h-02'],
     createdAt: '2026-05-05T00:00:00.000Z',
@@ -46,7 +40,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
     // Completed in "last week" (per §2b) so Objetivos completados has real week-over-week density.
     id: 'g-03', title: 'Build Financial Freedom', category: 'finance', priority: 'high', state: 'Completed',
     description: 'A real safety net, and a real plan for the next big purchase.',
-    targetDate: undefined,
     commitmentIds: ['c-04', 'c-13'],
     habitIds: [],
     createdAt: '2026-04-20T00:00:00.000Z',
@@ -55,7 +48,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   {
     id: 'g-04', title: 'Become More Productive', category: 'career', priority: 'high', state: 'Active',
     description: 'Ship what matters, on a rhythm that does not burn out.',
-    targetDate: undefined,
     commitmentIds: ['c-02', 'c-08', 'c-11', 'c-14'],
     habitIds: ['h-04'],
     createdAt: '2026-04-10T00:00:00.000Z',
@@ -64,7 +56,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   {
     id: 'g-05', title: 'Learn Portuguese', category: 'learning', priority: 'low', state: 'Active',
     description: 'Enough conversational Portuguese to get by on the next trip.',
-    targetDate: undefined,
     commitmentIds: ['c-06', 'c-16'],
     habitIds: ['h-03', 'h-08'],
     createdAt: '2026-05-12T00:00:00.000Z',
@@ -74,7 +65,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
     // Completed "this week" (per §2b) so Objetivos completados has a non-zero current-week count.
     id: 'g-06', title: 'Keep Reading', category: 'learning', priority: 'low', state: 'Completed',
     description: '24 books this year — one good habit, read consistently.',
-    targetDate: undefined,
     commitmentIds: ['c-05'],
     habitIds: ['h-06'],
     createdAt: '2026-05-15T00:00:00.000Z',
@@ -83,7 +73,6 @@ const demoGoalDTOs: DemoGoalDTO[] = [
   {
     id: 'g-07', title: 'Build Better Relationships', category: 'personal', priority: 'medium', state: 'Active',
     description: 'Put real time back into the friendships that matter.',
-    targetDate: undefined,
     commitmentIds: ['c-07', 'c-17'],
     habitIds: ['h-09'],
     createdAt: '2026-05-20T00:00:00.000Z',
@@ -127,23 +116,6 @@ let demoMilestones: Milestone[] = [
   { id: 'm-20', goalId: 'g-07', title: 'Host the first gathering', completed: false },
 ];
 
-/** Latest target date among a Goal's linked commitments — never a separately invented date. */
-function deriveTargetDate(dto: DemoGoalDTO): string | undefined {
-  if (dto.targetDate) return dto.targetDate;
-  const dates = dto.commitmentIds
-    .map((id) => demoCommitmentDTOs.find((c) => c.id === id)?.targetDate)
-    .filter((d): d is string => Boolean(d));
-  if (dates.length === 0) return undefined;
-  return dates.reduce((latest, d) => (new Date(d) > new Date(latest) ? d : latest));
-}
-
-async function withProgress(dto: DemoGoalDTO) {
-  const commitmentProgressRatios = dto.commitmentIds.map((id) => computeCommitmentProgressRatio(id));
-  const milestones = demoMilestones.filter((m) => m.goalId === dto.id);
-  const progress = computeGoalProgress({ commitmentProgressRatios, milestones });
-  return { ...dto, progress, milestones, targetDate: deriveTargetDate(dto) };
-}
-
 function findOrThrow(id: string) {
   const dto = demoGoalDTOs.find((g) => g.id === id);
   if (!dto) throw new Error(`Demo goal not found: ${id}`);
@@ -156,15 +128,21 @@ function findMilestoneOrThrow(id: string): Milestone {
   return milestone;
 }
 
+/** Strips demo-only fields (category/priority/createdAt) down to the shape goals.api.ts's real branch returns. */
+function toSummary(dto: DemoGoalDTO): GoalSummary {
+  const { id, title, description, state, commitmentIds, habitIds, completedAt } = dto;
+  return { id, title, description, state, commitmentIds, habitIds, completedAt };
+}
+
 export const demoGoalsRepository = {
-  list: async () => {
-    const items = await Promise.all(demoGoalDTOs.map(withProgress));
+  list: async (): Promise<{ items: GoalSummary[]; total: number }> => {
+    const items = demoGoalDTOs.map(toSummary);
     return { items, total: items.length };
   },
 
-  getById: async (id: string) => withProgress(findOrThrow(id)),
+  getById: async (id: string): Promise<GoalSummary> => toSummary(findOrThrow(id)),
 
-  create: async (payload: { title: string; description?: string }) => {
+  create: async (payload: { title: string; description?: string }): Promise<{ goalId: string }> => {
     const id = `g-demo-${Date.now()}`;
     demoGoalDTOs.push({
       id,
@@ -180,6 +158,9 @@ export const demoGoalsRepository = {
     });
     return { goalId: id };
   },
+
+  /** Demo-only — Milestone has no backend equivalent yet (milestone_domain_assessment.md). */
+  getMilestonesFor: (goalId: string): Milestone[] => demoMilestones.filter((m) => m.goalId === goalId),
 
   toggleMilestone: async (id: string): Promise<Milestone> => {
     const milestone = findMilestoneOrThrow(id);

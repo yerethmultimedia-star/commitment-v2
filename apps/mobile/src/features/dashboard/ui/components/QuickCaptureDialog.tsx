@@ -76,7 +76,7 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
     setIsCapturing(true);
     try {
       if (type === 'goal') {
-        await goalsApi.create({ title: trimmed });
+        await goalsApi.create({ id: generateId(), identityId, title: trimmed });
         queryClient.invalidateQueries({ queryKey: queryKeys.goals.all });
       } else if (type === 'commitment') {
         // Minimal capture, same principle as every other type here (ADR-020):

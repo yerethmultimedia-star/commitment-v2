@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useGoals } from './useGoals';
+import { useGoalsView } from './useGoalsView';
 
 export interface GoalFocusItem {
   goalId: string;
@@ -20,20 +20,20 @@ const CLOSE_TO_COMPLETION_THRESHOLD = 0.85;
  * own richer data need.
  */
 export function useGoalFocus(): GoalFocusItem[] {
-  const { data: goals } = useGoals();
+  const { data: goals } = useGoalsView();
 
   return useMemo(() => {
-    const active = (goals ?? []).filter((g: any) => g.state === 'Active');
+    const active = (goals ?? []).filter((g) => g.state === 'Active');
     if (active.length === 0) return [];
 
     const items: GoalFocusItem[] = [];
 
-    const lowest = [...active].sort((a: any, b: any) => a.progress - b.progress)[0];
+    const lowest = [...active].sort((a, b) => a.progress - b.progress)[0];
     if (lowest && lowest.progress < NEEDS_ATTENTION_THRESHOLD) {
       items.push({ goalId: lowest.id, goalTitle: lowest.title, progress: lowest.progress, kind: 'needs-attention' });
     }
 
-    const highest = [...active].sort((a: any, b: any) => b.progress - a.progress)[0];
+    const highest = [...active].sort((a, b) => b.progress - a.progress)[0];
     if (highest && highest.progress >= CLOSE_TO_COMPLETION_THRESHOLD && highest.progress < 1 && highest.id !== lowest?.id) {
       items.push({ goalId: highest.id, goalTitle: highest.title, progress: highest.progress, kind: 'close-to-completion' });
     }

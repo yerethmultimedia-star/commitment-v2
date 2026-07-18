@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { XStack, YStack, Circle } from 'tamagui';
+import { Target } from '@tamagui/lucide-icons';
 import { Card, Title, Body, toPlatformAccessibilityProps, EmptyState } from '@commitment/design-system';
 import { useInsightsContext } from '../../hooks/useInsightsContext';
-import { CATEGORY_ICON, GoalCategory } from '@/features/goals/utils/goal-descriptors';
 import { GoalProgressBar } from '@/features/goals/components/GoalProgressBar';
 
 /** Per-Goal progress, real via computeGoalProgress (already computed upstream) — the centerpiece of the Goal-centric redesign. */
@@ -35,7 +35,6 @@ export function GoalProgressInsight() {
       <Title i18nKey="insights.goalProgress.title" fontSize="$5" />
       <YStack gap="$3">
         {sorted.map((goal) => {
-          const Icon = CATEGORY_ICON[goal.category as GoalCategory];
           return (
             <YStack
               key={goal.goalId}
@@ -48,7 +47,7 @@ export function GoalProgressInsight() {
             >
               <XStack gap="$3" alignItems="center">
                 <Circle size={32} backgroundColor="$focus" justifyContent="center" alignItems="center">
-                  {Icon ? <Icon color="$accent" size={16} /> : null}
+                  <Target color="$accent" size={16} />
                 </Circle>
                 <Body fontWeight="600" flex={1} numberOfLines={1} ellipsizeMode="tail">{goal.title}</Body>
                 <Body fontWeight="700" color="$accent">{Math.round(goal.progress * 100)}%</Body>

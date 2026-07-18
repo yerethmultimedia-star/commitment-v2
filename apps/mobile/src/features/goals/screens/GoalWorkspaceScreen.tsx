@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Stack as ExpoStack } from 'expo-router';
 import { YStack, XStack, Circle } from 'tamagui';
 import {
-  CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Plus,
+  CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Plus, Target,
 } from '@tamagui/lucide-icons';
 import {
   AppScreen, Card, Body, IconButton,
@@ -11,14 +11,14 @@ import {
 } from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useRouter } from 'expo-router';
-import { useGoal, useToggleMilestone } from '../hooks/useGoals';
+import { useToggleMilestone } from '../hooks/useGoals';
+import { useGoalWorkspace } from '../hooks/useGoalsView';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
 import { HabitCard } from '@/features/habits/components/HabitCard';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
 import { GoalTabStrip } from '../components/GoalTabStrip';
-import { CATEGORY_ICON } from '../utils/goal-descriptors';
 
 export interface GoalWorkspaceScreenProps {
   goalId: string;
@@ -36,7 +36,7 @@ function progressDescriptionKey(progress: number): string {
 export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const { t } = useTranslation('common');
   const router = useRouter();
-  const { data: goal, isLoading } = useGoal(goalId);
+  const { data: goal, isLoading } = useGoalWorkspace(goalId);
   const { data: commitments = [] } = useCommitments();
   const { data: tasks = [] } = useTasks();
   const { data: habits = [] } = useHabits();
@@ -90,8 +90,6 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
     );
   }
 
-  const CategoryIcon = CATEGORY_ICON[goal.category];
-
   return (
     <>
       <ExpoStack.Screen options={{ headerShown: true, title: goal.title, presentation: 'card' }} />
@@ -99,13 +97,8 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
         <YStack padding="$4" gap="$4" backgroundColor="$background">
           <XStack gap="$3" alignItems="center">
             <Circle size={40} backgroundColor="$focus" justifyContent="center" alignItems="center">
-              <CategoryIcon color="$accent" size={20} />
+              <Target color="$accent" size={20} />
             </Circle>
-            <XStack gap="$2" alignItems="center" flex={1}>
-              <Body tone="secondary" fontSize="$2">{t(`goals.categories.${goal.category}`)}</Body>
-              <Circle size={4} backgroundColor="$divider" />
-              <Body tone="secondary" fontSize="$2" fontWeight="700">{t(`goals.priority.${goal.priority}`)}</Body>
-            </XStack>
           </XStack>
 
           <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.workspace.tabs.${tb}`)} />
@@ -128,22 +121,16 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                 <Body tone="secondary">{goal.description}</Body>
               ) : null}
 
-              <YStack gap="$2">
-                <Card variant="elevated">
-                  <YStack gap="$2">
-                    {goal.targetDate && (
-                      <XStack justifyContent="space-between">
-                        <Body tone="secondary">{t('goals.workspace.dueDate')}</Body>
-                        <Body fontWeight="600">{formatDate(goal.targetDate)}</Body>
-                      </XStack>
-                    )}
+              {goal.targetDate && (
+                <YStack gap="$2">
+                  <Card variant="elevated">
                     <XStack justifyContent="space-between">
-                      <Body tone="secondary">{t('goals.workspace.type')}</Body>
-                      <Body fontWeight="600">{t(`goals.categories.${goal.category}`)}</Body>
+                      <Body tone="secondary">{t('goals.workspace.dueDate')}</Body>
+                      <Body fontWeight="600">{formatDate(goal.targetDate)}</Body>
                     </XStack>
-                  </YStack>
-                </Card>
-              </YStack>
+                  </Card>
+                </YStack>
+              )}
 
               <YStack gap="$2">
                 <SectionHeader title={{ i18nKey: 'goals.workspace.statistics' }} />
@@ -277,7 +264,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   <Body tone="secondary" i18nKey="goals.workspace.upcomingEmpty" />
                 </Card>
               ) : (
-                goal.milestones.map((m: any) => (
+                goal.milestones.map((m) => (
                   <Card
                     key={m.id}
                     variant="elevated"

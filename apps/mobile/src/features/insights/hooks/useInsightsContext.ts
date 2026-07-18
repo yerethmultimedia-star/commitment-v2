@@ -12,7 +12,7 @@
 
 import { useMemo } from 'react';
 import { InsightsContext, GoalInsightSummary, isHabitDueOn } from '@commitment/domain';
-import { useGoals } from '@/features/goals/hooks/useGoals';
+import { useGoalsView } from '@/features/goals/hooks/useGoalsView';
 import { useHabits } from '@/features/habits/hooks/useHabits';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
@@ -35,7 +35,7 @@ export interface UseInsightsContextResult {
 
 export function useInsightsContext(): UseInsightsContextResult {
   const { identityId, isHydrated } = useSession();
-  const { data: goals = [], isLoading: goalsLoading } = useGoals();
+  const { data: goals = [], isLoading: goalsLoading } = useGoalsView();
   const { data: habits = [], isLoading: habitsLoading } = useHabits();
   const { data: commitments = [], isLoading: commitmentsLoading } = useCommitments();
   const { data: tasks = [], isLoading: tasksLoading } = useTasks();
@@ -49,7 +49,7 @@ export function useInsightsContext(): UseInsightsContextResult {
 
     const today = new Date();
 
-    const goalSummaries: GoalInsightSummary[] = goals.map((goal: any) => {
+    const goalSummaries: GoalInsightSummary[] = goals.map((goal) => {
       const linkedCommitments = commitments.filter((c) => c.goalId === goal.id);
       const linkedHabits = habits.filter((h) => h.goalId === goal.id && h.enabled);
       const habitsOnTrack = linkedHabits.filter((h) => h.currentStreakDays > 0).length;
@@ -60,8 +60,6 @@ export function useInsightsContext(): UseInsightsContextResult {
       return {
         goalId: goal.id,
         title: goal.title,
-        category: goal.category,
-        priority: goal.priority,
         state: goal.state,
         progress: goal.progress,
         activeCommitments: linkedCommitments.filter((c) => c.status === 'active').length,
@@ -87,8 +85,8 @@ export function useInsightsContext(): UseInsightsContextResult {
       overall: {
         completionRate: dashboardData?.metrics?.completionRate ?? 0,
         completedThisWeek: dashboardData?.metrics?.completedThisWeek ?? 0,
-        activeGoalsCount: goals.filter((g: any) => g.state === 'Active').length,
-        completedGoalsCount: goals.filter((g: any) => g.state === 'Completed').length,
+        activeGoalsCount: goals.filter((g) => g.state === 'Active').length,
+        completedGoalsCount: goals.filter((g) => g.state === 'Completed').length,
         bestStreakDays,
       },
       dailyActivity: computeDailyActivity(tasks),

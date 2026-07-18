@@ -10,8 +10,6 @@
 export interface GoalInsightSummary {
   readonly goalId: string;
   readonly title: string;
-  readonly category: string;
-  readonly priority: string;
   readonly state: string;
   /** 0..1 — already computed upstream via computeGoalProgress, never re-derived here. */
   readonly progress: number;

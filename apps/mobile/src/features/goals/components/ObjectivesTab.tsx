@@ -2,13 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, Button as TamaguiButton, ScrollView } from 'tamagui';
 import { EmptyState, ErrorState, LoadingState, Button, toPlatformAccessibilityProps } from '@commitment/design-system';
-import { useGoals } from '../hooks/useGoals';
+import { useGoalsView } from '../hooks/useGoalsView';
 import { GoalCard } from './GoalCard';
+import { GoalViewModel } from '../models/goal.model';
 
 type StatusChip = 'active' | 'inProgress' | 'completed';
 const CHIPS: StatusChip[] = ['active', 'inProgress', 'completed'];
 
-function matchesChip(goal: any, chip: StatusChip): boolean {
+function matchesChip(goal: GoalViewModel, chip: StatusChip): boolean {
   if (chip === 'active') return goal.state === 'Active';
   if (chip === 'inProgress') return goal.state === 'Active' && goal.progress > 0;
   return goal.state === 'Completed';
@@ -16,11 +17,11 @@ function matchesChip(goal: any, chip: StatusChip): boolean {
 
 export function ObjectivesTab() {
   const { t } = useTranslation('common');
-  const { data, isLoading, isError, refetch } = useGoals();
+  const { data, isLoading, isError, refetch } = useGoalsView();
   const goals = data ?? [];
   const [chip, setChip] = useState<StatusChip>('active');
 
-  const filtered = useMemo(() => goals.filter((g: any) => matchesChip(g, chip)), [goals, chip]);
+  const filtered = useMemo(() => goals.filter((g) => matchesChip(g, chip)), [goals, chip]);
 
   if (isLoading) {
     return <LoadingState fullscreen={false} title={{ i18nKey: 'goals.list.loading' }} />;
@@ -69,15 +70,8 @@ export function ObjectivesTab() {
         />
       ) : (
         <YStack gap="$3">
-          {filtered.map((item: any) => (
-            <GoalCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              category={item.category}
-              priority={item.priority}
-              progress={item.progress}
-            />
+          {filtered.map((item) => (
+            <GoalCard key={item.id} goal={item} />
           ))}
         </YStack>
       )}

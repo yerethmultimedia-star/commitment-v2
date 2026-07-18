@@ -273,20 +273,6 @@ export function replaceDemoTasks(next: TaskModel[]): void {
   demoTasks = next;
 }
 
-/**
- * A Commitment's progress, derived from its own Tasks — never a stored
- * number. This is the same ratio COMMITMENT_SEEDS.progressRatio targets
- * (buildTasksForCommitment completes exactly this fraction of a
- * commitment's tasks), computed here independently so a Goal's progress
- * (computeGoalProgress) is derived from real task state, not from
- * re-reading the seed's own target.
- */
-export function computeCommitmentProgressRatio(commitmentId: string): number {
-  const tasks = demoTasks.filter((t) => t.commitmentId === commitmentId);
-  if (tasks.length === 0) return 0;
-  return tasks.filter((t) => t.status === 'completed').length / tasks.length;
-}
-
 // --- Derived views (mirrors what the real backend computes) ------------
 
 function isSameDay(iso: string | null | undefined, ref: Date): boolean {

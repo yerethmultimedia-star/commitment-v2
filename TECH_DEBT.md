@@ -1,6 +1,6 @@
 # Technical Debt Register
 
-Version: 1.51.0
+Version: 1.54.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -180,8 +180,59 @@ This document tracks identified technical debt, compilation warnings, and archit
 
 ---
 
-## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 3 Implemented
+## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 4 Mostly Implemented (Milestones Excluded)
 
+- **Status update (2026-07-18, Fase 4 — implemented, Milestones excluded):** `goals.api.ts`
+  rewritten as a symmetric Demo/Backend adapter (`list`/`getById`/`create`), returning the exact
+  same `GoalSummary` shape either way — `demoGoalsRepository` stopped enriching with `progress`/
+  `category`/`priority`/`milestones` at the boundary, matching the real `GoalView` contract.
+  `progress`/`targetDate` are composed one layer up, in new `useGoalsView()`/`useGoalWorkspace()`
+  hooks (`compose-goal-view.ts`), which cross-reference the already-fetched `useCommitments()`/
+  `useTasks()` data through `computeGoalProgress()` (the pure domain function) — identical
+  computation for Demo and Backend Mode, no new backend query needed (a correction to the
+  Alignment Assessment's original, more pessimistic estimate). `category`/`priority` removed from
+  `GoalCard.tsx`/`GoalWorkspaceScreen.tsx`/`GoalProgressInsight.tsx` (generic `Target` icon instead)
+  and from `GoalInsightSummary` (`packages/domain`). `goalsApi.create()` now requires client-generated
+  `id` + `identityId` from `useSession()`, mirroring `useCreateHabit()`'s correct pattern (not
+  Commitment's broken one, Item 40). Milestones tab stays wired to `demoGoalsRepository` only —
+  empty in Backend Mode, per `milestone_domain_assessment.md`'s conclusion (no real sub-entity
+  designed yet, not a bug).
+  **Real finding during implementation, not caught by the original Alignment Assessment:**
+  `useDashboardContext.ts`'s "Priority of the Day" hero used `goal.priority` for real ranking logic
+  (a `goalBonus` scoring weight), not just presentation — the Assessment's "priority is presentation
+  only" claim was incomplete (missed Dashboard, only checked Goals Workspace). Resolved without
+  reopening the `Goal` aggregate: removed the `goalBonus` weight entirely (documented in code as a
+  conscious decision), ranking now uses only `task.priority` + `activeCommitmentBonus`. `priority`
+  still not added to `GoalView` — a functional consumer doesn't make a field a domain concept unless
+  it participates in the aggregate's invariants, which it doesn't. Assessment doc corrected in place.
+  Verified: `apps/mobile` `tsc --noEmit` clean, 79/79 relevant jest tests passing (15 unrelated
+  pre-existing failures confirmed via `git stash` — same 15/15 failing at HEAD before this work,
+  `__DEV__` jest-environment issue, nothing to do with Goal). `apps/backend` unaffected: `tsc`/95
+  tests still clean after rebuilding `packages/domain`.
+  **Remaining:** the Milestone product/domain decision (per `milestone_domain_assessment.md`) and
+  Fase 5 (Golden Path + closure).
+- **Status update (2026-07-17, Fase 4 — paused before implementation):** the pre-implementation
+  integration review found the mobile UI's `Goal` model and the backend's `GoalView` are not two
+  shapes of the same DTO — they're different models. `GoalWorkspaceScreen.tsx`/`GoalCard.tsx`/
+  `useGoalFocus` depend on `category`, `priority`, `progress`, `milestones[]`, `targetDate`; none of
+  these exist on `GoalView`. Rather than patch this with placeholder values or blindly extend
+  `GoalView`, opened `docs/03-architecture/goal_view_alignment_assessment.md` — a field-by-field
+  analysis answering "does this belong to the `Goal` aggregate?" using existing code as evidence
+  (not opinion). Findings: `category`/`priority` are pure presentation, never part of any domain
+  decision (not in ADR-019, not in the aggregate); `progress`/`targetDate` are explicitly derived by
+  design — `compute-goal-progress.ts`'s own pre-existing comment says progress should be fed by "a
+  real backend query later," never stored — same confirmed pattern for `targetDate` via
+  `demoGoalsRepository.deriveTargetDate()`; `milestones[]`/`toggleMilestone` is the one real gap —
+  `milestone.model.ts` documents Milestone as intentionally unmodeled, and this needs an explicit
+  product/domain decision (does Milestone become a real sub-entity with its own commands?) before
+  that part of the screen can migrate. Most of Fase 4 (`title`/`description`/`state`/`completedAt`/
+  `commitmentIds`/`habitIds`) is unblocked by this finding — only the Milestone question blocks a
+  full `GoalWorkspaceScreen.tsx` migration, isolable from the rest.
+- **Related, found in the same review, not a model-alignment issue:** `TECH_DEBT.md` Item 40 —
+  `commitmentsApi.create()` never sends `id`/`identityId` in its request body, so real-mode
+  Commitment registration would 400 today. Not Goal's bug, but ruled out as the pattern to mirror
+  for Goal's real `create` — `useCreateHabit()`'s pattern (client-generated `id` +
+  `identityId` from `useSession()`, both in the body) is correct and is the one to follow.
 - **Status update (2026-07-17, Fase 3):** `InMemoryEventStore` connected — Goal is its first real
   consumer (previously registered in DI but never invoked anywhere). Write side: every command
   handler (Register/Rename/Complete/Archive/LinkCommitment/LinkHabit) now calls
@@ -1874,6 +1925,40 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ---
 
+## Active Technical Debt Item 40: `commitmentsApi.create()` never sends `id`/`identityId` — real-mode Commitment registration would 400
+
+- **Description:** Found during the Goal Backend Fase 4 integration review (2026-07-17), while
+  deciding what pattern to mirror for Goal's real-mode `create`. `RegisterCommitmentDto`/
+  `registerSchema` (`apps/backend/src/commitment/api/commitments.controller.ts`) requires `id` and
+  `identityId` as UUIDs **in the request body**. `commitmentsApi.create()`
+  (`apps/mobile/src/features/commitments/api/commitments.api.ts`) only sends `title`,
+  `description`, `targetDate`, `recurrencePattern`, `priority`, `goalId` — no `id`, no
+  `identityId`. `identityId` is sent, but only as the `x-identity-id` HTTP header, which the
+  backend's `RequestContextMiddleware` reads purely for observability (`correlationId`/pino
+  logging context) — it is never injected into the DTO that `registerSchema` validates. The result:
+  calling `commitmentsApi.create()` with Demo Mode OFF would fail with a 400 "Validation failed"
+  (missing `id`/`identityId`) every time.
+- **Why it's gone unnoticed:** Demo Mode has apparently never been toggled off against a running
+  backend in this environment, so the real code path has never actually been exercised end-to-end.
+- **Contrast — Habit already solves this correctly:** `useCreateHabit()`
+  (`apps/mobile/src/features/habits/hooks/useHabits.ts`) generates `id` client-side
+  (`crypto.randomUUID()`, with a fallback) and pulls `identityId` from `useSession()`, assembling
+  both into the payload it sends to `habitsApi.create()` — the header remains request-context-only,
+  matching what the backend middleware actually does with it. This is the pattern to follow, not
+  Commitment's.
+- **Impact:** High in principle (real-mode Commitment creation is broken), but currently invisible/
+  zero in practice since nothing exercises it. Would become a real production bug the moment Demo
+  Mode is disabled without this fix.
+- **Priority:** Should be fixed before or alongside any work that assumes Commitment's `create` flow
+  as a reference pattern (explicitly not used as the template for Goal's Fase 4 `create`, in favor
+  of Habit's pattern instead).
+- **Recommended Resolution:** Mirror `useCreateHabit()` — generate `id` client-side and read
+  `identityId` from `useSession()` in `useCreateCommitment()`, add both to the payload
+  `commitmentsApi.create()` sends in the body, keep the `x-identity-id` header as request context
+  only (unchanged).
+
+---
+
 ## Active Technical Debt Item 1: Jest Hybrid Module Warnings (TS151002)
 
 - **Description:** Testing execution in `@commitment/domain` displays warnings: `ts-jest[config] (WARN) message TS151002: Using hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true".`
@@ -1894,6 +1979,34 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ## 📜 Change History
 
+- **v1.54.0 (2026-07-18):** **Item 10 — Fase 4 implemented (Milestones excluded).**
+  `goals.api.ts` rewritten as a symmetric Demo/Backend adapter; `progress`/`targetDate` composed via
+  `computeGoalProgress()` in new `useGoalsView()`/`useGoalWorkspace()` hooks, cross-referencing
+  already-fetched Commitment/Task data — no new backend query needed (corrects the Alignment
+  Assessment's original estimate). `category`/`priority` removed from the UI and from
+  `GoalInsightSummary`. Real finding during implementation: Dashboard's "Priority of the Day" used
+  `goal.priority` for real ranking (not just presentation, as the Assessment first concluded) —
+  resolved by removing that scoring weight rather than reopening the `Goal` aggregate; Assessment
+  doc corrected. Milestones tab stays demo-only per `milestone_domain_assessment.md` (new doc,
+  concludes Milestone is neither a finished subentity nor a derived projection — an unfinished
+  concept, no backend work justified yet). `apps/mobile` `tsc`/79 relevant jest tests clean (15
+  unrelated pre-existing failures confirmed via git stash). Remaining: Milestone product decision,
+  Fase 5 (Golden Path + closure).
+- **v1.53.0 (2026-07-17):** **Item 10 — Fase 4 paused before implementation, pending model
+  alignment.** Integration review found the mobile Goal UI and the real `GoalView` are different
+  models, not variants of one DTO (`category`/`priority`/`progress`/`milestones[]`/`targetDate` used
+  by the UI don't exist on `GoalView`). Opened
+  `docs/03-architecture/goal_view_alignment_assessment.md`, a field-by-field analysis resolving 4 of
+  5: `category`/`priority` are pure presentation (never a domain decision); `progress`/`targetDate`
+  are explicitly derived by pre-existing design (`compute-goal-progress.ts`'s own comment already
+  said so). Only `milestones[]`/`toggleMilestone` remains an open product/domain question — isolable,
+  doesn't block the rest of Fase 4.
+- **v1.52.0 (2026-07-17):** **Item 40 opened — `commitmentsApi.create()` missing `id`/
+  `identityId` in body.** Found during the Goal Backend Fase 4 integration review, while deciding
+  which mobile pattern to mirror for Goal's real-mode `create`. Real-mode Commitment registration
+  would 400 today; invisible only because Demo Mode has apparently never been toggled off against a
+  live backend. Habit's `useCreateHabit()` already solves this correctly — registered as the
+  pattern to follow instead.
 - **v1.51.0 (2026-07-17):** **Item 10 — Fase 3 (Event Store + historial) implemented and
   verified.** `InMemoryEventStore` connected — Goal is its first real consumer ever (previously
   registered in DI, never invoked). Write: every command handler adds

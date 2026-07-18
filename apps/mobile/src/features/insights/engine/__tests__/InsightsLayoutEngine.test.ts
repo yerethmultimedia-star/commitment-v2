@@ -9,8 +9,6 @@ import { InsightsContext, GoalInsightSummary } from '@commitment/domain';
 function goal(overrides: Partial<GoalInsightSummary> & { goalId: string }): GoalInsightSummary {
   return {
     title: 'Test Goal',
-    category: 'personal',
-    priority: 'medium',
     state: 'Active',
     progress: 0.5,
     activeCommitments: 1,

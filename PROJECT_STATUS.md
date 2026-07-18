@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.54.0
+Version: 1.56.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,8 +222,9 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 3 implemented
-   (2026-07-17).** Resumed as the strategic initiative after VS-037 closed, following the same
+8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 4 implemented,
+   Milestones excluded pending a product decision (2026-07-18).** Resumed as the strategic
+   initiative after VS-037 closed, following the same
    Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
    deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
 goal_backend_current_assessment.md` (Paso 1), `docs/03-architecture/
@@ -275,6 +276,44 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
      Event Store's own storage. Plan doc corrected in place. Verified: `tsc --noEmit` clean, 95/95
      backend jest tests (18 new), 3 new e2e tests, no regressions. Remaining: mobile integration
      (Fase 4), Golden Path + closure (Fase 5).
+   - **Fase 4 status (2026-07-17): paused before implementation.** The pre-implementation
+     integration review (answering: what mobile calls exist, which point to demo, what's the Demo/
+     Backend transition strategy) surfaced that the mobile Goal UI and the real `GoalView` are not
+     two shapes of one DTO — they're different models. `GoalWorkspaceScreen.tsx`/`GoalCard.tsx`/
+     `useGoalFocus` depend on `category`/`priority`/`progress`/`milestones[]`/`targetDate`, none of
+     which exist on `GoalView`. Rather than patch this with placeholder values or extend `GoalView`
+     reflexively, opened `docs/03-architecture/goal_view_alignment_assessment.md` — resolved 4 of 5
+     using evidence already in the codebase: `category`/`priority` are pure presentation, never a
+     domain decision; `progress`/`targetDate` are explicitly derived by pre-existing design (
+     `compute-goal-progress.ts`'s own comment already said progress should come from "a real backend
+     query later," never be stored — same pattern independently confirmed for `targetDate`).
+     `milestones[]`/`toggleMilestone` remains the one open product/domain question (does Milestone
+     become a real sub-entity?) — isolable, doesn't block the rest of Fase 4. Also found, same
+     review, unrelated to model alignment: `TECH_DEBT.md` Item 40 —
+     `commitmentsApi.create()` never sends `id`/`identityId` in its body (real-mode Commitment
+     registration would 400 today); ruled out as Goal's `create` template in favor of
+     `useCreateHabit()`'s correct pattern.
+   - **Fase 4 status (2026-07-18): implemented, Milestones excluded.** `goals.api.ts` rewritten as
+     a symmetric Demo/Backend adapter — both branches return the same `GoalSummary` shape.
+     `progress`/`targetDate` composed one layer up in new `useGoalsView()`/`useGoalWorkspace()`
+     hooks, cross-referencing already-fetched Commitment/Task data through `computeGoalProgress()` —
+     no new backend query needed, correcting the Alignment Assessment's original, more pessimistic
+     estimate. `category`/`priority` removed from `GoalCard`/`GoalWorkspaceScreen`/
+     `GoalProgressInsight` and from `GoalInsightSummary` (`packages/domain`).
+     **Real finding, not caught by the original Assessment:** Dashboard's "Priority of the Day"
+     hero used `goal.priority` for genuine ranking logic (a scoring bonus), not just presentation.
+     Resolved without reopening the `Goal` aggregate — removed that scoring weight, documented as a
+     conscious decision in code; a functional consumer doesn't make a field a domain concept unless
+     it affects the aggregate's invariants. Assessment doc corrected in place. Opened
+     `docs/03-architecture/milestone_domain_assessment.md`: evaluated whether Milestone is a real
+     subentity, a derived projection, or an unfinished concept — concluded unfinished (the Milestone
+     UI itself only supports toggling, no create/delete, and shares a screen with 3 other
+     permanently-empty placeholder sections) — no backend work justified without a product decision
+     first. Milestones tab stays wired to the demo repository only, empty in Backend Mode.
+     Verified: `apps/mobile` `tsc --noEmit` clean, 79/79 relevant jest tests passing (15 unrelated
+     pre-existing failures confirmed via `git stash` — same 15/15 failing at HEAD). `apps/backend`
+     unaffected after rebuilding `packages/domain`. Remaining: Milestone product decision, Fase 5
+     (Golden Path + closure).
      Full detail: `TECH_DEBT.md` Item 10.
 9. **Candidate, not yet numbered — Backend Infrastructure Simplification.** Surfaced 2026-07-17
    during the Goal Backend investigation: a single backend command costs ~7 files (command,
@@ -318,6 +357,25 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.56.0 (2026-07-18):** **Goal Backend Fase 4 implemented, Milestones excluded.**
+  `goals.api.ts` rewritten as a symmetric Demo/Backend adapter; `progress`/`targetDate` composed via
+  `computeGoalProgress()` in new `useGoalsView()`/`useGoalWorkspace()` hooks, reusing already-fetched
+  Commitment/Task data (no new backend query needed). `category`/`priority` removed from the UI and
+  from `GoalInsightSummary`. Found and resolved a real gap the original Alignment Assessment missed:
+  Dashboard's "Priority of the Day" used `goal.priority` for actual ranking, not just presentation —
+  fixed by removing that scoring weight rather than reopening the `Goal` aggregate. Opened
+  `docs/03-architecture/milestone_domain_assessment.md`: Milestone is neither a finished subentity
+  nor a derived projection, but an unfinished concept — stays demo-only pending a product decision.
+  `apps/mobile` clean (`tsc`, 79/79 relevant tests). Full detail: `TECH_DEBT.md` Item 10.
+- **v1.55.0 (2026-07-17):** **Goal Backend Fase 4 paused before implementation — model alignment
+  gap found.** Pre-implementation integration review found the mobile Goal UI and the real
+  `GoalView` are different models, not variants of one DTO. Opened
+  `docs/03-architecture/goal_view_alignment_assessment.md`: `category`/`priority` are pure
+  presentation (never a domain decision); `progress`/`targetDate` are explicitly derived by design
+  already documented in `compute-goal-progress.ts`/`demoGoalsRepository`; `milestones[]`/
+  `toggleMilestone` is the one real open question, isolable from the rest. Also opened `TECH_DEBT.md`
+  Item 40 for an unrelated pre-existing bug found in the same review:
+  `commitmentsApi.create()` never sends `id`/`identityId` in its body.
 - **v1.54.0 (2026-07-17):** **Goal Backend Fase 3 (Event Store + historial) implemented and
   verified.** `InMemoryEventStore` connected — Goal is its first real consumer ever. Write side:
   every command handler adds `eventStore.saveEvents()` as an additive step; read side:

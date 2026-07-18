@@ -28,11 +28,18 @@ import { useTranslation } from 'react-i18next';
  * where it comes from, so a genuinely urgent independent task can outrank a
  * low-priority commitment task. Kept as one auditable constant rather than
  * scattered magic numbers, per VS-032 Fase 2 design doc §2.
+ *
+ * goalBonus removed (2026-07-18, Goal Backend Fase 4): it scaled by
+ * Goal.priority, a field that turned out to be presentation-only, never
+ * part of the canonical Goal domain model (see
+ * goal_view_alignment_assessment.md) — the Goal aggregate has no priority.
+ * Ranking now ignores Goal-specific bonus until product defines Goal
+ * priority as an actual domain concept; that would be a domain evolution
+ * decided separately, not part of this integration.
  */
 export const PRIORITY_TASK_SCORE_WEIGHTS = {
   priority: { high: 30, medium: 15, low: 0 } as Record<'high' | 'medium' | 'low', number>,
   activeCommitmentBonus: 10,
-  goalBonus: { high: 5, medium: 2, low: 0 } as Record<'high' | 'medium' | 'low', number>,
 };
 
 interface PriorityTaskCandidate {
@@ -55,7 +62,7 @@ function computePriorityTask(
   todayTasks: PriorityTaskCandidate[],
   allTasks: { commitmentId?: string | null; status: string }[],
   commitments: { id: string; title: string; status: string }[],
-  goals: { id: string; title: string; state: string; priority: 'high' | 'medium' | 'low'; commitmentIds: readonly string[] }[],
+  goals: { id: string; title: string; state: string; commitmentIds: readonly string[] }[],
   personalFallbackLabel: string,
 ): DashboardPriorityTask | null {
   if (todayTasks.length === 0) return null;
@@ -69,8 +76,8 @@ function computePriorityTask(
 
   // Only resolves a Commitment's Goal when the Commitment itself is active —
   // a task on a cancelled/paused commitment shouldn't inherit its (possibly
-  // still-active) parent Goal's priority boost or context label, since the
-  // task's own path to that Goal is no longer live.
+  // still-active) parent Goal's context label, since the task's own path to
+  // that Goal is no longer live.
   const resolveGoal = (task: PriorityTaskCandidate) => {
     if (task.goalId) return goalsById.get(task.goalId) ?? null;
     if (task.commitmentId) {
@@ -85,8 +92,9 @@ function computePriorityTask(
     let s = PRIORITY_TASK_SCORE_WEIGHTS.priority[task.priority];
     const commitment = task.commitmentId ? commitmentsById.get(task.commitmentId) : undefined;
     if (commitment && commitment.status === 'active') s += PRIORITY_TASK_SCORE_WEIGHTS.activeCommitmentBonus;
-    const goal = resolveGoal(task);
-    if (goal && goal.state === 'Active') s += PRIORITY_TASK_SCORE_WEIGHTS.goalBonus[goal.priority];
+    // Goal priority is not part of the canonical Goal domain model. Until
+    // product defines Goal priority as a domain concept, ranking ignores
+    // any Goal-specific bonus (see PRIORITY_TASK_SCORE_WEIGHTS comment).
     return s;
   };
 

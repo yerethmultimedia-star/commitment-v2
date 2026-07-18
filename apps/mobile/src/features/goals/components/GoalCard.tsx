@@ -1,22 +1,20 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
+import { Target } from '@tamagui/lucide-icons';
 import { Card, Title, Body, ProgressMetric } from '@commitment/design-system';
-import { CATEGORY_ICON, PRIORITY_COLOR, GoalCategory, GoalPriority } from '../utils/goal-descriptors';
+import { GoalViewModel } from '../models/goal.model';
 
 export interface GoalCardProps {
-  id: string;
-  title: string;
-  category: GoalCategory;
-  priority: GoalPriority;
-  progress: number;
+  goal: GoalViewModel;
 }
 
-export function GoalCard({ id, title, category, priority, progress }: GoalCardProps) {
+// Category/priority icons and colors were removed (2026-07-17) — presentation-only,
+// never a real domain concept (see goal_view_alignment_assessment.md). Target is a
+// fixed, generic Goal icon now, not derived from any per-Goal field.
+export function GoalCard({ goal }: GoalCardProps) {
   const router = useRouter();
-  const { t } = useTranslation('common');
-  const Icon = CATEGORY_ICON[category];
+  const { id, title, progress } = goal;
 
   return (
     <Card
@@ -29,7 +27,7 @@ export function GoalCard({ id, title, category, priority, progress }: GoalCardPr
       <YStack gap="$3">
         <XStack gap="$3" alignItems="center">
           <Circle size={40} backgroundColor="$focus" justifyContent="center" alignItems="center">
-            <Icon color="$accent" size={20} />
+            <Target color="$accent" size={20} />
           </Circle>
           <YStack flex={1}>
             {/* minHeight reserves 2 lines' worth of space so every card is
@@ -40,17 +38,6 @@ export function GoalCard({ id, title, category, priority, progress }: GoalCardPr
             <YStack minHeight={42} justifyContent="center">
               <Title fontSize="$subtitle" lineHeight="$subtitle" numberOfLines={2} ellipsizeMode="tail">{title}</Title>
             </YStack>
-            <XStack gap="$2" alignItems="center">
-              <Body tone="secondary" fontSize="$2">{t(`goals.categories.${category}`)}</Body>
-              <Circle size={4} backgroundColor="$divider" />
-              {/* A colored dot carries the priority signal instead of
-                  colored text — danger/warning/success text-on-white all
-                  measure under 3:1 contrast (see CommitmentStatusBadge). */}
-              <Circle size={6} backgroundColor={PRIORITY_COLOR[priority] as any} />
-              <Body tone="secondary" fontSize="$2" fontWeight="600">
-                {t(`goals.priority.${priority}`)}
-              </Body>
-            </XStack>
           </YStack>
           <Body fontWeight="700" color="$accent">{Math.round(progress * 100)}%</Body>
         </XStack>
