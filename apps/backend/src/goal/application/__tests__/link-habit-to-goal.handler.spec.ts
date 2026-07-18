@@ -11,10 +11,12 @@ import { CompleteGoalCommandHandlerCore } from '../commands/complete-goal.handle
 import { CompleteGoalCommand } from '../commands/complete-goal.command';
 import { DomainEvent } from '@commitment/domain';
 import { InMemoryGoalRepository } from '../../infrastructure/in-memory-goal.repository';
+import { InMemoryEventStore } from '../../../infrastructure/event-store/in-memory-event-store';
 import { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
 
 describe('LinkHabitToGoalCommandHandlerCore', () => {
   let repository: InMemoryGoalRepository;
+  let eventStore: InMemoryEventStore;
   let dispatcher: DomainEventDispatcher;
   let dispatchedEvents: DomainEvent[];
   let registerHandler: RegisterGoalCommandHandlerCore;
@@ -28,6 +30,7 @@ describe('LinkHabitToGoalCommandHandlerCore', () => {
 
   beforeEach(async () => {
     repository = new InMemoryGoalRepository();
+    eventStore = new InMemoryEventStore();
     dispatchedEvents = [];
     dispatcher = {
       dispatch: (events) => {
@@ -39,12 +42,22 @@ describe('LinkHabitToGoalCommandHandlerCore', () => {
     registerHandler = new RegisterGoalCommandHandlerCore(
       repository,
       dispatcher,
+      eventStore,
     );
-    linkHandler = new LinkHabitToGoalCommandHandlerCore(repository, dispatcher);
-    archiveHandler = new ArchiveGoalCommandHandlerCore(repository, dispatcher);
+    linkHandler = new LinkHabitToGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
+    archiveHandler = new ArchiveGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
     completeHandler = new CompleteGoalCommandHandlerCore(
       repository,
       dispatcher,
+      eventStore,
     );
 
     await registerHandler.handle(

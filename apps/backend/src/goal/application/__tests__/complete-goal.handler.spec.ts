@@ -9,10 +9,12 @@ import { RegisterGoalCommandHandlerCore } from '../commands/register-goal.handle
 import { RegisterGoalCommand } from '../commands/register-goal.command';
 import { DomainEvent } from '@commitment/domain';
 import { InMemoryGoalRepository } from '../../infrastructure/in-memory-goal.repository';
+import { InMemoryEventStore } from '../../../infrastructure/event-store/in-memory-event-store';
 import { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
 
 describe('CompleteGoalCommandHandlerCore', () => {
   let repository: InMemoryGoalRepository;
+  let eventStore: InMemoryEventStore;
   let dispatcher: DomainEventDispatcher;
   let dispatchedEvents: DomainEvent[];
   let registerHandler: RegisterGoalCommandHandlerCore;
@@ -24,6 +26,7 @@ describe('CompleteGoalCommandHandlerCore', () => {
 
   beforeEach(async () => {
     repository = new InMemoryGoalRepository();
+    eventStore = new InMemoryEventStore();
     dispatchedEvents = [];
     dispatcher = {
       dispatch: (events) => {
@@ -35,12 +38,18 @@ describe('CompleteGoalCommandHandlerCore', () => {
     registerHandler = new RegisterGoalCommandHandlerCore(
       repository,
       dispatcher,
+      eventStore,
     );
     completeHandler = new CompleteGoalCommandHandlerCore(
       repository,
       dispatcher,
+      eventStore,
     );
-    archiveHandler = new ArchiveGoalCommandHandlerCore(repository, dispatcher);
+    archiveHandler = new ArchiveGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
 
     await registerHandler.handle(
       new RegisterGoalCommand(id, identityId, 'Run a half marathon'),
@@ -56,6 +65,13 @@ describe('CompleteGoalCommandHandlerCore', () => {
     expect(result.version).toBe(2);
     expect(dispatchedEvents).toHaveLength(1);
     expect(dispatchedEvents[0]?.name).toBe('goal.completed');
+
+    // registered (v1) + completed (v2) — both durably logged
+    const history = await eventStore.getEvents(id);
+    expect(history.map((e) => e.name)).toEqual([
+      'goal.registered',
+      'goal.completed',
+    ]);
   });
 
   it('should complete idempotently when already completed', async () => {

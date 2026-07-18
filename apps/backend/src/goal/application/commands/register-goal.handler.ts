@@ -4,6 +4,7 @@ import {
   GoalDescription,
   Goal,
   IdentityId,
+  type EventStore,
 } from '@commitment/domain';
 import { RegisterGoalCommand } from './register-goal.command';
 import { RegisterGoalResult } from './register-goal.result';
@@ -16,6 +17,7 @@ export class RegisterGoalCommandHandlerCore {
   constructor(
     private readonly goalRepository: VersionedGoalRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly eventStore: EventStore,
     @InjectMetric('goals_created_total')
     private readonly goalsCounter?: Counter<string>,
   ) {}
@@ -45,8 +47,17 @@ export class RegisterGoalCommandHandlerCore {
     // 4. Save to Repository — receive actual version
     const version = await this.goalRepository.save(goal);
 
-    // 5. Dispatch Primary Events & Clear Event Buffer
+    // 5. Durable event log (ADR-021) — additive, does not affect step 4's source of truth
     const events = goal.getUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventStore.saveEvents(
+        goal.id.value,
+        version - events.length,
+        events,
+      );
+    }
+
+    // 6. Dispatch Primary Events & Clear Event Buffer
     await this.eventDispatcher.dispatch(events);
     goal.clearUncommittedEvents();
 

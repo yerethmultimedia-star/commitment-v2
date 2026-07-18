@@ -151,11 +151,36 @@ correctamente persistido pero ese evento específico no queda en la bitácora, d
 parcial para ese agregado. La recuperación o reintento del historial ante esa falla es una
 consideración operativa independiente, no resuelta por este documento.
 
-**`GoalHistoryProjector`** (nombre propuesto, análogo a `ActivityLoggerHandler`): escucha los
-eventos de Goal, y en vez de escribir directamente a un `ActivityRepository` específico de Goal,
-consulta al Event Store ya poblado por el paso 5 — la única pieza genuinamente nueva de
-infraestructura, reutilizable después por cualquier otro agregado que decida generalizar su
-propio historial (explícitamente no forzado por ADR-021).
+**Corrección (2026-07-17, revisión previa a Fase 3):** la formulación original de esta sección
+proponía un `GoalHistoryProjector` análogo a `ActivityLoggerHandler`, mezclando dos patrones
+distintos. En ADR-014, `ActivityLoggerHandler` existe porque el modelo de lectura **no es el
+evento** — transforma `CommitmentRegisteredEvent` en un `ActivityRecord` propio y lo persiste en un
+`ActivityRepository` append-only separado; ahí sí hay una proyección auténtica. Con el Event Store
+de ADR-021 no hay nada que proyectar: `eventStore.saveEvents()` (paso 5) ya es la escritura durable
+completa — el historial ES la colección de eventos. Un componente que reciba un evento vía
+`@EventsHandler` y luego vuelva a leerlo consultando `eventStore.getEvents()` es redundante (ya lo
+tiene como parámetro) y no cumple ninguna función.
+
+**Diseño correcto:**
+
+- **Escritura:** ninguna pieza adicional. La secuencia ya descrita arriba (pasos 1–6) es completa;
+  el paso 5 (`eventStore.saveEvents()`) es la única escritura de historial, condicionado a que haya
+  eventos nuevos (`events.length > 0` — en una operación idempotente sin eventos, no hay nada que
+  persistir en el Event Store, igual que `eventDispatcher.dispatch([])` no dispara nada).
+- **Lectura:** una única pieza nueva — `GetGoalHistoryQuery` / `GetGoalHistoryHandler` (análogo a
+  `GetCommitmentHistoryQuery`/`GetCommitmentHistoryHandler`, pero leyendo de
+  `eventStore.getEvents(streamId)` en vez de un `ActivityRepository` propio). No hace falta
+  `ActivityFactory` ni `ActivityRepository`: construirlos encima del Event Store duplicaría
+  almacenamiento sin aportar valor, dado que ADR-021 no busca un modelo de lectura optimizado para
+  consultas distintas (timeline global, búsqueda por usuario, etc.) — solo persistir eventos.
+- El handler mapea los `DomainEvent[]` crudos a un DTO de respuesta estable (no expone las clases
+  de dominio directamente por la API) — p. ej. `GoalHistoryEntryDto { type, timestamp, version,
+summary, metadata }`. Ese mapeo es la adaptación habitual dominio↔contrato de API, no una
+  proyección persistente ni infraestructura paralela.
+
+Consecuencia observada: ADR-014 resolvía "quiero un historial"; ADR-021 resuelve "quiero persistir
+eventos" — y el historial aparece como derivado directo de esa persistencia, sin necesidad de
+construir un historial aparte.
 
 ---
 
@@ -226,9 +251,10 @@ en `Goal`? — no decidido aquí). Registrado como brecha conocida, no bloqueant
 3. **Fase 3 — Comandos de relación.** `LinkCommitment`/`LinkHabit` — dependen de que Commitment/
    Habit ya puedan referenciar un `goalId` real (ya lo hacen desde ADR-019/Fase 2A del lado
    Commitment; confirmar el lado Habit antes de esta fase).
-4. **Fase 4 — Event Store + historial.** Conectar `InMemoryEventStore` (sección 4),
-   `GoalHistoryProjector`. Explícitamente después de que el CRUD básico ya esté probado — no
-   bloquea las fases 1-3.
+4. **Fase 4 — Event Store + historial.** Conectar `InMemoryEventStore` en el paso 5 de cada handler
+   (sección 4, escritura pura, sin projector) y añadir `GetGoalHistoryQuery`/`GetGoalHistoryHandler`
+   (lectura, mapea a un DTO estable). Explícitamente después de que el CRUD básico ya esté probado —
+   no bloquea las fases 1-3.
 5. **Fase 5 — Integración móvil.** `goals.api.ts` (sección 5), resolver la brecha de
    `toggleMilestone`.
 6. **Fase 6 — Golden Path + cierre.** Nuevo Golden Path (`golden_path_goal_creation.md`, ya

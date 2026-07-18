@@ -2,6 +2,7 @@ import {
   GoalId,
   GoalAlreadyCompletedError,
   GoalAlreadyArchivedError,
+  type EventStore,
 } from '@commitment/domain';
 import { LinkHabitToGoalCommand } from './link-habit-to-goal.command';
 import { LinkHabitToGoalResult } from './link-habit-to-goal.result';
@@ -26,6 +27,7 @@ export class LinkHabitToGoalCommandHandlerCore {
   constructor(
     private readonly goalRepository: VersionedGoalRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly eventStore: EventStore,
   ) {}
 
   public async handle(
@@ -59,8 +61,17 @@ export class LinkHabitToGoalCommandHandlerCore {
     // 3. Persist — version unchanged if the link was already present (Rule #87)
     const version = await this.goalRepository.save(goal);
 
-    // 4. Dispatch events and clear buffer
+    // 4. Durable event log (ADR-021) — additive, does not affect step 3's source of truth
     const events = goal.getUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventStore.saveEvents(
+        goal.id.value,
+        version - events.length,
+        events,
+      );
+    }
+
+    // 5. Dispatch events and clear buffer
     await this.eventDispatcher.dispatch(events);
     goal.clearUncommittedEvents();
 

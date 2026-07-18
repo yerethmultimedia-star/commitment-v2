@@ -34,6 +34,14 @@ interface ProblemDetailsResponse {
   detail: string;
 }
 
+interface HistoryEntryResponse {
+  type: string;
+  timestamp: string;
+  version: number;
+  summary: string;
+  metadata: Record<string, unknown>;
+}
+
 const GOAL_ID = '018f6b5c-42e1-7000-8000-999999999999';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
 const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-222222222222';
@@ -313,5 +321,48 @@ describe('GoalsController (e2e)', () => {
       .post(`/v1/goals/${GOAL_ID}/habits`)
       .send({ habitId: HABIT_ID })
       .expect(409);
+  });
+
+  // ─── History ──────────────────────────────────────────────────────────────
+
+  it('GET /goals/:id/history — should return the ordered event history', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/goals')
+      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .patch(`/v1/goals/${GOAL_ID}`)
+      .send({ title: 'Master DDD' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/complete`)
+      .expect(200);
+
+    const res = await request(app.getHttpServer())
+      .get(`/v1/goals/${GOAL_ID}/history`)
+      .expect(200);
+
+    const body = res.body as HistoryEntryResponse[];
+    expect(body.map((h) => h.type)).toEqual([
+      'goal.registered',
+      'goal.renamed',
+      'goal.completed',
+    ]);
+    expect(body.map((h) => h.version)).toEqual([1, 2, 3]);
+    expect(body[2]?.summary).toBe('Goal completed');
+  });
+
+  it('GET /goals/:id/history — should return an empty array for a goal that was never registered', async () => {
+    const unknownId = '018f6b5c-42e1-7000-8000-000000000000';
+    const res = await request(app.getHttpServer())
+      .get(`/v1/goals/${unknownId}/history`)
+      .expect(200);
+    expect(res.body).toEqual([]);
+  });
+
+  it('GET /goals/:id/history — should return 400 on invalid UUID', async () => {
+    await request(app.getHttpServer())
+      .get('/v1/goals/not-a-uuid/history')
+      .expect(400);
   });
 });

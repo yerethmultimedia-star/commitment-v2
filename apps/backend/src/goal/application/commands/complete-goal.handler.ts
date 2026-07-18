@@ -3,6 +3,7 @@ import {
   GoalState,
   GoalAlreadyArchivedError,
   InvalidGoalStateTransitionError,
+  type EventStore,
 } from '@commitment/domain';
 import { CompleteGoalCommand } from './complete-goal.command';
 import { CompleteGoalResult } from './complete-goal.result';
@@ -27,6 +28,7 @@ export class CompleteGoalCommandHandlerCore {
   constructor(
     private readonly goalRepository: VersionedGoalRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly eventStore: EventStore,
   ) {}
 
   public async handle(
@@ -58,8 +60,17 @@ export class CompleteGoalCommandHandlerCore {
     // 3. Persist — version unchanged if the transition was idempotent (Rule #87)
     const version = await this.goalRepository.save(goal);
 
-    // 4. Dispatch events and clear buffer
+    // 4. Durable event log (ADR-021) — additive, does not affect step 3's source of truth
     const events = goal.getUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventStore.saveEvents(
+        goal.id.value,
+        version - events.length,
+        events,
+      );
+    }
+
+    // 5. Dispatch events and clear buffer
     await this.eventDispatcher.dispatch(events);
     goal.clearUncommittedEvents();
 

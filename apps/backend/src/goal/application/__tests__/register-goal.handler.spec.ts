@@ -2,17 +2,20 @@ import { RegisterGoalCommandHandlerCore } from '../commands/register-goal.handle
 import { GoalId, DomainEvent } from '@commitment/domain';
 import { RegisterGoalCommand } from '../commands/register-goal.command';
 import { InMemoryGoalRepository } from '../../infrastructure/in-memory-goal.repository';
+import { InMemoryEventStore } from '../../../infrastructure/event-store/in-memory-event-store';
 import { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
 import { Counter } from 'prom-client';
 
 describe('RegisterGoalCommandHandlerCore', () => {
   let repository: InMemoryGoalRepository;
+  let eventStore: InMemoryEventStore;
   let dispatcher: DomainEventDispatcher;
   let handler: RegisterGoalCommandHandlerCore;
   let dispatchedEvents: DomainEvent[];
 
   beforeEach(() => {
     repository = new InMemoryGoalRepository();
+    eventStore = new InMemoryEventStore();
     dispatchedEvents = [];
     dispatcher = {
       dispatch: (events) => {
@@ -28,6 +31,7 @@ describe('RegisterGoalCommandHandlerCore', () => {
     handler = new RegisterGoalCommandHandlerCore(
       repository,
       dispatcher,
+      eventStore,
       mockCounter,
     );
   });
@@ -54,6 +58,10 @@ describe('RegisterGoalCommandHandlerCore', () => {
 
     expect(dispatchedEvents).toHaveLength(1);
     expect(dispatchedEvents[0]?.name).toBe('goal.registered');
+
+    const history = await eventStore.getEvents(id);
+    expect(history).toHaveLength(1);
+    expect(history[0]?.name).toBe('goal.registered');
   });
 
   it('should register idempotently if the same goal id is received twice', async () => {
@@ -76,6 +84,9 @@ describe('RegisterGoalCommandHandlerCore', () => {
 
     const saved = await repository.findById(new GoalId(id));
     expect(saved?.title.value).toBe('First Title'); // Remains unmodified
+
+    const history = await eventStore.getEvents(id);
+    expect(history).toHaveLength(1); // no double-write on the idempotent call
   });
 
   it('should propagate domain exception errors if title exceeds maximum length', async () => {

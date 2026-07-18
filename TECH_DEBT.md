@@ -1,6 +1,6 @@
 # Technical Debt Register
 
-Version: 1.50.0
+Version: 1.51.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -180,8 +180,27 @@ This document tracks identified technical debt, compilation warnings, and archit
 
 ---
 
-## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 2 Implemented
+## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 3 Implemented
 
+- **Status update (2026-07-17, Fase 3):** `InMemoryEventStore` connected — Goal is its first real
+  consumer (previously registered in DI but never invoked anywhere). Write side: every command
+  handler (Register/Rename/Complete/Archive/LinkCommitment/LinkHabit) now calls
+  `eventStore.saveEvents(goal.id.value, version - events.length, events)` as an additive step
+  between `repository.save()` (source of truth, unchanged) and `eventDispatcher.dispatch()`, skipped
+  entirely when a command is idempotent (no new events). Read side: `GetGoalHistoryQuery`/
+  `GetGoalHistoryHandler` reads `eventStore.getEvents(streamId)` and maps raw `DomainEvent[]` inline
+  to a `GoalHistoryEntryDto[]` (`type`, `timestamp`, `version`, `summary`, `metadata`) — exposed at
+  `GET /goals/:id/history`.
+  **Design correction made before implementing:** the original plan proposed a `GoalHistoryProjector`
+  analogous to ADR-014's `ActivityLoggerHandler`. That mixed two different patterns — ADR-014 needs
+  a projector because its read model (`ActivityRecord`) is NOT the event; ADR-021's Event Store IS
+  the history, so there is nothing to project. Corrected design: no write-side component at all
+  beyond `eventStore.saveEvents()`, and no `ActivityFactory`/`ActivityRepository` — building those
+  on top of the Event Store would duplicate storage without adding value, since ADR-021 doesn't need
+  a differently-optimized read model. `docs/03-architecture/goal_backend_implementation_plan.md`
+  section 4 corrected to match. 4 new unit test suites (18 unit tests total on the history/write
+  path) + 3 new e2e tests (ordered history, empty-for-unknown-goal, invalid UUID). Full
+  `apps/backend` suite: 95/95 unit tests, 20 suites, no regressions. `tsc --noEmit` clean.
 - **Status update (2026-07-17, Fase 2):** Goal's aggregate relationships are now exercised through
   the full CQRS stack. `LinkCommitment`/`LinkHabit` commands added (`link-commitment-to-goal.*`,
   `link-habit-to-goal.*`, mirroring the Fase 1 command shape exactly), `GoalProjectors` extended
@@ -200,10 +219,11 @@ This document tracks identified technical debt, compilation warnings, and archit
   `GoalView` decision) — this entry uses the sequencing actually agreed going forward (Fase 1 done →
   Fase 2 = relationships, done → Fase 3 = Event Store/history → Fase 4 = mobile integration →
   Fase 5 = Golden Path/closure).
-  **Not yet done:** `InMemoryEventStore` connection + history projector, mobile integration
-  (`goals.api.ts` still routes unconditionally to the demo repository), and a Golden Path + formal
-  closure. `toggleMilestone` remains explicitly out of scope (no backend Milestone aggregate exists
-  by design — see `milestone.model.ts`'s own doc comment).
+  **Not yet done as of Fase 2:** `InMemoryEventStore` connection (now done — see Fase 3 entry
+  above), mobile integration (`goals.api.ts` still routes unconditionally to the demo repository),
+  and a Golden Path + formal closure. `toggleMilestone` remains explicitly out of scope (no backend
+  Milestone aggregate exists by design — see `milestone.model.ts`'s own doc comment). **Remaining
+  after Fase 3:** mobile integration (Fase 4) and Golden Path + closure (Fase 5) only.
 - **Fase 1 status (2026-07-17):** "Goal Backend mínimo" implemented and verified.
   `apps/backend/src/goal/` built: Register/Rename/Complete/Archive commands, a single `GoalView`
   read model with projectors for all four events, an in-memory versioned repository (mirroring
@@ -1874,6 +1894,16 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ## 📜 Change History
 
+- **v1.51.0 (2026-07-17):** **Item 10 — Fase 3 (Event Store + historial) implemented and
+  verified.** `InMemoryEventStore` connected — Goal is its first real consumer ever (previously
+  registered in DI, never invoked). Write: every command handler adds
+  `eventStore.saveEvents()` as an additive step, skipped on idempotent no-ops. Read:
+  `GetGoalHistoryQuery`/`Handler` reads `eventStore.getEvents()`, maps inline to
+  `GoalHistoryEntryDto[]`, exposed at `GET /goals/:id/history`. Corrected a design error found
+  during pre-implementation review: dropped the originally-planned `GoalHistoryProjector` (conflated
+  ADR-014's projector pattern, needed because its read model isn't the event, with ADR-021's Event
+  Store, which already IS the history — nothing to project). 18 new unit tests + 3 new e2e tests,
+  full suite 95/95, `tsc --noEmit` clean. Commit checkpoint before this phase: `00915d8`.
 - **v1.50.0 (2026-07-17):** **Item 10 — Fase 2 (Goal aggregate relationships) implemented and
   verified.** `LinkCommitment`/`LinkHabit` commands added on the same pattern as Fase 1, `GoalView`
   projectors extended (no new read model), two explicit REST endpoints

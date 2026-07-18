@@ -52,6 +52,8 @@ import { GetGoalByIdQuery } from '../application/queries/get-goal-by-id.query';
 import { GoalNotFoundQueryError } from '../application/queries/get-goal-by-id.handler';
 import { ListGoalsQuery } from '../application/queries/list-goals.query';
 import { GoalView, PaginatedGoals } from '../application/queries/goal-view.dto';
+import { GetGoalHistoryQuery } from '../application/queries/get-goal-history.query';
+import { GoalHistoryEntryDto } from './dtos/goal-history-entry.dto';
 
 const registerSchema = z.object({
   id: z.string().uuid('Invalid goal id UUID format'),
@@ -101,6 +103,22 @@ export class GoalsController {
       if (error instanceof GoalNotFoundQueryError) {
         throw new NotFoundException(error.message);
       }
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new BadRequestException(message);
+    }
+  }
+
+  @Get(':id/history')
+  async getHistory(@Param('id') id: string): Promise<GoalHistoryEntryDto[]> {
+    const result = uuidSchema.safeParse(id);
+    if (!result.success) {
+      throw new BadRequestException('Invalid UUID format');
+    }
+
+    try {
+      const query = new GetGoalHistoryQuery(id);
+      return await this.queryBus.execute(query);
+    } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       throw new BadRequestException(message);
     }

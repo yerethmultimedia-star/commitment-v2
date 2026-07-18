@@ -3,6 +3,7 @@ import {
   GoalTitle,
   GoalAlreadyCompletedError,
   GoalAlreadyArchivedError,
+  type EventStore,
 } from '@commitment/domain';
 import { RenameGoalCommand } from './rename-goal.command';
 import { RenameGoalResult } from './rename-goal.result';
@@ -28,6 +29,7 @@ export class RenameGoalCommandHandlerCore {
   constructor(
     private readonly goalRepository: VersionedGoalRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly eventStore: EventStore,
   ) {}
 
   public async handle(command: RenameGoalCommand): Promise<RenameGoalResult> {
@@ -58,8 +60,17 @@ export class RenameGoalCommandHandlerCore {
     // 3. Persist — version is returned by repository (unchanged if rename was a no-op, Rule #77/#87)
     const version = await this.goalRepository.save(goal);
 
-    // 4. Dispatch events and clear buffer
+    // 4. Durable event log (ADR-021) — additive, does not affect step 3's source of truth
     const events = goal.getUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventStore.saveEvents(
+        goal.id.value,
+        version - events.length,
+        events,
+      );
+    }
+
+    // 5. Dispatch events and clear buffer
     await this.eventDispatcher.dispatch(events);
     goal.clearUncommittedEvents();
 

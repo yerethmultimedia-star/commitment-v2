@@ -1,4 +1,4 @@
-import { GoalId, GoalState } from '@commitment/domain';
+import { GoalId, GoalState, type EventStore } from '@commitment/domain';
 import { ArchiveGoalCommand } from './archive-goal.command';
 import { ArchiveGoalResult } from './archive-goal.result';
 import type { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
@@ -15,6 +15,7 @@ export class ArchiveGoalCommandHandlerCore {
   constructor(
     private readonly goalRepository: VersionedGoalRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly eventStore: EventStore,
   ) {}
 
   public async handle(command: ArchiveGoalCommand): Promise<ArchiveGoalResult> {
@@ -32,8 +33,17 @@ export class ArchiveGoalCommandHandlerCore {
     // 3. Persist — version unchanged if already Archived (Rule #87)
     const version = await this.goalRepository.save(goal);
 
-    // 4. Dispatch events and clear buffer
+    // 4. Durable event log (ADR-021) — additive, does not affect step 3's source of truth
     const events = goal.getUncommittedEvents();
+    if (events.length > 0) {
+      await this.eventStore.saveEvents(
+        goal.id.value,
+        version - events.length,
+        events,
+      );
+    }
+
+    // 5. Dispatch events and clear buffer
     await this.eventDispatcher.dispatch(events);
     goal.clearUncommittedEvents();
 

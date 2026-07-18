@@ -4,6 +4,7 @@ import { ArchiveGoalCommand } from '../application/commands/archive-goal.command
 import { ArchiveGoalCommandHandlerCore } from '../application/commands/archive-goal.handler';
 import type { VersionedGoalRepository } from '../application/ports/versioned-goal-repository.port';
 import type { DomainEventDispatcher } from '../../commitment/application/ports/domain-event-dispatcher.port';
+import type { EventStore } from '@commitment/domain';
 
 @CommandHandler(ArchiveGoalCommand)
 export class ArchiveGoalNestjsHandler implements ICommandHandler<ArchiveGoalCommand> {
@@ -14,8 +15,14 @@ export class ArchiveGoalNestjsHandler implements ICommandHandler<ArchiveGoalComm
     repository: VersionedGoalRepository,
     @Inject('DomainEventDispatcher')
     dispatcher: DomainEventDispatcher,
+    @Inject('EventStore')
+    eventStore: EventStore,
   ) {
-    this.core = new ArchiveGoalCommandHandlerCore(repository, dispatcher);
+    this.core = new ArchiveGoalCommandHandlerCore(
+      repository,
+      dispatcher,
+      eventStore,
+    );
   }
 
   public execute(command: ArchiveGoalCommand) {

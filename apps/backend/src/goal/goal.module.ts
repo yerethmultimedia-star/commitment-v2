@@ -10,10 +10,12 @@ import { LinkCommitmentToGoalNestjsHandler } from './nestjs/link-commitment-to-g
 import { LinkHabitToGoalNestjsHandler } from './nestjs/link-habit-to-goal.nestjs-handler';
 import { GetGoalByIdNestjsHandler } from './nestjs/get-goal-by-id.nestjs-handler';
 import { ListGoalsNestjsHandler } from './nestjs/list-goals.nestjs-handler';
+import { GetGoalHistoryNestjsHandler } from './nestjs/get-goal-history.nestjs-handler';
 import { InMemoryGoalRepository } from './infrastructure/in-memory-goal.repository';
 import { InMemoryGoalProjectionStore } from './infrastructure/in-memory-goal-projection.store';
 import { InMemoryGoalQueryService } from './infrastructure/in-memory-goal.query-service';
 import { GoalProjectors } from './application/projectors/goal.projectors';
+import { InMemoryEventStore } from '../infrastructure/event-store/in-memory-event-store';
 
 @Module({
   // Reuses CommitmentModule's exported DomainEventDispatcher (task.module.ts precedent)
@@ -29,6 +31,7 @@ import { GoalProjectors } from './application/projectors/goal.projectors';
     LinkHabitToGoalNestjsHandler,
     GetGoalByIdNestjsHandler,
     ListGoalsNestjsHandler,
+    GetGoalHistoryNestjsHandler,
     ...GoalProjectors,
     {
       provide: 'GoalRepository',
@@ -41,6 +44,10 @@ import { GoalProjectors } from './application/projectors/goal.projectors';
     {
       provide: 'GoalQueryService',
       useClass: InMemoryGoalQueryService,
+    },
+    {
+      provide: 'EventStore',
+      useClass: InMemoryEventStore,
     },
   ],
   exports: ['GoalRepository'],

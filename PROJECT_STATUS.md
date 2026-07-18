@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.53.0
+Version: 1.54.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,7 +222,7 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 2 implemented
+8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 3 implemented
    (2026-07-17).** Resumed as the strategic initiative after VS-037 closed, following the same
    Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
    deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
@@ -259,7 +259,22 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
      regressions. **Renumbering note:** the original plan called this "Fase 3" (its "Fase 2," query
      services, was absorbed into Fase 1's single-`GoalView` decision) — from here on "Fase 2" means
      this relationships work, and remaining phases shift down: Fase 3 = Event Store/history, Fase 4
-     = mobile integration, Fase 5 = Golden Path + closure. None of those started.
+     = mobile integration, Fase 5 = Golden Path + closure. Committed as a checkpoint: `00915d8`.
+   - **Fase 3 status (2026-07-17):** implemented and verified. `InMemoryEventStore` connected —
+     Goal is its first real consumer in the whole codebase (it existed, registered in DI, since
+     before ADR-021 but was never once invoked). Every command handler now calls
+     `eventStore.saveEvents()` as an additive step between persisting the aggregate (unchanged
+     source of truth) and dispatching events, skipped when a command is idempotent.
+     `GetGoalHistoryQuery`/`Handler` reads `eventStore.getEvents()` and maps directly to a
+     `GoalHistoryEntryDto[]`, exposed at `GET /goals/:id/history`. **A design review before writing
+     code caught a real error in the plan:** it proposed a `GoalHistoryProjector` modeled on
+     ADR-014's `ActivityLoggerHandler` — but that projector exists in ADR-014 because the read model
+     (`ActivityRecord`) is not the event itself; with the Event Store, the history already IS the
+     event collection, so nothing needs to be projected. Corrected design: no write-side component
+     beyond `eventStore.saveEvents()`, no `ActivityFactory`/`ActivityRepository` duplicating the
+     Event Store's own storage. Plan doc corrected in place. Verified: `tsc --noEmit` clean, 95/95
+     backend jest tests (18 new), 3 new e2e tests, no regressions. Remaining: mobile integration
+     (Fase 4), Golden Path + closure (Fase 5).
      Full detail: `TECH_DEBT.md` Item 10.
 9. **Candidate, not yet numbered — Backend Infrastructure Simplification.** Surfaced 2026-07-17
    during the Goal Backend investigation: a single backend command costs ~7 files (command,
@@ -303,6 +318,15 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.54.0 (2026-07-17):** **Goal Backend Fase 3 (Event Store + historial) implemented and
+  verified.** `InMemoryEventStore` connected — Goal is its first real consumer ever. Write side:
+  every command handler adds `eventStore.saveEvents()` as an additive step; read side:
+  `GetGoalHistoryQuery`/`Handler` reads `eventStore.getEvents()`, mapped to `GoalHistoryEntryDto[]`
+  at `GET /goals/:id/history`. Pre-implementation design review caught and corrected a real plan
+  error: dropped a proposed `GoalHistoryProjector` that conflated ADR-014's projector pattern
+  (needed because its read model isn't the event) with ADR-021's Event Store (already IS the
+  history — nothing to project). 95/95 backend jest tests (18 new), 3 new e2e tests, `tsc --noEmit`
+  clean, no regressions. Full detail: `TECH_DEBT.md` Item 10.
 - **v1.53.0 (2026-07-17):** **Goal Backend Fase 2 (aggregate relationships) implemented and
   verified.** `LinkCommitment`/`LinkHabit` commands added on Fase 1's exact pattern; `GoalView`
   projectors extended (still one read model, no new views); two explicit REST endpoints
