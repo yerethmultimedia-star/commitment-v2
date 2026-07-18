@@ -13,19 +13,21 @@ own explicit, visible thing — only implied it via ad hoc audits.
 - **Status** — does a Golden Path doc exist for this flow, and has it last run clean?
   - ☐ — no Golden Path doc yet.
   - ⏳ — doc exists, implemented, pending its first end-to-end run (manual or automated).
+  - ⛔ — run attempted, blocked partway through by a product decision (not an implementation defect)
+    — see the doc's "Outcome gate" for what's pending.
   - ✅ — last run completed with no findings.
 - **Execution** — how the walkthrough is currently run. Starts at `Manual` for every entry; moves
   to `Automated` once converted to a real spec (Playwright or equivalent), then to `CI` once that
   spec runs on every relevant PR. This column is expected to evolve independently of Status — a
   path can be ✅ and still `Manual` for a long time before anyone automates it.
 
-| Golden Path         | Doc                                  | Status               | Execution |
-| ------------------- | ------------------------------------ | -------------------- | --------- |
-| Commitment Creation | `golden_path_commitment_creation.md` | ✅ PASS (2026-07-17) | Manual¹   |
-| Goal Creation       | _(not yet written)_                  | ☐                    | —         |
-| Task Completion     | _(not yet written)_                  | ☐                    | —         |
-| Habit Check-in      | _(not yet written)_                  | ☐                    | —         |
-| Quick Capture       | _(not yet written)_                  | ☐                    | —         |
+| Golden Path         | Doc                                  | Status                  | Execution |
+| ------------------- | ------------------------------------ | ----------------------- | --------- |
+| Commitment Creation | `golden_path_commitment_creation.md` | ✅ PASS (2026-07-17)    | Manual¹   |
+| Goal Creation       | `golden_path_goal_creation.md`       | ⛔ Blocked (2026-07-18) | Manual¹   |
+| Task Completion     | _(not yet written)_                  | ☐                       | —         |
+| Habit Check-in      | _(not yet written)_                  | ☐                       | —         |
+| Quick Capture       | _(not yet written)_                  | ☐                       | —         |
 
 ¹ Last run used an ad hoc Playwright/Chromium script (installed on the fly, not committed to the
 repo) rather than a manual click-through or a checked-in spec. Kept as `Manual` under this table's

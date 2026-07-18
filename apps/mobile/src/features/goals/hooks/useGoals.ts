@@ -35,3 +35,37 @@ export function useToggleMilestone() {
     onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
   });
 }
+
+export function useRenameGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, title }: { id: string; title: string }) => goalsApi.rename(id, title),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}
+
+export function useCompleteGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => goalsApi.complete(id),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}
+
+export function useArchiveGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => goalsApi.archive(id),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}
+
+/** Establishes Goal.commitmentIds[] — the ADR-021 relationship, not Commitment.goalId (TECH_DEBT.md Item 10, Fase 4B). */
+export function useLinkCommitmentToGoal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ goalId, commitmentId }: { goalId: string; commitmentId: string }) =>
+      goalsApi.linkCommitment(goalId, commitmentId),
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.goals.all }),
+  });
+}

@@ -366,7 +366,22 @@
       "attachments": "Attachments",
       "attachmentsEmpty": "No attachments yet.",
       "activity": "Activity Timeline",
-      "activityEmpty": "Activity history isn't tracked yet."
+      "activityEmpty": "Activity history isn't tracked yet.",
+      "editTitleTooltip": "Rename goal",
+      "renameTitle": "Rename goal",
+      "renamePlaceholder": "Goal title",
+      "renameSave": "Save",
+      "renameCancel": "Cancel",
+      "complete": "Complete goal",
+      "archive": "Archive goal",
+      "confirmComplete": {
+        "title": "Complete \"{{title}}\"?",
+        "description": "This marks the goal as achieved."
+      },
+      "confirmArchive": {
+        "title": "Archive \"{{title}}\"?",
+        "description": "This goal will stop appearing in your active list."
+      }
     }
   },
   "habits": {

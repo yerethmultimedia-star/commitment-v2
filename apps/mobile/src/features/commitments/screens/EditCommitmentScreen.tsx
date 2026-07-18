@@ -6,6 +6,7 @@ import { Title } from '@commitment/design-system';
 import { useCommitment } from '../hooks/useCommitment';
 import { useEditCommitment } from '../hooks/useEditCommitment';
 import { useRelinkCommitmentGoal } from '../hooks/useRelinkCommitmentGoal';
+import { useLinkCommitmentToGoal } from '@/features/goals/hooks/useGoals';
 import { getEditableFields } from '@/shared/domain/commitmentActions';
 import { CommitmentForm } from '../components/forms/CommitmentForm';
 import { CommitmentFormValues } from '../models/commitment.schema';
@@ -23,6 +24,7 @@ export function EditCommitmentScreen() {
   const { data: commitment, isLoading, isError, refetch } = useCommitment(id);
   const { mutateAsync, isPending } = useEditCommitment(id);
   const relinkGoal = useRelinkCommitmentGoal();
+  const linkCommitmentToGoal = useLinkCommitmentToGoal();
 
   // Derive the non-editable fields declaratively — no if/else in the component
   const disabledFields = useMemo(() => {
@@ -58,10 +60,19 @@ export function EditCommitmentScreen() {
     // concurrently caused a real lost-update bug for Habits (see
     // useRelinkHabitGoal), fixed there by always awaiting in order.
     mutateAsync(values)
-      .then(() => {
-        if (values.goalId !== (commitment.goalId ?? null)) {
-          return relinkGoal.mutateAsync({ id, goalId: values.goalId });
+      .then(async () => {
+        if (values.goalId === (commitment.goalId ?? null)) return;
+        if (values.goalId) {
+          // Commitment doesn't own this relationship on the real backend —
+          // Goal.commitmentIds[] does (TECH_DEBT.md Item 10, Fase 4B).
+          await linkCommitmentToGoal.mutateAsync({ goalId: values.goalId, commitmentId: id });
+          return;
         }
+        // Unlinking (goalId -> null): no backend "unlink" command exists yet
+        // for Goal.commitmentIds[] — relinkGoal still handles this correctly
+        // in Demo Mode (clears Commitment.goalId there), but is a documented
+        // no-op gap against the real backend until that command exists.
+        await relinkGoal.mutateAsync({ id, goalId: null });
       })
       .catch(() => {
         // A toast will be shown here in VS-030 (offline/feedback layer)

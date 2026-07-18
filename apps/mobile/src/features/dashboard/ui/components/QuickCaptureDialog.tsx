@@ -82,7 +82,7 @@ export function QuickCaptureDialog({ open, onOpenChange }: QuickCaptureDialogPro
         // Minimal capture, same principle as every other type here (ADR-020):
         // title only, no Goal picker in this dialog. Born unassociated if no
         // Goal can be inferred — same pattern Task/Habit already follow.
-        await commitmentsApi.create({ title: trimmed });
+        await commitmentsApi.create({ id: generateId(), identityId, title: trimmed });
         queryClient.invalidateQueries({ queryKey: queryKeys.commitments.list() });
       } else if (type === 'habit') {
         // Sensible defaults for a bare quick-captured habit (Daily, 9:00 AM) — fully editable afterward.

@@ -366,7 +366,22 @@
       "attachments": "Adjuntos",
       "attachmentsEmpty": "Aún no hay adjuntos.",
       "activity": "Cronología de Actividad",
-      "activityEmpty": "El historial de actividad aún no se registra."
+      "activityEmpty": "El historial de actividad aún no se registra.",
+      "editTitleTooltip": "Renombrar objetivo",
+      "renameTitle": "Renombrar objetivo",
+      "renamePlaceholder": "Título del objetivo",
+      "renameSave": "Guardar",
+      "renameCancel": "Cancelar",
+      "complete": "Completar objetivo",
+      "archive": "Archivar objetivo",
+      "confirmComplete": {
+        "title": "¿Completar \"{{title}}\"?",
+        "description": "Esto marca el objetivo como logrado."
+      },
+      "confirmArchive": {
+        "title": "¿Archivar \"{{title}}\"?",
+        "description": "Este objetivo dejará de aparecer en tu lista activa."
+      }
     }
   },
   "habits": {

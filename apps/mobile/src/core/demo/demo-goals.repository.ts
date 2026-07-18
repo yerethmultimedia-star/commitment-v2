@@ -159,6 +159,33 @@ export const demoGoalsRepository = {
     return { goalId: id };
   },
 
+  rename: async (id: string, title: string): Promise<{ goalId: string; title: string }> => {
+    const dto = findOrThrow(id);
+    dto.title = title;
+    return { goalId: id, title };
+  },
+
+  complete: async (id: string): Promise<{ goalId: string; state: string }> => {
+    const dto = findOrThrow(id);
+    dto.state = 'Completed';
+    dto.completedAt = new Date().toISOString();
+    return { goalId: id, state: dto.state };
+  },
+
+  archive: async (id: string): Promise<{ goalId: string; state: string }> => {
+    const dto = findOrThrow(id);
+    dto.state = 'Archived';
+    return { goalId: id, state: dto.state };
+  },
+
+  linkCommitment: async (goalId: string, commitmentId: string): Promise<{ goalId: string }> => {
+    const dto = findOrThrow(goalId);
+    if (!dto.commitmentIds.includes(commitmentId)) {
+      dto.commitmentIds = [...dto.commitmentIds, commitmentId];
+    }
+    return { goalId };
+  },
+
   /** Demo-only — Milestone has no backend equivalent yet (milestone_domain_assessment.md). */
   getMilestonesFor: (goalId: string): Milestone[] => demoMilestones.filter((m) => m.goalId === goalId),
 

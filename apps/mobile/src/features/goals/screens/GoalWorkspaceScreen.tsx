@@ -4,14 +4,15 @@ import { Stack as ExpoStack } from 'expo-router';
 import { YStack, XStack, Circle } from 'tamagui';
 import {
   CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Plus, Target,
+  Pencil, Archive as ArchiveIcon,
 } from '@tamagui/lucide-icons';
 import {
-  AppScreen, Card, Body, IconButton,
-  ProgressMetric, MetricCard, SectionHeader, LoadingState,
+  AppScreen, Card, Body, Title, IconButton, Button,
+  ProgressMetric, MetricCard, SectionHeader, LoadingState, ConfirmationDialog,
 } from '@commitment/design-system';
 import { formatDate } from '@commitment/localization';
 import { useRouter } from 'expo-router';
-import { useToggleMilestone } from '../hooks/useGoals';
+import { useToggleMilestone, useRenameGoal, useCompleteGoal, useArchiveGoal } from '../hooks/useGoals';
 import { useGoalWorkspace } from '../hooks/useGoalsView';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
@@ -19,6 +20,7 @@ import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
 import { HabitCard } from '@/features/habits/components/HabitCard';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
 import { GoalTabStrip } from '../components/GoalTabStrip';
+import { RenameGoalDialog } from '../components/RenameGoalDialog';
 
 export interface GoalWorkspaceScreenProps {
   goalId: string;
@@ -42,11 +44,22 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const { data: habits = [] } = useHabits();
   const toggleHabit = useToggleHabit();
   const toggleMilestone = useToggleMilestone();
+  const renameGoal = useRenameGoal();
+  const completeGoal = useCompleteGoal();
+  const archiveGoal = useArchiveGoal();
   const [tab, setTab] = useState<WorkspaceTab>('summary');
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [confirmingComplete, setConfirmingComplete] = useState(false);
+  const [confirmingArchive, setConfirmingArchive] = useState(false);
 
+  // Commitment doesn't own this relationship (TECH_DEBT.md Item 10, Fase 4B) —
+  // Goal.commitmentIds[] is the source of truth, not Commitment.goalId (which
+  // doesn't exist on the real backend). Habit DOES own its Goal relationship
+  // (Habit.goalId, real and working — see the Relationship Ownership
+  // Assessment candidate), so linkedHabits keeps filtering on the Habit side.
   const linkedCommitments = useMemo(
-    () => commitments.filter((c) => c.goalId === goalId),
-    [commitments, goalId]
+    () => commitments.filter((c) => goal?.commitmentIds.includes(c.id) ?? false),
+    [commitments, goal]
   );
   const linkedHabits = useMemo(
     () => habits.filter((h) => h.goalId === goalId),
@@ -99,6 +112,13 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
             <Circle size={40} backgroundColor="$focus" justifyContent="center" alignItems="center">
               <Target color="$accent" size={20} />
             </Circle>
+            <Title flex={1} fontSize="$6" numberOfLines={2}>{goal.title}</Title>
+            <IconButton
+              iconToken={<Pencil size={18} />}
+              tooltipI18nKey="goals.workspace.editTitleTooltip"
+              accessibilityHintI18nKey="goals.workspace.editTitleTooltip"
+              onPress={() => setRenameOpen(true)}
+            />
           </XStack>
 
           <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.workspace.tabs.${tb}`)} />
@@ -146,6 +166,29 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   </YStack>
                 </XStack>
               </YStack>
+
+              {(goal.state === 'Active' || goal.state === 'Draft') && (
+                <XStack gap="$3">
+                  <YStack flex={1}>
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      i18nKey="goals.workspace.complete"
+                      loading={completeGoal.isPending}
+                      onPress={() => setConfirmingComplete(true)}
+                    />
+                  </YStack>
+                  <YStack flex={1}>
+                    <Button
+                      variant="outline"
+                      fullWidth
+                      i18nKey="goals.workspace.archive"
+                      loading={archiveGoal.isPending}
+                      onPress={() => setConfirmingArchive(true)}
+                    />
+                  </YStack>
+                </XStack>
+              )}
             </YStack>
           )}
 
@@ -320,6 +363,47 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
           )}
         </YStack>
       </AppScreen>
+
+      <RenameGoalDialog
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+        currentTitle={goal.title}
+        isSaving={renameGoal.isPending}
+        onSave={(title) => {
+          renameGoal.mutate({ id: goal.id, title }, { onSuccess: () => setRenameOpen(false) });
+        }}
+      />
+
+      <ConfirmationDialog
+        open={confirmingComplete}
+        onOpenChange={setConfirmingComplete}
+        titleI18nKey="goals.workspace.confirmComplete.title"
+        titleI18nParams={{ title: goal.title }}
+        descriptionI18nKey="goals.workspace.confirmComplete.description"
+        descriptionI18nParams={{ title: goal.title }}
+        confirmI18nKey="goals.workspace.complete"
+        cancelI18nKey="goals.workspace.renameCancel"
+        onConfirm={() => {
+          setConfirmingComplete(false);
+          completeGoal.mutate(goal.id);
+        }}
+      />
+
+      <ConfirmationDialog
+        open={confirmingArchive}
+        onOpenChange={setConfirmingArchive}
+        titleI18nKey="goals.workspace.confirmArchive.title"
+        titleI18nParams={{ title: goal.title }}
+        descriptionI18nKey="goals.workspace.confirmArchive.description"
+        descriptionI18nParams={{ title: goal.title }}
+        confirmI18nKey="goals.workspace.archive"
+        cancelI18nKey="goals.workspace.renameCancel"
+        destructive
+        onConfirm={() => {
+          setConfirmingArchive(false);
+          archiveGoal.mutate(goal.id);
+        }}
+      />
     </>
   );
 }

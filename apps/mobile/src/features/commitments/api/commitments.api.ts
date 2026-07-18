@@ -3,13 +3,14 @@ import { isDemoModeActive } from '@/core/demo/demo-mode.store';
 import { demoCommitmentsRepository } from '@/core/demo/demo-commitments.repository';
 
 interface CreateCommitmentPayload {
+  /** Client-generated UUID — the real backend requires it in the body (TECH_DEBT.md Item 40). */
+  id: string;
+  identityId: string;
   title: string;
   description?: string;
   targetDate?: string;
   recurrencePattern?: string;
   priority?: string;
-  /** Owning Goal, when linked. Goal linkage is opt-in, not assumed (ADR-019 Fase 2A). */
-  goalId?: string | null;
 }
 
 interface EditCommitmentPayload {

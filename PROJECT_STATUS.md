@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.57.0
+Version: 1.59.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,25 +222,53 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. ✅ **Goal Backend / CQRS / Event Store — ADR-021 implementation CLOSED (2026-07-18).** Fases 1-4
-   (backend, relationships, history, mobile integration) all done and verified. Milestone
-   reclassified out of ADR-021 entirely — see item 11 below, "Goal Milestones" candidate — not
-   "Fase 5." What remains under ADR-021 itself is validation only: the Golden Path end-to-end
-   walkthrough (not new implementation). Resumed as the strategic initiative after VS-037 closed,
-   following the same
-   Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
-   deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
+8. 🔄 **Goal Backend / CQRS / Event Store — Backend + Mobile Integration (incl. Fase 4B) CLOSED,
+   Golden Path ⛔ Blocked on a product decision (2026-07-18).** **Correction to the prior "ADR-021
+   implementation CLOSED" entry**: actually running the Golden Path (not just `tsc`/jest/e2e) found
+   the mobile app never wired Rename/Complete/Archive/LinkCommitment/LinkHabit to any UI, and that
+   `CommitmentForm.tsx`'s Goal picker wrote to a `Commitment.goalId` field/endpoint that don't exist
+   on the real backend — the mobile UI never migrated off a demo-only convention onto ADR-021's
+   approved `Goal.commitmentIds[]` model. This is squarely "the app can do this" vs. "the user can
+   do this" — exactly the gap a Golden Path exists to catch.
+   - **Backend (Fases 1-3): ✅ done.**
+   - **Mobile read integration: ✅ done** (list/getById/create, `GoalViewModel` composition).
+   - **Mobile write integration ("Fase 4B"): ✅ done (2026-07-18).** Rename/Complete/Archive
+     integrated (`goals.api.ts`, `useGoals.ts` mutations, `GoalWorkspaceScreen.tsx` UI: title-edit
+     dialog, Complete/Archive buttons with confirmation). `Commitment.goalId`/`relinkGoal` flow
+     replaced with `Goal.linkCommitment` for the linking direction (`useCreateCommitment.ts`,
+     `EditCommitmentScreen.tsx`) — unlinking still has no backend command, documented as a known gap,
+     not silently papered over. `GoalWorkspaceScreen.tsx`'s linked-commitments list switched to read
+     from `Goal.commitmentIds[]` instead of `Commitment.goalId` (which doesn't exist in real mode).
+     Also fixed in the same pass, discovered as a blocker to testing this at all: `TECH_DEBT.md` Item
+     40 (`commitmentsApi.create()` missing `id`/`identityId`) — both call sites
+     (`useCreateCommitment.ts`, `QuickCaptureDialog.tsx`'s commitment branch). `linkHabit` explicitly
+     NOT built — see item 12, "Relationship Ownership Assessment": Habit already owns its Goal
+     relationship via a real, working, different mechanism (`Habit.goalId`/`relinkGoal`), so building
+     a second parallel path would be redundant, not a gap. Verified: `tsc --noEmit` clean, 79/79
+     relevant jest tests passing.
+   - **Golden Path: ⛔ Blocked, not failed** — `docs/07-quality/golden_path_goal_creation.md`.
+     Re-running it against Fase 4B's real implementation got further (Goal creation genuinely works
+     against the live backend) but hit a new, different blocker: a freshly created Goal starts in
+     `Draft` (correct domain behavior) and is invisible in the entire Objetivos screen (no chip
+     matches `Draft`). Not an implementation defect — registered as item 13, "Draft Lifecycle UX,"
+     the same underlying question Golden Path #1 already found for Commitment. Re-run pending that
+     decision.
+   - Milestone stays reclassified out of ADR-021 entirely — see item 11 below, "Goal Milestones"
+     candidate — none of this touches that. Resumed as the
+     strategic initiative after VS-037 closed, following the same
+     Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
+     deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
 goal_backend_current_assessment.md` (Paso 1), `docs/03-architecture/
 goal_backend_alternatives_evaluation.md` (Paso 2/3), `docs/03-architecture/
 adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key reframe: the real
-   problem was never CQRS or Event Store — it was that Goal has no backend at all — and a complete
-   `InMemoryEventStore` was found already built and registered in DI, but never once invoked
-   anywhere in the codebase, which the investigation explicitly treated as _not_ evidence it was
-   needed. **Decision:** build `apps/backend/src/goal/` mirroring Commitment/Task/Habit's existing
-   CQRS + versioned-state pattern (state stays the source of truth, no Event Sourcing), plus
-   connect the previously-unused Event Store as a durable domain-event log generalizing ADR-014's
-   Commitment-only history mechanism, with Goal as its first consumer. Full detail: `TECH_DEBT.md`
-   Item 10.
+     problem was never CQRS or Event Store — it was that Goal has no backend at all — and a complete
+     `InMemoryEventStore` was found already built and registered in DI, but never once invoked
+     anywhere in the codebase, which the investigation explicitly treated as _not_ evidence it was
+     needed. **Decision:** build `apps/backend/src/goal/` mirroring Commitment/Task/Habit's existing
+     CQRS + versioned-state pattern (state stays the source of truth, no Event Sourcing), plus
+     connect the previously-unused Event Store as a durable domain-event log generalizing ADR-014's
+     Commitment-only history mechanism, with Goal as its first consumer. Full detail: `TECH_DEBT.md`
+     Item 10.
    - **Explicitly deferred, not part of this decision:** migrating Commitment/Task/Habit onto the
      same history infrastructure (only if it later demonstrates real value); reducing per-command
      backend boilerplate (~7 files/command, the one technical pain point actually measured in the
@@ -346,6 +374,32 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
     reclassified as its own future initiative. Requires a product decision (does Milestone become a
     real domain subentity with its own commands, a derived projection, or does the UI feature get
     redesigned?) before any architecture or implementation work. Not started, not yet scoped.
+12. **Candidate, not yet numbered — Relationship Ownership Assessment.** Surfaced 2026-07-18 while
+    scoping Fase 4B: `Habit`↔`Goal` and `Commitment`↔`Goal` were built as two genuinely different
+    relationship models, not two implementations of the same pattern. Habit owns the relationship
+    (`Habit.goalId`, `Habit.relinkGoal()`, real backend route `PATCH /habits/:id/goal`) — fully
+    implemented, backend-connected, working in production today. Commitment does not own it — ADR-021
+    put `Goal.commitmentIds[]`/`linkCommitment` on the Goal side instead, which mobile never
+    connected to (see Item 10, Fase 4B). Unlike the `Commitment.goalId` gap, Habit's pattern shows
+    every sign of being a deliberate, working domain decision, not an unfinished implementation —
+    it exists in the aggregate, the backend, the API, and the UI, and functions correctly. **Not
+    treated as technical debt requiring a fix** — registered as an open question for later
+    evaluation: should Goal own every such relationship uniformly, or does ownership depend
+    per-aggregate on invariants/cardinality/lifecycle/query patterns? Explicitly deferred — Fase 4B
+    does not touch Habit's working flow. Not started, not yet scoped.
+13. **Candidate, not yet numbered — Draft Lifecycle UX.** Surfaced 2026-07-18 running
+    `docs/07-quality/golden_path_goal_creation.md`: a freshly created Goal starts in `Draft` on the
+    real backend (correct, intentional domain design) but is invisible in the entire Objetivos
+    screen — none of its three chips ("Activos"/"En progreso"/"Completados") match `Draft`. Both the
+    backend and the Fase 4B mobile write-integration worked exactly as built; what's missing is a
+    product decision about what a user should see immediately after creating an aggregate that
+    starts in `Draft`. This is the same underlying question `golden_path_commitment_creation.md`
+    already found and deliberately left open for Commitment (its "Known caveats" section) —
+    consolidated here as one cross-cutting question rather than separate per-aggregate debt, since
+    it will likely recur for Habit or any future aggregate with the same lifecycle shape. Not
+    started, not yet scoped — candidate questions: show Draft explicitly (a new chip/state), start
+    aggregates at `Active` instead (changes the domain), or require an explicit
+    activation step before an aggregate becomes visible.
 
 ---
 
@@ -370,6 +424,25 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.59.0 (2026-07-18):** **Fase 4B (Mobile Write Integration) implemented; Golden Path re-run
+  hits a new, different blocker.** Rename/Complete/Archive integrated with real UI (dialog +
+  confirmations); `Commitment.goalId`/`relinkGoal` replaced with `Goal.linkCommitment` for linking
+  (unlinking still has no backend command, documented not hidden); fixed `TECH_DEBT.md` Item 40 at
+  both call sites since it blocked even testing this. `linkHabit` deliberately not built — Habit
+  already owns its Goal relationship via a different, real, working mechanism (item 12,
+  "Relationship Ownership Assessment"). Re-running the Golden Path got further — Goal creation
+  genuinely works against the live backend — but found a new blocker: a freshly created Goal starts
+  in `Draft` and is invisible in the entire Objetivos screen. Not an implementation defect;
+  registered as item 13, "Draft Lifecycle UX," the same question Golden Path #1 already found for
+  Commitment. `tsc --noEmit` clean, 79/79 relevant jest tests passing. Full detail: `TECH_DEBT.md`
+  Item 10, `docs/07-quality/golden_path_goal_creation.md`.
+- **v1.58.0 (2026-07-18):** **Correction: "ADR-021 implementation CLOSED" (v1.57.0) was premature.**
+  Running the actual Golden Path (not just `tsc`/jest/e2e) found no mobile UI calls Rename/Complete/
+  Archive/LinkCommitment/LinkHabit, and `CommitmentForm.tsx`'s Goal picker relies on a
+  `Commitment.goalId` field/endpoint that don't exist on the real backend — a demo-only convention
+  never migrated onto ADR-021's approved model. Backend (Fases 1-3) and mobile read integration
+  stay ✅; mobile write integration reopened as scoped "Fase 4B"; Golden Path re-run deferred until
+  Fase 4B closes. Full detail: `TECH_DEBT.md` Item 10.
 - **v1.57.0 (2026-07-18):** **ADR-021 implementation CLOSED.** Fases 1-4 (backend, relationships,
   history, mobile integration) all done and verified. Milestone reclassified out of ADR-021's scope
   entirely into its own candidate initiative, "Goal Milestones" (item 11) — a product/domain
