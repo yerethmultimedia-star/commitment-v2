@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.56.0
+Version: 1.57.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -222,9 +222,12 @@ _Nota: No significa que el usuario vea el 87% de funcionalidades, sino que **la 
    empty state, T-001 starts confusing new Coach/navigation work), pull it forward then rather than
    waiting for a dedicated cleanup window.
 
-8. 🔄 **Goal Backend / CQRS / Event Store — ADR-021 Approved (2026-07-17), Fase 4 implemented,
-   Milestones excluded pending a product decision (2026-07-18).** Resumed as the strategic
-   initiative after VS-037 closed, following the same
+8. ✅ **Goal Backend / CQRS / Event Store — ADR-021 implementation CLOSED (2026-07-18).** Fases 1-4
+   (backend, relationships, history, mobile integration) all done and verified. Milestone
+   reclassified out of ADR-021 entirely — see item 11 below, "Goal Milestones" candidate — not
+   "Fase 5." What remains under ADR-021 itself is validation only: the Golden Path end-to-end
+   walkthrough (not new implementation). Resumed as the strategic initiative after VS-037 closed,
+   following the same
    Investigation → Alternatives → Decision process validated by ADR-019/ADR-020. Investigation
    deliberately started from the problem, not the solution — full trail: `docs/03-architecture/
 goal_backend_current_assessment.md` (Paso 1), `docs/03-architecture/
@@ -330,9 +333,19 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
     round (see `TECH_DEBT.md` RI-5). A real daily-snapshot or event-sourced history table would
     unlock weekly adherence, best/worst day, monthly trends, heatmaps, and materially better Coach/AI
     insights later — not a VS-032 concern, explicitly deferred to VS-033 or a future architectural
-    cycle, not started. **Potentially unlocked by ADR-021's Event Store infrastructure once Goal
-    (and possibly other aggregates) start producing durable domain-event history** — not yet
-    connected, worth revisiting once ADR-021 ships.
+    cycle, not started. **Potentially unlocked by ADR-021's Event Store infrastructure now that Goal
+    produces durable domain-event history** — not yet connected, worth revisiting now that ADR-021
+    has shipped.
+11. **Candidate, not yet numbered — Goal Milestones.** Surfaced 2026-07-18 during ADR-021 Fase 4's
+    integration review: the mobile `GoalWorkspaceScreen.tsx` Milestones tab (`toggleMilestone`) has
+    no backend equivalent, and — per
+    `docs/03-architecture/milestone_domain_assessment.md` — isn't a finished concept waiting to be
+    connected. Evidence points to an unfinished product feature (the UI only supports toggling, no
+    create/delete; shares a screen with 3 other permanently-empty placeholder sections), not a
+    ready-to-implement subentity or a derived projection. Explicitly NOT part of ADR-021's scope —
+    reclassified as its own future initiative. Requires a product decision (does Milestone become a
+    real domain subentity with its own commands, a derived projection, or does the UI feature get
+    redesigned?) before any architecture or implementation work. Not started, not yet scoped.
 
 ---
 
@@ -357,6 +370,11 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.57.0 (2026-07-18):** **ADR-021 implementation CLOSED.** Fases 1-4 (backend, relationships,
+  history, mobile integration) all done and verified. Milestone reclassified out of ADR-021's scope
+  entirely into its own candidate initiative, "Goal Milestones" (item 11) — a product/domain
+  decision, not an unfinished implementation fase. What remains under ADR-021 is validation only:
+  the Golden Path end-to-end walkthrough.
 - **v1.56.0 (2026-07-18):** **Goal Backend Fase 4 implemented, Milestones excluded.**
   `goals.api.ts` rewritten as a symmetric Demo/Backend adapter; `progress`/`targetDate` composed via
   `computeGoalProgress()` in new `useGoalsView()`/`useGoalWorkspace()` hooks, reusing already-fetched

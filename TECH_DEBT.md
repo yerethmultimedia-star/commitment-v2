@@ -1,6 +1,6 @@
 # Technical Debt Register
 
-Version: 1.54.0
+Version: 1.55.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-17
@@ -180,7 +180,16 @@ This document tracks identified technical debt, compilation warnings, and archit
 
 ---
 
-## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Approved, Fase 4 Mostly Implemented (Milestones Excluded)
+## Active Technical Debt Item 10: Goal aggregate has no backend module — ADR-021 Implementation CLOSED (2026-07-18)
+
+- **Closure note (2026-07-18):** ADR-021's implementation is complete — backend (Fase 1), aggregate
+  relationships (Fase 2), history infrastructure (Fase 3), and mobile integration (Fase 4) are all
+  done and verified. Milestone is explicitly NOT part of what remains: it's a product/domain
+  decision (see `milestone_domain_assessment.md`), not an unfinished piece of ADR-021's approved
+  scope — reclassified as its own candidate initiative, "Goal Milestones," not "ADR-021 Fase 5."
+  What remains under ADR-021 itself is validation only: the Golden Path end-to-end walkthrough
+  (create → rename → link Commitment/Habit → complete → view history, from the mobile app through
+  the real backend), not new implementation.
 
 - **Status update (2026-07-18, Fase 4 — implemented, Milestones excluded):** `goals.api.ts`
   rewritten as a symmetric Demo/Backend adapter (`list`/`getById`/`create`), returning the exact
@@ -1979,6 +1988,10 @@ tone={...}>`, reusing `task-descriptors.ts`'s existing tone mapping). Sub-case 2
 
 ## 📜 Change History
 
+- **v1.55.0 (2026-07-18):** **Item 10 — ADR-021 implementation CLOSED.** Fases 1-4 all done and
+  verified. Milestone reclassified out of ADR-021's scope entirely — it's a product/domain decision
+  ("Goal Milestones" candidate initiative), not an unfinished implementation fase. What remains
+  under ADR-021 is validation only: the Golden Path end-to-end walkthrough.
 - **v1.54.0 (2026-07-18):** **Item 10 — Fase 4 implemented (Milestones excluded).**
   `goals.api.ts` rewritten as a symmetric Demo/Backend adapter; `progress`/`targetDate` composed via
   `computeGoalProgress()` in new `useGoalsView()`/`useGoalWorkspace()` hooks, cross-referencing
