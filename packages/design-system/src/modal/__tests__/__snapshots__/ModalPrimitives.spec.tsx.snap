@@ -222,7 +222,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
           }
         >
           <View
-            accessibilityLabel="[TR] action.cancel"
+            accessibilityLabel="[TR] cancel"
             accessibilityRole="button"
             accessibilityState={
               {
@@ -296,7 +296,7 @@ exports[`Modal Primitives ActionSheet renders a list of actions and cancel butto
                 }
                 suppressHighlighting={true}
               >
-                [TR] action.cancel
+                [TR] cancel
               </Text>
             </View>
           </View>

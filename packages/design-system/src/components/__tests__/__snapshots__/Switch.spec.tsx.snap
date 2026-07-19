@@ -8,7 +8,7 @@ exports[`Switch matches forest theme snapshot 1`] = `
       "alignItems": "center",
       "flexDirection": "row",
       "gap": 12,
-      "opacity": 0.5,
+      "opacity": NaN,
       "transform": [
         {
           "scale": 1,
@@ -52,7 +52,7 @@ exports[`Switch matches forest theme snapshot 1`] = `
             "outlineWidth": 2,
           }
         }
-        id="_r_11_"
+        id="_r_15_"
         style={
           {
             "backgroundColor": "#22C55E",
@@ -91,7 +91,7 @@ exports[`Switch matches forest theme snapshot 1`] = `
             style={
               {
                 "alignSelf": "flex-end",
-                "backgroundColor": "#FFFFFF",
+                "backgroundColor": "#14281A",
                 "borderBottomLeftRadius": 1000,
                 "borderBottomRightRadius": 1000,
                 "borderTopLeftRadius": 1000,
@@ -166,7 +166,7 @@ exports[`Switch matches midnight theme snapshot 1`] = `
             "outlineWidth": 2,
           }
         }
-        id="_r_n_"
+        id="_r_q_"
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
@@ -211,7 +211,7 @@ exports[`Switch matches midnight theme snapshot 1`] = `
             style={
               {
                 "alignSelf": "flex-start",
-                "backgroundColor": "#FFFFFF",
+                "backgroundColor": "#FAFAFA",
                 "borderBottomLeftRadius": 1000,
                 "borderBottomRightRadius": 1000,
                 "borderTopLeftRadius": 1000,
@@ -286,7 +286,7 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
             "outlineWidth": 2,
           }
         }
-        id="_r_d_"
+        id="_r_f_"
         onResponderGrant={[Function]}
         onResponderMove={[Function]}
         onResponderRelease={[Function]}
@@ -331,7 +331,7 @@ exports[`Switch matches sunrise theme snapshot 1`] = `
             style={
               {
                 "alignSelf": "flex-end",
-                "backgroundColor": "#FFFFFF",
+                "backgroundColor": "#271F15",
                 "borderBottomLeftRadius": 1000,
                 "borderBottomRightRadius": 1000,
                 "borderTopLeftRadius": 1000,

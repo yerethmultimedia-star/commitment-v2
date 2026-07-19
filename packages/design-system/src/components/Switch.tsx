@@ -81,7 +81,16 @@ export const Switch = React.forwardRef<any, SwitchProps>(({
             })}
             aria-describedby={descriptionI18nKey ? descriptionId : undefined}
           >
-            <TamaguiSwitch.Thumb backgroundColor="#FFFFFF" />
+            {/* Track flips between $interactive (checked) and $surfaceRaised
+                (unchecked) above — the thumb must contrast against whichever
+                is showing, not a single fixed color. $contentOnAccent is
+                already the per-theme-verified pairing for $interactive
+                (identical to $accent in every theme — see Theme Audit,
+                Sprint de Estabilización); $contentPrimary never collides
+                with $surfaceRaised in any shipped theme. A hardcoded
+                '#FFFFFF' thumb was invisible against UberDark/V0Dark's
+                near-white $interactive track when checked. */}
+            <TamaguiSwitch.Thumb backgroundColor={checked ? '$contentOnAccent' : '$contentPrimary'} />
           </TamaguiSwitch>
         </View>
       </FocusRing>

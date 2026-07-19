@@ -43,6 +43,22 @@ function baseTamaguiTokens(resolved: ResolvedTheme): Record<string, string> {
 }
 
 /**
+ * ResolvedTheme.opacity (disabled/hover/press) was defined on every theme
+ * but never reached a component — adaptThemeToTamagui() only propagated
+ * colors/border/motion. useInteractionAnimation.ts hardcoded its own values
+ * instead (Theme Audit, Sprint de Estabilización, 2026-07-19). This closes
+ * that gap the same way motionFast/etc. already reach the Tamagui theme —
+ * as flat custom theme variables, read via useTheme() where needed.
+ */
+function opacityTamaguiTokens(resolved: ResolvedTheme): Record<string, number> {
+  return {
+    opacityDisabled: resolved.opacity.disabled,
+    opacityHover: resolved.opacity.hover,
+    opacityPress: resolved.opacity.press,
+  };
+}
+
+/**
  * Adapts a generic ResolvedTheme from the Theme Engine into a Tamagui-compatible theme object.
  * This ensures Tamagui never leaks into the Theme Engine.
  */
@@ -58,6 +74,7 @@ export function adaptThemeToTamagui(resolvedTheme: ResolvedTheme, reducedMotion:
   return {
     ...resolvedTheme.colors,
     ...baseTamaguiTokens(resolvedTheme),
+    ...opacityTamaguiTokens(resolvedTheme),
     // Inject motion as theme variables
     motionFast: motion.fast,
     motionNormal: motion.normal,

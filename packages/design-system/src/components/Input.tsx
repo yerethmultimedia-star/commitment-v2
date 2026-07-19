@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Input as TamaguiInput, YStack, XStack } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label, Caption, Body } from './typography/index.js';
-import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
+import { useInteractionState, useHapticBehavior, useInteractionAnimation, FocusRing } from '../interaction/index.js';
 import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface InputProps {
@@ -75,6 +75,7 @@ export const Input = React.forwardRef<any, InputProps>(({
   });
 
   useHapticBehavior(state);
+  const animationStyle = useInteractionAnimation(state);
 
   const handleChangeText = (text: string) => {
     let newText = text;
@@ -96,7 +97,7 @@ export const Input = React.forwardRef<any, InputProps>(({
   if (success) borderColor = '$success';
 
   return (
-    <YStack gap="$2" opacity={isActuallyDisabled ? 0.5 : 1}>
+    <YStack gap="$2" opacity={isActuallyDisabled ? animationStyle.opacity : 1}>
       {/* Label and Counter */}
       <XStack justifyContent="space-between" alignItems="center">
         {labelI18nKey && (

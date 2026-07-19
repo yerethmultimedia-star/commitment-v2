@@ -42,7 +42,11 @@ export const ActionSheet: React.FC<ActionSheetProps> = ({
           );
         })}
         <Button
-          i18nKey="action.cancel"
+          // Top-level 'cancel' — the same key ConfirmationDialog's own
+          // cancelI18nKey default already resolves successfully elsewhere
+          // in the app. 'action.cancel' has no matching resource in any
+          // locale (this component had no real consumer yet to catch it).
+          i18nKey="cancel"
           variant="outline"
           onPress={() => onOpenChange(false)}
           fullWidth

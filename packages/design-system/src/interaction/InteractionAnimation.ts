@@ -1,10 +1,28 @@
+import { useTheme } from 'tamagui';
 import { InteractionState } from './InteractionState.js';
 
 export const useInteractionAnimation = (state: InteractionState) => {
+  const theme = useTheme();
+  // Theme-driven — ResolvedTheme.opacity (disabled/hover/press), injected by
+  // adaptThemeToTamagui() (see theme-adapter.ts). Fallbacks only cover a
+  // theme that somehow fails to resolve these; they intentionally match the
+  // values every shipped theme already declares, so a resolution failure
+  // degrades to today's behavior rather than a visibly different one.
+  const disabledOpacity = theme.opacityDisabled?.get?.() ?? 0.4;
+  const hoverOpacity = theme.opacityHover?.get?.() ?? 0.85;
+  const pressOpacity = theme.opacityPress?.get?.() ?? 0.7;
+
   // Common scale effect for pressing
   const scale = state.pressed ? 0.95 : 1;
-  // Common opacity effect for hover/disable
-  const opacity = state.disabled ? 0.5 : state.hovered ? 0.8 : 1;
+  // Opacity precedence: disabled overrides everything; pressed (a stronger,
+  // momentary signal) overrides hover; hover is the resting-interactive dim.
+  const opacity = state.disabled
+    ? disabledOpacity
+    : state.pressed
+      ? pressOpacity
+      : state.hovered
+        ? hoverOpacity
+        : 1;
 
   return {
     scale,

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TextArea as TamaguiTextArea, YStack, XStack } from 'tamagui';
 import { useTranslation } from '@commitment/localization';
 import { Label, Caption } from './typography/index.js';
-import { useInteractionState, useHapticBehavior, FocusRing } from '../interaction/index.js';
+import { useInteractionState, useHapticBehavior, useInteractionAnimation, FocusRing } from '../interaction/index.js';
 import { toPlatformAccessibilityProps } from '../accessibility/platformAccessibilityProps.js';
 
 export interface TextAreaProps {
@@ -45,6 +45,7 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
   });
 
   useHapticBehavior(state);
+  const animationStyle = useInteractionAnimation(state);
 
   const id = React.useId();
   const helperId = `${id}-helper`;
@@ -55,7 +56,7 @@ export const TextArea = React.forwardRef<any, TextAreaProps>(({
   if (success) borderColor = '$success';
 
   return (
-    <YStack gap="$2" opacity={isActuallyDisabled ? 0.5 : 1}>
+    <YStack gap="$2" opacity={isActuallyDisabled ? animationStyle.opacity : 1}>
       {/* Label and Counter */}
       <XStack justifyContent="space-between" alignItems="center">
         {labelI18nKey && (
