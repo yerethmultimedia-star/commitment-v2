@@ -2,6 +2,7 @@ import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interf
 
 export interface TaskDueDateChangedEventPayload {
   readonly taskId: string;
+  readonly identityId: string;
   readonly dueDate: string | null;
 }
 

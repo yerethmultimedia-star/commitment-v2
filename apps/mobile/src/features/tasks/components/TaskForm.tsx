@@ -1,13 +1,20 @@
 import { useState, useMemo } from 'react';
-import { Text, YStack, Select, Adapt, Sheet, XStack, Button as TamaguiButton } from 'tamagui';
-import { Title, Input, Button, toPlatformAccessibilityProps } from '@commitment/design-system';
+import { Text, YStack, Select, Adapt, Sheet, XStack } from 'tamagui';
+import { Input, Button, DurationInput, ChoiceGroup, toPlatformAccessibilityProps } from '@commitment/design-system';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/core/auth/use-session';
+import { queryKeys } from '@/core/query/query-keys';
 import { tasksApi } from '../api/tasks.api';
 import { TaskModel, TaskPriority } from '../models/task.model';
 import { useTranslation } from 'react-i18next';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useGoals } from '@/features/goals/hooks/useGoals';
 import type { CommitmentModel } from '@/features/commitments/models/commitment.model';
+import { PlainDateTimePicker } from '@/shared/forms/PlainDateTimePicker';
+import { mergeDateAndTime } from '@/shared/lib/mergeDateAndTime';
+import { ReminderSection } from './ReminderSection';
+import { useEntityReminder, useReminderStore } from '@/core/reminders/use-reminder-store';
+import { DEFAULT_REMINDER_SETTINGS, ReminderSettings } from '@/core/reminders/reminder.types';
 
 type RelationKind = 'none' | 'goal' | 'commitment';
 
@@ -44,6 +51,7 @@ export function TaskForm({
 }) {
   const { identityId } = useSession();
   const { t } = useTranslation('tasks');
+  const queryClient = useQueryClient();
   const { data: allCommitments = [] } = useCommitments();
   const commitments = commitmentOptions ?? allCommitments;
   const { data: goals = [] } = useGoals();
@@ -60,7 +68,20 @@ export function TaskForm({
   const [relationTargetId, setRelationTargetId] = useState<string>(
     task?.goalId ?? task?.commitmentId ?? initialGoalId ?? ''
   );
+  const [dueDate, setDueDate] = useState<Date | null>(task?.dueDate ? new Date(task.dueDate) : null);
+  const dueDateHasTime = dueDate ? (dueDate.getHours() !== 0 || dueDate.getMinutes() !== 0) : false;
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(
+    task && task.estimatedMinutes > 0 ? task.estimatedMinutes : null
+  );
   const [saving, setSaving] = useState(false);
+
+  // Client-side-only reminder settings (see core/reminders) — an existing
+  // task reads/writes the persisted store directly by id; a not-yet-created
+  // task keeps its choice in local state until save() mints the real id.
+  const existingReminder = useEntityReminder('task', task?.id);
+  const [draftReminder, setDraftReminder] = useState<ReminderSettings>(DEFAULT_REMINDER_SETTINGS);
+  const reminderValue = task ? (existingReminder.settings ?? DEFAULT_REMINDER_SETTINGS) : draftReminder;
+  const setReminderValue = task ? existingReminder.setReminder : setDraftReminder;
 
   const titleError = titleTouched && !title.trim();
 
@@ -93,15 +114,31 @@ export function TaskForm({
     setSaving(true);
     try {
       if (task) {
-        // Edit task title and description
+        // Edit task title, description, and estimated duration — the same
+        // single command the domain's Task.edit() already accepts together
+        // (see task_domain_review.md: estimatedMinutes was already wired
+        // through EditTaskCommand, only the UI control was missing).
         await tasksApi.edit(task.id, {
           title: title.trim(),
-          description: description.trim() || undefined
+          description: description.trim() || undefined,
+          estimatedMinutes: estimatedMinutes ?? undefined,
         });
 
         // Edit priority if changed
         if (task.priority !== priority) {
           await tasksApi.changePriority(task.id, priority);
+        }
+
+        // Reschedule if the due date changed — Task Capability Completion
+        // Story 3, via the new ScheduleTaskCommand (previously impossible
+        // after creation; see task_domain_review.md). startDate isn't
+        // editable in this form yet (no UI for it) — pass the task's
+        // current value through unchanged rather than omitting it, since
+        // the backend resolves an omitted startDate to null (Story 6 fix).
+        const originalDueDateISO = task.dueDate ?? null;
+        const newDueDateISO = dueDate ? dueDate.toISOString() : null;
+        if (newDueDateISO !== originalDueDateISO) {
+          await tasksApi.schedule(task.id, newDueDateISO, task.startDate ?? null);
         }
 
         // Relink Goal/Commitment if the relation changed — fired after the
@@ -139,10 +176,28 @@ export function TaskForm({
           title: title.trim(),
           description: description.trim() || undefined,
           priority,
+          estimatedMinutes: estimatedMinutes ?? undefined,
+          dueDate: dueDate ? dueDate.toISOString() : undefined,
           commitmentId: relationKind === 'commitment' && relationTargetId ? relationTargetId : undefined,
           goalId: relationKind === 'goal' && relationTargetId ? relationTargetId : undefined,
         });
+
+        if (draftReminder.enabled) {
+          useReminderStore.getState().setReminder('task', uuid, draftReminder);
+        }
       }
+
+      // Found live while verifying Story 1 (estimatedMinutes): this save
+      // path called tasksApi.* directly, bypassing useTaskActions()'s own
+      // mutations entirely, so nothing ever invalidated the cache after an
+      // edit — Detail kept showing pre-edit data for up to the query
+      // client's 5-minute default staleTime. Mirrors useTaskActions()'s own
+      // invalidate() shape (tasks + commitments, since relinking/priority
+      // changes affect Commitment-scoped views too).
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.commitments.all }),
+      ]);
 
       setTitle('');
       setTitleTouched(false);
@@ -150,6 +205,9 @@ export function TaskForm({
       setRelationKind('none');
       setRelationTargetId('');
       setPriority('medium');
+      setDueDate(null);
+      setEstimatedMinutes(null);
+      setDraftReminder(DEFAULT_REMINDER_SETTINGS);
       onSaved();
     } finally {
       setSaving(false);
@@ -158,10 +216,6 @@ export function TaskForm({
 
   return (
     <YStack gap="$3" padding="$4" backgroundColor="$surfaceRaised" borderRadius="$4">
-      <Title fontSize="$5" fontWeight="bold">
-        {task ? t('form.editTitle') : t('form.title')}
-      </Title>
-
       <Input
         value={title}
         onChangeText={setTitle}
@@ -179,47 +233,60 @@ export function TaskForm({
         placeholderI18nKey="tasks:form.descriptionPlaceholder"
       />
 
-      <YStack gap="$1">
-        <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{t('form.priority')}</Text>
-        <XStack gap="$2">
-          {(['low', 'medium', 'high'] as TaskPriority[]).map(value => (
-            <TamaguiButton
-              key={value}
-              size="$2"
-              theme={priority === value ? 'active' : undefined}
-              onPress={() => setPriority(value)}
-              flex={1}
-              {...toPlatformAccessibilityProps({
-                accessibilityRole: 'button',
-                accessibilityState: { selected: priority === value },
-              })}
-            >
-              {t(`form.priority${value.charAt(0).toUpperCase() + value.slice(1)}`)}
-            </TamaguiButton>
-          ))}
-        </XStack>
-      </YStack>
+      {
+        // Task Capability Completion Story 3 — editable in both create and
+        // edit mode now that ScheduleTaskCommand exposes Task.schedule()
+        // (previously edit-mode showed this read-only, since the real
+        // backend had no command wired to change it after creation).
+        //
+        // App-wide UX rule: date and time are always two independent
+        // fields, never one combined picker — the user decides the day
+        // first, then (optionally) the time, and can change either without
+        // touching the other. Both map onto the same dueDate (verified to
+        // already be a full instant, no midnight normalization anywhere in
+        // the domain — no new attribute here). The Hora field is disabled
+        // until a Fecha exists (a time needs a day to attach to) and shows
+        // its placeholder rather than "12:00 AM" whenever dueDate has no
+        // explicit time component yet, using the same "date-only, no real
+        // time" heuristic Calendar's isoTime() already uses.
+      }
+      <PlainDateTimePicker
+        value={dueDate}
+        onChange={(date) => setDueDate(mergeDateAndTime(dueDate, date, 'date'))}
+        labelI18nKey={t('form.dueDate')}
+        placeholderI18nKey={t('form.dueDatePlaceholder')}
+        mode="date"
+      />
+      <PlainDateTimePicker
+        value={dueDateHasTime ? dueDate : null}
+        onChange={(date) => setDueDate(mergeDateAndTime(dueDate, date, 'time'))}
+        labelI18nKey={t('form.dueTime')}
+        placeholderI18nKey={t('form.dueTimePlaceholder')}
+        mode="time"
+        disabled={!dueDate}
+      />
 
-      <YStack gap="$1">
-        <Text color="$contentSecondary" fontSize="$3" fontWeight="bold">{t('form.relatedTo')}</Text>
-        <XStack gap="$2">
-          {(['none', 'goal', 'commitment'] as RelationKind[]).map(kind => (
-            <TamaguiButton
-              key={kind}
-              size="$2"
-              theme={relationKind === kind ? 'active' : undefined}
-              onPress={() => setRelationKindAndReset(kind)}
-              flex={1}
-              {...toPlatformAccessibilityProps({
-                accessibilityRole: 'button',
-                accessibilityState: { selected: relationKind === kind },
-              })}
-            >
-              {t(`form.relatedTo${kind.charAt(0).toUpperCase() + kind.slice(1)}`)}
-            </TamaguiButton>
-          ))}
-        </XStack>
-      </YStack>
+      <ChoiceGroup
+        label={t('form.priority')}
+        options={['low', 'medium', 'high'] as TaskPriority[]}
+        isSelected={(p) => priority === p}
+        onSelect={setPriority}
+        labelFor={(p) => t(`form.priority${p.charAt(0).toUpperCase() + p.slice(1)}`)}
+        stretch
+      />
+
+      <DurationInput value={estimatedMinutes} onChange={setEstimatedMinutes} />
+
+      <ReminderSection value={reminderValue} onChange={setReminderValue} dueDate={dueDate} />
+
+      <ChoiceGroup
+        label={t('form.relatedTo')}
+        options={['none', 'goal', 'commitment'] as RelationKind[]}
+        isSelected={(kind) => relationKind === kind}
+        onSelect={setRelationKindAndReset}
+        labelFor={(kind) => t(`form.relatedTo${kind.charAt(0).toUpperCase() + kind.slice(1)}`)}
+        stretch
+      />
 
       {relationKind !== 'none' && (
         <YStack gap="$1">

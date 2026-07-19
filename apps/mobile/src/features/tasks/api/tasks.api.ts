@@ -9,9 +9,15 @@ export interface CreateTaskPayload {
   title: string;
   description?: string;
   priority?: TaskPriority;
+  estimatedMinutes?: number;
   dueDate?: string;
   commitmentId?: string;
   goalId?: string;
+  // Task Capability Completion Story 6 — accepted by RegisterTaskCommand's
+  // registerSchema already; no startDate here, matching the domain (Task
+  // has no creation-time startDate param, only via schedule()).
+  tags?: string[];
+  metadata?: Record<string, any>;
 }
 
 // Demo Mode is a data-source switch checked here, at the API boundary — the
@@ -22,6 +28,10 @@ export const tasksApi = {
     if (isDemoModeActive()) return demoTasksRepository.list();
     return apiClient.get('tasks', { searchParams: { identityId }, signal }).json<{ data: TaskModel[] }>();
   },
+  getById: (id: string, signal?: AbortSignal): Promise<TaskModel> => {
+    if (isDemoModeActive()) return demoTasksRepository.getById(id);
+    return apiClient.get(`tasks/${id}`, { signal }).json<TaskModel>();
+  },
   dashboard: (identityId: string, signal?: AbortSignal) => {
     if (isDemoModeActive()) return demoTasksRepository.dashboard();
     return apiClient.get(`tasks/dashboard/${identityId}`, { signal }).json<DashboardViewModel>();
@@ -30,7 +40,7 @@ export const tasksApi = {
     if (isDemoModeActive()) return demoTasksRepository.create(payload);
     return apiClient.post('tasks', { json: payload }).json<{ taskId: string }>();
   },
-  edit: async (id: string, payload: Partial<Pick<TaskModel, 'title' | 'description'>>): Promise<{ taskId: string }> => {
+  edit: async (id: string, payload: Partial<Pick<TaskModel, 'title' | 'description' | 'estimatedMinutes' | 'tags' | 'metadata'>>): Promise<{ taskId: string }> => {
     if (isDemoModeActive()) return demoTasksRepository.edit(id, payload);
     await apiClient.patch(`tasks/${id}`, { json: payload });
     return { taskId: id };
@@ -91,6 +101,24 @@ export const tasksApi = {
   relinkCommitment: async (id: string, commitmentId: string | null): Promise<{ taskId: string }> => {
     if (isDemoModeActive()) return demoTasksRepository.relinkCommitment(id, commitmentId);
     await apiClient.patch(`tasks/${id}/commitment`, { json: { commitmentId } });
+    return { taskId: id };
+  },
+  // Task Capability Completion Story 3 — wraps the domain's Task.schedule(),
+  // exposed for the first time via a new ScheduleTaskCommand + endpoint
+  // (previously dueDate could only be set at creation). `dueDate: null`
+  // explicitly clears it, matching relinkGoal/relinkCommitment's own
+  // explicit-null convention — always pass it, never omit.
+  //
+  // Story 6 fix: `startDate` is now a required (not optional) third
+  // parameter, closing a real bug found during Story 6's verification —
+  // the backend controller resolves an omitted startDate to `null`
+  // (`parsed.data.startDate ?? null`), so every prior schedule() call
+  // (which only ever sent dueDate) was silently clearing startDate on
+  // every reschedule. Callers must now explicitly pass the task's current
+  // startDate to preserve it, or null to intentionally clear it.
+  schedule: async (id: string, dueDate: string | null, startDate: string | null): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.schedule(id, dueDate, startDate);
+    await apiClient.patch(`tasks/${id}/schedule`, { json: { dueDate, startDate } });
     return { taskId: id };
   },
 };

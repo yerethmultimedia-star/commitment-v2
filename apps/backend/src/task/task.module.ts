@@ -21,6 +21,7 @@ import { DuplicateTaskNestjsHandler } from './nestjs/duplicate-task.nestjs-handl
 import { RelinkTaskGoalNestjsHandler } from './nestjs/relink-task-goal.nestjs-handler';
 import { RelinkTaskCommitmentNestjsHandler } from './nestjs/relink-task-commitment.nestjs-handler';
 import { CreateTaskDependencyNestjsHandler } from './nestjs/create-task-dependency.nestjs-handler';
+import { ScheduleTaskNestjsHandler } from './nestjs/schedule-task.nestjs-handler';
 // ADR-022 §3.2 — registered here, not CommitmentModule, to avoid a circular
 // module dependency (TaskModule already imports CommitmentModule).
 import { ActivateCommitmentNestjsHandler } from './nestjs/activate-commitment.nestjs-handler';
@@ -79,6 +80,7 @@ import type { VersionedCommitmentRepository } from '../commitment/application/po
     RelinkTaskGoalNestjsHandler,
     RelinkTaskCommitmentNestjsHandler,
     CreateTaskDependencyNestjsHandler,
+    ScheduleTaskNestjsHandler,
     ActivateCommitmentNestjsHandler,
 
     // Sagas

@@ -16,6 +16,7 @@ import { DuplicateTaskCommand } from '../commands/duplicate-task.command';
 import { RelinkTaskGoalCommand } from '../commands/relink-task-goal.command';
 import { RelinkTaskCommitmentCommand } from '../commands/relink-task-commitment.command';
 import { CreateTaskDependencyCommand } from '../commands/create-task-dependency.command';
+import { ScheduleTaskCommand } from '../commands/schedule-task.command';
 import { GetTaskByIdQuery } from '../queries/get-task-by-id.query';
 import { ListTasksQuery } from '../queries/list-tasks.query';
 import { PaginatedTasks, TaskView } from '../queries/task-view.dto';
@@ -91,6 +92,10 @@ export class TaskApplicationService {
   }
 
   async createTaskDependency(cmd: CreateTaskDependencyCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async scheduleTask(cmd: ScheduleTaskCommand): Promise<void> {
     await this.commandBus.execute(cmd);
   }
 

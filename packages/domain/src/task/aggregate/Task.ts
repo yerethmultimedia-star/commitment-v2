@@ -354,6 +354,7 @@ export class Task extends AggregateRoot<TaskId> {
       this.id.value,
       {
         taskId: this.id.value,
+        identityId: this._props.identityId.value,
         dueDate: newDueDate
       }
     );

@@ -15,7 +15,11 @@ export interface TaskModel {
   priority: TaskPriority;
   estimatedMinutes: number;
   actualMinutes: number;
+  /** Set only via Task.schedule() (Story 3's ScheduleTaskCommand) — no creation-time equivalent, matches the domain. */
+  startDate?: string | null;
   dueDate?: string | null;
+  tags?: string[];
+  metadata?: Record<string, any>;
   commitmentId?: string | null;
   /** Direct Goal link — mutually exclusive with commitmentId (see Task.relinkGoal domain invariant). */
   goalId?: string | null;

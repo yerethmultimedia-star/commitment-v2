@@ -30,9 +30,11 @@ const preBlockStatus = new Map<string, 'pending' | 'in_progress'>();
 export const demoTasksRepository = {
   list: async () => ({ data: demoTasks }),
 
+  getById: async (id: string): Promise<TaskModel> => findOrThrow(id),
+
   dashboard: async () => getDemoDashboard(),
 
-  create: async (payload: { id?: string; title: string; description?: string; priority?: TaskPriority; dueDate?: string; commitmentId?: string; goalId?: string }) => {
+  create: async (payload: { id?: string; title: string; description?: string; priority?: TaskPriority; estimatedMinutes?: number; dueDate?: string; commitmentId?: string; goalId?: string; tags?: string[]; metadata?: Record<string, any> }) => {
     demoTaskCounter += 1;
     const id = payload.id ?? `t-demo-${demoTaskCounter}`;
     const task: TaskModel = {
@@ -42,9 +44,12 @@ export const demoTasksRepository = {
       description: payload.description ?? '',
       status: 'pending',
       priority: payload.priority ?? 'medium',
-      estimatedMinutes: 20,
+      estimatedMinutes: payload.estimatedMinutes ?? 20,
       actualMinutes: 0,
+      startDate: null,
       dueDate: payload.dueDate ?? new Date().toISOString(),
+      tags: payload.tags ?? [],
+      metadata: payload.metadata ?? {},
       commitmentId: payload.commitmentId ?? null,
       goalId: payload.goalId ?? null,
       createdAt: new Date().toISOString(),
@@ -54,11 +59,26 @@ export const demoTasksRepository = {
     return { taskId: id };
   },
 
-  edit: async (id: string, payload: Partial<Pick<TaskModel, 'title' | 'description'>>) => {
+  edit: async (id: string, payload: Partial<Pick<TaskModel, 'title' | 'description' | 'estimatedMinutes' | 'tags' | 'metadata'>>) => {
     const updates: Partial<TaskModel> = {};
     if (payload.title !== undefined) updates.title = payload.title;
     if (payload.description !== undefined) updates.description = payload.description ?? '';
+    if (payload.estimatedMinutes !== undefined) updates.estimatedMinutes = payload.estimatedMinutes;
+    if (payload.tags !== undefined) updates.tags = payload.tags;
+    if (payload.metadata !== undefined) updates.metadata = payload.metadata;
     replace(id, updates);
+    return { taskId: id };
+  },
+
+  // Task Capability Completion Story 3 — mirrors the real backend's new
+  // PATCH tasks/:id/schedule endpoint (Task.schedule()). `dueDate`/
+  // `startDate: null` are real, intentional values here (clear them) —
+  // must reach replace() as null, not undefined (undefined would still
+  // overwrite via object spread, just with the wrong value). Story 6:
+  // startDate is now always passed explicitly by callers, mirroring the
+  // real backend fix (see tasksApi.schedule()'s comment).
+  schedule: async (id: string, dueDate: string | null, startDate: string | null) => {
+    replace(id, { dueDate, startDate });
     return { taskId: id };
   },
 

@@ -33,6 +33,7 @@ import { DuplicateTaskCommand } from '../application/commands/duplicate-task.com
 import { RelinkTaskGoalCommand } from '../application/commands/relink-task-goal.command';
 import { RelinkTaskCommitmentCommand } from '../application/commands/relink-task-commitment.command';
 import { CreateTaskDependencyCommand } from '../application/commands/create-task-dependency.command';
+import { ScheduleTaskCommand } from '../application/commands/schedule-task.command';
 import { RegisterTaskResult } from '../application/commands/register-task.result';
 import { ListTasksQuery } from '../application/queries/list-tasks.query';
 import { GetDashboardQuery } from '../application/queries/get-dashboard.query';
@@ -116,6 +117,13 @@ const relinkGoalSchema = z.object({
 
 const relinkCommitmentSchema = z.object({
   commitmentId: z.string().uuid().nullable(),
+});
+
+const scheduleSchema = z.object({
+  // Explicit null clears the due date — omitting the field entirely is a
+  // validation error, mirroring relinkGoalSchema's own convention.
+  dueDate: z.string().nullable(),
+  startDate: z.string().nullable().optional(),
 });
 
 const createDependencySchema = z.object({
@@ -545,6 +553,39 @@ export class TasksController {
     try {
       await this.taskAppService.relinkCommitment(
         new RelinkTaskCommitmentCommand(id, parsed.data.commitmentId),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotBeCompletedError)
+        throw new ConflictException(err.message);
+      if (err instanceof TaskCannotBeCancelledError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Patch(':id/schedule')
+  @ApiOperation({ summary: "Change a task's due date and/or start date" })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async schedule(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    const idParsed = uuidSchema.safeParse(id);
+    if (!idParsed.success) throw new BadRequestException('Invalid task ID');
+
+    const parsed = scheduleSchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.taskAppService.scheduleTask(
+        new ScheduleTaskCommand(
+          id,
+          parsed.data.dueDate,
+          parsed.data.startDate ?? null,
+        ),
       );
     } catch (err) {
       if (err instanceof TaskNotFoundError)

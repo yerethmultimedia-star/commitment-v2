@@ -176,4 +176,61 @@ describe('demoTasksRepository — referential integrity of the returned list', (
     const { data: after } = await demoTasksRepository.list();
     expect(after).not.toBe(before);
   });
+
+  // Task Capability Completion Story 3 — mirrors the real backend's
+  // ScheduleTaskCommand at the demo-mode repository level.
+  it('schedule() updates dueDate and returns a new array reference', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.schedule('t-050', '2026-09-15T00:00:00.000Z', null);
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    expect((await findTask('t-050')).dueDate).toBe('2026-09-15T00:00:00.000Z');
+  });
+
+  it('schedule(null) explicitly clears dueDate rather than leaving it unchanged', async () => {
+    await demoTasksRepository.schedule('t-050', '2026-09-15T00:00:00.000Z', null);
+    await demoTasksRepository.schedule('t-050', null, null);
+    const after = await findTask('t-050');
+    expect(after.dueDate ?? null).toBeNull();
+  });
+
+  // Task Capability Completion Story 6 — regression guard for a real bug:
+  // the real backend resolves an omitted startDate to null, so every
+  // schedule() call must explicitly pass the current startDate to avoid
+  // silently clearing it on an unrelated dueDate change.
+  it('schedule() sets startDate when passed, and preserves it across a later dueDate-only change', async () => {
+    await demoTasksRepository.schedule('t-050', '2026-09-15T00:00:00.000Z', '2026-09-10T00:00:00.000Z');
+    expect((await findTask('t-050')).startDate).toBe('2026-09-10T00:00:00.000Z');
+
+    // Caller passes the task's current startDate through unchanged, as
+    // TaskForm.tsx now does — must NOT clear it.
+    await demoTasksRepository.schedule('t-050', '2026-09-20T00:00:00.000Z', '2026-09-10T00:00:00.000Z');
+    const after = await findTask('t-050');
+    expect(after.dueDate).toBe('2026-09-20T00:00:00.000Z');
+    expect(after.startDate).toBe('2026-09-10T00:00:00.000Z');
+  });
+
+  it('create() accepts tags/metadata and edit() updates them', async () => {
+    const { taskId } = await demoTasksRepository.create({
+      title: 'Story 6 tags/metadata test',
+      tags: ['urgent', 'work'],
+      metadata: { source: 'test' },
+    });
+    const created = await findTask(taskId);
+    expect(created.tags).toEqual(['urgent', 'work']);
+    expect(created.metadata).toEqual({ source: 'test' });
+
+    await demoTasksRepository.edit(taskId, { tags: ['updated'] });
+    const edited = await findTask(taskId);
+    expect(edited.tags).toEqual(['updated']);
+    expect(edited.metadata).toEqual({ source: 'test' }); // untouched
+  });
+
+  it('create() defaults tags/metadata/startDate when omitted', async () => {
+    const { taskId } = await demoTasksRepository.create({ title: 'No tags/metadata given' });
+    const created = await findTask(taskId);
+    expect(created.tags).toEqual([]);
+    expect(created.metadata).toEqual({});
+    expect(created.startDate ?? null).toBeNull();
+  });
 });

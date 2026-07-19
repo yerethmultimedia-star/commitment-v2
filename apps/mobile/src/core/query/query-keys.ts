@@ -8,6 +8,7 @@ export const queryKeys = {
     all: ['tasks'] as const,
     list: (filters?: Record<string, unknown>) => ['tasks', 'list', filters] as const,
     dashboard: (identityId: string) => ['tasks', 'dashboard', identityId] as const,
+    detail: (id: string) => ['tasks', 'detail', id] as const,
   },
   habits: {
     all: ['habits'] as const,

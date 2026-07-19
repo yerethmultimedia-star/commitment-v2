@@ -19,8 +19,7 @@ const TYPE_DOT_COLOR: Record<AgendaItemType, string> = {
 
 /** Where tapping an agenda item navigates — Milestones have no screen of
  * their own, so their `sourceId` is the owning Goal's id (see
- * `buildDayAgenda`). Tasks have no per-item detail route yet, so they land
- * on the Tasks list rather than a dead link. */
+ * `buildDayAgenda`). */
 function routeFor(item: AgendaItem): string | null {
   switch (item.type) {
     case 'commitment':
@@ -30,7 +29,7 @@ function routeFor(item: AgendaItem): string | null {
     case 'milestone':
       return `/goals/${item.sourceId}`;
     case 'task':
-      return '/(tabs)/tasks';
+      return `/tasks/${item.sourceId}`;
     default:
       return null;
   }
@@ -75,6 +74,45 @@ export default function CalendarScreen() {
   const week = useMemo(() => weekDaysFor(selectedDate), [selectedDate]);
   const { agenda, isLoading } = useDayAgenda(selectedDate);
   const items = agenda?.items ?? [];
+  // App-wide UX rule: items with a real time render first, chronologically
+  // (buildDayAgenda already sorts them this way); items with only a due
+  // date, no time, render after under a distinct "Sin hora" section rather
+  // than interleaved — so a scheduled 14:30 task and a plain due-today task
+  // are never visually ambiguous about whether either has a real time.
+  const timedItems = items.filter((item) => item.time);
+  const untimedItems = items.filter((item) => !item.time);
+
+  const renderAgendaItemCard = (item: AgendaItem) => {
+    const route = routeFor(item);
+    return (
+      <Card
+        key={item.id}
+        variant="elevated"
+        clickable={!!route}
+        onPress={route ? () => router.push(route as any) : undefined}
+        accessibilityLabel={t('calendar.itemA11y', { title: item.title, type: t(`calendar.types.${item.type}`) })}
+      >
+        <XStack gap="$3" alignItems="center">
+          <Circle size={10} backgroundColor={TYPE_DOT_COLOR[item.type] as any} />
+          <Body fontWeight="600" width={48} tone="secondary">
+            {item.time ?? ''}
+          </Body>
+          <Body
+            flex={1}
+            fontWeight="600"
+            textDecorationLine={item.completed ? 'line-through' : 'none'}
+          >
+            {item.title}
+          </Body>
+          {item.durationMinutes && (
+            <Body tone="secondary" fontSize="$2">
+              {t('calendar.durationMinutes', { count: item.durationMinutes })}
+            </Body>
+          )}
+        </XStack>
+      </Card>
+    );
+  };
 
   return (
     <>
@@ -144,38 +182,20 @@ export default function CalendarScreen() {
               description={{ i18nKey: 'calendar.empty.description' }}
             />
           ) : (
-            <YStack gap="$3">
-              {items.map((item) => {
-                const route = routeFor(item);
-                return (
-                  <Card
-                    key={item.id}
-                    variant="elevated"
-                    clickable={!!route}
-                    onPress={route ? () => router.push(route as any) : undefined}
-                    accessibilityLabel={t('calendar.itemA11y', { title: item.title, type: t(`calendar.types.${item.type}`) })}
-                  >
-                    <XStack gap="$3" alignItems="center">
-                      <Circle size={10} backgroundColor={TYPE_DOT_COLOR[item.type] as any} />
-                      <Body fontWeight="600" width={48} tone="secondary">
-                        {item.time ?? ''}
-                      </Body>
-                      <Body
-                        flex={1}
-                        fontWeight="600"
-                        textDecorationLine={item.completed ? 'line-through' : 'none'}
-                      >
-                        {item.title}
-                      </Body>
-                      {item.durationMinutes && (
-                        <Body tone="secondary" fontSize="$2">
-                          {t('calendar.durationMinutes', { count: item.durationMinutes })}
-                        </Body>
-                      )}
-                    </XStack>
-                  </Card>
-                );
-              })}
+            <YStack gap="$4">
+              {timedItems.length > 0 && (
+                <YStack gap="$3">
+                  {timedItems.map((item) => renderAgendaItemCard(item))}
+                </YStack>
+              )}
+              {untimedItems.length > 0 && (
+                <YStack gap="$3">
+                  <Body tone="secondary" fontWeight="600" fontSize="$2">
+                    {t('calendar.noTimeSection')}
+                  </Body>
+                  {untimedItems.map((item) => renderAgendaItemCard(item))}
+                </YStack>
+              )}
             </YStack>
           )}
 

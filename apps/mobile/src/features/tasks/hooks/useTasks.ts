@@ -13,6 +13,14 @@ export function useTasks() {
   });
 }
 
+export function useTask(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.tasks.detail(id ?? ''),
+    queryFn: ({ signal }) => tasksApi.getById(id!, signal),
+    enabled: Boolean(id),
+  });
+}
+
 export function useDashboardQuery() {
   const { identityId } = useSession();
   return useQuery({
