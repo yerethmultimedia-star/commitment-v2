@@ -98,11 +98,62 @@ describe('demoTasksRepository — referential integrity of the returned list', (
     expect(after).not.toBe(before);
   });
 
-  it('archive() returns a new array reference', async () => {
+  // ADR-022 Task Lifecycle & Execution Model — replaces the old archive()
+  // referential-integrity test (TECH_DEBT.md Item 41). Chained in a
+  // coherent order (start -> block -> unblock -> returnToPending -> cancel
+  // -> reopen) so unblock() also exercises preBlockStatus restoration, not
+  // just referential integrity.
+  it('start() returns a new array reference', async () => {
     const { data: before } = await demoTasksRepository.list();
-    await demoTasksRepository.archive('t-050');
+    await demoTasksRepository.start('t-050');
     const { data: after } = await demoTasksRepository.list();
     expect(after).not.toBe(before);
+    expect((await findTask('t-050')).status).toBe('in_progress');
+  });
+
+  it('block() sets blockedType=manual and returns a new array reference', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.block('t-050', 'waiting on review');
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    const task = await findTask('t-050');
+    expect(task.status).toBe('blocked');
+    expect(task.blockedType).toBe('manual');
+    expect(task.blockedReason).toBe('waiting on review');
+  });
+
+  it('unblock() restores the exact prior status (in_progress) and clears blockedType', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.unblock('t-050');
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    const task = await findTask('t-050');
+    expect(task.status).toBe('in_progress');
+    expect(task.blockedType ?? null).toBeNull();
+  });
+
+  it('returnToPending() returns a new array reference', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.returnToPending('t-050');
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    expect((await findTask('t-050')).status).toBe('pending');
+  });
+
+  it('cancel() returns a new array reference', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.cancel('t-050');
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    expect((await findTask('t-050')).status).toBe('cancelled');
+  });
+
+  it('reopen() returns a new array reference and lands on pending', async () => {
+    const { data: before } = await demoTasksRepository.list();
+    await demoTasksRepository.reopen('t-050');
+    const { data: after } = await demoTasksRepository.list();
+    expect(after).not.toBe(before);
+    expect((await findTask('t-050')).status).toBe('pending');
   });
 
   it('duplicate() returns a new array reference', async () => {

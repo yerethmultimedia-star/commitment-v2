@@ -283,9 +283,17 @@ function isSameDay(iso: string | null | undefined, ref: Date): boolean {
 
 export function getDemoDashboard(): DashboardViewModel {
   const now = today();
+  // ADR-022: "today"/"upcoming" surface anything still actionable and due —
+  // Pending, InProgress, and Blocked — not just Pending, mirroring the
+  // backend's DashboardProjector (apps/backend/src/task/application/
+  // projectors/dashboard.projector.ts). A Blocked task due today still
+  // needs attention; an InProgress task due today shouldn't disappear.
+  const actionable = demoTasks.filter(
+    (t) => t.status === 'pending' || t.status === 'in_progress' || t.status === 'blocked'
+  );
   const pending = demoTasks.filter((t) => t.status === 'pending');
-  const todayTasks = pending.filter((t) => isSameDay(t.dueDate, now));
-  const upcoming = pending
+  const todayTasks = actionable.filter((t) => isSameDay(t.dueDate, now));
+  const upcoming = actionable
     .filter((t) => t.dueDate && new Date(t.dueDate) > now && !isSameDay(t.dueDate, now))
     .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime());
   const recentActivity = demoTasks
@@ -296,7 +304,9 @@ export function getDemoDashboard(): DashboardViewModel {
   const completedThisWeek = demoTasks.filter(
     (t) => t.status === 'completed' && t.completedAt && new Date(t.completedAt).getTime() > now.getTime() - 7 * DAY
   ).length;
-  const totalRelevant = demoTasks.filter((t) => t.status !== 'archived').length;
+  // 'cancelled' replaces 'archived' (ADR-022 §4.1 migration) as the
+  // terminal state excluded from the completion-rate denominator.
+  const totalRelevant = demoTasks.filter((t) => t.status !== 'cancelled').length;
   const completedTotal = demoTasks.filter((t) => t.status === 'completed').length;
 
   return {

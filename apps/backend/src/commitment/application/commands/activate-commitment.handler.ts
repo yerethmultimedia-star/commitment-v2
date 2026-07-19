@@ -10,6 +10,7 @@ import { ActivateCommitmentCommand } from './activate-commitment.command';
 import { ActivateCommitmentResult } from './activate-commitment.result';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
 import { VersionedCommitmentRepository } from '../ports/versioned-commitment-repository.port';
+import type { CommitmentActivationPreconditions } from '../ports/commitment-activation-preconditions.port';
 
 // Application-layer exceptions (framework-agnostic)
 export class CommitmentNotFoundError extends Error {
@@ -37,6 +38,7 @@ export class ActivateCommitmentCommandHandlerCore {
   constructor(
     private readonly commitmentRepository: VersionedCommitmentRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
+    private readonly activationPreconditions: CommitmentActivationPreconditions,
   ) {}
 
   public async handle(
@@ -60,9 +62,15 @@ export class ActivateCommitmentCommandHandlerCore {
       );
     }
 
+    // 2b. Resolve the one cross-aggregate fact the aggregate can't know on
+    // its own (ADR-022 §3.1, Command Preconditions) — the aggregate still
+    // decides and throws (Rule #86), it just receives this as an input.
+    const hasExecutionPlan =
+      await this.activationPreconditions.hasExecutionPlan(id);
+
     // 3. Invoke domain behavior — let the Aggregate decide validity (Rule #86)
     try {
-      commitment.activate();
+      commitment.activate(hasExecutionPlan);
     } catch (error: unknown) {
       if (
         error instanceof CommitmentAlreadyCompletedError ||

@@ -33,7 +33,7 @@ function createDraftCommitment(id = COMMITMENT_ID): Commitment {
 
 function createActiveCommitment(): Commitment {
   const commitment = createDraftCommitment(COMMITMENT_ID);
-  commitment.activate();
+  commitment.activate(true);
   return commitment;
 }
 

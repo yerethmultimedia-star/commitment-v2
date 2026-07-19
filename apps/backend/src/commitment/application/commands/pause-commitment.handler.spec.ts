@@ -33,7 +33,7 @@ function createActiveCommitment(): Commitment {
     new CommitmentDescription('Test description'),
   );
   // Activate the commitment to move to Active state
-  commitment.activate();
+  commitment.activate(true);
   return commitment;
 }
 

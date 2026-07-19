@@ -8,6 +8,7 @@ export { TaskTitle } from './value-objects/task-title.js';
 export { TaskDescription } from './value-objects/task-description.js';
 export { TaskPriority, PriorityType } from './value-objects/task-priority.js';
 export { TaskStatus, StatusType } from './value-objects/task-status.js';
+export type { BlockedType } from './value-objects/task-status.js';
 
 // Events
 export { TaskRegisteredEvent } from './events/task-registered.event.js';
@@ -18,10 +19,16 @@ export { TaskCompletedEvent } from './events/task-completed.event.js';
 export type { TaskCompletedEventPayload } from './events/task-completed.event.js';
 export { TaskReopenedEvent } from './events/task-reopened.event.js';
 export type { TaskReopenedEventPayload } from './events/task-reopened.event.js';
-export { TaskArchivedEvent } from './events/task-archived.event.js';
-export type { TaskArchivedEventPayload } from './events/task-archived.event.js';
-export { TaskRestoredEvent } from './events/task-restored.event.js';
-export type { TaskRestoredEventPayload } from './events/task-restored.event.js';
+export { TaskStartedEvent } from './events/task-started.event.js';
+export type { TaskStartedEventPayload } from './events/task-started.event.js';
+export { TaskBlockedEvent } from './events/task-blocked.event.js';
+export type { TaskBlockedEventPayload } from './events/task-blocked.event.js';
+export { TaskUnblockedEvent } from './events/task-unblocked.event.js';
+export type { TaskUnblockedEventPayload } from './events/task-unblocked.event.js';
+export { TaskCancelledEvent } from './events/task-cancelled.event.js';
+export type { TaskCancelledEventPayload } from './events/task-cancelled.event.js';
+export { TaskReturnedToPendingEvent } from './events/task-returned-to-pending.event.js';
+export type { TaskReturnedToPendingEventPayload } from './events/task-returned-to-pending.event.js';
 export { TaskDeletedEvent } from './events/task-deleted.event.js';
 export type { TaskDeletedEventPayload } from './events/task-deleted.event.js';
 export { TaskPriorityChangedEvent } from './events/task-priority-changed.event.js';
@@ -46,15 +53,27 @@ export {
   InvalidTaskPriorityError,
   InvalidTaskStatusError,
   TaskAlreadyCompletedError,
-  TaskAlreadyArchivedError,
+  TaskAlreadyCancelledError,
   TaskAlreadyDeletedError,
   TaskCannotBeCompletedError,
   TaskCannotBeReopenedError,
-  TaskCannotBeArchivedError,
-  TaskCannotBeRestoredError,
+  TaskReopenBlockedByCommitmentError,
+  TaskCannotBeStartedError,
+  TaskCannotBeBlockedError,
+  TaskCannotBeUnblockedError,
+  TaskCannotBeUnblockedManuallyError,
+  TaskCannotBeCancelledError,
+  TaskCannotReturnToPendingError,
   InvalidTaskStateTransitionError,
-  TaskNotFoundError
+  TaskNotFoundError,
+  TaskDependencyCycleError,
+  InvalidTaskDependencyError
 } from './errors/task-errors.js';
 
 // Constants
 export { TaskConstraints } from './constants/task-constraints.js';
+
+// TaskDependency
+export { TaskDependency } from './aggregate/task-dependency.js';
+export type { TaskDependencyProps } from './aggregate/task-dependency.js';
+export { TaskDependencyService } from './services/task-dependency.service.js';

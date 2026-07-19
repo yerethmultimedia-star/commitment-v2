@@ -201,8 +201,13 @@ export function useDashboardContext(): UseDashboardContextResult {
         completedTodayCount: scheduledTodayHabits.filter((h) => h.completedToday).length,
         atRiskCount: scheduledTodayHabits.filter((h) => h.currentStreakDays > 0 && !h.completedToday).length,
       },
+      // ADR-022: dashboard.today now includes Blocked tasks (not just
+      // Pending/InProgress) — correct for "what's on your plate today," but
+      // the priority-of-the-day hero must stay actionable, so Blocked is
+      // excluded here specifically (it still appears in the plain "today"
+      // count/list above, unfiltered).
       priorityTask: computePriorityTask(
-        taskData?.today ?? [],
+        (taskData?.today ?? []).filter((t) => t.status !== 'blocked'),
         allTasks,
         commitments,
         goals,

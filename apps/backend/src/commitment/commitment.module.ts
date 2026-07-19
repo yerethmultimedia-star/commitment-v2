@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CommitmentsController } from './api/commitments.controller';
 import { RegisterCommitmentNestjsHandler } from './nestjs/register-commitment.nestjs-handler';
-import { ActivateCommitmentNestjsHandler } from './nestjs/activate-commitment.nestjs-handler';
 import { PauseCommitmentNestjsHandler } from './nestjs/pause-commitment.nestjs-handler';
 import { ResumeCommitmentNestjsHandler } from './nestjs/resume-commitment.nestjs-handler';
 import { CompleteCommitmentNestjsHandler } from './nestjs/complete-commitment.nestjs-handler';
@@ -24,8 +23,14 @@ import { RecurringCommitmentSaga } from './application/sagas/recurring-commitmen
   imports: [CqrsModule],
   controllers: [CommitmentsController],
   providers: [
+    // ActivateCommitmentNestjsHandler is deliberately NOT registered here —
+    // it lives in TaskModule (ADR-022 §3.2), which needs TaskRepository to
+    // resolve CommitmentActivationPreconditions. Registering it here would
+    // require CommitmentModule to import TaskModule, a circular dependency
+    // (TaskModule already imports CommitmentModule). The Command/Result/
+    // Core for activate-commitment stay in this module's own
+    // application/commands/ folder, unmoved.
     RegisterCommitmentNestjsHandler,
-    ActivateCommitmentNestjsHandler,
     PauseCommitmentNestjsHandler,
     ResumeCommitmentNestjsHandler,
     CompleteCommitmentNestjsHandler,

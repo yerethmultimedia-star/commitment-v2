@@ -126,19 +126,19 @@ export class Commitment extends AggregateRoot<CommitmentId> {
   /**
    * Draft -> Active (Commitment Draft Lifecycle, mirroring Goal.activate()).
    * Title needs no runtime check — CommitmentTitle's constructor already
-   * guarantees it. Description is, for now, the only invariant enforced
-   * here. The original product spec also required "at least one linked
-   * Habit or Task," but that was revised: an Aggregate shouldn't reach
-   * into another Aggregate's data to validate its own invariants (it would
-   * force Commitment to query Task/Habit, breaking aggregate boundaries —
-   * and would've required a circular module dependency between
-   * CommitmentModule and TaskModule to even implement). The real product
-   * intent — "an execution plan must exist before activating" — needs its
-   * own Commitment↔Task↔Habit relationship model, which doesn't exist yet.
-   * TODO: revisit once that relationship model is designed; don't add an
-   * ad hoc cross-aggregate check here in the meantime.
+   * guarantees it. Description is an invariant this aggregate can check on
+   * its own. "At least one linked Task or Habit" (an execution plan) is
+   * NOT — that would force Commitment to query Task/Habit, breaking
+   * aggregate boundaries. ADR-022 resolves this with a Command
+   * Preconditions class (`CommitmentActivationPreconditions`, Application
+   * Layer) that resolves `hasExecutionPlan` externally; this method still
+   * decides validity and throws — it just receives that one fact as a
+   * parameter, the same as any other externally-supplied input. The
+   * Habit half of that check isn't resolvable yet (no Habit<->Commitment
+   * relationship exists) — see ADR-022 §3.1 and §12 (deferred to a future
+   * "ADR-023", not blocking).
    */
-  public activate(): void {
+  public activate(hasExecutionPlan: boolean): void {
     if (this._state === CommitmentState.Active) {
       // Idempotent: already active, no state change or event
       return;
@@ -149,6 +149,9 @@ export class Commitment extends AggregateRoot<CommitmentId> {
     }
     if (!this._description || this._description.value.length === 0) {
       throw new CommitmentActivationRequirementsNotMetError('Commitment must have a description before it can be activated.');
+    }
+    if (!hasExecutionPlan) {
+      throw new CommitmentActivationRequirementsNotMetError('Commitment must have at least one linked Task before it can be activated.');
     }
     const event = new CommitmentActivatedEvent(
       this.id.value,

@@ -12,7 +12,7 @@
     "today": "Hoy",
     "upcoming": "Próximas",
     "completed": "Completadas",
-    "archived": "Archivadas",
+    "cancelled": "Canceladas",
     "empty": {
       "inbox": {
         "title": "La bandeja está vacía",
@@ -30,9 +30,9 @@
         "title": "Aún no hay tareas completadas",
         "description": "Las tareas que termines aparecerán aquí."
       },
-      "archived": {
-        "title": "No hay tareas archivadas",
-        "description": "Las tareas que archives aparecerán aquí."
+      "cancelled": {
+        "title": "No hay tareas canceladas",
+        "description": "Las tareas que canceles aparecerán aquí."
       }
     }
   },
@@ -64,13 +64,26 @@
   "actions": {
     "complete": "Completar",
     "duplicate": "Duplicar",
-    "archive": "Archivar",
-    "edit": "Editar"
+    "edit": "Editar",
+    "start": "Iniciar",
+    "block": "Bloquear",
+    "unblock": "Desbloquear",
+    "returnToPending": "Volver a Pendiente",
+    "cancel": "Cancelar",
+    "reopen": "Reabrir"
   },
   "status": {
     "pending": "Pendiente",
+    "in_progress": "En curso",
+    "blocked": "Bloqueada",
     "completed": "Completada",
-    "archived": "Archivada"
+    "cancelled": "Cancelada"
+  },
+  "confirm": {
+    "cancel": {
+      "title": "¿Cancelar esta tarea?",
+      "description": "\"{{title}}\" pasará a Cancelada. Puedes reabrirla más adelante si lo necesitas."
+    }
   },
   "progress": {
     "title": "Progreso",

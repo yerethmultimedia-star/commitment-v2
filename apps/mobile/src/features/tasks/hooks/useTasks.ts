@@ -30,7 +30,15 @@ export function useTaskActions() {
   ]);
   return {
     complete: useMutation({ mutationFn: tasksApi.complete, onSuccess: invalidate }),
-    archive: useMutation({ mutationFn: tasksApi.archive, onSuccess: invalidate }),
+    start: useMutation({ mutationFn: tasksApi.start, onSuccess: invalidate }),
+    block: useMutation({
+      mutationFn: ({ id, reason }: { id: string; reason?: string }) => tasksApi.block(id, reason),
+      onSuccess: invalidate,
+    }),
+    unblock: useMutation({ mutationFn: tasksApi.unblock, onSuccess: invalidate }),
+    returnToPending: useMutation({ mutationFn: tasksApi.returnToPending, onSuccess: invalidate }),
+    cancel: useMutation({ mutationFn: tasksApi.cancel, onSuccess: invalidate }),
+    reopen: useMutation({ mutationFn: tasksApi.reopen, onSuccess: invalidate }),
     duplicate: useMutation({ mutationFn: tasksApi.duplicate, onSuccess: invalidate }),
     changePriority: useMutation({
       mutationFn: ({ id, priority }: { id: string; priority: TaskPriority }) =>

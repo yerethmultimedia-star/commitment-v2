@@ -5,8 +5,11 @@ import {
   TaskEditedEvent,
   TaskCompletedEvent,
   TaskReopenedEvent,
-  TaskArchivedEvent,
-  TaskRestoredEvent,
+  TaskStartedEvent,
+  TaskBlockedEvent,
+  TaskUnblockedEvent,
+  TaskCancelledEvent,
+  TaskReturnedToPendingEvent,
   TaskDeletedEvent,
   TaskPriorityChangedEvent,
   TaskDueDateChangedEvent,
@@ -24,8 +27,11 @@ const startOfDay = (date: Date) =>
   TaskEditedEvent,
   TaskCompletedEvent,
   TaskReopenedEvent,
-  TaskArchivedEvent,
-  TaskRestoredEvent,
+  TaskStartedEvent,
+  TaskBlockedEvent,
+  TaskUnblockedEvent,
+  TaskCancelledEvent,
+  TaskReturnedToPendingEvent,
   TaskDeletedEvent,
   TaskPriorityChangedEvent,
   TaskDueDateChangedEvent,
@@ -64,16 +70,26 @@ export class DashboardProjector implements IEventHandler<any> {
 
     const tasks = this.taskStore
       .findByIdentityId(identityId)
-      .filter((task) => !task.deletedAt && task.status !== 'archived');
+      .filter((task) => !task.deletedAt && task.status !== 'cancelled');
 
     const byDueDate = (a: TaskView, b: TaskView) =>
       new Date(a.dueDate ?? '9999-12-31').getTime() -
       new Date(b.dueDate ?? '9999-12-31').getTime();
 
+    // ADR-022: "today"/"upcoming" show anything still actionable and due —
+    // Pending, InProgress, and Blocked — not just Pending. A Blocked task
+    // due today still needs attention (that's the point of surfacing it),
+    // and an InProgress task due today shouldn't disappear from view just
+    // because it's been started.
+    const isActionable = (task: TaskView) =>
+      task.status === 'pending' ||
+      task.status === 'in_progress' ||
+      task.status === 'blocked';
+
     const today = tasks
       .filter(
         (task) =>
-          task.status === 'pending' &&
+          isActionable(task) &&
           task.dueDate &&
           new Date(task.dueDate) >= todayStart &&
           new Date(task.dueDate) < tomorrow,
@@ -83,7 +99,7 @@ export class DashboardProjector implements IEventHandler<any> {
     const upcoming = tasks
       .filter(
         (task) =>
-          task.status === 'pending' &&
+          isActionable(task) &&
           task.dueDate &&
           new Date(task.dueDate) >= tomorrow,
       )

@@ -4,7 +4,7 @@ import { TaskId } from '../value-objects/task-id.js';
 import { TaskTitle } from '../value-objects/task-title.js';
 import { TaskDescription } from '../value-objects/task-description.js';
 import { TaskPriority, PriorityType } from '../value-objects/task-priority.js';
-import { TaskStatus, StatusType } from '../value-objects/task-status.js';
+import { TaskStatus, StatusType, BlockedType } from '../value-objects/task-status.js';
 import { IdentityId } from '../../identity/value-objects/identity-id.js';
 import { CommitmentId } from '../../commitment/value-objects/commitment-id.js';
 
@@ -12,8 +12,11 @@ import { TaskRegisteredEvent } from '../events/task-registered.event.js';
 import { TaskEditedEvent } from '../events/task-edited.event.js';
 import { TaskCompletedEvent } from '../events/task-completed.event.js';
 import { TaskReopenedEvent } from '../events/task-reopened.event.js';
-import { TaskArchivedEvent } from '../events/task-archived.event.js';
-import { TaskRestoredEvent } from '../events/task-restored.event.js';
+import { TaskStartedEvent } from '../events/task-started.event.js';
+import { TaskBlockedEvent } from '../events/task-blocked.event.js';
+import { TaskUnblockedEvent } from '../events/task-unblocked.event.js';
+import { TaskCancelledEvent } from '../events/task-cancelled.event.js';
+import { TaskReturnedToPendingEvent } from '../events/task-returned-to-pending.event.js';
 import { TaskDeletedEvent } from '../events/task-deleted.event.js';
 import { TaskPriorityChangedEvent } from '../events/task-priority-changed.event.js';
 import { TaskDueDateChangedEvent } from '../events/task-due-date-changed.event.js';
@@ -23,11 +26,17 @@ import { TaskRelinkedToCommitmentEvent } from '../events/task-relinked-to-commit
 
 import {
   TaskAlreadyCompletedError,
-  TaskAlreadyArchivedError,
+  TaskAlreadyCancelledError,
   TaskAlreadyDeletedError,
+  TaskCannotBeCompletedError,
   TaskCannotBeReopenedError,
-  TaskCannotBeArchivedError,
-  TaskCannotBeRestoredError,
+  TaskReopenBlockedByCommitmentError,
+  TaskCannotBeStartedError,
+  TaskCannotBeBlockedError,
+  TaskCannotBeUnblockedError,
+  TaskCannotBeUnblockedManuallyError,
+  TaskCannotBeCancelledError,
+  TaskCannotReturnToPendingError,
 } from '../errors/task-errors.js';
 
 export interface TaskProps {
@@ -48,6 +57,11 @@ export interface TaskProps {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date | null;
+  /** Only set while status is Blocked; ADR-022 §4.2. */
+  blockedType: BlockedType | null;
+  blockedReason: string | null;
+  /** The operational status (Pending/InProgress) Unblock restores. */
+  preBlockStatus: StatusType | null;
 }
 
 export class Task extends AggregateRoot<TaskId> {
@@ -76,6 +90,8 @@ export class Task extends AggregateRoot<TaskId> {
   public get updatedAt(): Date { return this._props.updatedAt; }
   public get deletedAt(): Date | null | undefined { return this._props.deletedAt; }
   public get isDeleted(): boolean { return !!this._props.deletedAt; }
+  public get blockedType(): BlockedType | null { return this._props.blockedType; }
+  public get blockedReason(): string | null { return this._props.blockedReason; }
 
   // Behaviors
   public static register(
@@ -93,7 +109,7 @@ export class Task extends AggregateRoot<TaskId> {
   ): Task {
     const task = new Task(id);
     const now = new Date();
-    
+
     const event = new TaskRegisteredEvent(
       id.value,
       {
@@ -124,17 +140,17 @@ export class Task extends AggregateRoot<TaskId> {
     metadata?: Record<string, any>
   ): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
+    this.ensureOperational();
 
     let hasChanges = false;
     if (title && title.value !== this._props.title.value) hasChanges = true;
-    
+
     const currentDesc = this._props.description ? this._props.description.value : '';
     const newDesc = description ? description.value : (description === null ? '' : currentDesc);
     if (description !== undefined && currentDesc !== newDesc) hasChanges = true;
-    
+
     if (estimatedMinutes !== undefined && estimatedMinutes !== this._props.estimatedMinutes) hasChanges = true;
-    
+
     if (tags !== undefined && JSON.stringify(tags) !== JSON.stringify(this._props.tags)) hasChanges = true;
     if (metadata !== undefined && JSON.stringify(metadata) !== JSON.stringify(this._props.metadata)) hasChanges = true;
 
@@ -154,12 +170,18 @@ export class Task extends AggregateRoot<TaskId> {
     this.recordEvent(event);
   }
 
+  /** Pending or In Progress -> Completed. Blocked must Unblock first (ADR-022 §4.2). */
   public complete(actualMinutes?: number): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
 
     if (this._props.status.value === StatusType.Completed) {
       throw new TaskAlreadyCompletedError('Task is already completed');
+    }
+    if (
+      this._props.status.value !== StatusType.Pending &&
+      this._props.status.value !== StatusType.InProgress
+    ) {
+      throw new TaskCannotBeCompletedError(`Cannot complete task from state: ${this._props.status.value}`);
     }
 
     const now = new Date();
@@ -177,46 +199,117 @@ export class Task extends AggregateRoot<TaskId> {
     }
   }
 
-  public reopen(): void {
+  /** Pending -> In Progress. Only reachable via this explicit action (ADR-022 §4.2), never automatic. */
+  public start(): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
-
-    if (this._props.status.value !== StatusType.Completed) {
-      throw new TaskCannotBeReopenedError('Only completed tasks can be reopened');
+    if (this._props.status.value !== StatusType.Pending) {
+      throw new TaskCannotBeStartedError(`Cannot start task from state: ${this._props.status.value}`);
     }
+    const event = new TaskStartedEvent(this.id.value, { taskId: this.id.value });
+    this.recordEvent(event);
+  }
 
-    const event = new TaskReopenedEvent(
+  /**
+   * Pending or In Progress -> Blocked. Records the exact prior status so
+   * Unblock can restore it precisely (ADR-022 §4.2).
+   */
+  public block(blockedType: BlockedType, blockedReason?: string): void {
+    this.ensureNotDeleted();
+    const current = this._props.status.value;
+    if (current !== StatusType.Pending && current !== StatusType.InProgress) {
+      throw new TaskCannotBeBlockedError(`Cannot block task from state: ${current}`);
+    }
+    const event = new TaskBlockedEvent(
       this.id.value,
-      { taskId: this.id.value }
+      {
+        taskId: this.id.value,
+        blockedType,
+        blockedReason,
+        previousStatus: current,
+      }
     );
     this.recordEvent(event);
   }
 
-  public archive(): void {
+  /**
+   * Blocked -> (Pending | In Progress), restoring the exact prior status.
+   * `source: 'manual'` is rejected when `blockedType === 'dependency'` —
+   * a dependency-blocked Task can only be unblocked automatically, by its
+   * predecessor completing (ADR-022 §4.2). `source: 'system'` is how that
+   * automatic resolution calls this method; it has no such restriction.
+   */
+  public unblock(source: 'manual' | 'system'): void {
     this.ensureNotDeleted();
-
-    if (this._props.status.value === StatusType.Archived) {
-      throw new TaskAlreadyArchivedError('Task is already archived');
+    if (this._props.status.value !== StatusType.Blocked) {
+      throw new TaskCannotBeUnblockedError(`Cannot unblock task from state: ${this._props.status.value}`);
     }
-
-    const event = new TaskArchivedEvent(
+    if (source === 'manual' && this._props.blockedType === 'dependency') {
+      throw new TaskCannotBeUnblockedManuallyError(
+        'A dependency-blocked task can only be unblocked automatically, when its predecessor completes.'
+      );
+    }
+    const resultingStatus = this._props.preBlockStatus ?? StatusType.Pending;
+    const event = new TaskUnblockedEvent(
       this.id.value,
-      { taskId: this.id.value }
+      {
+        taskId: this.id.value,
+        source,
+        resultingStatus,
+      }
     );
     this.recordEvent(event);
   }
 
-  public restore(): void {
+  /**
+   * Pending, In Progress, or Blocked -> Cancelled. Terminal. Used directly
+   * by a user action and by the Commitment->Task cancellation cascade
+   * (ADR-022 §6.1) — the cascade handler is responsible for only calling
+   * this on non-terminal Tasks (Completed/Cancelled are left untouched by
+   * the cascade); this method itself throws on a repeat call, matching
+   * every other terminal-state transition on this aggregate.
+   */
+  public cancel(): void {
     this.ensureNotDeleted();
-
-    if (this._props.status.value !== StatusType.Archived) {
-      throw new TaskCannotBeRestoredError('Only archived tasks can be restored');
+    if (this._props.status.value === StatusType.Cancelled) {
+      throw new TaskAlreadyCancelledError('Task is already cancelled');
     }
+    if (this._props.status.value === StatusType.Completed) {
+      throw new TaskCannotBeCancelledError('Cannot cancel a completed task');
+    }
+    const event = new TaskCancelledEvent(this.id.value, { taskId: this.id.value });
+    this.recordEvent(event);
+  }
 
-    const event = new TaskRestoredEvent(
-      this.id.value,
-      { taskId: this.id.value }
-    );
+  /** In Progress -> Pending. The explicit "step back" action (ADR-022 §4.2). */
+  public returnToPending(): void {
+    this.ensureNotDeleted();
+    if (this._props.status.value !== StatusType.InProgress) {
+      throw new TaskCannotReturnToPendingError(`Cannot return task to pending from state: ${this._props.status.value}`);
+    }
+    const event = new TaskReturnedToPendingEvent(this.id.value, { taskId: this.id.value });
+    this.recordEvent(event);
+  }
+
+  /**
+   * Completed or Cancelled -> Pending. Always dispatches TaskReopenedEvent
+   * regardless of origin, so a reopened Task is distinguishable from one
+   * completed exactly once (ADR-022 §4.4). `commitmentAllowsReopen` is
+   * resolved externally by TaskReopenPreconditions (ADR-022 §6.2) — this
+   * aggregate still decides and throws, it just can't resolve that fact
+   * about another aggregate (Commitment) by itself.
+   */
+  public reopen(commitmentAllowsReopen: boolean): void {
+    this.ensureNotDeleted();
+    const current = this._props.status.value;
+    if (current !== StatusType.Completed && current !== StatusType.Cancelled) {
+      throw new TaskCannotBeReopenedError('Only completed or cancelled tasks can be reopened');
+    }
+    if (!commitmentAllowsReopen) {
+      throw new TaskReopenBlockedByCommitmentError(
+        'Cannot reopen a task whose linked Commitment is no longer Active.'
+      );
+    }
+    const event = new TaskReopenedEvent(this.id.value, { taskId: this.id.value });
     this.recordEvent(event);
   }
 
@@ -234,7 +327,7 @@ export class Task extends AggregateRoot<TaskId> {
 
   public changePriority(priority: TaskPriority): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
+    this.ensureOperational();
 
     if (this._props.priority.value === priority.value) return;
 
@@ -250,11 +343,11 @@ export class Task extends AggregateRoot<TaskId> {
 
   public schedule(dueDate: Date | null, startDate: Date | null = null): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
+    this.ensureOperational();
 
     const currentDueDate = this._props.dueDate ? this._props.dueDate.toISOString() : null;
     const newDueDate = dueDate ? dueDate.toISOString() : null;
-    
+
     if (currentDueDate === newDueDate && startDate === this._props.startDate) return;
 
     const event = new TaskDueDateChangedEvent(
@@ -265,7 +358,7 @@ export class Task extends AggregateRoot<TaskId> {
       }
     );
     this.recordEvent(event);
-    
+
     if (startDate !== undefined) {
       const editEvent = new TaskEditedEvent(
         this.id.value,
@@ -280,7 +373,7 @@ export class Task extends AggregateRoot<TaskId> {
 
   public estimate(estimatedMinutes: number, actualMinutes?: number): void {
     this.ensureNotDeleted();
-    
+
     if (this._props.estimatedMinutes === estimatedMinutes && this._props.actualMinutes === actualMinutes) return;
 
     const event = new TaskEditedEvent(
@@ -302,7 +395,7 @@ export class Task extends AggregateRoot<TaskId> {
    */
   public relinkGoal(goalId: string | null, now: Date = new Date()): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
+    this.ensureOperational();
 
     if (goalId === this._props.goalId) return;
 
@@ -329,7 +422,7 @@ export class Task extends AggregateRoot<TaskId> {
    */
   public relinkCommitment(commitmentId: CommitmentId | null, now: Date = new Date()): void {
     this.ensureNotDeleted();
-    this.ensureNotArchived();
+    this.ensureOperational();
 
     const currentValue = this._props.commitmentId ? this._props.commitmentId.value : null;
     const newValue = commitmentId ? commitmentId.value : null;
@@ -354,7 +447,7 @@ export class Task extends AggregateRoot<TaskId> {
 
   public duplicate(newId: TaskId): Task {
     this.ensureNotDeleted();
-    
+
     const newTask = Task.register(
       newId,
       this._props.identityId,
@@ -387,9 +480,13 @@ export class Task extends AggregateRoot<TaskId> {
     }
   }
 
-  private ensureNotArchived(): void {
-    if (this._props.status.value === StatusType.Archived) {
-      throw new TaskCannotBeArchivedError('Operation not allowed on archived task');
+  /** Blocks operations on terminal states (Completed/Cancelled) — Blocked/Pending/InProgress are all "operational." */
+  private ensureOperational(): void {
+    if (this._props.status.value === StatusType.Completed) {
+      throw new TaskCannotBeCompletedError('Operation not allowed on a completed task');
+    }
+    if (this._props.status.value === StatusType.Cancelled) {
+      throw new TaskCannotBeCancelledError('Operation not allowed on a cancelled task');
     }
   }
 
@@ -413,6 +510,9 @@ export class Task extends AggregateRoot<TaskId> {
         metadata: payload.metadata || {},
         createdAt: new Date(payload.createdAt),
         updatedAt: new Date(payload.createdAt),
+        blockedType: null,
+        blockedReason: null,
+        preBlockStatus: null,
       };
     } else if (event.name === 'task.edited') {
       const payload = (event as TaskEditedEvent).payload;
@@ -429,15 +529,35 @@ export class Task extends AggregateRoot<TaskId> {
       this._props.status = new TaskStatus(StatusType.Completed);
       this._props.completedAt = new Date(payload.completedAt);
       this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.started') {
+      this._props.status = new TaskStatus(StatusType.InProgress);
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.blocked') {
+      const payload = (event as TaskBlockedEvent).payload;
+      this._props.status = new TaskStatus(StatusType.Blocked);
+      this._props.blockedType = payload.blockedType;
+      this._props.blockedReason = payload.blockedReason ?? null;
+      this._props.preBlockStatus = payload.previousStatus as StatusType;
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.unblocked') {
+      const payload = (event as TaskUnblockedEvent).payload;
+      this._props.status = new TaskStatus(payload.resultingStatus as StatusType);
+      this._props.blockedType = null;
+      this._props.blockedReason = null;
+      this._props.preBlockStatus = null;
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.cancelled') {
+      this._props.status = new TaskStatus(StatusType.Cancelled);
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
+    } else if (event.name === 'task.returned_to_pending') {
+      this._props.status = new TaskStatus(StatusType.Pending);
+      this._props.updatedAt = new Date(event.metadata.occurredAt);
     } else if (event.name === 'task.reopened') {
       this._props.status = new TaskStatus(StatusType.Pending);
       this._props.completedAt = null;
-      this._props.updatedAt = new Date(event.metadata.occurredAt);
-    } else if (event.name === 'task.archived') {
-      this._props.status = new TaskStatus(StatusType.Archived);
-      this._props.updatedAt = new Date(event.metadata.occurredAt);
-    } else if (event.name === 'task.restored') {
-      this._props.status = new TaskStatus(this._props.completedAt ? StatusType.Completed : StatusType.Pending);
+      this._props.blockedType = null;
+      this._props.blockedReason = null;
+      this._props.preBlockStatus = null;
       this._props.updatedAt = new Date(event.metadata.occurredAt);
     } else if (event.name === 'task.deleted') {
       this._props.deletedAt = new Date(event.metadata.occurredAt);

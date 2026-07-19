@@ -40,9 +40,38 @@ export const tasksApi = {
     await apiClient.post(`tasks/${id}/complete`, { json: {} });
     return { taskId: id };
   },
-  archive: async (id: string): Promise<{ taskId: string }> => {
-    if (isDemoModeActive()) return demoTasksRepository.archive(id);
-    await apiClient.post(`tasks/${id}/archive`);
+  // ADR-022 Task Lifecycle & Execution Model — replaces the removed
+  // archive/restore pair (TECH_DEBT.md Item 41). Mirrors the backend's
+  // POST tasks/:id/{start,block,unblock,cancel,return-to-pending,reopen}
+  // endpoints (apps/backend/src/task/api/tasks.controller.ts).
+  start: async (id: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.start(id);
+    await apiClient.post(`tasks/${id}/start`);
+    return { taskId: id };
+  },
+  block: async (id: string, blockedReason?: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.block(id, blockedReason);
+    await apiClient.post(`tasks/${id}/block`, { json: { blockedReason } });
+    return { taskId: id };
+  },
+  unblock: async (id: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.unblock(id);
+    await apiClient.post(`tasks/${id}/unblock`);
+    return { taskId: id };
+  },
+  cancel: async (id: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.cancel(id);
+    await apiClient.post(`tasks/${id}/cancel`);
+    return { taskId: id };
+  },
+  returnToPending: async (id: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.returnToPending(id);
+    await apiClient.post(`tasks/${id}/return-to-pending`);
+    return { taskId: id };
+  },
+  reopen: async (id: string): Promise<{ taskId: string }> => {
+    if (isDemoModeActive()) return demoTasksRepository.reopen(id);
+    await apiClient.post(`tasks/${id}/reopen`);
     return { taskId: id };
   },
   duplicate: async (id: string): Promise<{ taskId: string }> => {

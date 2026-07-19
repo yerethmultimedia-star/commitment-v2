@@ -1,17 +1,20 @@
 import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interface.js';
 
-export interface TaskArchivedEventPayload {
+export interface TaskUnblockedEventPayload {
   readonly taskId: string;
+  readonly source: 'manual' | 'system';
+  /** The operational status (`pending`/`in_progress`) restored. */
+  readonly resultingStatus: string;
 }
 
-export class TaskArchivedEvent implements DomainEvent {
-  public readonly name = 'task.archived';
+export class TaskUnblockedEvent implements DomainEvent {
+  public readonly name = 'task.unblocked';
   public readonly metadata: DomainEventMetadata;
-  public readonly payload: TaskArchivedEventPayload;
+  public readonly payload: TaskUnblockedEventPayload;
 
   constructor(
     aggregateId: string,
-    payload: TaskArchivedEventPayload,
+    payload: TaskUnblockedEventPayload,
     occurredAt?: string
   ) {
     this.payload = payload;

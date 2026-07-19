@@ -51,7 +51,7 @@ describe('InMemoryCommitmentRepository', () => {
     expect(v1).toBe(1); // registered event
 
     commitment.clearUncommittedEvents();
-    commitment.activate();
+    commitment.activate(true);
     const v2 = await repository.save(commitment);
     expect(v2).toBe(2); // activated event added
 

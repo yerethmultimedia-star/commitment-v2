@@ -161,7 +161,7 @@ describe('Commitment Bounded Context', () => {
       );
 
       commitment.clearUncommittedEvents();
-      commitment.activate();
+      commitment.activate(true);
 
       expect(commitment.state).toBe(CommitmentState.Active);
 
@@ -182,9 +182,9 @@ describe('Commitment Bounded Context', () => {
         validDescription
       );
 
-      commitment.activate();
+      commitment.activate(true);
       // Second activation should not throw and not produce a new event
-      expect(() => commitment.activate()).not.toThrow();
+      expect(() => commitment.activate(true)).not.toThrow();
       const events = commitment.getUncommittedEvents();
       // Only one Activated event should exist
       const activatedEvents = events.filter(e => e.name === 'commitment.activated');
@@ -199,7 +199,7 @@ describe('Commitment Bounded Context', () => {
         null
       );
 
-      expect(() => commitment.activate()).toThrow(CommitmentActivationRequirementsNotMetError);
+      expect(() => commitment.activate(true)).toThrow(CommitmentActivationRequirementsNotMetError);
     });
 
     it('unblocks activate() once a description is set via updateDescription()', () => {
@@ -210,11 +210,35 @@ describe('Commitment Bounded Context', () => {
         null
       );
 
-      expect(() => commitment.activate()).toThrow(CommitmentActivationRequirementsNotMetError);
+      expect(() => commitment.activate(true)).toThrow(CommitmentActivationRequirementsNotMetError);
 
       commitment.updateDescription(validDescription);
 
-      expect(() => commitment.activate()).not.toThrow();
+      expect(() => commitment.activate(true)).not.toThrow();
+      expect(commitment.state).toBe(CommitmentState.Active);
+    });
+
+    it('rejects activation without an execution plan (ADR-022, hasExecutionPlan=false)', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        validDescription
+      );
+
+      expect(() => commitment.activate(false)).toThrow(CommitmentActivationRequirementsNotMetError);
+      expect(commitment.state).toBe(CommitmentState.Draft);
+    });
+
+    it('activates once both description and hasExecutionPlan are satisfied', () => {
+      const commitment = Commitment.register(
+        new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
+        validIdentityId,
+        validTitle,
+        validDescription
+      );
+
+      expect(() => commitment.activate(true)).not.toThrow();
       expect(commitment.state).toBe(CommitmentState.Active);
     });
 
@@ -225,7 +249,7 @@ describe('Commitment Bounded Context', () => {
         validTitle,
         validDescription
       );
-      commitment.activate();
+      commitment.activate(true);
       commitment.clearUncommittedEvents();
 
       // Pause
@@ -251,7 +275,7 @@ describe('pause()', () => {
       validTitle,
       validDescription
     );
-    commitment.activate();
+    commitment.activate(true);
     commitment.clearUncommittedEvents();
 
     commitment.pause();
@@ -274,7 +298,7 @@ describe('pause()', () => {
       validTitle,
       validDescription
     );
-    commitment.activate();
+    commitment.activate(true);
     commitment.pause();
     const versionAfterFirstPause = commitment.version;
     commitment.clearUncommittedEvents();
@@ -293,7 +317,7 @@ describe('pause()', () => {
       validTitle,
       validDescription
     );
-    commitment.activate();
+    commitment.activate(true);
     commitment.complete();
 
     expect(() => commitment.pause()).toThrow(CommitmentAlreadyCompletedError);
@@ -326,7 +350,7 @@ describe('pause()', () => {
       // Cannot resume a draft
       expect(() => commitment.resume()).toThrow(CommitmentCannotBeResumedError);
       
-      commitment.activate();
+      commitment.activate(true);
       // Resuming an active commitment is idempotent: no error, no new event
       commitment.clearUncommittedEvents();
       expect(() => commitment.resume()).not.toThrow();
@@ -345,12 +369,12 @@ describe('pause()', () => {
       expect(draft.getUncommittedEvents()[1]?.name).toBe('commitment.cancelled');
 
       const active = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-200000000000'), validIdentityId, validTitle, validDescription);
-      active.activate();
+      active.activate(true);
       active.cancel();
       expect(active.state).toBe(CommitmentState.Cancelled);
 
       const paused = Commitment.register(new CommitmentId('018f6b5c-42e1-7000-8000-300000000000'), validIdentityId, validTitle, validDescription);
-      paused.activate();
+      paused.activate(true);
       paused.pause();
       paused.cancel();
       expect(paused.state).toBe(CommitmentState.Cancelled);
@@ -367,13 +391,13 @@ describe('pause()', () => {
       // Draft cannot complete
       expect(() => commitment.complete()).toThrow(CommitmentCannotBeCompletedError);
 
-      commitment.activate();
+      commitment.activate(true);
       commitment.complete();
       expect(commitment.state).toBe(CommitmentState.Completed);
       expect(commitment.getUncommittedEvents()[2]?.name).toBe('commitment.completed');
 
       // Completed is immutable
-      expect(() => commitment.activate()).toThrow(CommitmentAlreadyCompletedError);
+      expect(() => commitment.activate(true)).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.pause()).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.resume()).toThrow(CommitmentAlreadyCompletedError);
       expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCompletedError);
@@ -394,7 +418,7 @@ describe('pause()', () => {
         validTitle,
         validDescription
       );
-      commitment.activate();
+      commitment.activate(true);
       commitment.pause();
       
       expect(() => commitment.complete()).not.toThrow();
@@ -420,7 +444,7 @@ describe('pause()', () => {
           new CommitmentId('018f6b5c-42e1-7000-8000-222222222222'),
           validIdentityId, validTitle, validDescription
         );
-        active.activate();
+        active.activate(true);
         active.clearUncommittedEvents();
         active.cancel();
         expect(active.state).toBe(CommitmentState.Cancelled);
@@ -431,7 +455,7 @@ describe('pause()', () => {
           new CommitmentId('018f6b5c-42e1-7000-8000-333333333333'),
           validIdentityId, validTitle, validDescription
         );
-        paused.activate();
+        paused.activate(true);
         paused.pause();
         paused.clearUncommittedEvents();
         paused.cancel();
@@ -456,7 +480,7 @@ describe('pause()', () => {
           new CommitmentId('018f6b5c-42e1-7000-8000-999999999999'),
           validIdentityId, validTitle, validDescription
         );
-        commitment.activate();
+        commitment.activate(true);
         commitment.complete();
         
         expect(() => commitment.cancel()).toThrow(CommitmentAlreadyCompletedError);
@@ -469,7 +493,7 @@ describe('pause()', () => {
         );
         commitment.cancel();
 
-        expect(() => commitment.activate()).toThrow(CommitmentAlreadyCancelledError);
+        expect(() => commitment.activate(true)).toThrow(CommitmentAlreadyCancelledError);
         expect(() => commitment.pause()).toThrow(CommitmentAlreadyCancelledError);
         expect(() => commitment.resume()).toThrow(CommitmentAlreadyCancelledError);
         expect(() => commitment.complete()).toThrow(CommitmentAlreadyCancelledError);
@@ -547,7 +571,7 @@ describe('pause()', () => {
       const newDesc = new CommitmentDescription('Practice modeling clean architecture aggregates');
       c.updateDescription(newDesc);
       
-      c.activate();
+      c.activate(true);
       c.pause();
       c.resume();
       c.complete();
@@ -576,11 +600,11 @@ describe('pause()', () => {
         validTitle,
         validDescription
       );
-      commitment.activate();
+      commitment.activate(true);
       commitment.pause();
       
       // Try to manually activate a paused commitment
-      expect(() => commitment.activate()).toThrow(InvalidCommitmentStateTransitionError);
+      expect(() => commitment.activate(true)).toThrow(InvalidCommitmentStateTransitionError);
     });
   });
 

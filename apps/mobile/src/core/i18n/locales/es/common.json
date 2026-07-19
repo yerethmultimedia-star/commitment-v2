@@ -348,8 +348,10 @@
         "days": "{{count}}d"
       },
       "tabs": {
-        "summary": "Resumen",
+        "overview": "Resumen",
+        "commitments": "Compromisos",
         "tasks": "Tareas",
+        "analytics": "Analítica",
         "milestones": "Hitos",
         "notes": "Notas"
       },
@@ -366,7 +368,17 @@
       "addCommitment": "Agregar compromiso",
       "habits": "Hábitos",
       "addHabit": "Agregar hábito",
+      "tasks": "Tareas",
       "addTask": "Agregar tarea",
+      "tasksEmpty": "Aún no hay tareas en los compromisos de este objetivo.",
+      "analytics": {
+        "commitments": "Compromisos",
+        "tasks": "Tareas",
+        "active": "Activos",
+        "paused": "Pausados",
+        "completed": "Completados",
+        "completionRate": "Tasa de Finalización"
+      },
       "upcoming": "Próximamente",
       "upcomingEmpty": "Nada próximo para este objetivo.",
       "milestonesEmpty": "Aún no hay hitos.",

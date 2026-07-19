@@ -1967,9 +1967,12 @@ tone={PRIORITY_TONE[task.priority]} i18nKey={...}>`, with a local `PRIORITY_TONE
   domain aggregate actually supports today (`pending`/`completed`/`archived`) — an initially
   proposed 6-state set (Pending/In Progress/Blocked/Deferred/Cancelled/Completed) was **descoped**
   after review: no transitions, events, or invariants were ever defined for the 4 new states, and
-  inventing them would be domain design, not a badge-rendering task. See "Task Lifecycle Expansion"
-  below for that as its own, separately-tracked initiative. Verified live via Playwright in Demo
-  Mode (all 3 states render with icon+tone+text). `tsc --noEmit` and `jest` clean.
+  inventing them would be domain design, not a badge-rendering task. Tracked separately as "Task
+  Lifecycle Expansion" (`PROJECT_STATUS.md` item 14) — **ADR-022 ✅ approved**
+  (`docs/03-architecture/adr_022_task_lifecycle_and_execution_model.md`, 2026-07-18) as the full
+  domain spec for that expansion; Fase 2 (implementation) authorized, not yet started. Verified live
+  via Playwright in Demo Mode (all 3 states render with icon+tone+text). `tsc --noEmit` and `jest`
+  clean.
 
 ---
 
@@ -2031,6 +2034,79 @@ title={{ i18nKey: ... }}>`, matching `ObjectivesTab.tsx`'s established usage pat
   `identityId` from `useSession()` in `useCreateCommitment()`, add both to the payload
   `commitmentsApi.create()` sends in the body, keep the `x-identity-id` header as request context
   only (unchanged).
+
+---
+
+## Active Technical Debt Item 41: Mobile Task client still targets the pre-ADR-022 3-state model — real-mode `archive()` now 404s — RESOLVED, 2026-07-19
+
+- **Resolution:** ADR-022 Fase 2.3 (Frontend) implemented the full 5-state model across the mobile
+  client — `TaskStatus`, `TaskStatusBadge`, `TasksScreen`'s bucket logic, `tasksApi.ts` (removed
+  `archive()`, added `start`/`block`/`unblock`/`cancel`/`returnToPending`/`reopen`), Demo Mode's
+  `demo-tasks.repository.ts` (same 6 actions, including a `preBlockStatus` map mirroring the
+  backend's internal field), and both `en`/`es` i18n locale files. New `TaskCard`/`TaskActionBar`/
+  `shared/domain/taskActions.ts` (mirrors `commitmentActions.ts`'s "UI must never contain status
+  conditionals" rule). Verified via `tsc --noEmit`, `jest`, and a live Playwright walkthrough against
+  a running backend + web target (Start → Block → Unblock → Complete → Reopen, Cancel confirmation) —
+  see `docs/03-architecture/task_frontend_migration_checklist.md` for the full record. The specific
+  404 this item tracked no longer occurs — `tasksApi.archive()` doesn't exist anymore, nothing calls
+  the removed endpoint.
+- **Original description (superseded, kept for history):** Found during ADR-022 Fase 2.2 (backend) —
+  explicitly flagged for documentation
+  per the user's instruction, not fixed, since Fase 2.3 (Frontend) is a separate authorized phase.
+  The backend's Task lifecycle is now the 5-state ADR-022 model
+  (`Pending`/`In Progress`/`Blocked`/`Completed`/`Cancelled`) — `archive`/`restore` commands, NestJS
+  handlers, and the `POST /tasks/:id/archive` and `POST /tasks/:id/restore` endpoints were removed
+  entirely. Mobile's Task client was never updated (out of Fase 2.2 scope) and still assumes the old
+  3-state model end to end:
+  - `apps/mobile/src/features/tasks/models/task.model.ts`: `TaskStatus = 'pending' | 'completed' |
+'archived'` — no `in_progress`/`blocked`/`cancelled`.
+  - `apps/mobile/src/features/tasks/api/tasks.api.ts` (`tasksApi.archive()`): in real (non-Demo-Mode)
+    mode, calls `apiClient.post('tasks/:id/archive')` — **this endpoint no longer exists on the
+    backend; this call now 404s.**
+  - `apps/mobile/src/features/tasks/screens/TasksScreen.tsx` and
+    `apps/mobile/src/features/tasks/components/TaskStatusBadge.tsx`: bucket/badge logic hard-coded to
+    the 3 old states.
+  - `apps/mobile/src/core/demo/demo-tasks.repository.ts` / `demo-data.ts`: Demo Mode's own Task
+    fixtures and `archive()` action are also on the old 3-state model — Demo Mode doesn't hit this
+    backend at all (it's a local in-memory repository), so it doesn't 404, but it's a second place
+    that will need the same state-model update in Fase 2.3, plus its own `'archived'` fixture data
+    migrated to `'cancelled'` (mirrors the backend-side migration note in Item 38 above and
+    `docs/03-architecture/adr_022_task_lifecycle_and_execution_model.md` §4.1).
+- **Impact:** High in principle (real-mode Task archiving is broken — a hard 404, not a silent
+  mismatch), currently invisible in practice for the same reason as Item 40: Demo Mode has
+  apparently never been toggled off against a running backend in this environment. Discovered now,
+  before deployment, per explicit instruction ("mejor descubrirlo ahora que después del despliegue").
+- **Priority:** Must be resolved as part of ADR-022 Fase 2.3 (Frontend) — not before, since Fase 2.3
+  has not been authorized yet at the time this item was logged (backend-only Fase 2.2 in progress).
+- **Recommended Resolution:** Fase 2.3 scope, not a standalone fix — update `TaskStatus` to the
+  5-state model, replace `tasksApi.archive()`/`demoTasksRepository.archive()` with the new
+  Start/Block/Unblock/Cancel/ReturnToPending/Reopen actions, update `TaskStatusBadge` and
+  `TasksScreen`'s bucket logic, and migrate Demo Mode's `'archived'` fixtures to `'cancelled'`.
+
+---
+
+## Active Technical Debt Item 42: `ConfirmationDialog`/`Dialog` triggers a React 19 `element.ref` deprecation warning
+
+- **Description:** Found incidentally during ADR-022 Fase 2.3's Playwright functional verification
+  (2026-07-19) — console-error monitoring was active during the walkthrough and caught a warning
+  that isn't visible from `tsc`/`jest` alone: `Accessing element.ref was removed in React 19. ref is
+now a regular prop. It will be removed from the JSX Element type in a future release.` Fires every
+  time `ConfirmationDialog` (`packages/design-system/src/modal/ConfirmationDialog.tsx`) opens.
+  **Confirmed pre-existing, not introduced by Fase 2.3:** reproduced on an untouched call site
+  (Goal's "Archivar objetivo" confirmation, code that existed long before this session) as well as
+  on the new Task Cancel confirmation — same warning either way, meaning the bug lives inside
+  `ConfirmationDialog`/`Dialog`/`Button`'s own internals (likely a `React.forwardRef` or `.ref`
+  access pattern that predates React 19's ref-as-a-regular-prop change), not in any call site.
+- **Impact:** Low today — a console warning, not a functional break; the dialog opens, renders, and
+  confirms/cancels correctly in all observed cases. Likely to become a real break in a future React
+  major version once the deprecated `.ref` access path is actually removed (the warning says so
+  explicitly).
+- **Priority:** Low. Not blocking any current work; worth fixing as part of a future Design System /
+  React version maintenance pass, not urgent.
+- **Recommended Resolution:** Locate the `.ref` access inside `Dialog.tsx`/`ConfirmationDialog.tsx`/
+  `Button.tsx`'s implementation (likely something reading `child.ref` off a passed React element
+  rather than using `React.forwardRef` idiomatically) and update it to the React 19 pattern (ref as a
+  plain prop).
 
 ---
 

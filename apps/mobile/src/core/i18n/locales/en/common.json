@@ -348,8 +348,10 @@
         "days": "{{count}}d"
       },
       "tabs": {
-        "summary": "Summary",
+        "overview": "Overview",
+        "commitments": "Commitments",
         "tasks": "Tasks",
+        "analytics": "Analytics",
         "milestones": "Milestones",
         "notes": "Notes"
       },
@@ -366,7 +368,17 @@
       "addCommitment": "Add commitment",
       "habits": "Habits",
       "addHabit": "Add habit",
+      "tasks": "Tasks",
       "addTask": "Add task",
+      "tasksEmpty": "No tasks under this goal's commitments yet.",
+      "analytics": {
+        "commitments": "Commitments",
+        "tasks": "Tasks",
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed",
+        "completionRate": "Completion Rate"
+      },
       "upcoming": "Upcoming",
       "upcomingEmpty": "Nothing upcoming for this goal.",
       "milestonesEmpty": "No milestones yet.",

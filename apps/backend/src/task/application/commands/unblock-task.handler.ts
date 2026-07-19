@@ -1,20 +1,20 @@
 import { TaskId, TaskNotFoundError } from '@commitment/domain';
-import { ArchiveTaskCommand } from './archive-task.command';
+import { UnblockTaskCommand } from './unblock-task.command';
 import type { TaskVersionedRepository } from '../ports/task-versioned-repository.port';
 import type { DomainEventDispatcher } from '../../../commitment/application/ports/domain-event-dispatcher.port';
 
-export class ArchiveTaskCommandHandlerCore {
+export class UnblockTaskCommandHandlerCore {
   constructor(
     private readonly taskRepository: TaskVersionedRepository,
     private readonly eventDispatcher: DomainEventDispatcher,
   ) {}
 
-  public async handle(command: ArchiveTaskCommand): Promise<void> {
+  public async handle(command: UnblockTaskCommand): Promise<void> {
     const id = new TaskId(command.id);
     const task = await this.taskRepository.findById(id);
     if (!task) throw new TaskNotFoundError(`Task not found: ${command.id}`);
 
-    task.archive();
+    task.unblock(command.source);
 
     await this.taskRepository.save(task);
     await this.eventDispatcher.dispatch(task.getUncommittedEvents());

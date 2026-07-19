@@ -23,6 +23,9 @@ function replace(id: string, updates: Partial<TaskModel>): TaskModel {
 }
 
 let demoTaskCounter = demoTasks.length;
+// Mirrors the backend's internal (non-public) preBlockStatus field (ADR-022
+// §4.2) — Unblock must restore the exact prior operational status.
+const preBlockStatus = new Map<string, 'pending' | 'in_progress'>();
 
 export const demoTasksRepository = {
   list: async () => ({ data: demoTasks }),
@@ -69,8 +72,49 @@ export const demoTasksRepository = {
     return { taskId: id };
   },
 
-  archive: async (id: string) => {
-    replace(id, { status: 'archived' });
+  // ADR-022 Task Lifecycle & Execution Model — replaces archive/restore
+  // (TECH_DEBT.md Item 41). Demo Mode has no dependency graph of its own
+  // (TaskDependency is backend/Fase 2.2 architecture-only, no UI), so every
+  // block here is 'manual' — there is no automatic dependency-block/unblock
+  // simulation in Demo Mode.
+  start: async (id: string) => {
+    replace(id, { status: 'in_progress' });
+    return { taskId: id };
+  },
+
+  block: async (id: string, blockedReason?: string) => {
+    const task = findOrThrow(id);
+    replace(id, {
+      status: 'blocked',
+      blockedType: 'manual',
+      blockedReason: blockedReason ?? null,
+      // Remembered only in-memory via closure below, not persisted on the
+      // model (mirrors the backend's internal, non-public preBlockStatus) —
+      // see unblock() for how it's recovered.
+    });
+    preBlockStatus.set(id, task.status === 'in_progress' ? 'in_progress' : 'pending');
+    return { taskId: id };
+  },
+
+  unblock: async (id: string) => {
+    const resultingStatus = preBlockStatus.get(id) ?? 'pending';
+    preBlockStatus.delete(id);
+    replace(id, { status: resultingStatus, blockedType: null, blockedReason: null });
+    return { taskId: id };
+  },
+
+  cancel: async (id: string) => {
+    replace(id, { status: 'cancelled' });
+    return { taskId: id };
+  },
+
+  returnToPending: async (id: string) => {
+    replace(id, { status: 'pending' });
+    return { taskId: id };
+  },
+
+  reopen: async (id: string) => {
+    replace(id, { status: 'pending', completedAt: null, blockedType: null, blockedReason: null });
     return { taskId: id };
   },
 
@@ -83,6 +127,8 @@ export const demoTasksRepository = {
       id: id2,
       status: 'pending',
       completedAt: null,
+      blockedType: null,
+      blockedReason: null,
       actualMinutes: 0,
       createdAt: new Date().toISOString(),
     };

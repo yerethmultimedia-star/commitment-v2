@@ -4,7 +4,7 @@ import { Stack as ExpoStack } from 'expo-router';
 import { YStack, XStack, Circle } from 'tamagui';
 import {
   CheckCircle2, Circle as CircleIcon, StickyNote, Paperclip, History, ListChecks, Repeat, Clock, Plus, Target,
-  Pencil, Archive as ArchiveIcon,
+  Pencil,
 } from '@tamagui/lucide-icons';
 import {
   AppScreen, Card, Body, Title, IconButton, Button,
@@ -16,9 +16,13 @@ import { useToggleMilestone, useRenameGoal, useUpdateGoalDescription, useActivat
 import { useGoalWorkspace } from '../hooks/useGoalsView';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
+import { useTaskActionDispatch } from '@/features/tasks/hooks/useTaskActionDispatch';
 import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
 import { HabitCard } from '@/features/habits/components/HabitCard';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
+import { TaskCard } from '@/features/tasks/components/TaskCard';
+import { TaskForm } from '@/features/tasks/components/TaskForm';
+import type { TaskModel } from '@/features/tasks/models/task.model';
 import { GoalTabStrip } from '../components/GoalTabStrip';
 import { RenameGoalDialog } from '../components/RenameGoalDialog';
 
@@ -26,8 +30,14 @@ export interface GoalWorkspaceScreenProps {
   goalId: string;
 }
 
-type WorkspaceTab = 'summary' | 'tasks' | 'milestones' | 'notes';
-const TABS: WorkspaceTab[] = ['summary', 'tasks', 'milestones', 'notes'];
+// ADR-022 §8 — Overview/Commitments/Tasks/Analytics are explicitly a
+// hierarchy of abstraction levels (Goal -> Commitment -> Task), not 4
+// independent tabs, hence this order. Milestones/Notes are explicitly
+// out of scope for this ADR (untouched functionality) — kept as trailing
+// tabs, deliberately not primary, rather than deleted (a later, separate,
+// deliberate decision — not bundled into this redesign).
+type WorkspaceTab = 'overview' | 'commitments' | 'tasks' | 'analytics' | 'milestones' | 'notes';
+const TABS: WorkspaceTab[] = ['overview', 'commitments', 'tasks', 'analytics', 'milestones', 'notes'];
 
 function progressDescriptionKey(progress: number): string {
   if (progress >= 0.7) return 'goals.workspace.progressDescription.great';
@@ -49,11 +59,14 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const activateGoal = useActivateGoal();
   const completeGoal = useCompleteGoal();
   const archiveGoal = useArchiveGoal();
-  const [tab, setTab] = useState<WorkspaceTab>('summary');
+  const [tab, setTab] = useState<WorkspaceTab>('overview');
   const [renameOpen, setRenameOpen] = useState(false);
   const [confirmingActivate, setConfirmingActivate] = useState(false);
   const [confirmingComplete, setConfirmingComplete] = useState(false);
   const [confirmingArchive, setConfirmingArchive] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskModel | null>(null);
+  const [creatingTask, setCreatingTask] = useState(false);
+  const taskActionDispatch = useTaskActionDispatch();
 
   // Commitment doesn't own this relationship (TECH_DEBT.md Item 10, Fase 4B) —
   // Goal.commitmentIds[] is the source of truth, not Commitment.goalId (which
@@ -75,13 +88,18 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
     ),
     [tasks, goal, goalId]
   );
-  const upcomingTasks = useMemo(() => {
-    const now = new Date();
-    return linkedTasks
-      .filter((tk) => tk.status === 'pending' && tk.dueDate && new Date(tk.dueDate) >= now)
-      .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
-      .slice(0, 5);
-  }, [linkedTasks]);
+  // ADR-022 §8 — the Tasks tab is strictly Commitment-transitive (Goal ->
+  // Commitment -> Task): "todas las Tasks pertenecientes a cualquier
+  // Commitment asociado al Goal... No debe mostrar Tasks independientes
+  // (sin commitmentId), ni Tasks vinculadas directamente a otro Goal." This
+  // is narrower than linkedTasks above (which also includes direct
+  // Goal-linked tasks with no Commitment) — linkedTasks is kept as-is for
+  // Overview's existing aggregate stats (no behavior change there);
+  // goalScopedTasks is the new, stricter set used only by the Tasks tab.
+  const goalScopedTasks = useMemo(
+    () => tasks.filter((tk) => tk.commitmentId && (goal?.commitmentIds.includes(tk.commitmentId) ?? false)),
+    [tasks, goal]
+  );
 
   const stats = useMemo(() => {
     const completedTasks = linkedTasks.filter((tk) => tk.status === 'completed').length;
@@ -97,6 +115,21 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
       totalMilestones: goal?.milestones.length ?? 0,
     };
   }, [linkedTasks, linkedHabits, goal]);
+
+  // Analytics tab — "la vista agregada que consume tanto la capa de
+  // planificación como la de ejecución" (ADR-022 §8): synthesizes across
+  // both layers, so it deliberately uses the broader linkedCommitments/
+  // linkedTasks sets, not the Tasks tab's stricter Commitment-only scope.
+  const analytics = useMemo(() => {
+    const commitmentsByStatus = { draft: 0, active: 0, paused: 0, completed: 0, cancelled: 0 };
+    for (const c of linkedCommitments) commitmentsByStatus[c.status] += 1;
+    const tasksByStatus = { pending: 0, in_progress: 0, blocked: 0, completed: 0, cancelled: 0 };
+    for (const tk of linkedTasks) tasksByStatus[tk.status] += 1;
+    const completionRate = linkedTasks.length > 0
+      ? Math.round((tasksByStatus.completed / linkedTasks.length) * 100)
+      : 0;
+    return { commitmentsByStatus, tasksByStatus, completionRate };
+  }, [linkedCommitments, linkedTasks]);
 
   if (isLoading || !goal) {
     return (
@@ -126,7 +159,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
 
           <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.workspace.tabs.${tb}`)} />
 
-          {tab === 'summary' && (
+          {tab === 'overview' && (
             <YStack gap="$5">
               <Card variant="elevated">
                 <XStack gap="$4" alignItems="center">
@@ -208,7 +241,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
             </YStack>
           )}
 
-          {tab === 'tasks' && (
+          {tab === 'commitments' && (
             <YStack gap="$5">
               <YStack gap="$2">
                 <SectionHeader
@@ -268,52 +301,120 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   </YStack>
                 )}
               </YStack>
+            </YStack>
+          )}
 
+          {/* ADR-022 §8 — a projection, not an independent list: filtered by
+              this Goal's own linked Commitments (goalScopedTasks above),
+              same TaskCard/action-dispatch machinery TasksScreen uses, no
+              separate data source or duplicated component. */}
+          {tab === 'tasks' && (
+            <YStack gap="$5">
               <YStack gap="$2">
                 <SectionHeader
-                  title={{ i18nKey: 'goals.workspace.upcoming' }}
+                  title={{ i18nKey: 'goals.workspace.tasks' }}
                   action={
                     <IconButton
                       iconToken={<Plus size={18} />}
                       tooltipI18nKey="goals.workspace.addTask"
                       accessibilityHintI18nKey="goals.workspace.addTask"
-                      onPress={() => router.push(`/(tabs)/tasks?prefillGoalId=${goal.id}` as any)}
+                      onPress={() => { setEditingTask(null); setCreatingTask(true); }}
                     />
                   }
                 />
-                {upcomingTasks.length === 0 ? (
+
+                {creatingTask && (
+                  <TaskForm
+                    defaultRelationKind={linkedCommitments.length > 0 ? 'commitment' : 'none'}
+                    commitmentOptions={linkedCommitments}
+                    onSaved={() => setCreatingTask(false)}
+                    onCancel={() => setCreatingTask(false)}
+                  />
+                )}
+
+                {editingTask && (
+                  <TaskForm
+                    task={editingTask}
+                    commitmentOptions={linkedCommitments}
+                    onSaved={() => setEditingTask(null)}
+                    onCancel={() => setEditingTask(null)}
+                  />
+                )}
+
+                {!creatingTask && goalScopedTasks.length === 0 ? (
                   <EmptyState
                     fullscreen={false}
                     icon={<Clock color="$contentTertiary" size={32} />}
-                    title={{ i18nKey: 'goals.workspace.upcomingEmpty' }}
+                    title={{ i18nKey: 'goals.workspace.tasksEmpty' }}
                   />
                 ) : (
                   <YStack gap="$2">
-                    {upcomingTasks.map((tk) => (
-                      // Navigates to the Tasks screen (Task has no per-item detail
-                      // route anywhere in the app) rather than exposing an inline
-                      // action here — matches the entity's own summary-card
-                      // pattern already established by UpcomingTasksWidget on
-                      // Today, and the "summary cards lead to the entity's main
-                      // surface" rule Commitment's own card in this same tab
-                      // already follows (TECH_DEBT.md B-001, VS-037).
-                      <Card
-                        key={tk.id}
-                        variant="elevated"
-                        clickable
-                        onPress={() => router.push('/(tabs)/tasks' as any)}
-                        pressStyle={{ opacity: 0.9 }}
-                        accessibilityLabel={tk.title}
-                      >
-                        <XStack gap="$3" alignItems="center">
-                          <Clock color="$contentSecondary" size={18} />
-                          <Body flex={1}>{tk.title}</Body>
-                          <Body tone="secondary" fontSize="$2">{formatDate(tk.dueDate!)}</Body>
-                        </XStack>
-                      </Card>
-                    ))}
+                    {goalScopedTasks
+                      .filter((tk) => editingTask?.id !== tk.id)
+                      .map((tk) => (
+                        <TaskCard
+                          key={tk.id}
+                          task={tk}
+                          pendingAction={taskActionDispatch.pendingActionFor(tk.id)}
+                          onAction={taskActionDispatch.handleAction}
+                          onEdit={(t) => { setCreatingTask(false); setEditingTask(t); }}
+                          onDuplicate={(t) => taskActionDispatch.duplicate.mutate(t.id)}
+                        />
+                      ))}
                   </YStack>
                 )}
+              </YStack>
+            </YStack>
+          )}
+
+          {tab === 'analytics' && (
+            <YStack gap="$5">
+              <YStack gap="$2">
+                <SectionHeader title={{ i18nKey: 'goals.workspace.analytics.commitments' }} />
+                <XStack gap="$3" flexWrap="wrap">
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard tone="success" icon={<CheckCircle2 color="$success" size={20} />} i18nKey="goals.workspace.analytics.active" value={analytics.commitmentsByStatus.active} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<Clock color="$contentTertiary" size={20} />} i18nKey="goals.workspace.analytics.paused" value={analytics.commitmentsByStatus.paused} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard tone="accent" icon={<CheckCircle2 color="$accent" size={20} />} i18nKey="goals.workspace.analytics.completed" value={analytics.commitmentsByStatus.completed} />
+                  </YStack>
+                </XStack>
+              </YStack>
+
+              <YStack gap="$2">
+                <SectionHeader title={{ i18nKey: 'goals.workspace.analytics.tasks' }} />
+                <XStack gap="$3" flexWrap="wrap">
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<CircleIcon color="$contentTertiary" size={20} />} i18nKey="tasks:status.pending" value={analytics.tasksByStatus.pending} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard tone="accent" icon={<ListChecks color="$accent" size={20} />} i18nKey="tasks:status.in_progress" value={analytics.tasksByStatus.in_progress} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard tone="warning" icon={<Clock color="$warning" size={20} />} i18nKey="tasks:status.blocked" value={analytics.tasksByStatus.blocked} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard tone="success" icon={<CheckCircle2 color="$success" size={20} />} i18nKey="tasks:status.completed" value={analytics.tasksByStatus.completed} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard i18nKey="goals.workspace.analytics.completionRate" value={`${analytics.completionRate}%`} />
+                  </YStack>
+                </XStack>
+              </YStack>
+
+              <YStack gap="$2">
+                <SectionHeader title={{ i18nKey: 'goals.workspace.statistics' }} />
+                <XStack gap="$3" flexWrap="wrap">
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgStreak" value={t('goals.workspace.stats.days', { count: stats.avgStreak })} />
+                  </YStack>
+                  <YStack flex={1} minWidth={100}>
+                    <MetricCard icon={<CheckCircle2 color="$accent" size={20} />} i18nKey="goals.workspace.stats.milestones" value={`${stats.completedMilestones}/${stats.totalMilestones}`} />
+                  </YStack>
+                </XStack>
               </YStack>
             </YStack>
           )}
@@ -442,6 +543,22 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
           archiveGoal.mutate(goal.id);
         }}
       />
+
+      {taskActionDispatch.confirming && (
+        <ConfirmationDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) taskActionDispatch.setConfirming(null);
+          }}
+          titleI18nKey={`tasks:confirm.${taskActionDispatch.confirming.action.id}.title`}
+          descriptionI18nKey={`tasks:confirm.${taskActionDispatch.confirming.action.id}.description`}
+          descriptionI18nParams={{ title: taskActionDispatch.confirming.task.title }}
+          confirmI18nKey={`tasks:${taskActionDispatch.confirming.action.labelKey}`}
+          cancelI18nKey="common:cancel"
+          destructive={taskActionDispatch.confirming.action.destructive}
+          onConfirm={() => taskActionDispatch.executeAction(taskActionDispatch.confirming!.task, taskActionDispatch.confirming!.action)}
+        />
+      )}
     </>
   );
 }

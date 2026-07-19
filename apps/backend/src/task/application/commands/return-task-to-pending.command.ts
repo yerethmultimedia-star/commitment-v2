@@ -1,3 +1,3 @@
-export class ArchiveTaskCommand {
+export class ReturnTaskToPendingCommand {
   constructor(public readonly id: string) {}
 }

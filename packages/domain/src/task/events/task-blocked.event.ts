@@ -1,17 +1,22 @@
 import { DomainEvent, DomainEventMetadata } from '../../core/domain-event.interface.js';
+import { BlockedType } from '../value-objects/task-status.js';
 
-export interface TaskRestoredEventPayload {
+export interface TaskBlockedEventPayload {
   readonly taskId: string;
+  readonly blockedType: BlockedType;
+  readonly blockedReason?: string;
+  /** The operational status (`pending`/`in_progress`) Unblock must restore. */
+  readonly previousStatus: string;
 }
 
-export class TaskRestoredEvent implements DomainEvent {
-  public readonly name = 'task.restored';
+export class TaskBlockedEvent implements DomainEvent {
+  public readonly name = 'task.blocked';
   public readonly metadata: DomainEventMetadata;
-  public readonly payload: TaskRestoredEventPayload;
+  public readonly payload: TaskBlockedEventPayload;
 
   constructor(
     aggregateId: string,
-    payload: TaskRestoredEventPayload,
+    payload: TaskBlockedEventPayload,
     occurredAt?: string
   ) {
     this.payload = payload;

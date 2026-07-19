@@ -12,6 +12,8 @@ export interface TaskView {
   completedAt?: string | null;
   commitmentId?: string | null;
   goalId?: string | null;
+  blockedType?: string | null;
+  blockedReason?: string | null;
   tags: string[];
   metadata: Record<string, any>;
   createdAt: string;

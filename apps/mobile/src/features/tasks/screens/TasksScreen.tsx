@@ -1,28 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, ScrollView, Theme, View, XStack, YStack } from 'tamagui';
+import { Button, ScrollView, Theme, View, XStack } from 'tamagui';
 import { useLocalSearchParams } from 'expo-router';
 import { TaskForm } from '../components/TaskForm';
-import { TaskStatusBadge } from '../components/TaskStatusBadge';
-import { useTaskActions, useTasks } from '../hooks/useTasks';
+import { TaskCard } from '../components/TaskCard';
+import { useTasks } from '../hooks/useTasks';
+import { useTaskActionDispatch } from '../hooks/useTaskActionDispatch';
 import { useTranslation } from 'react-i18next';
 import { TaskModel } from '../models/task.model';
 import { EmptyState } from '@/shared/ui/feedback/EmptyState';
-import { IconButton, Card, Title, Body, Badge, BadgeTone, toPlatformAccessibilityProps, Portal } from '@commitment/design-system';
+import { IconButton, Title, Body, ConfirmationDialog, toPlatformAccessibilityProps, Portal } from '@commitment/design-system';
 import { Plus } from '@tamagui/lucide-icons';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { useAppearanceStore } from '@/features/appearance/store/use-appearance-store';
 
-// Same three levels, same meaning, same tone mapping as Commitment's priority
-// (see CommitmentPriorityBadge.tsx) — TECH_DEBT.md Item 38 (V-001): this used
-// to hand-roll its own <Text> instead of reusing the shared Badge component.
-const PRIORITY_TONE: Record<TaskModel['priority'], BadgeTone> = {
-  high: 'danger',
-  medium: 'warning',
-  low: 'neutral',
-};
-
-type Bucket = 'inbox' | 'today' | 'upcoming' | 'completed' | 'archived';
-const BUCKETS: Bucket[] = ['inbox', 'today', 'upcoming', 'completed', 'archived'];
+// ADR-022 Task Lifecycle & Execution Model — 'archived' migrated to
+// 'cancelled' (see TECH_DEBT.md Item 41). In Progress/Blocked tasks aren't
+// special-cased here: they fall through to the same date-based bucketing as
+// Pending (they're still "actionable and due," same as the backend's
+// DashboardProjector — see dashboard.projector.ts), distinguished visually
+// per-card via TaskStatusBadge rather than by a separate bucket/tab.
+type Bucket = 'inbox' | 'today' | 'upcoming' | 'completed' | 'cancelled';
+const BUCKETS: Bucket[] = ['inbox', 'today', 'upcoming', 'completed', 'cancelled'];
 
 function endOfToday(): Date {
   const d = new Date();
@@ -32,7 +30,7 @@ function endOfToday(): Date {
 
 function bucketOf(task: TaskModel, todayEnd: Date): Bucket {
   if (task.status === 'completed') return 'completed';
-  if (task.status === 'archived') return 'archived';
+  if (task.status === 'cancelled') return 'cancelled';
   if (!task.dueDate) return 'inbox';
   return new Date(task.dueDate) <= todayEnd ? 'today' : 'upcoming';
 }
@@ -40,7 +38,7 @@ function bucketOf(task: TaskModel, todayEnd: Date): Bucket {
 export function TasksScreen() {
   const { data: tasks = [], isLoading, refetch } = useTasks();
   const { t } = useTranslation('tasks');
-  const { complete, archive, duplicate } = useTaskActions();
+  const { confirming, setConfirming, handleAction, executeAction, pendingActionFor, duplicate } = useTaskActionDispatch();
   const openQuickCapture = useUiStore((s) => s.openQuickCapture);
   const themeId = useAppearanceStore((s) => s.appearance?.settings.themeId ?? 'DefaultLight');
   const { taskId: deepLinkedTaskId, prefillGoalId } = useLocalSearchParams<{ taskId?: string; prefillGoalId?: string }>();
@@ -88,7 +86,7 @@ export function TasksScreen() {
   }, [prefillGoalId]);
 
   const bucketCounts = useMemo(() => {
-    const counts: Record<Bucket, number> = { inbox: 0, today: 0, upcoming: 0, completed: 0, archived: 0 };
+    const counts: Record<Bucket, number> = { inbox: 0, today: 0, upcoming: 0, completed: 0, cancelled: 0 };
     for (const task of tasks) counts[bucketOf(task, todayEnd)] += 1;
     return counts;
   }, [tasks, todayEnd]);
@@ -146,77 +144,34 @@ export function TasksScreen() {
           }
 
           return (
-            <Card
+            <TaskCard
               key={task.id}
-              variant="elevated"
-              gap="$2"
-              opacity={task.status === 'completed' ? 0.6 : 1}
-            >
-              <XStack justifyContent="space-between" alignItems="flex-start">
-                <YStack flex={1} gap="$1">
-                  <Body fontWeight="700" fontSize="$5">{task.title}</Body>
-                  {!!task.description && (
-                    <Body tone="secondary" fontSize="$3">{task.description}</Body>
-                  )}
-                </YStack>
-                <Badge
-                  tone={PRIORITY_TONE[task.priority]}
-                  i18nKey={`tasks:form.priority${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}`}
-                />
-              </XStack>
-
-              <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
-                <TaskStatusBadge status={task.status} />
-
-                <XStack gap="$2">
-                  <Button
-                    size="$2"
-                    disabled={task.status === 'completed'}
-                    onPress={() => complete.mutate(task.id)}
-                    {...toPlatformAccessibilityProps({
-                      accessibilityRole: 'button',
-                      accessibilityLabel: t('actions.complete'),
-                    })}
-                  >
-                    {t('actions.complete')}
-                  </Button>
-                  <Button
-                    size="$2"
-                    onPress={() => setEditingTask(task)}
-                    {...toPlatformAccessibilityProps({
-                      accessibilityRole: 'button',
-                      accessibilityLabel: t('actions.edit'),
-                    })}
-                  >
-                    {t('actions.edit')}
-                  </Button>
-                  <Button
-                    size="$2"
-                    onPress={() => duplicate.mutate(task.id)}
-                    {...toPlatformAccessibilityProps({
-                      accessibilityRole: 'button',
-                      accessibilityLabel: t('actions.duplicate'),
-                    })}
-                  >
-                    {t('actions.duplicate')}
-                  </Button>
-                  <Button
-                    size="$2"
-                    onPress={() => archive.mutate(task.id)}
-                    {...toPlatformAccessibilityProps({
-                      accessibilityRole: 'button',
-                      accessibilityLabel: t('actions.archive'),
-                    })}
-                  >
-                    {t('actions.archive')}
-                  </Button>
-                </XStack>
-              </XStack>
-            </Card>
+              task={task}
+              pendingAction={pendingActionFor(task.id)}
+              onAction={handleAction}
+              onEdit={setEditingTask}
+              onDuplicate={(t) => duplicate.mutate(t.id)}
+            />
           );
         })
         )}
       </ScrollView>
+
+      {confirming && (
+        <ConfirmationDialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setConfirming(null);
+          }}
+          titleI18nKey={`tasks:confirm.${confirming.action.id}.title`}
+          descriptionI18nKey={`tasks:confirm.${confirming.action.id}.description`}
+          descriptionI18nParams={{ title: confirming.task.title }}
+          confirmI18nKey={`tasks:${confirming.action.labelKey}`}
+          cancelI18nKey="common:cancel"
+          destructive={confirming.action.destructive}
+          onConfirm={() => executeAction(confirming.task, confirming.action)}
+        />
+      )}
 
       {!editingTask && !creatingWithGoalId && (
         // Rendered via Portal, not inline: a plain `position:absolute` +

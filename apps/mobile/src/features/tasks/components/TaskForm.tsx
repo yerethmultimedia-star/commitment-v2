@@ -7,6 +7,7 @@ import { TaskModel, TaskPriority } from '../models/task.model';
 import { useTranslation } from 'react-i18next';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useGoals } from '@/features/goals/hooks/useGoals';
+import type { CommitmentModel } from '@/features/commitments/models/commitment.model';
 
 type RelationKind = 'none' | 'goal' | 'commitment';
 
@@ -20,18 +21,31 @@ function relationKindOf(task: Pick<TaskModel, 'goalId' | 'commitmentId'> | undef
 export function TaskForm({
   task,
   initialGoalId,
+  defaultRelationKind,
+  commitmentOptions,
   onSaved,
   onCancel
 }: {
   task?: TaskModel;
   /** Preloads the "Related to" selector to this Goal in create mode — e.g. arriving from Goal Workspace's "Add task". User-changeable, not locked in. */
   initialGoalId?: string;
+  /**
+   * ADR-022 §8 — Goal Workspace's Tasks tab creates Tasks scoped to the
+   * Goal's own Commitments, not the Goal directly (Tasks tab is
+   * Commitment-transitive, see GoalWorkspaceScreen.tsx). Overrides the
+   * default "goal if initialGoalId else none" starting kind — still
+   * user-changeable, not locked in.
+   */
+  defaultRelationKind?: RelationKind;
+  /** Restricts the Commitment selector's options — e.g. to only a Goal's own linked Commitments, instead of every Commitment in the app. Falls back to useCommitments() when omitted. */
+  commitmentOptions?: CommitmentModel[];
   onSaved: () => void;
   onCancel?: () => void;
 }) {
   const { identityId } = useSession();
   const { t } = useTranslation('tasks');
-  const { data: commitments = [] } = useCommitments();
+  const { data: allCommitments = [] } = useCommitments();
+  const commitments = commitmentOptions ?? allCommitments;
   const { data: goals = [] } = useGoals();
 
   const [title, setTitle] = useState(task?.title ?? '');
@@ -39,8 +53,8 @@ export function TaskForm({
   const [description, setDescription] = useState(task?.description ?? '');
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? 'medium');
   const initialRelationKind = useMemo(
-    () => task ? relationKindOf(task) : (initialGoalId ? 'goal' : 'none'),
-    [task, initialGoalId]
+    () => task ? relationKindOf(task) : (defaultRelationKind ?? (initialGoalId ? 'goal' : 'none')),
+    [task, initialGoalId, defaultRelationKind]
   );
   const [relationKind, setRelationKind] = useState<RelationKind>(initialRelationKind);
   const [relationTargetId, setRelationTargetId] = useState<string>(

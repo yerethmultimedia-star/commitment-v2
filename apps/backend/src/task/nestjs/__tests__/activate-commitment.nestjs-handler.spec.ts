@@ -1,7 +1,8 @@
 import { ActivateCommitmentNestjsHandler } from '../activate-commitment.nestjs-handler';
-import { ActivateCommitmentCommand } from '../../application/commands/activate-commitment.command';
-import { InMemoryCommitmentRepository } from '../../infrastructure/in-memory-commitment.repository';
-import { NoOpDomainEventDispatcher } from '../../infrastructure/noop-event-dispatcher';
+import { ActivateCommitmentCommand } from '../../../commitment/application/commands/activate-commitment.command';
+import { InMemoryCommitmentRepository } from '../../../commitment/infrastructure/in-memory-commitment.repository';
+import { NoOpDomainEventDispatcher } from '../../../commitment/infrastructure/noop-event-dispatcher';
+import type { CommitmentActivationPreconditions } from '../../../commitment/application/ports/commitment-activation-preconditions.port';
 import {
   Commitment,
   CommitmentId,
@@ -14,7 +15,16 @@ describe('ActivateCommitmentNestjsHandler', () => {
   it('should delegate to core handler and return ActivateCommitmentResult', async () => {
     const repository = new InMemoryCommitmentRepository();
     const dispatcher = new NoOpDomainEventDispatcher();
-    const handler = new ActivateCommitmentNestjsHandler(repository, dispatcher);
+    // ADR-022 §3.1 — stubbed to satisfy the precondition; this test covers
+    // NestJS wiring, not the execution-plan requirement itself.
+    const activationPreconditions: CommitmentActivationPreconditions = {
+      hasExecutionPlan: () => Promise.resolve(true),
+    };
+    const handler = new ActivateCommitmentNestjsHandler(
+      repository,
+      dispatcher,
+      activationPreconditions,
+    );
 
     // Pre-seed a commitment
     const id = '018f6b5c-42e1-7000-8000-999999999999';

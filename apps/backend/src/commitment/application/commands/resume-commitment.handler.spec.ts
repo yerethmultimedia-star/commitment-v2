@@ -32,7 +32,7 @@ function createPausedCommitment(): Commitment {
     new CommitmentTitle('Test'),
     new CommitmentDescription('Test description'),
   );
-  commitment.activate();
+  commitment.activate(true);
   commitment.pause();
   return commitment;
 }

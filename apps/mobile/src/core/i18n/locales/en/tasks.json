@@ -12,7 +12,7 @@
     "today": "Today",
     "upcoming": "Upcoming",
     "completed": "Completed",
-    "archived": "Archived",
+    "cancelled": "Cancelled",
     "empty": {
       "inbox": { "title": "Inbox is empty", "description": "Tasks without a due date land here." },
       "today": {
@@ -27,9 +27,9 @@
         "title": "No completed tasks yet",
         "description": "Tasks you finish will show up here."
       },
-      "archived": {
-        "title": "No archived tasks",
-        "description": "Tasks you archive will show up here."
+      "cancelled": {
+        "title": "No cancelled tasks",
+        "description": "Tasks you cancel will show up here."
       }
     }
   },
@@ -61,13 +61,26 @@
   "actions": {
     "complete": "Complete",
     "duplicate": "Duplicate",
-    "archive": "Archive",
-    "edit": "Edit"
+    "edit": "Edit",
+    "start": "Start",
+    "block": "Block",
+    "unblock": "Unblock",
+    "returnToPending": "Return to Pending",
+    "cancel": "Cancel",
+    "reopen": "Reopen"
   },
   "status": {
     "pending": "Pending",
+    "in_progress": "In Progress",
+    "blocked": "Blocked",
     "completed": "Completed",
-    "archived": "Archived"
+    "cancelled": "Cancelled"
+  },
+  "confirm": {
+    "cancel": {
+      "title": "Cancel this task?",
+      "description": "\"{{title}}\" will be moved to Cancelled. You can reopen it later if needed."
+    }
   },
   "progress": {
     "title": "Progress",

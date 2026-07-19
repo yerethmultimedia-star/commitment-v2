@@ -5,6 +5,7 @@ import { Card, Body, toPlatformAccessibilityProps } from '@commitment/design-sys
 
 import { useRouter } from 'expo-router';
 import { useDashboardQuery } from '@/features/tasks/hooks/useTasks';
+import { TaskStatusBadge } from '@/features/tasks/components/TaskStatusBadge';
 
 export const TodayWidget = React.memo(function TodayWidget() {
   // Still needed for the two accessibilityLabel sites below — Card supports
@@ -58,10 +59,16 @@ export const TodayWidget = React.memo(function TodayWidget() {
                   accessibilityRole: 'button',
                 })}
               >
-                <YStack width={12} height={12} borderRadius={6} backgroundColor="$accent" marginRight="$3" />
                 <Body color="$contentPrimary" fontSize="$4" numberOfLines={1} flex={1}>
                   {task.title}
                 </Body>
+                {/* ADR-022 review note (2026-07-19): "today" now includes
+                    Pending/In Progress/Blocked, which aren't the same kind
+                    of work cognitively — a status-aware badge replaces the
+                    old flat accent dot so each row is distinguishable at a
+                    glance, reusing TaskStatusBadge rather than inventing a
+                    new visual language (UX reuse mandate, ADR-022 §9). */}
+                <TaskStatusBadge status={task.status} />
               </XStack>
             ))
           )}

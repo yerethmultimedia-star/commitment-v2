@@ -5,13 +5,17 @@ import { RegisterTaskResult } from '../commands/register-task.result';
 import { EditTaskCommand } from '../commands/edit-task.command';
 import { CompleteTaskCommand } from '../commands/complete-task.command';
 import { ReopenTaskCommand } from '../commands/reopen-task.command';
-import { ArchiveTaskCommand } from '../commands/archive-task.command';
-import { RestoreTaskCommand } from '../commands/restore-task.command';
+import { StartTaskCommand } from '../commands/start-task.command';
+import { BlockTaskCommand } from '../commands/block-task.command';
+import { UnblockTaskCommand } from '../commands/unblock-task.command';
+import { CancelTaskCommand } from '../commands/cancel-task.command';
+import { ReturnTaskToPendingCommand } from '../commands/return-task-to-pending.command';
 import { DeleteTaskCommand } from '../commands/delete-task.command';
 import { ChangePriorityTaskCommand } from '../commands/change-priority-task.command';
 import { DuplicateTaskCommand } from '../commands/duplicate-task.command';
 import { RelinkTaskGoalCommand } from '../commands/relink-task-goal.command';
 import { RelinkTaskCommitmentCommand } from '../commands/relink-task-commitment.command';
+import { CreateTaskDependencyCommand } from '../commands/create-task-dependency.command';
 import { GetTaskByIdQuery } from '../queries/get-task-by-id.query';
 import { ListTasksQuery } from '../queries/list-tasks.query';
 import { PaginatedTasks, TaskView } from '../queries/task-view.dto';
@@ -44,11 +48,23 @@ export class TaskApplicationService {
     await this.commandBus.execute(cmd);
   }
 
-  async archiveTask(cmd: ArchiveTaskCommand): Promise<void> {
+  async startTask(cmd: StartTaskCommand): Promise<void> {
     await this.commandBus.execute(cmd);
   }
 
-  async restoreTask(cmd: RestoreTaskCommand): Promise<void> {
+  async blockTask(cmd: BlockTaskCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async unblockTask(cmd: UnblockTaskCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async cancelTask(cmd: CancelTaskCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async returnTaskToPending(cmd: ReturnTaskToPendingCommand): Promise<void> {
     await this.commandBus.execute(cmd);
   }
 
@@ -71,6 +87,10 @@ export class TaskApplicationService {
   }
 
   async relinkCommitment(cmd: RelinkTaskCommitmentCommand): Promise<void> {
+    await this.commandBus.execute(cmd);
+  }
+
+  async createTaskDependency(cmd: CreateTaskDependencyCommand): Promise<void> {
     await this.commandBus.execute(cmd);
   }
 

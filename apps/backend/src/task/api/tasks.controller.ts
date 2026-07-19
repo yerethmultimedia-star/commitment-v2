@@ -22,13 +22,17 @@ import { RegisterTaskCommand } from '../application/commands/register-task.comma
 import { EditTaskCommand } from '../application/commands/edit-task.command';
 import { CompleteTaskCommand } from '../application/commands/complete-task.command';
 import { ReopenTaskCommand } from '../application/commands/reopen-task.command';
-import { ArchiveTaskCommand } from '../application/commands/archive-task.command';
-import { RestoreTaskCommand } from '../application/commands/restore-task.command';
+import { StartTaskCommand } from '../application/commands/start-task.command';
+import { BlockTaskCommand } from '../application/commands/block-task.command';
+import { UnblockTaskCommand } from '../application/commands/unblock-task.command';
+import { CancelTaskCommand } from '../application/commands/cancel-task.command';
+import { ReturnTaskToPendingCommand } from '../application/commands/return-task-to-pending.command';
 import { DeleteTaskCommand } from '../application/commands/delete-task.command';
 import { ChangePriorityTaskCommand } from '../application/commands/change-priority-task.command';
 import { DuplicateTaskCommand } from '../application/commands/duplicate-task.command';
 import { RelinkTaskGoalCommand } from '../application/commands/relink-task-goal.command';
 import { RelinkTaskCommitmentCommand } from '../application/commands/relink-task-commitment.command';
+import { CreateTaskDependencyCommand } from '../application/commands/create-task-dependency.command';
 import { RegisterTaskResult } from '../application/commands/register-task.result';
 import { ListTasksQuery } from '../application/queries/list-tasks.query';
 import { GetDashboardQuery } from '../application/queries/get-dashboard.query';
@@ -42,11 +46,19 @@ import { TaskApplicationService } from '../application/services/task-application
 import {
   TaskNotFoundError,
   TaskAlreadyCompletedError,
-  TaskAlreadyArchivedError,
+  TaskAlreadyCancelledError,
   TaskAlreadyDeletedError,
+  TaskCannotBeCompletedError,
   TaskCannotBeReopenedError,
-  TaskCannotBeRestoredError,
-  TaskCannotBeArchivedError,
+  TaskReopenBlockedByCommitmentError,
+  TaskCannotBeStartedError,
+  TaskCannotBeBlockedError,
+  TaskCannotBeUnblockedError,
+  TaskCannotBeUnblockedManuallyError,
+  TaskCannotBeCancelledError,
+  TaskCannotReturnToPendingError,
+  TaskDependencyCycleError,
+  InvalidTaskDependencyError,
 } from '@commitment/domain';
 
 const uuidSchema = z.string().uuid('Invalid UUID format');
@@ -85,6 +97,14 @@ const completeSchema = z.object({
   actualMinutes: z.number().min(0).optional(),
 });
 
+// blockedType is deliberately NOT accepted here — the public Block endpoint
+// always blocks manually. 'dependency' is only ever set by the internal
+// dependency-resolution cascade (ADR-022 §4.2/§5), never by a direct client
+// request.
+const blockSchema = z.object({
+  blockedReason: z.string().max(500).optional(),
+});
+
 const changePrioritySchema = z.object({
   priority: z.enum(['low', 'medium', 'high']),
 });
@@ -96,6 +116,10 @@ const relinkGoalSchema = z.object({
 
 const relinkCommitmentSchema = z.object({
   commitmentId: z.string().uuid().nullable(),
+});
+
+const createDependencySchema = z.object({
+  predecessorTaskId: z.string().uuid(),
 });
 
 @ApiTags('tasks')
@@ -257,15 +281,22 @@ export class TasksController {
         throw new NotFoundException(err.message);
       if (err instanceof TaskAlreadyCompletedError)
         throw new ConflictException(err.message);
-      if (err instanceof TaskAlreadyArchivedError)
+      if (err instanceof TaskCannotBeCompletedError)
         throw new ConflictException(err.message);
       throw err;
     }
   }
 
   @Post(':id/reopen')
-  @ApiOperation({ summary: 'Reopen a completed task' })
+  @ApiOperation({
+    summary: 'Reopen a Completed or Cancelled task (ADR-022 §4.4)',
+  })
   @ApiParam({ name: 'id', description: 'Task UUID' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Wrong state, or the linked Commitment is no longer Active (ADR-022 §6.2)',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async reopen(@Param('id') id: string): Promise<void> {
     try {
@@ -275,37 +306,155 @@ export class TasksController {
         throw new NotFoundException(err.message);
       if (err instanceof TaskCannotBeReopenedError)
         throw new ConflictException(err.message);
-      throw err;
-    }
-  }
-
-  @Post(':id/archive')
-  @ApiOperation({ summary: 'Archive a task' })
-  @ApiParam({ name: 'id', description: 'Task UUID' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async archive(@Param('id') id: string): Promise<void> {
-    try {
-      await this.taskAppService.archiveTask(new ArchiveTaskCommand(id));
-    } catch (err) {
-      if (err instanceof TaskNotFoundError)
-        throw new NotFoundException(err.message);
-      if (err instanceof TaskAlreadyArchivedError)
+      if (err instanceof TaskReopenBlockedByCommitmentError)
         throw new ConflictException(err.message);
       throw err;
     }
   }
 
-  @Post(':id/restore')
-  @ApiOperation({ summary: 'Restore an archived task' })
+  // ─── Task Lifecycle (ADR-022 §4) ────────────────────────────────────────
+
+  @Post(':id/start')
+  @ApiOperation({
+    summary: 'Pending -> In Progress. Only reachable via this explicit action.',
+  })
   @ApiParam({ name: 'id', description: 'Task UUID' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async restore(@Param('id') id: string): Promise<void> {
+  async start(@Param('id') id: string): Promise<void> {
     try {
-      await this.taskAppService.restoreTask(new RestoreTaskCommand(id));
+      await this.taskAppService.startTask(new StartTaskCommand(id));
     } catch (err) {
       if (err instanceof TaskNotFoundError)
         throw new NotFoundException(err.message);
-      if (err instanceof TaskCannotBeRestoredError)
+      if (err instanceof TaskCannotBeStartedError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post(':id/block')
+  @ApiOperation({
+    summary:
+      'Pending or In Progress -> Blocked (manual — dependency blocks are set automatically, never via this endpoint)',
+  })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async block(@Param('id') id: string, @Body() body: unknown): Promise<void> {
+    const parsed = blockSchema.safeParse(body ?? {});
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.taskAppService.blockTask(
+        new BlockTaskCommand(id, 'manual', parsed.data.blockedReason),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotBeBlockedError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post(':id/unblock')
+  @ApiOperation({
+    summary:
+      'Blocked -> prior status. Rejected for dependency-blocked tasks — those unblock only automatically (ADR-022 §4.2).',
+  })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Not Blocked, or dependency-blocked (manual unblock not allowed)',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async unblock(@Param('id') id: string): Promise<void> {
+    try {
+      await this.taskAppService.unblockTask(
+        new UnblockTaskCommand(id, 'manual'),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotBeUnblockedError)
+        throw new ConflictException(err.message);
+      if (err instanceof TaskCannotBeUnblockedManuallyError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post(':id/cancel')
+  @ApiOperation({
+    summary: 'Pending, In Progress, or Blocked -> Cancelled (terminal)',
+  })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async cancel(@Param('id') id: string): Promise<void> {
+    try {
+      await this.taskAppService.cancelTask(new CancelTaskCommand(id));
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskAlreadyCancelledError)
+        throw new ConflictException(err.message);
+      if (err instanceof TaskCannotBeCancelledError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  @Post(':id/return-to-pending')
+  @ApiOperation({ summary: 'In Progress -> Pending (explicit step back)' })
+  @ApiParam({ name: 'id', description: 'Task UUID' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async returnToPending(@Param('id') id: string): Promise<void> {
+    try {
+      await this.taskAppService.returnTaskToPending(
+        new ReturnTaskToPendingCommand(id),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskCannotReturnToPendingError)
+        throw new ConflictException(err.message);
+      throw err;
+    }
+  }
+
+  // ─── Task Dependencies (ADR-022 §5 — command/API only, no dedicated UI) ─
+
+  @Post(':id/dependencies')
+  @ApiOperation({
+    summary:
+      "Declare that task :id depends on (comes after) predecessorTaskId. If the predecessor isn't Completed yet, :id is blocked automatically (blockedType='dependency'); it unblocks automatically once all its predecessors complete.",
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Successor Task UUID (the dependent task)',
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Would create a cycle, or predecessorTaskId equals :id',
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async createDependency(
+    @Param('id') id: string,
+    @Body() body: unknown,
+  ): Promise<void> {
+    const parsed = createDependencySchema.safeParse(body);
+    if (!parsed.success) throw new BadRequestException(parsed.error.issues);
+
+    try {
+      await this.taskAppService.createTaskDependency(
+        new CreateTaskDependencyCommand(parsed.data.predecessorTaskId, id),
+      );
+    } catch (err) {
+      if (err instanceof TaskNotFoundError)
+        throw new NotFoundException(err.message);
+      if (err instanceof TaskDependencyCycleError)
+        throw new ConflictException(err.message);
+      if (err instanceof InvalidTaskDependencyError)
         throw new ConflictException(err.message);
       throw err;
     }
@@ -371,7 +520,9 @@ export class TasksController {
     } catch (err) {
       if (err instanceof TaskNotFoundError)
         throw new NotFoundException(err.message);
-      if (err instanceof TaskCannotBeArchivedError)
+      if (err instanceof TaskCannotBeCompletedError)
+        throw new ConflictException(err.message);
+      if (err instanceof TaskCannotBeCancelledError)
         throw new ConflictException(err.message);
       throw err;
     }
@@ -398,7 +549,9 @@ export class TasksController {
     } catch (err) {
       if (err instanceof TaskNotFoundError)
         throw new NotFoundException(err.message);
-      if (err instanceof TaskCannotBeArchivedError)
+      if (err instanceof TaskCannotBeCompletedError)
+        throw new ConflictException(err.message);
+      if (err instanceof TaskCannotBeCancelledError)
         throw new ConflictException(err.message);
       throw err;
     }

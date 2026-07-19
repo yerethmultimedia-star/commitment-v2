@@ -5,8 +5,11 @@ import {
   TaskEditedEvent,
   TaskCompletedEvent,
   TaskReopenedEvent,
-  TaskArchivedEvent,
-  TaskRestoredEvent,
+  TaskStartedEvent,
+  TaskBlockedEvent,
+  TaskUnblockedEvent,
+  TaskCancelledEvent,
+  TaskReturnedToPendingEvent,
   TaskDeletedEvent,
   TaskPriorityChangedEvent,
   TaskDueDateChangedEvent,
@@ -37,6 +40,8 @@ export class TaskRegisteredProjector implements IEventHandler<TaskRegisteredEven
       completedAt: null,
       commitmentId: event.payload.commitmentId ?? null,
       goalId: event.payload.goalId ?? null,
+      blockedType: null,
+      blockedReason: null,
       tags: event.payload.tags,
       metadata: event.payload.metadata,
       createdAt: event.payload.createdAt,
@@ -105,40 +110,99 @@ export class TaskReopenedProjector implements IEventHandler<TaskReopenedEvent> {
     if (!view) return;
     view.status = 'pending';
     view.completedAt = null;
+    view.blockedType = null;
+    view.blockedReason = null;
     view.updatedAt = event.metadata.occurredAt;
     view.version += 1;
     this.store.save(view);
   }
 }
 
-@EventsHandler(TaskArchivedEvent)
-export class TaskArchivedProjector implements IEventHandler<TaskArchivedEvent> {
+@EventsHandler(TaskStartedEvent)
+export class TaskStartedProjector implements IEventHandler<TaskStartedEvent> {
   constructor(
     @Inject('TaskProjectionStore')
     private readonly store: InMemoryTaskProjectionStore,
   ) {}
 
-  public handle(event: TaskArchivedEvent): void {
+  public handle(event: TaskStartedEvent): void {
     const view = this.store.findById(event.payload.taskId);
     if (!view) return;
-    view.status = 'archived';
+    view.status = 'in_progress';
     view.updatedAt = event.metadata.occurredAt;
     view.version += 1;
     this.store.save(view);
   }
 }
 
-@EventsHandler(TaskRestoredEvent)
-export class TaskRestoredProjector implements IEventHandler<TaskRestoredEvent> {
+@EventsHandler(TaskBlockedEvent)
+export class TaskBlockedProjector implements IEventHandler<TaskBlockedEvent> {
   constructor(
     @Inject('TaskProjectionStore')
     private readonly store: InMemoryTaskProjectionStore,
   ) {}
 
-  public handle(event: TaskRestoredEvent): void {
+  public handle(event: TaskBlockedEvent): void {
     const view = this.store.findById(event.payload.taskId);
     if (!view) return;
-    view.status = view.completedAt ? 'completed' : 'pending';
+    view.status = 'blocked';
+    view.blockedType = event.payload.blockedType;
+    view.blockedReason = event.payload.blockedReason ?? null;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
+@EventsHandler(TaskUnblockedEvent)
+export class TaskUnblockedProjector implements IEventHandler<TaskUnblockedEvent> {
+  constructor(
+    @Inject('TaskProjectionStore')
+    private readonly store: InMemoryTaskProjectionStore,
+  ) {}
+
+  public handle(event: TaskUnblockedEvent): void {
+    const view = this.store.findById(event.payload.taskId);
+    if (!view) return;
+    view.status = event.payload.resultingStatus;
+    view.blockedType = null;
+    view.blockedReason = null;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
+@EventsHandler(TaskCancelledEvent)
+export class TaskCancelledProjector implements IEventHandler<TaskCancelledEvent> {
+  constructor(
+    @Inject('TaskProjectionStore')
+    private readonly store: InMemoryTaskProjectionStore,
+  ) {}
+
+  public handle(event: TaskCancelledEvent): void {
+    const view = this.store.findById(event.payload.taskId);
+    if (!view) return;
+    view.status = 'cancelled';
+    view.blockedType = null;
+    view.blockedReason = null;
+    view.updatedAt = event.metadata.occurredAt;
+    view.version += 1;
+    this.store.save(view);
+  }
+}
+
+@EventsHandler(TaskReturnedToPendingEvent)
+export class TaskReturnedToPendingProjector implements IEventHandler<TaskReturnedToPendingEvent> {
+  constructor(
+    @Inject('TaskProjectionStore')
+    private readonly store: InMemoryTaskProjectionStore,
+  ) {}
+
+  public handle(event: TaskReturnedToPendingEvent): void {
+    const view = this.store.findById(event.payload.taskId);
+    if (!view) return;
+    view.status = 'pending';
     view.updatedAt = event.metadata.occurredAt;
     view.version += 1;
     this.store.save(view);
@@ -235,8 +299,11 @@ export const TaskProjectors = [
   TaskEditedProjector,
   TaskCompletedProjector,
   TaskReopenedProjector,
-  TaskArchivedProjector,
-  TaskRestoredProjector,
+  TaskStartedProjector,
+  TaskBlockedProjector,
+  TaskUnblockedProjector,
+  TaskCancelledProjector,
+  TaskReturnedToPendingProjector,
   TaskDeletedProjector,
   TaskPriorityChangedProjector,
   TaskDueDateChangedProjector,

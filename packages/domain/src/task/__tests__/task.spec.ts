@@ -9,6 +9,11 @@ import { CommitmentId } from '../../commitment/value-objects/commitment-id.js';
 import { TaskConstraints } from '../constants/task-constraints.js';
 import { TaskRegisteredEvent } from '../events/task-registered.event.js';
 import { TaskCompletedEvent } from '../events/task-completed.event.js';
+import { TaskStartedEvent } from '../events/task-started.event.js';
+import { TaskBlockedEvent } from '../events/task-blocked.event.js';
+import { TaskUnblockedEvent } from '../events/task-unblocked.event.js';
+import { TaskCancelledEvent } from '../events/task-cancelled.event.js';
+import { TaskReturnedToPendingEvent } from '../events/task-returned-to-pending.event.js';
 import { TaskPriorityChangedEvent } from '../events/task-priority-changed.event.js';
 import { TaskDueDateChangedEvent } from '../events/task-due-date-changed.event.js';
 import { TaskRelinkedToGoalEvent } from '../events/task-relinked-to-goal.event.js';
@@ -19,11 +24,17 @@ import {
   InvalidTaskPriorityError,
   InvalidTaskStatusError,
   TaskAlreadyCompletedError,
-  TaskAlreadyArchivedError,
+  TaskAlreadyCancelledError,
   TaskAlreadyDeletedError,
+  TaskCannotBeCompletedError,
   TaskCannotBeReopenedError,
-  TaskCannotBeArchivedError,
-  TaskCannotBeRestoredError,
+  TaskReopenBlockedByCommitmentError,
+  TaskCannotBeStartedError,
+  TaskCannotBeBlockedError,
+  TaskCannotBeUnblockedError,
+  TaskCannotBeUnblockedManuallyError,
+  TaskCannotBeCancelledError,
+  TaskCannotReturnToPendingError,
 } from '../errors/task-errors.js';
 
 describe('Task Domain', () => {
@@ -98,12 +109,15 @@ describe('Task Domain', () => {
     describe('TaskStatus', () => {
       it('should create statuses via factory methods', () => {
         expect(TaskStatus.pending().value).toBe(StatusType.Pending);
+        expect(TaskStatus.inProgress().value).toBe(StatusType.InProgress);
+        expect(TaskStatus.blocked().value).toBe(StatusType.Blocked);
         expect(TaskStatus.completed().value).toBe(StatusType.Completed);
-        expect(TaskStatus.archived().value).toBe(StatusType.Archived);
+        expect(TaskStatus.cancelled().value).toBe(StatusType.Cancelled);
       });
 
       it('should reject invalid status values', () => {
-        expect(() => new TaskStatus('deleted' as any)).toThrow(InvalidTaskStatusError);
+        expect(() => new TaskStatus('archived' as any)).toThrow(InvalidTaskStatusError);
+        expect(() => new TaskStatus('deferred' as any)).toThrow(InvalidTaskStatusError);
       });
     });
   });
@@ -122,6 +136,8 @@ describe('Task Domain', () => {
         expect(task.status.value).toBe(StatusType.Pending);
         expect(task.priority.value).toBe(PriorityType.Medium);
         expect(task.isDeleted).toBe(false);
+        expect(task.blockedType).toBeNull();
+        expect(task.blockedReason).toBeNull();
 
         const events = task.getUncommittedEvents();
         expect(events).toHaveLength(1);
@@ -168,8 +184,41 @@ describe('Task Domain', () => {
       });
     });
 
+    describe('start()', () => {
+      it('should move Pending -> In Progress and emit TaskStartedEvent', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.clearUncommittedEvents();
+
+        task.start();
+
+        expect(task.status.value).toBe(StatusType.InProgress);
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        const e = events[0] as TaskStartedEvent;
+        expect(e.name).toBe('task.started');
+        expect(e.payload.taskId).toBe(validId.value);
+      });
+
+      it('is never reached automatically — only Start moves to In Progress', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        expect(task.status.value).toBe(StatusType.Pending);
+      });
+
+      it('rejects starting a task that is already In Progress', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        expect(() => task.start()).toThrow(TaskCannotBeStartedError);
+      });
+
+      it('rejects starting a Completed task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.complete();
+        expect(() => task.start()).toThrow(TaskCannotBeStartedError);
+      });
+    });
+
     describe('complete()', () => {
-      it('should complete a pending task and emit TaskCompletedEvent', () => {
+      it('should complete a pending task and emit TaskCompletedEvent (Pending -> Completed, skipping In Progress)', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
         task.clearUncommittedEvents();
 
@@ -185,16 +234,29 @@ describe('Task Domain', () => {
         expect(e.payload.taskId).toBe(validId.value);
       });
 
+      it('should complete an In Progress task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        task.complete();
+        expect(task.status.value).toBe(StatusType.Completed);
+      });
+
       it('should not complete an already-completed task', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
         task.complete();
         expect(() => task.complete()).toThrow(TaskAlreadyCompletedError);
       });
 
-      it('should not complete an archived task', () => {
+      it('should not complete a Blocked task directly — must Unblock first', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        expect(() => task.complete()).toThrow(TaskCannotBeArchivedError);
+        task.block('manual');
+        expect(() => task.complete()).toThrow(TaskCannotBeCompletedError);
+      });
+
+      it('should not complete a Cancelled task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.cancel();
+        expect(() => task.complete()).toThrow(TaskCannotBeCompletedError);
       });
 
       it('should not complete a deleted task', () => {
@@ -210,13 +272,174 @@ describe('Task Domain', () => {
       });
     });
 
+    describe('block() / unblock()', () => {
+      it('blocks a Pending task manually and remembers Pending as the pre-block status', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.clearUncommittedEvents();
+
+        task.block('manual', 'Waiting on design review');
+
+        expect(task.status.value).toBe(StatusType.Blocked);
+        expect(task.blockedType).toBe('manual');
+        expect(task.blockedReason).toBe('Waiting on design review');
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        const e = events[0] as TaskBlockedEvent;
+        expect(e.name).toBe('task.blocked');
+        expect(e.payload.previousStatus).toBe(StatusType.Pending);
+      });
+
+      it('blocks an In Progress task and remembers In Progress as the pre-block status', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        task.clearUncommittedEvents();
+
+        task.block('dependency');
+
+        expect(task.status.value).toBe(StatusType.Blocked);
+        const events = task.getUncommittedEvents();
+        expect((events[0] as TaskBlockedEvent).payload.previousStatus).toBe(StatusType.InProgress);
+      });
+
+      it('rejects blocking a Completed or Cancelled task', () => {
+        const completed = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        completed.complete();
+        expect(() => completed.block('manual')).toThrow(TaskCannotBeBlockedError);
+
+        const cancelled = Task.register(
+          new TaskId('018f6b5c-0001-7000-8000-999999999998'),
+          validIdentityId, validTitle, null, validPriority
+        );
+        cancelled.cancel();
+        expect(() => cancelled.block('manual')).toThrow(TaskCannotBeBlockedError);
+      });
+
+      it('manually unblocks a manual-blocked task, restoring Pending', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('manual');
+        task.clearUncommittedEvents();
+
+        task.unblock('manual');
+
+        expect(task.status.value).toBe(StatusType.Pending);
+        expect(task.blockedType).toBeNull();
+        expect(task.blockedReason).toBeNull();
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        const e = events[0] as TaskUnblockedEvent;
+        expect(e.name).toBe('task.unblocked');
+        expect(e.payload.source).toBe('manual');
+        expect(e.payload.resultingStatus).toBe(StatusType.Pending);
+      });
+
+      it('manually unblocks back to In Progress when that was the pre-block status', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        task.block('manual');
+
+        task.unblock('manual');
+
+        expect(task.status.value).toBe(StatusType.InProgress);
+      });
+
+      it('REJECTS manual unblock on a dependency-blocked task (ADR-022 §4.2)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('dependency');
+
+        expect(() => task.unblock('manual')).toThrow(TaskCannotBeUnblockedManuallyError);
+        expect(task.status.value).toBe(StatusType.Blocked);
+      });
+
+      it('allows system (automatic) unblock on a dependency-blocked task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('dependency');
+        task.clearUncommittedEvents();
+
+        task.unblock('system');
+
+        expect(task.status.value).toBe(StatusType.Pending);
+        const events = task.getUncommittedEvents();
+        expect((events[0] as TaskUnblockedEvent).payload.source).toBe('system');
+      });
+
+      it('allows system unblock on a manual-blocked task too (no restriction on that side)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('manual');
+        expect(() => task.unblock('system')).not.toThrow();
+      });
+
+      it('rejects unblocking a task that is not Blocked', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        expect(() => task.unblock('manual')).toThrow(TaskCannotBeUnblockedError);
+      });
+    });
+
+    describe('cancel()', () => {
+      it('cancels a Pending task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.clearUncommittedEvents();
+
+        task.cancel();
+
+        expect(task.status.value).toBe(StatusType.Cancelled);
+        const events = task.getUncommittedEvents();
+        expect(events).toHaveLength(1);
+        expect((events[0] as TaskCancelledEvent).name).toBe('task.cancelled');
+      });
+
+      it('cancels an In Progress task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        task.cancel();
+        expect(task.status.value).toBe(StatusType.Cancelled);
+      });
+
+      it('cancels a Blocked task (available even while blocked)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('dependency');
+        task.cancel();
+        expect(task.status.value).toBe(StatusType.Cancelled);
+      });
+
+      it('rejects cancelling an already-cancelled task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.cancel();
+        expect(() => task.cancel()).toThrow(TaskAlreadyCancelledError);
+      });
+
+      it('rejects cancelling a Completed task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.complete();
+        expect(() => task.cancel()).toThrow(TaskCannotBeCancelledError);
+      });
+    });
+
+    describe('returnToPending()', () => {
+      it('moves In Progress -> Pending', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        task.clearUncommittedEvents();
+
+        task.returnToPending();
+
+        expect(task.status.value).toBe(StatusType.Pending);
+        const events = task.getUncommittedEvents();
+        expect((events[0] as TaskReturnedToPendingEvent).name).toBe('task.returned_to_pending');
+      });
+
+      it('rejects returning to pending from any state other than In Progress', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        expect(() => task.returnToPending()).toThrow(TaskCannotReturnToPendingError);
+      });
+    });
+
     describe('reopen()', () => {
-      it('should reopen a completed task', () => {
+      it('should reopen a completed task (Completed -> Pending) and always emit TaskReopenedEvent', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
         task.complete();
         task.clearUncommittedEvents();
 
-        task.reopen();
+        task.reopen(true);
 
         expect(task.status.value).toBe(StatusType.Pending);
         expect(task.completedAt).toBeNull();
@@ -225,61 +448,43 @@ describe('Task Domain', () => {
         expect(events[0]?.name).toBe('task.reopened');
       });
 
-      it('should not reopen a pending task', () => {
+      it('should reopen a cancelled task (Cancelled -> Pending), same event as reopening a Completed one', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        expect(() => task.reopen()).toThrow(TaskCannotBeReopenedError);
-      });
-
-      it('should not reopen an archived task', () => {
-        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        expect(() => task.reopen()).toThrow(TaskCannotBeArchivedError);
-      });
-    });
-
-    describe('archive()', () => {
-      it('should archive a pending task', () => {
-        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.cancel();
         task.clearUncommittedEvents();
 
-        task.archive();
-
-        expect(task.status.value).toBe(StatusType.Archived);
-        const events = task.getUncommittedEvents();
-        expect(events).toHaveLength(1);
-        expect(events[0]?.name).toBe('task.archived');
-      });
-
-      it('should not archive an already-archived task', () => {
-        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        expect(() => task.archive()).toThrow(TaskAlreadyArchivedError);
-      });
-
-      it('should not archive a deleted task', () => {
-        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.delete();
-        expect(() => task.archive()).toThrow(TaskAlreadyDeletedError);
-      });
-    });
-
-    describe('restore()', () => {
-      it('should restore an archived task to Pending', () => {
-        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        task.clearUncommittedEvents();
-
-        task.restore();
+        task.reopen(true);
 
         expect(task.status.value).toBe(StatusType.Pending);
         const events = task.getUncommittedEvents();
-        expect(events).toHaveLength(1);
-        expect(events[0]?.name).toBe('task.restored');
+        expect(events[0]?.name).toBe('task.reopened');
       });
 
-      it('should not restore a pending task', () => {
+      it('never lands on In Progress, even if the task was In Progress before completing', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        expect(() => task.restore()).toThrow(TaskCannotBeRestoredError);
+        task.start();
+        task.complete();
+        task.reopen(true);
+        expect(task.status.value).toBe(StatusType.Pending);
+      });
+
+      it('should not reopen a pending task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        expect(() => task.reopen(true)).toThrow(TaskCannotBeReopenedError);
+      });
+
+      it('should not reopen a Blocked task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('manual');
+        expect(() => task.reopen(true)).toThrow(TaskCannotBeReopenedError);
+      });
+
+      it('REJECTS reopening when the linked Commitment no longer allows it (ADR-022 §6.2)', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.complete();
+
+        expect(() => task.reopen(false)).toThrow(TaskReopenBlockedByCommitmentError);
+        expect(task.status.value).toBe(StatusType.Completed); // unchanged
       });
     });
 
@@ -323,6 +528,18 @@ describe('Task Domain', () => {
         expect(events[0]?.name).toBe('task.edited');
       });
 
+      it('is available while In Progress', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.start();
+        expect(() => task.edit(new TaskTitle('New title'))).not.toThrow();
+      });
+
+      it('is available while Blocked', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.block('manual');
+        expect(() => task.edit(new TaskTitle('New title'))).not.toThrow();
+      });
+
       it('should not emit an event when nothing changed', () => {
         const task = Task.register(validId, validIdentityId, validTitle, validDescription, validPriority, 30, null, null, null, ['tag1']);
         task.clearUncommittedEvents();
@@ -339,10 +556,16 @@ describe('Task Domain', () => {
         expect(() => task.edit(new TaskTitle('Anything'))).toThrow(TaskAlreadyDeletedError);
       });
 
-      it('should not edit an archived task', () => {
+      it('should not edit a Completed task', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        expect(() => task.edit(new TaskTitle('Anything'))).toThrow(TaskCannotBeArchivedError);
+        task.complete();
+        expect(() => task.edit(new TaskTitle('Anything'))).toThrow(TaskCannotBeCompletedError);
+      });
+
+      it('should not edit a Cancelled task', () => {
+        const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
+        task.cancel();
+        expect(() => task.edit(new TaskTitle('Anything'))).toThrow(TaskCannotBeCancelledError);
       });
     });
 
@@ -512,10 +735,10 @@ describe('Task Domain', () => {
         expect((events[1] as TaskRelinkedToGoalEvent).payload.goalId).toBeNull();
       });
 
-      it('blocks relinkGoal on an archived task', () => {
+      it('blocks relinkGoal on a Cancelled task', () => {
         const task = Task.register(validId, validIdentityId, validTitle, null, validPriority);
-        task.archive();
-        expect(() => task.relinkGoal(goalId, new Date())).toThrow(TaskCannotBeArchivedError);
+        task.cancel();
+        expect(() => task.relinkGoal(goalId, new Date())).toThrow(TaskCannotBeCancelledError);
       });
 
       it('blocks relinkCommitment on a deleted task', () => {
@@ -525,10 +748,132 @@ describe('Task Domain', () => {
       });
     });
 
+    describe('ADR-022 §4.3 — exhaustive transition table', () => {
+      function freshTask(id = validId): Task {
+        return Task.register(id, validIdentityId, validTitle, null, validPriority);
+      }
+
+      it('Pending -> In Progress (Start)', () => {
+        const t = freshTask();
+        t.start();
+        expect(t.status.value).toBe(StatusType.InProgress);
+      });
+
+      it('Pending -> Completed (Complete, skipping In Progress)', () => {
+        const t = freshTask();
+        t.complete();
+        expect(t.status.value).toBe(StatusType.Completed);
+      });
+
+      it('Pending -> Blocked (Block)', () => {
+        const t = freshTask();
+        t.block('manual');
+        expect(t.status.value).toBe(StatusType.Blocked);
+      });
+
+      it('Pending -> Cancelled (Cancel)', () => {
+        const t = freshTask();
+        t.cancel();
+        expect(t.status.value).toBe(StatusType.Cancelled);
+      });
+
+      it('In Progress -> Completed (Complete)', () => {
+        const t = freshTask();
+        t.start();
+        t.complete();
+        expect(t.status.value).toBe(StatusType.Completed);
+      });
+
+      it('In Progress -> Blocked (Block)', () => {
+        const t = freshTask();
+        t.start();
+        t.block('dependency');
+        expect(t.status.value).toBe(StatusType.Blocked);
+      });
+
+      it('In Progress -> Cancelled (Cancel)', () => {
+        const t = freshTask();
+        t.start();
+        t.cancel();
+        expect(t.status.value).toBe(StatusType.Cancelled);
+      });
+
+      it('In Progress -> Pending (Return to Pending)', () => {
+        const t = freshTask();
+        t.start();
+        t.returnToPending();
+        expect(t.status.value).toBe(StatusType.Pending);
+      });
+
+      it('Blocked -> Pending (manual Unblock, pre-block was Pending)', () => {
+        const t = freshTask();
+        t.block('manual');
+        t.unblock('manual');
+        expect(t.status.value).toBe(StatusType.Pending);
+      });
+
+      it('Blocked -> In Progress (manual Unblock, pre-block was In Progress)', () => {
+        const t = freshTask();
+        t.start();
+        t.block('manual');
+        t.unblock('manual');
+        expect(t.status.value).toBe(StatusType.InProgress);
+      });
+
+      it('Blocked -> Pending (system Unblock, pre-block was Pending, blockedType dependency)', () => {
+        const t = freshTask();
+        t.block('dependency');
+        t.unblock('system');
+        expect(t.status.value).toBe(StatusType.Pending);
+      });
+
+      it('Blocked -> In Progress (system Unblock, pre-block was In Progress, blockedType dependency)', () => {
+        const t = freshTask();
+        t.start();
+        t.block('dependency');
+        t.unblock('system');
+        expect(t.status.value).toBe(StatusType.InProgress);
+      });
+
+      it('Blocked -> Cancelled (Cancel)', () => {
+        const t = freshTask();
+        t.block('manual');
+        t.cancel();
+        expect(t.status.value).toBe(StatusType.Cancelled);
+      });
+
+      it('Completed -> Pending (Reopen, commitmentAllowsReopen=true)', () => {
+        const t = freshTask();
+        t.complete();
+        t.reopen(true);
+        expect(t.status.value).toBe(StatusType.Pending);
+      });
+
+      it('Cancelled -> Pending (Reopen, commitmentAllowsReopen=true)', () => {
+        const t = freshTask();
+        t.cancel();
+        t.reopen(true);
+        expect(t.status.value).toBe(StatusType.Pending);
+      });
+
+      it('no transition ever lands automatically on In Progress', () => {
+        // Every path that reaches Pending or Completed/Cancelled requires an
+        // explicit action; only Start (from Pending) reaches In Progress.
+        const t = freshTask();
+        t.complete();
+        t.reopen(true);
+        expect(t.status.value).toBe(StatusType.Pending);
+        expect(t.status.value).not.toBe(StatusType.InProgress);
+      });
+    });
+
     describe('Event Sourcing (loadFromHistory)', () => {
-      it('should rehydrate task from event stream', () => {
+      it('should rehydrate task from event stream through the new lifecycle', () => {
         const task = Task.register(validId, validIdentityId, validTitle, validDescription, validPriority, 30);
         task.changePriority(TaskPriority.high());
+        task.start();
+        task.block('manual', 'blocked for testing');
+        task.unblock('manual');
         task.complete();
 
         const events = [...task.getUncommittedEvents()];
@@ -546,6 +891,7 @@ describe('Task Domain', () => {
         expect(rehydrated.status.value).toBe(StatusType.Completed);
         expect(rehydrated.priority.value).toBe(PriorityType.High);
         expect(rehydrated.completedAt).not.toBeNull();
+        expect(rehydrated.blockedType).toBeNull();
       });
 
       it('should maintain correct version after replaying history', () => {

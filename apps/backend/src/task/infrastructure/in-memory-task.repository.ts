@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Task, TaskId } from '@commitment/domain';
+import { Task, TaskId, CommitmentId } from '@commitment/domain';
 import { TaskVersionedRepository } from '../application/ports/task-versioned-repository.port';
 
 @Injectable()
@@ -32,5 +32,13 @@ export class InMemoryTaskRepository implements TaskVersionedRepository {
     this.store.delete(id.value);
     this.versions.delete(id.value);
     return Promise.resolve();
+  }
+
+  public findByCommitmentId(commitmentId: CommitmentId): Promise<Task[]> {
+    const tasks = Array.from(this.store.values()).filter(
+      (task) =>
+        !task.isDeleted && task.commitmentId?.value === commitmentId.value,
+    );
+    return Promise.resolve(tasks);
   }
 }

@@ -14,6 +14,7 @@ import {
 import { ActivateCommitmentCommand } from '../commands/activate-commitment.command';
 import { InMemoryCommitmentRepository } from '../../infrastructure/in-memory-commitment.repository';
 import { DomainEventDispatcher } from '../ports/domain-event-dispatcher.port';
+import { CommitmentActivationPreconditions } from '../ports/commitment-activation-preconditions.port';
 import { DomainEvent } from '@commitment/domain';
 
 const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-999999999999';
@@ -38,6 +39,7 @@ describe('ActivateCommitmentCommandHandlerCore', () => {
   let repository: InMemoryCommitmentRepository;
   let dispatchedEvents: DomainEvent[];
   let dispatcher: DomainEventDispatcher;
+  let activationPreconditions: CommitmentActivationPreconditions;
   let handler: ActivateCommitmentCommandHandlerCore;
 
   beforeEach(() => {
@@ -49,7 +51,17 @@ describe('ActivateCommitmentCommandHandlerCore', () => {
         return Promise.resolve();
       },
     };
-    handler = new ActivateCommitmentCommandHandlerCore(repository, dispatcher);
+    // Command Preconditions (ADR-022 §3) — stubbed here since this suite
+    // exercises state-transition rules, not the execution-plan requirement
+    // itself (covered separately in activate-commitment integration tests).
+    activationPreconditions = {
+      hasExecutionPlan: () => Promise.resolve(true),
+    };
+    handler = new ActivateCommitmentCommandHandlerCore(
+      repository,
+      dispatcher,
+      activationPreconditions,
+    );
   });
 
   it('should activate a Draft commitment and return version 2', async () => {
@@ -122,7 +134,7 @@ describe('ActivateCommitmentCommandHandlerCore', () => {
     const commitment = makeCommitment();
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
-    commitment.activate();
+    commitment.activate(true);
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
     commitment.complete();
@@ -144,11 +156,29 @@ describe('ActivateCommitmentCommandHandlerCore', () => {
     ).rejects.toThrow(CommitmentStateConflictError);
   });
 
+  it('should throw CommitmentStateConflictError when the execution plan precondition is not met (ADR-022 §3.1)', async () => {
+    const commitment = makeCommitment();
+    await repository.save(commitment);
+    commitment.clearUncommittedEvents();
+    activationPreconditions = {
+      hasExecutionPlan: () => Promise.resolve(false),
+    };
+    handler = new ActivateCommitmentCommandHandlerCore(
+      repository,
+      dispatcher,
+      activationPreconditions,
+    );
+
+    await expect(
+      handler.handle(new ActivateCommitmentCommand(COMMITMENT_ID)),
+    ).rejects.toThrow(CommitmentStateConflictError);
+  });
+
   it('should throw CommitmentStateTransitionError when commitment is Paused', async () => {
     const commitment = makeCommitment();
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
-    commitment.activate();
+    commitment.activate(true);
     await repository.save(commitment);
     commitment.clearUncommittedEvents();
     commitment.pause();

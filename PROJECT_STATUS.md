@@ -1,11 +1,35 @@
 # Commitment v2 — Project Status
 
-Version: 1.61.0
+Version: 1.68.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-17
+Last Updated: 2026-07-19
 
 ---
+
+## Domain Model Foundation — ADR-021 ✅ and ADR-022 ✅ both fully implemented (2026-07-19)
+
+The application's core operating model changed twice this cycle, and both changes are now complete
+end to end (domain → backend → frontend, each independently verified via a live functional
+walkthrough, not just `tsc`/`jest`):
+
+- **ADR-021 (Goal Backend & Domain History Infrastructure) ✅** — Goal Lifecycle (Draft→Active→
+  Completed/Archived) + Draft Editing + a real backend module + Event Store-backed domain history,
+  implemented and Golden-Path-verified (commit `b35021b`). See `PROJECT_STATUS.md` item 13 and
+  `project_adr021_goal_backend` (memory) for the full arc, including the mid-arc self-correction
+  that caught mobile's read-model never having migrated onto it.
+- **ADR-022 (Task Lifecycle & Execution Model) ✅** — Task's 5-state lifecycle
+  (Pending/In Progress/Blocked/Completed/Cancelled, `Archived` fully removed), `TaskDependency`,
+  Command Preconditions, the Commitment→Task cancellation cascade, and the Goal Workspace
+  `Overview → Commitments → Tasks → Analytics` navigation redesign — implemented across Fase 2.1
+  (Domain), 2.2 (Application + Backend), and 2.3 (Frontend), all three approved. See item 14 below
+  and `docs/03-architecture/task_frontend_migration_checklist.md`.
+
+**Next priority, per explicit decision (2026-07-19): a short stabilization period, not a new ADR
+immediately.** Reviewing performance, UX, visual/naming consistency, documentation, and any tech
+debt introduced by ADR-021/ADR-022 before opening **ADR-023 (candidate: Habit Lifecycle)** — the
+next major domain block. Do not start ADR-023 work without this stabilization pass first, per
+explicit instruction.
 
 ## Current Phase
 
@@ -422,8 +446,9 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
       a circular module dependency between `CommitmentModule` and `TaskModule` to implement at all).
       The real product intent — "an execution plan must exist before activating" — needs its own
       `Commitment`↔`Task`↔`Habit` relationship model first, which doesn't exist yet (see
-      `Commitment.activate()`'s own doc comment for the in-code TODO). Not scheduled — revisit once
-      that relationship model is designed, don't bolt on an ad hoc cross-aggregate check.
+      `Commitment.activate()`'s own doc comment for the in-code TODO). **Resolution now drafted**
+      in item 14's ADR-022 (Activation Policy pattern) — not scheduled for implementation until
+      that ADR is approved.
       Golden Path verified end-to-end against the real backend (live UI clicks): Draft → Activar →
       Active → Completar → Completed.
     - **Goal — a domain question, not a UX question.** `GoalState.Active` is defined but has
@@ -437,16 +462,105 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
       for activation" to "does `Active` need to exist for `Goal` at all."
       Not started, not yet scoped for implementation — this remains an analysis checkpoint, not a
       decision.
-14. **Candidate, not yet numbered — Task Lifecycle Expansion.** Surfaced 2026-07-18 implementing
-    V-001 (`TECH_DEBT.md` Item 38): the originally proposed Task status set (Pending/In
-    Progress/Blocked/Deferred/Cancelled/Completed) was descoped from V-001's `TaskStatusBadge`
-    work — the domain aggregate only supports 3 states today (`pending`/`completed`/`archived`, see
-    `packages/domain/src/task/value-objects/task-status.ts`), and no transitions, triggering
-    actions, events, or invariants were ever defined for the 4 new states. Building those would be
-    domain design (an ADR), not a badge-rendering task — explicitly not invented unilaterally.
-    `TaskStatusBadge.tsx` ships now, scoped to the 3 real states; this item tracks the state-machine
-    design work as its own future initiative, separate from and not blocking V-001's closure. Not
-    started, not yet scoped.
+14. **Task Lifecycle Expansion — ADR-022 ✅ APPROVED 2026-07-18. Fase 2.1 (Domain) ✅ complete, Fase
+    2.2 (Application + Backend) ✅ complete and ✅ APPROVED 2026-07-19, Fase 2.3 (Frontend) ✅
+    complete 2026-07-19 — checklist fully checked off at
+    `docs/03-architecture/task_frontend_migration_checklist.md`.** Surfaced 2026-07-18 implementing
+    V-001 (`TECH_DEBT.md` Item 38): the originally
+    proposed Task status set (Pending/In Progress/Blocked/Deferred/Cancelled/Completed) was
+    descoped from V-001's `TaskStatusBadge` work — the domain aggregate only supported 3 states then
+    (`pending`/`completed`/`archived`), and no transitions, triggering actions, events, or
+    invariants were ever defined for the 4 new states. `docs/03-architecture/
+adr_022_task_lifecycle_and_execution_model.md` is the full, approved domain specification: 5
+    official states (Pending/In Progress/Blocked/Completed/Cancelled — `Archived` removed,
+    migrating existing data to `Cancelled`; `Deferred` never added), exhaustive transition table,
+    `Blocked` with `blockedType`/`blockedReason` (dependency-type blocks can only auto-unblock, never
+    manually), `Reopen` extended to `Cancelled` (always dispatches `TaskReopenedEvent`) but newly
+    blocked if the Task's linked Commitment isn't `Active`, a `TaskDependency` relationship entity
+    (not a raw ID array — architecture-only in Fase 2, no UI) with anti-cycle invariant, a
+    Commitment→Task cancellation cascade on `CommitmentCompletedEvent`, and a Goal Workspace
+    navigation redesign (Overview→Commitments→Tasks→Analytics, explicitly a hierarchy of
+    abstraction levels mirroring Goal→Commitment→Task, not independent tabs — Milestones/Notes stay
+    untouched). Formally resolves the deferred Commitment "≥1 Task or Habit" activation invariant
+    (item 13's Decisión A note) via **Command Preconditions** (renamed from "Activation Policy" on
+    review — a fixed set of preconditions per command, not a configurable policy) in the Application
+    Layer — the aggregate still decides validity (receives a pre-computed boolean), no circular
+    module dependency, no `forwardRef()`. Same pattern reused for the new Task-reopen-vs-Commitment
+    check (`TaskReopenPreconditions`), which — unlike Commitment's — needs no special module
+    relocation since `TaskModule` already imports `CommitmentModule` in the correct direction.
+    Also adds an explicit architectural note: attributes like priority/tags/reminders/attachments/
+    comments are orthogonal to lifecycle, never future "states" (`Waiting`/`Flagged`/`Urgent` would
+    be a modeling mistake). Two items explicitly deferred to a future ADR, not blocking Fase 2:
+    `Habit`↔`Commitment` relationship (candidate "ADR-023") and whether Task ever needs a
+    time-of-day field.
+    **Fase 2.1 (Domain, packages/domain/src/task/ + commitment/) — complete:** 5-state `StatusType`,
+    `TaskDependency` entity + `TaskDependencyService.wouldCreateCycle()`, `Commitment.activate()`
+    signature changed to `activate(hasExecutionPlan: boolean)`, all new/removed events, `Task.ts`
+    rewritten. 268/268 domain tests passing, `tsc --noEmit` clean.
+    **Fase 2.2 (Application + Backend, apps/backend/src/task/ + commitment/) — complete:** new
+    lifecycle commands (Start/Block/Unblock/Cancel/ReturnToPending) with controller endpoints;
+    archive-task/restore-task removed entirely (command, handler, NestJS handler, endpoints — zero
+    references left in `src/task/`, confirmed by grep); `CommitmentActivationPreconditions` +
+    `TaskReopenPreconditions` are the only two real Command Preconditions instances — no
+    `GoalActivationPreconditions` was built (Goal's invariant is self-contained, per ADR-022 §3.3;
+    reconfirmed during Fase 2.2 kickoff after a direct contradiction check against the ADR — see
+    governing rule below); `ActivateCommitmentNestjsHandler` relocated into `TaskModule` per §3.2;
+    `TaskDependency` persistence (`InMemoryTaskDependencyRepository`) + `CreateTaskDependencyCommand`
+    (cycle-checked, auto-blocks the successor if the predecessor isn't Completed) +
+    `TaskDependencyCascadeSaga` (auto-unblocks a dependency-blocked successor once **all** its
+    predecessors are Completed) + `POST /tasks/:id/dependencies` endpoint (command/API only, no UI,
+    per ADR §5's explicit Fase 2 scope); `CancelTasksOnCommitmentCompletedSaga` implements the §6.1
+    cascade (Pending/In Progress/Blocked → Cancelled on `CommitmentCompletedEvent`, Completed/
+    Cancelled left untouched, uses `Task.cancel()` not `delete()` — history preserved); projectors
+    and `DashboardProjector` updated for the new event set (dashboard's "today"/"upcoming" now
+    surface Pending **and** In Progress **and** Blocked tasks, not just Pending — a Blocked-but-due
+    task needs attention, an In-Progress task due today shouldn't disappear); `TaskView` DTO gained
+    `blockedType`/`blockedReason`. **Governing rule for Command Preconditions, now documented as
+    standing architectural guidance:** "A Command Preconditions class only exists when a command
+    needs to know facts outside its own aggregate's boundary. If all preconditions can be resolved
+    from the aggregate's own internal state, validation stays inside the aggregate." **Migration
+    note:** `InMemoryTaskRepository`/`InMemoryEventStore` are in-memory only (reset on process
+    restart) — there is no persisted legacy `archived` backend data to migrate; the real `'archived'`
+    data lives in mobile's Demo Mode fixtures, whose migration is Fase 2.3 scope. **Compatibility
+    finding (documented, not fixed — Fase 2.3 scope):** mobile's real-mode Task client
+    (`tasksApi.archive()`) still calls the now-removed `POST /tasks/:id/archive` endpoint and would
+    404; mobile's `TaskStatus` type/`TaskStatusBadge`/`TasksScreen` and Demo Mode's Task fixtures are
+    all still on the old 3-state model — see `TECH_DEBT.md` Item 41. Backend verification: `tsc
+--noEmit` clean, 22/22 test suites (109/109 tests) passing, zero `Archived`/`Deferred` references
+    remaining in `apps/backend/src/task/`.
+    **Fase 2.2 review outcome (2026-07-19):** approved with no deviations from ADR-022 found. Review
+    specifically praised: (a) not building `GoalActivationPreconditions`, (b) `TaskDependency` as an
+    entity from day one, (c) `TaskDependencyCascadeSaga` keeping cross-aggregate orchestration out of
+    the aggregate (DDD — the aggregate only knows how to block/unblock itself, the Saga decides
+    when), (d) the live-`curl` Golden Path over unit-tests-only verification, (e) the confirmed
+    `POST /tasks/:id/archive` → 404 as proof of a real (not "ghost-compatible") lifecycle change. One
+    UX note for Fase 2.3, not a backend change: reconsider how "today"/"upcoming" _presents_
+    Pending/In Progress/Blocked (cognitively different kinds of work), without changing what the
+    dashboard query returns.
+    **Fase 2.3 (Frontend) — ✅ complete, 2026-07-19.** Followed the authorized sequence: Task model
+    (`TaskStatus` 5-state + `blockedType`/`blockedReason` on `TaskModel`) → components/states
+    (`TaskStatusBadge` 5-state tone/icon map, new `TaskCard`/`TaskActionBar`/`shared/domain/
+taskActions.ts` mirroring `commitmentActions.ts`'s "no status conditionals in the UI" rule,
+    action-dispatch logic extracted into `useTaskActionDispatch()`) → API integration
+    (`tasksApi.ts`/`demoTasksRepository`'s `archive()` replaced by
+    start/block/unblock/cancel/returnToPending/reopen, `TECH_DEBT.md` Item 41 now resolved) → Goal
+    Workspace as a Commitment-scoped projection (`goalScopedTasks`, no separate dataset, `TaskForm`
+    extended with two optional props rather than new form logic — its existing `relationKind`
+    selector already satisfied the ADR's Task-creation requirement) → navigation redesign
+    (`Overview → Commitments → Tasks → Analytics → Milestones → Notes`, `GoalTabStrip` reused
+    unchanged, Milestones/Notes reordered to trailing position, not removed) → semantic sweep (found
+    and fixed one real issue: a demo-mode test still called the removed `archive()`) → validation
+    (`tsc --noEmit` clean, `jest` 84/99 with the same 15 pre-existing unrelated failures as baseline,
+    and a live Playwright walkthrough against a running backend + web target — 23/24 automated
+    checks passed, full lifecycle clicked through in the actual rendered UI, not just asserted).
+    Two things resolved along the way that weren't pre-decided: the "Today" bucket UX note from the
+    Fase 2.2 review (`TodayWidget` now shows `TaskStatusBadge` per row instead of a flat dot) and a
+    newly-found related bug (the dashboard's priority-hero selector could pick a Blocked task as
+    "today's #1 priority" — now excluded from hero candidates). One new low-priority tech debt item
+    logged from the verification pass, confirmed pre-existing and unrelated:
+    `ConfirmationDialog`/`Dialog` fires a React 19 `element.ref` deprecation warning on every open,
+    reproduced on an untouched Goal-Archive call site (`TECH_DEBT.md` Item 42). Full detail, file
+    list, and the completed checklist: `docs/03-architecture/task_frontend_migration_checklist.md`.
 15. **Candidate, not yet numbered — Design System: canonical Time Selection components.** Surfaced
     2026-07-18: an initial instruction to "reuse Postpone's time picker for all time-of-day
     selection" conflated two different concepts. `PostponeSheet.tsx`'s `DurationWheelPicker` selects
@@ -483,6 +597,73 @@ adr_021_goal_backend_and_domain_history_infrastructure.md` (decision). Key refra
 
 ## 📜 Change History
 
+- **v1.68.0 (2026-07-19):** **ADR-022 Fase 2.3 (Frontend) ✅ COMPLETE.** Mobile Task client migrated
+  end to end to the 5-state model: `TaskStatus`/`TaskModel` (+ `blockedType`/`blockedReason`), new
+  `TaskCard`/`TaskActionBar`/`shared/domain/taskActions.ts` (status-gated actions, no UI status
+  conditionals, mirroring `commitmentActions.ts`), `tasksApi.ts`/`demoTasksRepository`'s `archive()`
+  replaced by start/block/unblock/cancel/returnToPending/reopen (`TECH_DEBT.md` Item 41 resolved),
+  full `en`/`es` i18n coverage, and the Goal Workspace navigation redesign
+  (`Overview → Commitments → Tasks → Analytics → Milestones → Notes`, Tasks tab a genuine
+  Commitment-scoped projection reusing the existing `TaskForm`/`GoalTabStrip`, not a new dataset or
+  component). Fixed a related dashboard bug found along the way (priority-hero selector could pick a
+  Blocked task). Verified via `tsc --noEmit`, `jest` (same baseline as before), and a live Playwright
+  walkthrough against a running backend + web target (23/24 automated checks, full lifecycle clicked
+  through in the real rendered UI). Logged one new low-priority, confirmed-pre-existing tech debt
+  item found during verification (`TECH_DEBT.md` Item 42, a React 19 warning in the Design System's
+  `ConfirmationDialog`, reproduced on an untouched Goal-Archive call site). Full record:
+  `docs/03-architecture/task_frontend_migration_checklist.md`.
+- **v1.67.0 (2026-07-19):** **ADR-022 Fase 2.2 ✅ APPROVED (checkpoint review, no deviations found);
+  Fase 2.3 (Frontend) AUTHORIZED, not started.** Review praised: no `GoalActivationPreconditions`
+  built, `TaskDependency` as an entity from day one, `TaskDependencyCascadeSaga` keeping cascade
+  orchestration out of the aggregate, the live-`curl` Golden Path, and the confirmed
+  `POST /tasks/:id/archive` → 404. One Fase 2.3 UX note (presentation only, not a backend change):
+  reconsider how "today"/"upcoming" visually distinguishes Pending/In Progress/Blocked. New required
+  first step for Fase 2.3: a semantic sweep for old Archive/Deferred concept names (not just literal
+  string search), captured with concrete file-level findings in
+  `docs/03-architecture/task_frontend_migration_checklist.md` (new document — not an ADR, a working
+  checklist, alongside `TECH_DEBT.md` Item 41 which it resolves once Fase 2.3 completes).
+- **v1.66.0 (2026-07-18):** **ADR-022 Fase 2.1 (Domain) and Fase 2.2 (Application + Backend) ✅
+  complete.** Task's domain aggregate rewritten to the 5-state ADR-022 model; `TaskDependency`
+  entity + anti-cycle service; new lifecycle commands (Start/Block/Unblock/Cancel/ReturnToPending)
+  and REST endpoints; archive-task/restore-task removed end to end; `CommitmentActivationPreconditions`
+  and `TaskReopenPreconditions` wired as the only two real Command Preconditions instances (no
+  `GoalActivationPreconditions`, per ADR-022 §3.3 — reconfirmed via an explicit contradiction check
+  during kickoff); `ActivateCommitmentNestjsHandler` relocated into `TaskModule`;
+  `TaskDependencyCascadeSaga` and `CancelTasksOnCommitmentCompletedSaga` implement the two automatic
+  cross-aggregate cascades from §5 and §6.1; projectors/`DashboardProjector`/`TaskView` updated for
+  the new event set. Backend verified: `tsc --noEmit` clean, 22/22 suites (109/109 tests) passing,
+  zero `Archived`/`Deferred` references left in `apps/backend/src/task/`. New standing rule
+  documented: a Command Preconditions class only exists when a command needs facts outside its own
+  aggregate's boundary. **Compatibility finding logged, not fixed:** mobile's real-mode Task client
+  still targets the old 3-state model and calls the now-removed archive endpoint (`TECH_DEBT.md` Item 41) — Fase 2.3 (Frontend) scope. Fase 2.3 explicitly not started, pending an independent review
+  checkpoint. See `PROJECT_STATUS.md` item 14 for full detail.
+- **v1.65.0 (2026-07-18):** **ADR-022 ✅ APPROVED — Fase 2 (implementation) authorized, not started.**
+  Architectural review incorporated: "Activation Policy" renamed to **Command Preconditions** (a
+  fixed set of preconditions per command, not a configurable policy); Task→Task dependencies now
+  modeled as a `TaskDependency` relationship entity instead of a raw ID array (avoids a predictable
+  future migration for dependency types/strength/percentage); `Blocked(dependency)` can only
+  auto-unblock, never manually (also resolves the "automatic vs. manual" open question); new rule —
+  `Task.reopen()` blocked if the linked Commitment isn't `Active`, resolved via a second Command
+  Preconditions instance (`TaskReopenPreconditions`, trivial placement since `TaskModule` already
+  imports `CommitmentModule` correctly, unlike Commitment's own case); `Reopen` always dispatches
+  `TaskReopenedEvent` for analytics distinguishability; Goal Workspace's 4 tabs documented explicitly
+  as a Goal→Commitment→Task abstraction hierarchy, not independent views; new architectural note on
+  lifecycle-orthogonal attributes (priority/tags/reminders/etc. are never future states); `Archived`
+  data migrates to `Cancelled`; Edit available in any operational state (Pending/In
+  Progress/Blocked). Of the original 6 open questions, 4 resolved directly in the ADR, 2 explicitly
+  deferred to a future non-blocking ADR (Habit↔Commitment relationship, Task time-of-day field). No
+  further architectural review required before Fase 2 begins.
+- **v1.64.0 (2026-07-18):** **ADR-022 (Task Lifecycle & Execution Model) drafted — Fase 1 only, no
+  code.** `docs/03-architecture/adr_022_task_lifecycle_and_execution_model.md`: full domain spec for
+  Task's 5-state lifecycle (Pending/In Progress/Blocked/Completed/Cancelled, `Archived` removed),
+  exhaustive transitions, `Blocked` origin tracking, extended `Reopen`, Task→Task dependencies (V1,
+  architecture only), a Commitment→Task cancellation cascade, and a Goal Workspace navigation
+  redesign. Introduces "Activation Policy" as the resolved pattern for Commitment's deferred
+  execution-plan invariant — Application Layer resolves cross-aggregate facts, the aggregate still
+  decides validity, no circular module dependency (reuses the same cross-module DI-reuse pattern
+  already validated for Goal/Commitment's shared `DomainEventDispatcher`). 6 explicit open questions
+  block Fase 2 (implementation) until resolved — see item 14. `PROJECT_STATUS.md`/`TECH_DEBT.md`
+  updated; no domain/backend/frontend code touched.
 - **v1.63.0 (2026-07-18):** **Commitment Draft Lifecycle implemented; V-001 status sub-case
   closed at real scope; two follow-up initiatives spun out.** `Commitment.activate()` now enforces
   a description-required invariant (mirrors `Goal.activate()`); Demo Mode's `create()` starts in
