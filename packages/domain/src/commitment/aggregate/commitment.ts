@@ -127,16 +127,18 @@ export class Commitment extends AggregateRoot<CommitmentId> {
    * Draft -> Active (Commitment Draft Lifecycle, mirroring Goal.activate()).
    * Title needs no runtime check — CommitmentTitle's constructor already
    * guarantees it. Description is an invariant this aggregate can check on
-   * its own. "At least one linked Task or Habit" (an execution plan) is
-   * NOT — that would force Commitment to query Task/Habit, breaking
-   * aggregate boundaries. ADR-022 resolves this with a Command
-   * Preconditions class (`CommitmentActivationPreconditions`, Application
-   * Layer) that resolves `hasExecutionPlan` externally; this method still
-   * decides validity and throws — it just receives that one fact as a
-   * parameter, the same as any other externally-supplied input. The
-   * Habit half of that check isn't resolvable yet (no Habit<->Commitment
-   * relationship exists) — see ADR-022 §3.1 and §12 (deferred to a future
-   * "ADR-023", not blocking).
+   * its own. "At least one linked Task" (an execution plan) is NOT — that
+   * would force Commitment to query Task, breaking aggregate boundaries.
+   * ADR-022 resolves this with a Command Preconditions class
+   * (`CommitmentActivationPreconditions`, Application Layer) that resolves
+   * `hasExecutionPlan` externally; this method still decides validity and
+   * throws — it just receives that one fact as a parameter, the same as
+   * any other externally-supplied input. Habit is deliberately NOT part of
+   * this invariant — ADR-023 (`docs/03-architecture/
+   * adr_023_habit_commitment_relationship.md`) decided Habit↔Commitment is
+   * a weak, non-owning association (a Habit may support 0..n Commitments)
+   * with no bearing on activation; habits are "un mecanismo de ejecución
+   * transversal," not a requirement for a Commitment to activate.
    */
   public activate(hasExecutionPlan: boolean): void {
     if (this._state === CommitmentState.Active) {

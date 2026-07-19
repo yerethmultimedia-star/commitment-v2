@@ -7,9 +7,12 @@ import type { TaskVersionedRepository } from '../ports/task-versioned-repository
  * Concrete implementation of Commitment's Activation Preconditions
  * (ADR-022 §3.1) — lives here, not in commitment/, because it needs
  * TaskRepository and CommitmentModule cannot import TaskModule without a
- * circular dependency (§3.2). Only evaluates the "Task" half of the
- * original "≥1 Task or Habit" requirement — Habit has no relationship to
- * Commitment yet (deferred to candidate "ADR-023", §12, not blocking).
+ * circular dependency (§3.2). Evaluates Task only, by design, not by
+ * omission — ADR-023 (`docs/03-architecture/
+ * adr_023_habit_commitment_relationship.md`) formally decided Habit is not
+ * part of this invariant: the class name keeps "TaskBased" as an accurate
+ * description, not a placeholder for a "HabitBased" counterpart that was
+ * never going to be built.
  */
 export class TaskBasedCommitmentActivationPreconditions implements CommitmentActivationPreconditionsPort {
   constructor(private readonly taskRepository: TaskVersionedRepository) {}
