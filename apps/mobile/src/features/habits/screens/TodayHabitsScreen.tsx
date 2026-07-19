@@ -67,7 +67,7 @@ export function TodayHabitsScreen() {
                   key={habit.id}
                   habit={habit}
                   onToggle={() => toggleHabit.mutate({ id: habit.id, completedToday: habit.completedToday })}
-                  onPress={() => router.push(`/habits/${habit.id}/edit` as any)}
+                  onPress={() => router.push(`/habits/${habit.id}` as any)}
                 />
               ))}
             </YStack>

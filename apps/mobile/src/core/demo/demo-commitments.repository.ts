@@ -27,8 +27,12 @@ export const demoCommitmentsRepository = {
   // Commitment Draft Lifecycle: matches Commitment.register() on the real
   // backend (starts in Draft, not Active) — no shortcut here, mirroring the
   // same fix already applied to demoGoalsRepository.create().
-  create: async (payload: { title: string; description?: string; targetDate?: string; recurrencePattern?: string; priority?: string; goalId?: string | null }) => {
-    const id = `c-demo-${Date.now()}`;
+  create: async (payload: { id?: string; title: string; description?: string; targetDate?: string; recurrencePattern?: string; priority?: string; goalId?: string | null }) => {
+    // Quick Capture generates its own id client-side and navigates to it
+    // right after create() resolves (Product Decision "Capture vs
+    // Authoring") — must be respected, not overwritten, or the destination
+    // Workspace looks up an id that was never stored.
+    const id = payload.id ?? `c-demo-${Date.now()}`;
     // Reassign to a new array (not .push()) — list() returns demoCommitmentDTOs
     // by reference, and React Query's refetch-after-invalidate needs a new
     // reference to actually pick up the change. Same bug class as Tasks' RI-2.

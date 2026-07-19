@@ -7,32 +7,37 @@
   "emptyDescription": "Anota lo que necesitas hacer y aparecerá aquí.",
   "fab": "Nueva tarea",
   "fabHint": "Abre Captura Rápida para agregar una nueva tarea.",
-  "buckets": {
-    "inbox": "Bandeja",
+  "quickFilters": {
     "today": "Hoy",
     "upcoming": "Próximas",
+    "inbox": "Bandeja",
+    "overdue": "Vencidas",
     "completed": "Completadas",
-    "cancelled": "Canceladas",
+    "all": "Todas",
     "empty": {
-      "inbox": {
-        "title": "La bandeja está vacía",
-        "description": "Las tareas sin fecha límite aparecen aquí."
-      },
       "today": {
-        "title": "Nada vence hoy",
-        "description": "Las tareas vencidas y las de hoy aparecen aquí."
+        "title": "No tienes tareas para hoy.",
+        "description": "Las tareas con fecha límite hoy aparecerán aquí."
       },
       "upcoming": {
-        "title": "Nada próximo",
+        "title": "No hay tareas programadas.",
         "description": "Las tareas con fecha futura aparecerán aquí."
+      },
+      "inbox": {
+        "title": "La bandeja está vacía.",
+        "description": "Las tareas sin fecha límite aparecen aquí."
+      },
+      "overdue": {
+        "title": "¡Excelente! No tienes tareas vencidas.",
+        "description": "Las tareas que pasen su fecha límite aparecerán aquí."
       },
       "completed": {
         "title": "Aún no hay tareas completadas",
         "description": "Las tareas que termines aparecerán aquí."
       },
-      "cancelled": {
-        "title": "No hay tareas canceladas",
-        "description": "Las tareas que canceles aparecerán aquí."
+      "all": {
+        "title": "No tienes tareas todavía.",
+        "description": "Todo lo que captures aparecerá aquí."
       }
     }
   },
@@ -59,7 +64,36 @@
     "sortCreated": "Fecha de Creación",
     "sortPriority": "Prioridad",
     "submit": "Crear tarea",
-    "titleRequired": "El título es obligatorio"
+    "titleRequired": "El título es obligatorio",
+    "dueDate": "Fecha límite",
+    "dueDatePlaceholder": "Sin fecha límite",
+    "dueDateLockedHint": "La fecha límite solo puede definirse al crear la tarea.",
+    "dueTime": "Hora",
+    "dueTimePlaceholder": "Sin definir"
+  },
+  "reminders": {
+    "title": "Recordatorios",
+    "enable": "Activar recordatorios",
+    "preset": "Cuándo",
+    "presetAtDueDate": "En la fecha límite",
+    "preset5min": "5 minutos antes",
+    "preset15min": "15 minutos antes",
+    "preset30min": "30 minutos antes",
+    "preset1hour": "1 hora antes",
+    "preset1day": "1 día antes",
+    "presetCustom": "Personalizado",
+    "customDateTime": "Fecha y hora",
+    "needsDueDateHint": "Define una fecha límite para usar recordatorios relativos, o elige \"Personalizado\".",
+    "repeat": "Repetir",
+    "repeatNever": "Nunca",
+    "repeat15min": "Cada 15 minutos",
+    "repeatHourly": "Cada hora",
+    "repeatDaily": "Cada día",
+    "stopCondition": "Detener recordatorios",
+    "stopOnCompleted": "Al completar la tarea",
+    "stopAfterDueDate": "Después de la fecha límite",
+    "preview": "Se enviará el {{date}}",
+    "previewNone": "Configura una fecha para ver la vista previa."
   },
   "actions": {
     "complete": "Completar",
@@ -84,6 +118,29 @@
       "title": "¿Cancelar esta tarea?",
       "description": "\"{{title}}\" pasará a Cancelada. Puedes reabrirla más adelante si lo necesitas."
     }
+  },
+  "detail": {
+    "loading": "Cargando tarea…",
+    "error": {
+      "title": "No se pudo cargar la tarea",
+      "retry": "Reintentar"
+    },
+    "priority": "Prioridad",
+    "dueDate": "Fecha límite",
+    "noDueDate": "Sin fecha límite",
+    "dueTime": "Hora",
+    "dueTimeNotSet": "Sin definir",
+    "reminder": "Recordatorio",
+    "reminderOn": "Activado",
+    "reminderOff": "Sin recordatorio",
+    "estimatedTime": "Tiempo estimado",
+    "minutes": "{{count}} min",
+    "goal": "Objetivo",
+    "commitment": "Compromiso",
+    "none": "Ninguno",
+    "description": "Descripción",
+    "moreActions": "Más acciones",
+    "editAction": "Editar"
   },
   "progress": {
     "title": "Progreso",

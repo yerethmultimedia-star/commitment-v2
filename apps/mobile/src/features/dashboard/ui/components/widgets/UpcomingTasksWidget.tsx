@@ -35,7 +35,7 @@ export const UpcomingTasksWidget = React.memo(function UpcomingTasksWidget() {
             tasks.map(task => (
               <XStack
                 key={task.id}
-                onPress={() => router.push('/(tabs)/tasks' as any)}
+                onPress={() => router.push(`/tasks/${task.id}` as any)}
                 pressStyle={{ opacity: 0.7 }}
                 justifyContent="space-between"
                 backgroundColor="$surface"

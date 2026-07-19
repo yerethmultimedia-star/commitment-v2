@@ -16,13 +16,11 @@ import { useToggleMilestone, useRenameGoal, useUpdateGoalDescription, useActivat
 import { useGoalWorkspace } from '../hooks/useGoalsView';
 import { useCommitments } from '@/features/commitments/hooks/useCommitments';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
-import { useTaskActionDispatch } from '@/features/tasks/hooks/useTaskActionDispatch';
 import { useHabits, useToggleHabit } from '@/features/habits/hooks/useHabits';
 import { HabitCard } from '@/features/habits/components/HabitCard';
 import { CommitmentStatusBadge } from '@/features/commitments/components/CommitmentStatusBadge';
 import { TaskCard } from '@/features/tasks/components/TaskCard';
 import { TaskForm } from '@/features/tasks/components/TaskForm';
-import type { TaskModel } from '@/features/tasks/models/task.model';
 import { GoalTabStrip } from '../components/GoalTabStrip';
 import { RenameGoalDialog } from '../components/RenameGoalDialog';
 
@@ -64,9 +62,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
   const [confirmingActivate, setConfirmingActivate] = useState(false);
   const [confirmingComplete, setConfirmingComplete] = useState(false);
   const [confirmingArchive, setConfirmingArchive] = useState(false);
-  const [editingTask, setEditingTask] = useState<TaskModel | null>(null);
   const [creatingTask, setCreatingTask] = useState(false);
-  const taskActionDispatch = useTaskActionDispatch();
 
   // Commitment doesn't own this relationship (TECH_DEBT.md Item 10, Fase 4B) —
   // Goal.commitmentIds[] is the source of truth, not Commitment.goalId (which
@@ -306,8 +302,11 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
 
           {/* ADR-022 §8 — a projection, not an independent list: filtered by
               this Goal's own linked Commitments (goalScopedTasks above),
-              same TaskCard/action-dispatch machinery TasksScreen uses, no
-              separate data source or duplicated component. */}
+              same TaskCard component TasksScreen uses, no separate data
+              source or duplicated component. Task UX Redesign round: tapping
+              a card navigates to /tasks/[id] (Detail) — the same
+              List -> Detail -> Edit shape as everywhere else Task appears
+              now, no inline edit form here either. */}
           {tab === 'tasks' && (
             <YStack gap="$5">
               <YStack gap="$2">
@@ -318,7 +317,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                       iconToken={<Plus size={18} />}
                       tooltipI18nKey="goals.workspace.addTask"
                       accessibilityHintI18nKey="goals.workspace.addTask"
-                      onPress={() => { setEditingTask(null); setCreatingTask(true); }}
+                      onPress={() => setCreatingTask(true)}
                     />
                   }
                 />
@@ -332,15 +331,6 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   />
                 )}
 
-                {editingTask && (
-                  <TaskForm
-                    task={editingTask}
-                    commitmentOptions={linkedCommitments}
-                    onSaved={() => setEditingTask(null)}
-                    onCancel={() => setEditingTask(null)}
-                  />
-                )}
-
                 {!creatingTask && goalScopedTasks.length === 0 ? (
                   <EmptyState
                     fullscreen={false}
@@ -349,18 +339,13 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                   />
                 ) : (
                   <YStack gap="$2">
-                    {goalScopedTasks
-                      .filter((tk) => editingTask?.id !== tk.id)
-                      .map((tk) => (
-                        <TaskCard
-                          key={tk.id}
-                          task={tk}
-                          pendingAction={taskActionDispatch.pendingActionFor(tk.id)}
-                          onAction={taskActionDispatch.handleAction}
-                          onEdit={(t) => { setCreatingTask(false); setEditingTask(t); }}
-                          onDuplicate={(t) => taskActionDispatch.duplicate.mutate(t.id)}
-                        />
-                      ))}
+                    {goalScopedTasks.map((tk) => (
+                      <TaskCard
+                        key={tk.id}
+                        task={tk}
+                        onPress={() => router.push(`/tasks/${tk.id}` as any)}
+                      />
+                    ))}
                   </YStack>
                 )}
               </YStack>
@@ -544,21 +529,6 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
         }}
       />
 
-      {taskActionDispatch.confirming && (
-        <ConfirmationDialog
-          open={true}
-          onOpenChange={(open) => {
-            if (!open) taskActionDispatch.setConfirming(null);
-          }}
-          titleI18nKey={`tasks:confirm.${taskActionDispatch.confirming.action.id}.title`}
-          descriptionI18nKey={`tasks:confirm.${taskActionDispatch.confirming.action.id}.description`}
-          descriptionI18nParams={{ title: taskActionDispatch.confirming.task.title }}
-          confirmI18nKey={`tasks:${taskActionDispatch.confirming.action.labelKey}`}
-          cancelI18nKey="common:cancel"
-          destructive={taskActionDispatch.confirming.action.destructive}
-          onConfirm={() => taskActionDispatch.executeAction(taskActionDispatch.confirming!.task, taskActionDispatch.confirming!.action)}
-        />
-      )}
     </>
   );
 }

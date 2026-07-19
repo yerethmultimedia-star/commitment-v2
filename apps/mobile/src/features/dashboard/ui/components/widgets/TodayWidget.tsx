@@ -18,8 +18,8 @@ export const TodayWidget = React.memo(function TodayWidget() {
   // useMemo used as per Track C performance requirements
   const tasks = useMemo(() => dashboard?.today ?? [], [dashboard?.today]);
 
-  const onTaskPress = () => {
-    router.push('/(tabs)/tasks' as any);
+  const onTaskPress = (taskId: string) => {
+    router.push(`/tasks/${taskId}` as any);
   };
 
   return (
@@ -52,7 +52,7 @@ export const TodayWidget = React.memo(function TodayWidget() {
                 borderWidth={1}
                 borderColor="$divider"
                 alignItems="center"
-                onPress={onTaskPress}
+                onPress={() => onTaskPress(task.id)}
                 pressStyle={{ opacity: 0.7 }}
                 {...toPlatformAccessibilityProps({
                   accessibilityLabel: t('dashboard.widgets.today.itemA11y', { title: task.title }),

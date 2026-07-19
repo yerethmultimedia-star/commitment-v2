@@ -13,9 +13,14 @@ import { CommitmentPriorityBadge } from '@/features/commitments/components/Commi
  * Not to be confused with the separate features/tasks TasksScreen
  * (individual to-do items) — that stays as is. Renamed from "Tasks" per
  * ADR-019 (docs/03-architecture/adr_019_commitment_user_model.md), which
- * reserves "Tarea"/"Task" exclusively for the Task aggregate.
+ * reserves "Tarea"/"Task" exclusively for the Task aggregate. File itself
+ * renamed GoalTasksTab.tsx -> GoalCommitmentsTab.tsx (Sprint de
+ * Estabilización, Fase 2) to match — a "Tasks" tab showing Commitments was
+ * exactly the kind of naming confusion ADR-019 already flagged; the internal
+ * `tab` id 'tasks' on GoalsScreen also became 'commitments', freeing 'tasks'
+ * for the new, real flat Task list tab (see GoalTasksFlatTab.tsx).
  */
-export function GoalTasksTab() {
+export function GoalCommitmentsTab() {
   const router = useRouter();
   const { data: commitments = [], isLoading } = useCommitments();
   const { data: goals = [] } = useGoals();
@@ -30,8 +35,8 @@ export function GoalTasksTab() {
     return (
       <EmptyState
         fullscreen={false}
-        title={{ i18nKey: 'goals.tasksTab.empty.title' }}
-        description={{ i18nKey: 'goals.tasksTab.empty.description' }}
+        title={{ i18nKey: 'goals.commitmentsTab.empty.title' }}
+        description={{ i18nKey: 'goals.commitmentsTab.empty.description' }}
       />
     );
   }

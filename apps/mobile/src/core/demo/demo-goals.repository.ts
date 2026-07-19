@@ -145,8 +145,12 @@ export const demoGoalsRepository = {
   // Decisión B, Goal Lifecycle: matches Goal.register() on the real backend
   // (starts in Draft, not Active) — no shortcut here, so a Draft Goal is
   // genuinely reachable and testable in Demo Mode too, same as the real app.
-  create: async (payload: { title: string; description?: string }): Promise<{ goalId: string }> => {
-    const id = `g-demo-${Date.now()}`;
+  create: async (payload: { id?: string; title: string; description?: string }): Promise<{ goalId: string }> => {
+    // Quick Capture generates its own id client-side and navigates to it
+    // right after create() resolves (Product Decision "Capture vs
+    // Authoring") — must be respected, not overwritten, or the destination
+    // Workspace looks up an id that was never stored.
+    const id = payload.id ?? `g-demo-${Date.now()}`;
     demoGoalDTOs.push({
       id,
       title: payload.title,

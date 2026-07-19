@@ -35,6 +35,66 @@
       "forest": {
         "name": "Forest",
         "description": "Grounded, natural, and steady."
+      },
+      "electricVibrancy": {
+        "name": "Electric Vibrancy",
+        "description": "Vibrant electric blue accents over a clean white canvas."
+      },
+      "neonFocus": {
+        "name": "Neon Focus",
+        "description": "Pure black backdrop highlighted with energetic neon blue."
+      },
+      "freshEnergy": {
+        "name": "Fresh Energy",
+        "description": "High-contrast canvas accented with fresh organic green."
+      },
+      "midnightForest": {
+        "name": "Midnight Forest",
+        "description": "Deep black backdrop accented with fresh organic green."
+      },
+      "calmLavender": {
+        "name": "Calm Lavender",
+        "description": "Soft lavender layout with a soothing violet accent."
+      },
+      "cosmicCalm": {
+        "name": "Cosmic Calm",
+        "description": "Refined deep cosmic space style with soft violet details."
+      },
+      "monochromeLight": {
+        "name": "Monochrome Light",
+        "description": "Minimalist high-contrast zinc layout with bold black accents."
+      },
+      "monochromeDark": {
+        "name": "Monochrome Dark",
+        "description": "Minimalist high-contrast zinc layout with clean white accents."
+      },
+      "tenderRose": {
+        "name": "Tender Rose",
+        "description": "Sweet, gentle baby pink layout with organic roundings."
+      },
+      "mintFreshness": {
+        "name": "Mint Freshness",
+        "description": "Cool, soothing mint green layout with organic roundings."
+      },
+      "lavenderMist": {
+        "name": "Lavender Mist",
+        "description": "Soft, whispering lavender-lila layout with organic roundings."
+      },
+      "shadowSentinel": {
+        "name": "Shadow Sentinel",
+        "description": "Pitch-black tactical layout accented with alert gold."
+      },
+      "arachnidEnergy": {
+        "name": "Arachnid Energy",
+        "description": "Vibrant navy suit layout with energetic red and electric blue."
+      },
+      "fierySpirit": {
+        "name": "Fiery Spirit",
+        "description": "High-energy orange and navy blue layout with vibrant accents."
+      },
+      "royalPride": {
+        "name": "Royal Pride",
+        "description": "Structured royal navy layout with gold and white armor accents."
       }
     }
   },
@@ -89,6 +149,18 @@
   },
   "back": "Back",
   "cancel": "Cancel",
+  "duration": {
+    "label": "Estimated Duration",
+    "preset15": "15 min",
+    "preset30": "30 min",
+    "preset45": "45 min",
+    "preset60": "1 h",
+    "preset90": "1 h 30 min",
+    "preset120": "2 h",
+    "custom": "Custom…",
+    "customLabel": "Duration",
+    "customPlaceholder": "Minutes"
+  },
   "notFound": {
     "title": "Oops!",
     "description": "This screen doesn't exist.",
@@ -109,6 +181,7 @@
     "nextDay": "Next day",
     "addActivity": "Add activity",
     "durationMinutes": "{{count}} min",
+    "noTimeSection": "No time",
     "empty": {
       "title": "Nothing scheduled today",
       "description": "Tasks, commitments, habits and milestones with a date will show up here."
@@ -273,7 +346,8 @@
     },
     "tabs": {
       "objectives": "Goals",
-      "tasks": "Commitments",
+      "commitments": "Commitments",
+      "tasks": "Tasks",
       "habits": "Habits",
       "roadmaps": "Roadmaps"
     },
@@ -301,10 +375,16 @@
         }
       }
     },
-    "tasksTab": {
+    "commitmentsTab": {
       "empty": {
         "title": "No commitments yet",
         "description": "Commitments linked to your goals will show up here."
+      }
+    },
+    "tasksTab": {
+      "empty": {
+        "title": "No tasks yet",
+        "description": "Tasks linked to your goals will show up here."
       }
     },
     "habitsTab": {
@@ -422,6 +502,8 @@
       "relatedGoal": "Related goal",
       "postpone": "Postpone reminder",
       "archive": "Archive habit",
+      "editAction": "Edit",
+      "streakDays": "{{count}} day streak",
       "confirmArchive": {
         "title": "Archive \"{{title}}\"?",
         "description": "This habit will stop appearing in your daily list. You can't undo this from here."
@@ -544,6 +626,9 @@
     },
     "focus": {
       "title": "Focus",
+      "thisWeek": "This week",
+      "average": "Average",
+      "minutesPerDay": "{{count}} min/day",
       "bestDay": "Best day",
       "worstDay": "Worst day",
       "minutesLabel": "{{count}} min",
@@ -576,6 +661,22 @@
       "task": "Task",
       "note": "Note"
     },
+    "creating": {
+      "goal": "New Goal",
+      "commitment": "New Commitment",
+      "habit": "New Habit",
+      "task": "New Task",
+      "note": "New Note"
+    },
+    "descriptions": {
+      "goal": "Define a long-term objective.",
+      "commitment": "Create the plan that turns your goal into action.",
+      "task": "Add one specific action to complete.",
+      "habit": "Build a routine you'll repeat over time.",
+      "note": "Capture ideas, thoughts or references."
+    },
+    "askCoach": "Ask Coach",
+    "askCoachDescription": "Plan, brainstorm or solve problems with AI.",
     "placeholders": {
       "goal": "What do you want to achieve?",
       "commitment": "What are you committing to?",

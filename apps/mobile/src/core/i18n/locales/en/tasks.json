@@ -7,29 +7,34 @@
   "emptyDescription": "Capture what needs doing and it'll show up here.",
   "fab": "New task",
   "fabHint": "Opens Quick Capture to add a new task.",
-  "buckets": {
-    "inbox": "Inbox",
+  "quickFilters": {
     "today": "Today",
     "upcoming": "Upcoming",
+    "inbox": "Inbox",
+    "overdue": "Overdue",
     "completed": "Completed",
-    "cancelled": "Cancelled",
+    "all": "All",
     "empty": {
-      "inbox": { "title": "Inbox is empty", "description": "Tasks without a due date land here." },
       "today": {
-        "title": "Nothing due today",
-        "description": "Overdue and today's tasks show up here."
+        "title": "You have no tasks for today.",
+        "description": "Tasks due today will show up here."
       },
       "upcoming": {
-        "title": "Nothing upcoming",
+        "title": "Nothing scheduled.",
         "description": "Tasks due later will show up here."
+      },
+      "inbox": { "title": "Inbox is empty.", "description": "Tasks without a due date land here." },
+      "overdue": {
+        "title": "Great! No overdue tasks.",
+        "description": "Tasks that pass their due date will show up here."
       },
       "completed": {
         "title": "No completed tasks yet",
         "description": "Tasks you finish will show up here."
       },
-      "cancelled": {
-        "title": "No cancelled tasks",
-        "description": "Tasks you cancel will show up here."
+      "all": {
+        "title": "No tasks yet.",
+        "description": "Everything you capture will show up here."
       }
     }
   },
@@ -56,7 +61,36 @@
     "sortCreated": "Date Created",
     "sortPriority": "Priority",
     "submit": "Create task",
-    "titleRequired": "Title is required"
+    "titleRequired": "Title is required",
+    "dueDate": "Due date",
+    "dueDatePlaceholder": "No due date",
+    "dueDateLockedHint": "The due date can only be set when creating the task.",
+    "dueTime": "Time",
+    "dueTimePlaceholder": "Not set"
+  },
+  "reminders": {
+    "title": "Reminders",
+    "enable": "Enable reminders",
+    "preset": "When",
+    "presetAtDueDate": "At due date",
+    "preset5min": "5 minutes before",
+    "preset15min": "15 minutes before",
+    "preset30min": "30 minutes before",
+    "preset1hour": "1 hour before",
+    "preset1day": "1 day before",
+    "presetCustom": "Custom",
+    "customDateTime": "Date and time",
+    "needsDueDateHint": "Set a due date to use relative reminders, or choose \"Custom\".",
+    "repeat": "Repeat",
+    "repeatNever": "Never",
+    "repeat15min": "Every 15 minutes",
+    "repeatHourly": "Every hour",
+    "repeatDaily": "Every day",
+    "stopCondition": "Stop reminders",
+    "stopOnCompleted": "When completed",
+    "stopAfterDueDate": "After due date",
+    "preview": "Will send on {{date}}",
+    "previewNone": "Set a date to see a preview."
   },
   "actions": {
     "complete": "Complete",
@@ -81,6 +115,29 @@
       "title": "Cancel this task?",
       "description": "\"{{title}}\" will be moved to Cancelled. You can reopen it later if needed."
     }
+  },
+  "detail": {
+    "loading": "Loading task…",
+    "error": {
+      "title": "Couldn't load the task",
+      "retry": "Retry"
+    },
+    "priority": "Priority",
+    "dueDate": "Due date",
+    "noDueDate": "No due date",
+    "dueTime": "Time",
+    "dueTimeNotSet": "Not set",
+    "reminder": "Reminder",
+    "reminderOn": "On",
+    "reminderOff": "No reminder",
+    "estimatedTime": "Estimated time",
+    "minutes": "{{count}} min",
+    "goal": "Goal",
+    "commitment": "Commitment",
+    "none": "None",
+    "description": "Description",
+    "moreActions": "More actions",
+    "editAction": "Edit"
   },
   "progress": {
     "title": "Progress",

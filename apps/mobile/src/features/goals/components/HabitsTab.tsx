@@ -34,7 +34,7 @@ export function HabitsTab() {
           key={h.id}
           habit={h}
           onToggle={() => toggleHabit.mutate({ id: h.id, completedToday: h.completedToday })}
-          onPress={() => router.push(`/habits/${h.id}/edit` as any)}
+          onPress={() => router.push(`/habits/${h.id}` as any)}
         />
       ))}
     </YStack>

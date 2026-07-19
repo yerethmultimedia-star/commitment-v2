@@ -114,7 +114,7 @@ describe('DashboardLayoutEngine', () => {
       expect(layout.hero.contextLabel).toBe('Commitment Project');
       expect(layout.hero.priority).toBe('high');
       expect(layout.hero.progressRatio).toBe(0.72);
-      expect(layout.hero.actionRoute).toBe('/(tabs)/tasks?taskId=t-01');
+      expect(layout.hero.actionRoute).toBe('/tasks/t-01');
     });
 
     it('shows a resolved goal/independent context without a progress ratio', () => {

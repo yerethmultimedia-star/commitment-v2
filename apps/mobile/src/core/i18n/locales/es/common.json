@@ -35,6 +35,66 @@
       "forest": {
         "name": "Bosque",
         "description": "Natural, estable y sereno."
+      },
+      "electricVibrancy": {
+        "name": "Energía Vibrante",
+        "description": "Acentos azul eléctrico vibrante sobre un lienzo blanco limpio."
+      },
+      "neonFocus": {
+        "name": "Enfoque Neón",
+        "description": "Fondo negro puro destacado con un azul neón enérgico."
+      },
+      "freshEnergy": {
+        "name": "Energía Fresca",
+        "description": "Lienzo de alto contraste decorado con verde fresco orgánico."
+      },
+      "midnightForest": {
+        "name": "Bosque de Medianoche",
+        "description": "Fondo negro puro decorado con verde fresco orgánico."
+      },
+      "calmLavender": {
+        "name": "Lavanda Calma",
+        "description": "Lienzo lavanda suave con acento violeta calmo."
+      },
+      "cosmicCalm": {
+        "name": "Calma Cósmica",
+        "description": "Estilo refinado de espacio cósmico profundo con detalles violeta suaves."
+      },
+      "monochromeLight": {
+        "name": "Monocromo Claro",
+        "description": "Escala de zinc minimalista de alto contraste con acentos negros audaces."
+      },
+      "monochromeDark": {
+        "name": "Monocromo Oscuro",
+        "description": "Escala de zinc minimalista de alto contraste con acentos blancos limpios."
+      },
+      "tenderRose": {
+        "name": "Rosa Tierno",
+        "description": "Lienzo rosa pastel con bordes suaves y formas redondeadas orgánicas."
+      },
+      "mintFreshness": {
+        "name": "Frescura de Menta",
+        "description": "Lienzo verde menta fresco con bordes suaves y formas redondeadas orgánicas."
+      },
+      "lavenderMist": {
+        "name": "Niebla de Lavanda",
+        "description": "Lienzo lila lavanda con bordes suaves y formas redondeadas orgánicas."
+      },
+      "shadowSentinel": {
+        "name": "Centinela de la Sombra",
+        "description": "Lienzo negro táctico destacado con acentos amarillo alerta."
+      },
+      "arachnidEnergy": {
+        "name": "Energía Arácnida",
+        "description": "Lienzo azul marino dinámico con acentos rojo enérgico y azul eléctrico."
+      },
+      "fierySpirit": {
+        "name": "Espíritu Ígneo",
+        "description": "Lienzo enérgico de color naranja y azul marino con acentos vibrantes."
+      },
+      "royalPride": {
+        "name": "Orgullo Real",
+        "description": "Lienzo azul marino real estructurado con acentos amarillo oro y blanco armadura."
       }
     }
   },
@@ -89,6 +149,18 @@
   },
   "back": "Atrás",
   "cancel": "Cancelar",
+  "duration": {
+    "label": "Duración estimada",
+    "preset15": "15 min",
+    "preset30": "30 min",
+    "preset45": "45 min",
+    "preset60": "1 h",
+    "preset90": "1 h 30 min",
+    "preset120": "2 h",
+    "custom": "Personalizado…",
+    "customLabel": "Duración",
+    "customPlaceholder": "Minutos"
+  },
   "notFound": {
     "title": "¡Ups!",
     "description": "Esta pantalla no existe.",
@@ -109,6 +181,7 @@
     "nextDay": "Día siguiente",
     "addActivity": "Agregar actividad",
     "durationMinutes": "{{count}} min",
+    "noTimeSection": "Sin hora",
     "empty": {
       "title": "No hay nada programado hoy",
       "description": "Las tareas, compromisos, hábitos e hitos con fecha aparecerán aquí."
@@ -273,7 +346,8 @@
     },
     "tabs": {
       "objectives": "Objetivos",
-      "tasks": "Compromisos",
+      "commitments": "Compromisos",
+      "tasks": "Tareas",
       "habits": "Hábitos",
       "roadmaps": "Roadmaps"
     },
@@ -301,10 +375,16 @@
         }
       }
     },
-    "tasksTab": {
+    "commitmentsTab": {
       "empty": {
         "title": "Aún no hay compromisos",
         "description": "Los compromisos enlazados a tus objetivos aparecerán aquí."
+      }
+    },
+    "tasksTab": {
+      "empty": {
+        "title": "Aún no hay tareas",
+        "description": "Las tareas enlazadas a tus objetivos aparecerán aquí."
       }
     },
     "habitsTab": {
@@ -422,6 +502,9 @@
       "relatedGoal": "Objetivo relacionado",
       "postpone": "Posponer recordatorio",
       "archive": "Archivar hábito",
+      "editAction": "Editar",
+      "streakDays": "Racha de {{count}} día",
+      "streakDays_other": "Racha de {{count}} días",
       "confirmArchive": {
         "title": "¿Archivar \"{{title}}\"?",
         "description": "Este hábito dejará de aparecer en tu lista diaria. No puedes deshacer esto desde aquí."
@@ -544,6 +627,9 @@
     },
     "focus": {
       "title": "Enfoque",
+      "thisWeek": "Esta semana",
+      "average": "Promedio",
+      "minutesPerDay": "{{count}} min/día",
       "bestDay": "Mejor día",
       "worstDay": "Peor día",
       "minutesLabel": "{{count}} min",
@@ -576,6 +662,22 @@
       "task": "Tarea",
       "note": "Nota"
     },
+    "creating": {
+      "goal": "Nuevo Objetivo",
+      "commitment": "Nuevo Compromiso",
+      "habit": "Nuevo Hábito",
+      "task": "Nueva Tarea",
+      "note": "Nueva Nota"
+    },
+    "descriptions": {
+      "goal": "Define un objetivo a largo plazo.",
+      "commitment": "Crea el plan que convierte tu objetivo en acción.",
+      "task": "Agrega una acción concreta por completar.",
+      "habit": "Construye una rutina que repetirás con el tiempo.",
+      "note": "Captura ideas, pensamientos o referencias."
+    },
+    "askCoach": "Preguntar al Coach",
+    "askCoachDescription": "Planea, genera ideas o resuelve problemas con IA.",
     "placeholders": {
       "goal": "¿Qué quieres lograr?",
       "commitment": "¿Con qué te estás comprometiendo?",

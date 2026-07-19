@@ -1,6 +1,7 @@
 import { HabitSummary, HabitRecurrenceType, computeHabitStreak } from '@commitment/domain';
 
 export interface CreateHabitPayload {
+  id?: string;
   title: string;
   recurrenceType?: string;
   daysOfWeek?: number[];
@@ -81,7 +82,11 @@ export const demoHabitsRepository = {
   getById: async (id: string): Promise<HabitSummary> => findOrThrow(id),
 
   create: async (payload: CreateHabitPayload): Promise<{ habitId: string }> => {
-    const id = `h-demo-${Date.now()}`;
+    // Quick Capture generates its own id client-side and navigates to it
+    // right after create() resolves (Product Decision "Capture vs
+    // Authoring") — must be respected, not overwritten, or HabitDetailScreen
+    // looks up an id that was never stored.
+    const id = payload.id ?? `h-demo-${Date.now()}`;
     const recurrenceType = (payload.recurrenceType as HabitRecurrenceType) ?? HabitRecurrenceType.Daily;
     // Reassign to a new array (not .push()) — list() returns demoHabitDTOs by
     // reference, and React Query's refetch-after-invalidate needs a new

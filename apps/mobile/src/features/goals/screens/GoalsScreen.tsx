@@ -5,15 +5,21 @@ import { XStack, YStack } from 'tamagui';
 import { Plus } from '@tamagui/lucide-icons';
 import { AppScreen, Title, Body, IconButton } from '@commitment/design-system';
 import { ObjectivesTab } from '../components/ObjectivesTab';
-import { GoalTasksTab } from '../components/GoalTasksTab';
+import { GoalCommitmentsTab } from '../components/GoalCommitmentsTab';
+import { GoalTasksFlatTab } from '../components/GoalTasksFlatTab';
 import { HabitsTab } from '../components/HabitsTab';
 import { RoadmapsTab } from '../components/RoadmapsTab';
 import { GoalTabStrip } from '../components/GoalTabStrip';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { useTabBarHeightStore } from '@/shared/store/use-tab-bar-height-store';
 
-type GoalsTab = 'objectives' | 'tasks' | 'habits' | 'roadmaps';
-const TABS: GoalsTab[] = ['objectives', 'tasks', 'habits', 'roadmaps'];
+// Sprint de Estabilización, Fase 2 — official order Goals/Commitments/Tasks/
+// Habits/Roadmap. 'commitments' is the renamed former 'tasks' id (it always
+// showed Commitments — see GoalCommitmentsTab.tsx); 'tasks' is new, a flat
+// list of every Task, filling the gap that renaming exposed rather than
+// leaving "Tasks" absent from a screen that names it in the tab strip.
+type GoalsTab = 'objectives' | 'commitments' | 'tasks' | 'habits' | 'roadmaps';
+const TABS: GoalsTab[] = ['objectives', 'commitments', 'tasks', 'habits', 'roadmaps'];
 
 function isGoalsTab(value: unknown): value is GoalsTab {
   return typeof value === 'string' && (TABS as string[]).includes(value);
@@ -50,14 +56,16 @@ export function GoalsScreen() {
     // dialog with no correct default.
     //
     // 'goals-commitments', not 'tasks': the standalone Tasks screen already
-    // uses 'tasks' as its own source string, and this sub-tab (still id
-    // 'tasks' internally, labeled "Compromisos" since ADR-019 Fase 1) means
-    // something different now — reusing 'tasks' here would wrongly default
-    // the real Tasks screen's own "+" to Compromiso too (TECH_DEBT Item 34).
+    // uses 'tasks' as its own source string — reusing it here would wrongly
+    // default the real Tasks screen's own "+" to Compromiso too (TECH_DEBT
+    // Item 34). This tab's id is 'commitments' now (see TABS above), so this
+    // branch and that concern are naturally still distinct.
     if (tab === 'habits') {
       router.push('/habits/create' as any);
-    } else if (tab === 'tasks') {
+    } else if (tab === 'commitments') {
       openQuickCapture('goals-commitments');
+    } else if (tab === 'tasks') {
+      openQuickCapture('goals-tasks');
     } else {
       openQuickCapture('goals');
     }
@@ -85,7 +93,8 @@ export function GoalsScreen() {
         <GoalTabStrip tabs={TABS} active={tab} onChange={setTab} labelFor={(tb) => t(`goals.tabs.${tb}`)} />
 
         {tab === 'objectives' && <ObjectivesTab />}
-        {tab === 'tasks' && <GoalTasksTab />}
+        {tab === 'commitments' && <GoalCommitmentsTab />}
+        {tab === 'tasks' && <GoalTasksFlatTab />}
         {tab === 'habits' && <HabitsTab />}
         {tab === 'roadmaps' && <RoadmapsTab />}
       </YStack>

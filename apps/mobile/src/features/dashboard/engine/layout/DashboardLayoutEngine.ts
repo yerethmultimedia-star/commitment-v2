@@ -95,10 +95,10 @@ function resolveHero(context: DashboardContext, recommendations: Recommendation[
       contextLabel: context.priorityTask.contextLabel,
       priority: context.priorityTask.priority,
       progressRatio: context.priorityTask.commitmentProgressRatio,
-      // Opens the task itself in the Tasks tab — neither the Goal Workspace
-      // nor the Commitment Workspace screen shows individual Task items, so
-      // those routes are dead ends here even though this task may belong to one.
-      actionRoute: `/(tabs)/tasks?taskId=${context.priorityTask.taskId}`,
+      // Opens the task's own Detail screen directly (Task UX Redesign
+      // round gave Task a real /tasks/[id] route) — no need to route
+      // through a list anymore.
+      actionRoute: `/tasks/${context.priorityTask.taskId}`,
     };
   }
 

@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Home, Target, TrendingUp, User, ListChecks, Compass } from '@tamagui/lucide-icons';
+import { Home, Target, TrendingUp, User, Compass } from '@tamagui/lucide-icons';
 import { useUiStore } from '@/core/store/use-ui-store';
 import { QuickCaptureDialog } from '@/features/dashboard/ui/components/QuickCaptureDialog';
+import { QuickActionMenu } from '@/core/components/QuickActionMenu';
 import { FloatingTabBar } from '@/shared/ui/FloatingTabBar';
 
 // Five primary tabs, no center FAB — VS-031 Product Experience Completion
@@ -58,20 +59,9 @@ export default function TabLayout() {
             tabBarIcon: ({ color, size }) => <User color={color as any} size={size ?? 20} />,
           }}
         />
-        <Tabs.Screen
-          name="tasks"
-          options={{
-            title: t('tabs.tasks'),
-            tabBarIcon: ({ color, size }) => <ListChecks color={color as any} size={size ?? 20} />,
-            // Reachable at /(tabs)/tasks (Today/Goals/Coach link here) but no
-            // longer a primary destination — VS-031 Product Completion Sprint
-            // nav restructure. href: null hides it from the tab bar without
-            // removing the route.
-            href: null,
-          }}
-        />
       </Tabs>
 
+      <QuickActionMenu />
       <QuickCaptureDialog
         open={isQuickCaptureOpen}
         onOpenChange={setQuickCaptureOpen}
