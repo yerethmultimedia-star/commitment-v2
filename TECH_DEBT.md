@@ -1,9 +1,9 @@
 # Technical Debt Register
 
-Version: 1.57.0
+Version: 1.65.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-17
+Last Updated: 2026-07-19
 
 ---
 
@@ -723,7 +723,7 @@ outlineWidth: 2, outlineOffset: 2 }`, using Tamagui's own pseudo-style prop mech
 
 ---
 
-## Active Technical Debt Item 19: Shared form controls (`shared/forms/*`) don't source from the Design System
+## Active Technical Debt Item 19: Shared form controls (`shared/forms/*`) don't source from the Design System — PARTIALLY RESOLVED, 2026-07-19
 
 - **Description:** Found during the Habits capability audit while reviewing `HabitForm.tsx`.
   `ControlledInput.tsx`, `ControlledSelect.tsx`, and `ControlledDatePicker.tsx` (used by Habits
@@ -733,6 +733,14 @@ outlineWidth: 2, outlineOffset: 2 }`, using Tamagui's own pseudo-style prop mech
   `$contentSecondary`/`$danger`/`$divider`/`$accent`) and already accessible
   (`toPlatformAccessibilityProps` applied) — this is a sourcing/consistency gap, not a visible bug
   or a11y gap.
+- **Partial resolution (2026-07-19):** `ControlledDatePicker.tsx` (and its sibling
+  `PlainDateTimePicker.tsx`) now genuinely source their chrome from `@commitment/design-system`'s
+  new `SelectableField` — verified against current code, not assumed. `ControlledInput.tsx` and
+  `ControlledSelect.tsx` still import raw Tamagui primitives directly, unchanged — this item stays
+  open for those two specifically. A same-day Form Consistency Audit also found the Task/Commitment
+  Goal/Commitment target picker (`TaskForm.tsx`'s raw `Select.Trigger`) has the same "looks like
+  static text, not `SelectableField`" gap the date/time fields had before this fix — a natural next
+  candidate for closing the rest of this item, not yet done.
 - **Impact:** Low-Medium. No visible inconsistency today; the risk is drift if the Design System's
   `Input`/`Select` primitives evolve (new focus states, new validation styling) and these three
   shared wrappers silently don't inherit it since they don't route through those components.
@@ -1874,6 +1882,49 @@ it touched real source files during this work, per this project's transparency s
   `tsc --noEmit` surfaced the 2 genuinely pre-existing, unrelated failures now tracked as Item 35
   above — not new corruption, confirmed by content, not just absence of errors.
 
+**Recurrence, 2026-07-19 (Task Capability Completion Story 4 pre-work):** the same hazard hit largely
+the same files again — `packages/domain/src/index.ts` (missing the Goal/Habit/Calendar/Task/Dashboard/
+Insights export lines entirely — the most severe instance yet, since it silently breaks
+`@commitment/domain`'s public surface for every downstream consumer the next time it's rebuilt),
+`packages/domain/src/notifications/events/reminder-queued.event.ts`,
+`apps/backend/src/notifications/infrastructure/in-memory-reminder-scheduler.ts`,
+`packages/design-system/src/components/Card.tsx`,
+`apps/mobile/src/app/(auth)/onboarding.tsx`, and
+`apps/mobile/src/features/commitments/components/forms/CommitmentForm.tsx` (this last one for a
+second time — see above). This time it was found proactively via a full repo sweep for
+`" [0-9]\.[a-z]+$"`-pattern filenames (`find . -regex '.* [0-9]\.[a-zA-Z]*$'`), prompted while
+investigating the Reminder Engine's source files for an unrelated reason (Story 4's Domain Exposure
+Verification), not because a build broke — worth running that sweep periodically rather than only
+reactively. Same recovery protocol: diffed every " 2" copy against `git show HEAD:<path>` before
+touching anything; all were byte-identical to HEAD, so purely a restore, nothing to reconcile. Also
+hit the `node_modules` variant of this hazard again (`json5` inside `ts-jest`'s dependency tree
+missing its `main` entry, breaking the entire backend Jest suite) — same `npx pnpm@10.34.4 install
+--force` remedy. Verified clean after recovery: `packages/domain` `tsc --noEmit` clean (was
+previously broken — 4 errors from the `reminder-queued.event.ts` corruption alone), rebuilt its
+`dist/`, backend `tsc --noEmit`/109 Jest passing, mobile `tsc --noEmit`/86 Jest passing (matching the
+pre-corruption baseline exactly).
+
+**Pipeline gap this exposed, flagged for later (not acted on now):** `packages/domain`'s `src/` never
+gets its own `tsc --noEmit` run in `.github/workflows/ci.yml` today — CI only exercises it indirectly
+through backend/mobile, which consume the already-built `dist/`. That's exactly why this corruption
+sat unnoticed: a broken `src/` doesn't fail CI until someone actually rebuilds `dist/` from it. Worth
+adding an explicit `packages/domain` `tsc --noEmit` step to CI to catch this class of corruption (or
+any other src/dist divergence) immediately rather than silently, whenever that pipeline work is
+prioritized.
+
+**Third recurrence, same day (Task Capability Completion Story 6 pre-work):** the exact same 3 files
+as the 2026-07-19 recurrence above (`onboarding.tsx`, `Card.tsx`, `in-memory-reminder-scheduler.ts`)
+hit again within the same session, found via the same proactive sweep, restored the same way (all
+byte-identical to `git show HEAD`). Given this is now the 3rd hit on largely the same file set in one
+day, the CI gap noted above is looking less like a nice-to-have and more like the actual fix — a
+periodic/pre-commit sweep is a workaround, not a resolution, for a filesystem-level hazard that keeps
+recurring regardless of how often it's caught.
+
+**Fourth and fifth recurrences, same day, same 3 files exactly, both restored the same way (all
+byte-identical to HEAD):** once during the DS-Selectable Chips work, once during the ADR-023 domain
+review kickoff. Still not urgent enough to have derailed anything — the sweep-and-restore protocol is
+holding — but the pattern is now firmly "expect this every session," not an anomaly.
+
 ---
 
 ## Active Technical Debt Item 36: B-001 — "Upcoming" Task cards in Goal Workspace had no way to reach Task's main interaction surface — RESOLVED, 2026-07-17
@@ -2110,6 +2161,103 @@ now a regular prop. It will be removed from the JSX Element type in a future rel
 
 ---
 
+## Active Technical Debt Item 43: `ControlledDatePicker`/`PlainDateTimePicker` open no picker on Expo web — due date fields are unclickable on that platform — RESOLVED, 2026-07-19
+
+- **Description:** Found during Task Capability Completion Story 3's live Playwright verification
+  (2026-07-19), while confirming the newly-editable "Fecha límite" field in `TaskForm`'s edit mode.
+  Both `ControlledDatePicker.tsx` and `PlainDateTimePicker.tsx` (`apps/mobile/src/shared/forms/`)
+  render an inline `<DateTimePicker>` only when `Platform.OS === 'ios'`, and gate the on-press modal
+  picker behind `show && Platform.OS === 'android'`. On web, pressing the date button flips internal
+  `show` state that nothing ever reads — the button visibly focuses but no picker opens, so the date
+  cannot be changed through the UI at all on that platform.
+  **Confirmed pre-existing, not introduced by Story 3:** `ControlledDatePicker.tsx` (committed at
+  `a0e865d`, predates this session) has the identical pattern and is shared by `CommitmentForm.tsx`
+  and `HabitForm.tsx` — every due-date/reminder-time field in the app is affected on web, not just
+  Task's.
+- **Impact:** Medium on web specifically — due dates (and any other date/time field using either
+  component) can only be set at record-creation time via a default, never changed interactively,
+  on Expo web. No impact on iOS (always-visible inline picker) or Android (functional modal). Since
+  this session's entire Playwright verification protocol runs against Expo web, it silently blocked
+  interactive due-date verification for Story 3 — backend and demo-repository-level correctness were
+  confirmed instead (see `ENGINEERING_BOARD.md`'s Story 3 entry).
+- **Priority:** Medium if Expo web is a real target platform for end users; Low if web is dev/test-only
+  and native (iOS/Android) is the actual delivery surface — worth confirming which, since it changes
+  urgency.
+- **Recommended Resolution:** Add a `Platform.OS === 'web'` branch to both components (e.g. a native
+  `<input type="date">`/`type="time"` styled to match, or a small popover date picker), or fold this
+  into the already-planned Fase 2.6 "Form system modernization" so it's fixed once for both components
+  instead of twice.
+- **Resolution (2026-07-19):** Fixed exactly as recommended, as part of a broader cross-app fix (user's
+  own ask, after seeing that date/time fields also looked non-interactive on native — no border, no
+  icon, no chevron, indistinguishable from static text). Both components now render a real, transparent
+  `<input type="date">`/`type="time">` overlay on web — clicking anywhere on the field opens the
+  browser's actual native picker; the visible text shows the app's own locale-formatted value instead
+  of the native input's own rendering. Verified live: setting a date/time via the native web input
+  updates the field, saves, and round-trips correctly through Detail. See `ENGINEERING_BOARD.md`'s
+  "Independent Date/Time Fields" entry (2026-07-19) for the full fix, which also addressed the
+  affordance problem (no border/icon/chevron) both components had on every platform, not just web.
+
+---
+
+## Active Technical Debt Item 44: "Segmented choice" pattern hand-rolled 4+ times, none wired to the shared interaction system — RESOLVED (scoped), 2026-07-19
+
+- **Description:** Found 2026-07-19 by a Form Consistency Audit run after the `SelectableField`
+  work, checking every interactive/selector component against the baseline `Input`/`Button`/
+  `SelectableField`/`Switch` now share (`useInteractionState`/`FocusRing`/`useHapticBehavior`/
+  `useInteractionAnimation`, `Label` typography). A "row of toggle-able chip buttons" pattern is
+  duplicated independently at minimum in: `ReminderSection.tsx`'s local `ChoiceRow` (reused 3× —
+  preset/repeat/stopCondition, `apps/mobile/src/features/tasks/components/ReminderSection.tsx:18-49`),
+  `DurationInput.tsx`'s preset chips (`packages/design-system/src/components/DurationInput.tsx:64-85`),
+  `TaskForm.tsx`'s priority selector (Baja/Media/Alta, `TaskForm.tsx:270-286`), and `TaskForm.tsx`'s
+  relation-kind selector (Ninguno/Objetivo/Compromiso, `TaskForm.tsx:293-~310`). None of the 4+ sites
+  use `FocusRing`/`useHapticBehavior`/`useInteractionAnimation` — no visible focus ring, no haptic
+  feedback, no press/hover animation, unlike every component in the now-consistent group. Labels
+  above them are all a raw `<Text color="$contentSecondary" fontSize="$3" fontWeight="bold">`, not
+  the shared `Label` component.
+- **Related, separate finding:** `FilterChip.tsx` (`apps/mobile/src/features/tasks/components/
+FilterChip.tsx:19-44`) is a third, distinct hand-rolled pattern — raw `XStack` with only
+  `pressStyle={{opacity:0.8}}`, no `FocusRing`, no keyboard-focus styling, no haptics. Lower blast
+  radius (single use, Task list filter row only) — noted here rather than as its own item since it's
+  the same root cause (no shared "toggle chip" primitive exists yet), just a smaller instance.
+- **Impact:** Medium-High. Blast radius is high — this is the field type most likely to appear on
+  any new form (Task/Habit/Commitment all have at least one instance today), so every new form built
+  without a shared component either duplicates the pattern again or silently misses the
+  focus/haptic/animation consistency the rest of the Design System now has.
+- **Priority:** Medium — not a visible bug (all 4+ sites work correctly, just inconsistently
+  polished vs. the rest of the app), but the highest-value next Design System consolidation
+  candidate given how many places would benefit from one fix.
+- **Recommended Resolution:** Extract a shared `ChoiceGroup`/`SegmentedControl` component (naming
+  TBD) into `packages/design-system`, wired through the same interaction hooks `SelectableField`
+  already establishes as the pattern, and migrate the 4+ call sites onto it. `FilterChip` is a
+  smaller, separate follow-up once the main pattern exists.
+- **Related, separate finding, same audit:** `TaskForm.tsx`'s Goal/Commitment target picker
+  (`TaskForm.tsx:318-336`) uses a raw Tamagui `Select` directly — no design-system wrapper,
+  `iconAfter={null}` explicitly strips Tamagui's own default chevron with nothing replacing it,
+  relies on Tamagui's native `focusStyle` instead of `FocusRing`, same raw-`Text` label. This is the
+  same "looks like static text" gap class the date/time fields had before `SelectableField` — a
+  natural, low-effort next migration since it already opens a picker on press (see `TECH_DEBT.md`
+  Item 19's update, same date, for the cross-reference).
+- **Resolution (2026-07-19), deliberately scoped:** built the recommended `ChoiceGroup`
+  (`packages/design-system/src/components/ChoiceGroup.tsx`) — same `useInteractionState`/
+  `FocusRing`/`useHapticBehavior`/`useInteractionAnimation`/`Label` wiring as `SelectableField`,
+  generalized over any option type via `isSelected`/`onSelect`/`labelFor` (not a strict `value ===
+option` equality, since `DurationInput`'s "Custom…" chip isn't itself a valid duration value).
+  Migrated exactly the 4 identified call sites — `ReminderSection`'s 3 `ChoiceRow` usages,
+  `DurationInput`'s presets, `TaskForm`'s priority selector, `TaskForm`'s relation-kind selector —
+  and nothing else, per explicit scope (`FilterChip` and the raw `Select` picker deliberately left
+  for their own separate follow-ups, not folded in here). **Found and fixed a real rendering bug
+  before it shipped:** `FocusRing` defaults to `alignSelf: 'flex-start'` (hugging its content), so a
+  naive `flex={1}` on the inner bordered `View` alone silently collapsed the 3rd chip in every
+  equal-width row (priority/relation selectors) into a barely-visible sliver — fixed by wrapping
+  `FocusRing` itself in an outer `flex={1}` box and passing its own `stretch` prop through, so
+  `FocusRing` actually grows to fill its share of the row instead of hugging near-zero width.
+  Verified live via Playwright: all 4 consumers render correctly (3 equal-width chips filling their
+  row properly, selected state clearly visually distinct, focus ring visible), `packages/
+design-system` 225/225 tests passing, mobile `tsc --noEmit` clean, mobile Jest at baseline
+  (93/108, same 15 pre-existing unrelated failures).
+
+---
+
 ## Active Technical Debt Item 1: Jest Hybrid Module Warnings (TS151002)
 
 - **Description:** Testing execution in `@commitment/domain` displays warnings: `ts-jest[config] (WARN) message TS151002: Using hybrid module kind (Node16/18/Next) is only supported in "isolatedModules: true".`
@@ -2130,6 +2278,54 @@ now a regular prop. It will be removed from the JSX Element type in a future rel
 
 ## 📜 Change History
 
+- **v1.65.0 (2026-07-19):** iCloud corruption 4th and 5th recurrences, same 3 files, both restored.
+  No longer worth a detailed entry per hit — noted briefly, pattern confirmed stable (annoying, not
+  dangerous, given the sweep-and-restore protocol).
+- **v1.64.0 (2026-07-19):** **Item 44 resolved, scoped exactly as directed ("DS-Selectable Chips").**
+  New `ChoiceGroup` (`@commitment/design-system`), migrated the 4 identified call sites only
+  (`ReminderSection`'s 3 `ChoiceRow`s, `DurationInput`, `TaskForm`'s priority and relation-kind
+  selectors) — `FilterChip` and the raw `Select` picker deliberately left untouched, not folded in.
+  Found and fixed a real rendering bug during verification: `FocusRing`'s default hug-content
+  behavior silently collapsed equal-width chip rows to a sliver; fixed before shipping. Verified live.
+- **v1.63.0 (2026-07-19):** Form Consistency Audit + pre-ADR-023 review (both user-requested, run as
+  parallel background audits). New **Item 44**: the "segmented choice" chip-row pattern is duplicated
+  4+ times (reminder options, duration presets, priority selector, relation-kind selector), none wired
+  to the shared interaction system `SelectableField`/`Input`/`Button`/`Switch` now use — highest-value
+  next Design System consolidation target. Also flags `FilterChip` (smaller, separate) and
+  `TaskForm`'s raw Goal/Commitment `Select` (same affordance gap class as the now-fixed date/time
+  fields). **Item 19 updated** — `ControlledDatePicker` portion resolved by today's `SelectableField`
+  work, `ControlledInput`/`ControlledSelect` portion still open. Pre-ADR-023 review confirmed: no
+  duplicate/orphaned routes, Reminder Engine's Goal gap is intentional and already documented, Calendar
+  still correctly handles Commitments/Milestones after the Task-focused churn, no other lingering
+  undocumented exposure gaps — genuinely clean to proceed to ADR-023.
+- **v1.62.0 (2026-07-19):** **Item 43 resolved.** Fixed as part of a broader cross-app fix, not a
+  screen-by-screen patch: both `ControlledDatePicker`/`PlainDateTimePicker` now render a real,
+  functional native `<input type="date"|"time">` on web (closing the dead-button gap for good) and a
+  new shared `SelectableField` (`@commitment/design-system`) for the visual/interaction chrome on
+  every platform, fixing a related but separate affordance problem — date/time fields looked like
+  static labels everywhere, not just on web. iCloud sync corruption hit `CommitmentForm.tsx` a 4th
+  time mid-session (restored, byte-identical to HEAD as always). See `ENGINEERING_BOARD.md`'s
+  "Independent Date/Time Fields" entry.
+- **v1.61.0 (2026-07-19):** iCloud sync corruption hit a 3rd time in the same session (same 3 files
+  as the prior recurrence), found and restored the same way. Noted this makes the CI-gap fix (added
+  above) look more urgent than "nice to have."
+- **v1.60.0 (2026-07-19):** Added a flagged-for-later note (not acted on) to the iCloud recurrence
+  entry above: CI never runs `packages/domain`'s own `tsc --noEmit` directly, only exercises it
+  indirectly via backend/mobile's consumption of its pre-built `dist/` — which is exactly why the
+  `index.ts` corruption sat undetected. User's suggestion, logged for a future CI pipeline pass.
+- **v1.59.0 (2026-07-19):** **iCloud sync corruption recurred, this time breaking `packages/domain`'s
+  public `index.ts`.** Found proactively via a repo-wide sweep (not a build failure) while doing
+  Story 4's Domain Exposure Verification on the Reminder Engine. 6 source files silently reverted to
+  stale content (all byte-identical restores from their orphaned `" 2.ext"` copies, verified against
+  `git show HEAD` before touching anything) plus a `node_modules` variant (`json5`, fixed via `pnpm
+install --force`). All three packages re-verified clean after recovery. See the dated entry under
+  "iCloud Desktop-sync corruption during Fase 2B" above.
+- **v1.58.0 (2026-07-19):** **Item 43 registered — date pickers unclickable on Expo web.** Found
+  during Task Capability Completion Story 3's live verification; confirmed pre-existing (shared
+  `ControlledDatePicker`/`PlainDateTimePicker` pattern, affects Task/Habit/Commitment forms alike),
+  not a Story 3 regression. Story 3 itself (`ScheduleTaskCommand`) verified independently via a real
+  backend curl round-trip (create → schedule → confirm) plus new demo-repository unit tests, since
+  the interactive UI path was the one blocked by this item.
 - **v1.57.0 (2026-07-18):** **Item 10 — Fase 4B implemented; Golden Path re-run hits a new
   blocker.** Rename/Complete/Archive got real UI; `Commitment.goalId`/`relinkGoal` replaced with
   `Goal.linkCommitment` for linking (unlinking documented as a known gap, not silently handled);

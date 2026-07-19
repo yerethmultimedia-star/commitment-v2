@@ -1,15 +1,48 @@
 # Engineering Board
 
-Version: 1.47.0
+Version: 1.64.0
 Status: Active
 Owner: Architecture Review Board
-Last Updated: 2026-07-17
+Last Updated: 2026-07-19
 
 ---
 
 ## Current Epic
 
-Epic VS — Vertical Slice Product Phase
+**Product Polish / Stabilization: `Complete` (2026-07-19), user-declared cycle close.** Everything
+since ADR-022 — Theme Audit, Quick Capture consolidation, Habit Detail, Task Detail, `/tasks` screen
+removal, Reminder Engine (Story 4), `estimatedMinutes`/`dueDate`+time exposure, Calendar, Forms
+consolidation, `SelectableField`, `ChoiceGroup`, the Domain Exposure Verification principle, and the
+whole Task Capability Completion epic — is now closed as one cycle. User's own framing: "casi todas
+las mejoras fueron estructurales, no solo funcionales." No new stories of this kind open without a
+real bug forcing one; see the Working Principles section below for the standing discipline going
+forward. **ADR-023 (Habit↔Commitment Relationship): ✅ Decided (2026-07-19)**, greenlit and resolved
+same day — user corrected the working name from "Habit Lifecycle" to its original ADR-022 §12
+scoping. Domain review (`docs/03-architecture/habit_commitment_relationship_review.md`) found **no
+relationship exists in any layer** — reframing this from "formalize edge cases" (ADR-022's shape) to
+"decide whether to introduce it at all." **Decision: weak association, not ownership** — a Habit may
+optionally support 0..n Commitments (`Habit.commitmentIds[]`, mirroring the already-shipped
+`Goal.commitmentIds[]`/`Goal.habitIds[]` pattern from ADR-021), additive to and non-exclusive with
+`Habit.goalId` (unlike `Task`'s Goal-or-Commitment exclusivity, since a Habit's long-lived, identity
+nature doesn't share Task's single-plan scoping). No cascades, no ownership, no shared lifecycle;
+Commitment's activation invariant stays "≥1 Task," formally excluding Habit rather than leaving it
+deferred. Full reasoning: `docs/03-architecture/adr_023_habit_commitment_relationship.md`. Model
+decided only — implementation (the field, commands, UI) not built, a separate future story if
+prioritized. User's own explicit rejection of Option 3 (mirroring Task's ownership pattern) is itself
+a Domain Exposure Verification-style catch: analogy to a successful prior pattern isn't evidence the
+same pattern fits a domain concept with a genuinely different nature. Implementation deliberately
+**not** prioritized — triggers when a real use case needs it (surfacing supporting habits on a
+Commitment's own detail, suggesting relevant habits at Commitment creation, richer Analytics), not
+before.
+
+**Consolidation cycle closed (2026-07-19): Product Polish/Stabilization, Task Capability Completion,
+Design System (`SelectableField`/`ChoiceGroup`), ADR-023 — all done.** User's own read of the
+project's current state: architecture solid enough to shift focus back to product capabilities.
+**Standing direction for the next cycle: prioritize product-facing capabilities (new user-facing
+experiences), not infrastructure/consolidation work, unless a real Critical/blocking tech debt item
+forces otherwise.** This doesn't reopen or weaken the Working Principles below — verify-first,
+extend-before-duplicate, and fix-in-the-shared-component still apply to whatever product work comes
+next; it's a statement about _what kind_ of work to prioritize, not how to do it.
 
 ## Current Phase (2026-07-15)
 
@@ -281,7 +314,327 @@ audit's red-deltas finding), and a haptic/sound taxonomy. **No further screen au
 this document exists — it now does**, so the next audit under this milestone is the first with a
 stable, comparable standard instead of a fresh judgment call each time.
 
+**Design System freeze — two explicit, scoped exceptions exercised this session (2026-07-19), not
+violations:** `SelectableField` (date/time field affordance — see the "Independent Date/Time Fields"
+entry above) and `ChoiceGroup` (segmented choice chips, `TECH_DEBT.md` Item 44) are both new
+components. Both qualify under the freeze's own carve-out — `SelectableField` fixed a genuinely
+Critical bug (the web date/time field was a fully dead button, not just unpolished); `ChoiceGroup`
+was scoped and explicitly directed by the user as "the last Product Polish work" specifically to
+avoid it becoming an open-ended refactor — migrated exactly 4 identified call sites, nothing else
+(`FilterChip`, `ControlledSelect`, and `TaskForm`'s raw `Select` picker were explicitly left alone).
+Both are visual-consistency/affordance fixes, not new product surface — in scope for a Product
+Polish milestone whose whole purpose is exactly this category of work, even under an active freeze.
+
+## Working Principles (Commitment's standing discipline, formalized 2026-07-19)
+
+User's own closing framing for the Product Polish/Stabilization cycle above: this set of habits
+"ha demostrado ser efectivo durante todo el epic Task Capability Completion y vale la pena
+convertirlo en la forma habitual de trabajar en Commitment" — not cycle-specific practice, the
+default going forward, starting with ADR-023.
+
+1. **Verify first** that a capability doesn't already exist in the domain before adding anything —
+   see "Domain Exposure Verification" immediately below; the principle that started this list.
+2. **Extend before duplicating.** Before building a new mechanism, check whether an existing one
+   (a port, a service, an event-handler pattern) already generalizes to the new case — Story 4
+   (`ReminderSourceType('task')`) is the model: the Reminder Engine was already fully source-agnostic,
+   the only real gap was a closed type union and wiring, not a new engine.
+3. **Fix in the shared component, not the screen.** When a bug or inconsistency traces back to a
+   component reused across features, fix it once there — `SelectableField`/`ChoiceGroup` both
+   started as a Task-specific ask and were built as design-system primitives instead, so the fix
+   propagated to Habit/Commitment automatically, verified without touching either screen's code.
+4. **Document governance only when a real decision changes**, not per implementation detail. Version
+   bumps and changelog entries earn their place when they record an actual architectural or scoping
+   decision (a new epic, a closed item, a reversed choice) — not routine restating of what code
+   already shows.
+
+## Working Principle: Domain Exposure Verification (effective 2026-07-19)
+
+Registered after the Task Domain Review (`docs/03-architecture/task_domain_review.md`) found that
+`estimatedMinutes`, `actualMinutes`, `dueDate`, and `startDate` were all already fully modeled on
+the `Task` aggregate — with working behavior methods and their own domain events — while a product
+proposal was independently arriving at the same fields as "new" attributes to add. The domain
+design was correct from the start; the gap was that nothing above the aggregate (API commands,
+mobile models, UI) exposed what already existed.
+
+**Before adding a new attribute to a domain aggregate, verify whether the capability already
+exists and only needs exposing through the upper layers (API, mobile model, UI).** Check the
+aggregate itself, not just the read models or the client — a field can be fully modeled and still
+invisible everywhere it would need to be to matter. This is a large-enough codebase now that
+skipping this check produces real duplicated work, not just redundant documentation.
+
+Directly reinforces the Product Polish milestone's existing **domain freeze** ("no new aggregates,
+no new entities — bugs only," see below): most of what looks like a domain-change request turns
+out to be an exposure gap once actually checked against the aggregate, satisfiable without touching
+`packages/domain` at all.
+
+## Design Principle: Independent Date/Time Fields (effective 2026-07-19)
+
+Registered after exposing `dueDate`'s time-of-day precision (Task Capability Completion's
+post-closure follow-through, above): **wherever the app lets a user pick a date and a time
+together, they must be two independent, separately-labeled, separately-editable fields — never one
+combined "date and time" control.** Both map onto the same underlying value (e.g. `dueDate`), so
+this is a UI-composition rule, not a new domain attribute anywhere it applies.
+
+Rationale: users decide the day first, then (optionally) the time, as two separate mental steps;
+independent fields let either be changed without touching the other, and make "no time set" an
+explicit, visible state (e.g. "Sin definir") rather than an ambiguous midnight value or a hidden
+field. `apps/mobile/src/shared/lib/mergeDateAndTime.ts` is the shared helper two sibling pickers use
+to combine their independent edits back into one `Date` — reuse it rather than re-deriving the
+merge logic per form.
+
+**Scope, Task-specific parts:** implemented for Task (`TaskForm` create/edit, `TaskDetailScreen`, and
+Calendar's chronological-then-"Sin hora" grouping — see the epic entry below for detail). Calendar
+Events and future Focus Sessions have no scheduling UI to fix yet — registered here as the standing
+rule for whenever that UI gets built, not implemented against anything now.
+
+**Honest note on churn:** earlier in this same work, `PlainDateTimePicker` was extended with a
+combined `mode="datetime"` (plus real Android two-step dialog chaining to make it actually correct
+cross-platform) to expose `dueDate`'s time-of-day in a single field. This design principle reverses
+that specific choice in favor of split fields — the combined-mode code (and its Android chaining)
+was removed again in the same pass once the principle was set, rather than left as unused dead code
+alongside the new split-field implementation.
+
+### Cross-app affordance fix (2026-07-19, same day) — user's follow-up after seeing the split fields
+
+The split Fecha/Hora fields still failed a more basic test: they didn't look editable — no border, no
+background, no icon, no chevron, indistinguishable from a static label — and the same bare-button
+pattern existed on every screen using either base component, not just Task. Treated as a Design
+System fix, not a per-screen patch, per explicit instruction.
+
+**Audit (exactly as requested):**
+
+- **Consumers found:** exactly 4 — `TaskForm.tsx`, `ReminderSection.tsx` (both Task, via
+  `PlainDateTimePicker`), `CommitmentForm.tsx`, `HabitForm.tsx` (both via `ControlledDatePicker`). No
+  other date/time picker implementation exists anywhere in the app — confirmed by grepping for both
+  `PlainDateTimePicker`/`ControlledDatePicker` and any other `DateTimePicker` import across
+  `apps/mobile/src`.
+- **Base component modified:** two, matching the audit above exactly —
+  `apps/mobile/src/shared/forms/PlainDateTimePicker.tsx` and `ControlledDatePicker.tsx`. Both now
+  delegate their visual/interaction chrome to a new, generic, public design-system primitive,
+  **`SelectableField`** (`packages/design-system/src/components/SelectableField.tsx`, exported from
+  `@commitment/design-system`) — a labeled, bordered, iconed, chevron-having, fully-stateful
+  (hover/press/focus/disabled, via the same `useInteractionState`/`FocusRing`/`useHapticBehavior`/
+  `useInteractionAnimation` wiring `Input`/`Button` already use) pressable row. Deliberately named and
+  scoped generically, not date-specific — the same "todo campo que abra un selector debe compartir el
+  mismo patrón visual" rule the user stated applies to color/icon/priority/goal selectors too, so this
+  is the one place that pattern will live when those get built, not a second bespoke component later.
+- **Screens that inherit the fix automatically:** all 4 consumers above, confirmed live via
+  Playwright screenshots without editing any of their screen-level code — `TaskForm` (create/edit),
+  `ReminderSection`'s narrower side-by-side custom date/time pair, `CommitmentForm`'s "Fecha objetivo",
+  and `HabitForm`'s "Hora del recordatorio" all show the identical bordered/iconed/chevroned field the
+  moment the two base components were fixed. This is the direct, verified payoff of there being
+  exactly 2 reusable base components already, not 6 separate implementations.
+- **Screens still using their own implementation:** none found. The audit's premise (patching
+  screen-by-screen would be wrong because a shared component already exists) held exactly — there was
+  no third, undiscovered date-picker implementation anywhere to worry about.
+- **Deprecated:** nothing formally deprecated; the combined `mode="datetime"` support added and then
+  reverted earlier the same day never shipped as a real API surface, so there's nothing left pointing
+  at it to deprecate.
+
+**Web (TECH_DEBT.md Item 43, now resolved):** both components now render a real, fully transparent,
+absolutely-positioned native `<input type="date">`/`type="time">` inside the `SelectableField` row on
+web — clicking anywhere on the row opens the browser's actual native picker (no dead button); the
+visible text still shows the app's own locale-formatted value, not the native input's own rendering.
+Verified live: setting a date via the native input updates `SelectableField`'s displayed text
+immediately (including its focus-ring styling, which picks up the inner input's real DOM focus via
+React's bubbling `onFocus`/`onBlur` — no extra wiring needed), saves, and round-trips correctly
+through `TaskDetailScreen`.
+
+**Android:** kept the existing Fecha→Hora-as-two-separate-taps flow (each field is now its own
+`SelectableField` row with its own tap target, so there's no longer even a two-step-within-one-field
+chaining concern — that was only needed for the reverted combined-mode picker).
+
+**iOS:** left `display="default"` (already a compact, native, tap-to-open control — not an
+always-expanded wheel, confirmed from the library's own type definitions rather than assumed) _outside_
+`SelectableField`'s own border/background, sharing only the `Label` typography above it. Wrapping an
+already-native-chrome iOS control in a second custom border risked looking broken/nested with no way
+to verify on a real device or simulator in this environment — the conservative, non-overreaching
+reading of "keep the most appropriate native behavior."
+
+**Verification status, per platform** (user's own correction — code review and reasoning about the
+library's type definitions is not the same claim as having seen it render):
+
+- **Android ✅ verified** — `tsc --noEmit` clean, mobile Jest at baseline, and the underlying
+  `SelectableField` row/press mechanics are identical to what's already live-verified on web.
+- **Web ✅ verified live** — Playwright screenshots of all 4 consumers, plus a full save round-trip
+  (date + time set via the native web `<input>` → saved → correctly displayed on Detail).
+- **iOS — pending device verification.** `display="default"`'s compact-control behavior is asserted
+  from the library's own type definitions (`IOSDisplay = 'default' | 'compact' | 'inline' |
+'spinner'`), not observed — no simulator or device available in this environment. Not blocking
+  (the change is additive — a `Label` above an untouched native control — and low-risk), but not
+  claimed as "closed" until someone actually sees it on iOS.
+
 ## Priorities
+
+- **Epic: Task Capability Completion — `Closed` (2026-07-19)**, opened 2026-07-19, closed the
+  Stabilization Sprint — see `PROJECT_STATUS.md` v1.69.0. Direct output of the Task Domain Review:
+  `estimatedMinutes`, `actualMinutes`, `dueDate`, and `startDate` are already real `Task` aggregate
+  fields with working behavior methods (`estimate()`, `schedule()`) — this epic connects them through
+  the layers that don't expose them yet. All 6 stories done (Story 5's UI presentation deliberately
+  spun out to the new, separate **Insights / Analytics** epic in `ROADMAP.md` rather than blocking
+  this epic's closure). Two small, deliberate domain touches across the whole epic, both flagged in
+  advance rather than silent — widening `ReminderSourceType`'s closed union (Story 4) and enriching
+  `TaskDueDateChangedEvent`'s payload with `identityId` (Story 4's own bug fix) — neither adds a new
+  domain concept, verified against the aggregate before scoping either time, per the Working
+  Principle above.
+  - **Story 1 ✅ (2026-07-19):** Exposed `estimatedMinutes` in `TaskForm` (create and edit) via a
+    new, deliberately reusable `DurationInput` component (`packages/design-system` — presets 15/30/
+    45/60/90/120 min + Custom, meant for Focus Sessions/Habits/Calendar/Coach later too). Shown
+    discreetly on `TaskCard` and in `TaskDetailScreen`'s info block. Found and fixed a real,
+    pre-existing bug along the way: `TaskForm.tsx`'s save path never invalidated the React Query
+    cache after an edit (title/description/priority/relations were all silently affected, not just
+    this new field) — Detail screens showed stale data for up to the client's 5-minute `staleTime`.
+    Zero `packages/domain` changes. Deliberately did not add domain/backend min/max validation
+    (none exists yet in `task-constraints.ts` or the backend's Zod schemas) — presets bound the
+    common case, Custom clamps client-side only as a UX guardrail, domain stays the source of truth.
+  - **Story 2 ✅ (2026-07-19, satisfied — no code needed):** "Show `estimatedMinutes` as calendar
+    block duration in the day agenda" — verified live and found this capability **already shipped**,
+    predating this whole sprint (`calendar.tsx`'s `{item.durationMinutes && ...}` render, commit
+    `a0e865d`). Corrects this backlog entry's own original claim ("nothing renders it yet") — that
+    was wrong, written without checking `calendar.tsx` closely enough at review time. Exactly the
+    failure mode the Domain Exposure Verification principle exists to catch, and it caught it before
+    any code was written. The bigger "reserve a proportional visual time-block, 2:15 PM → 3:00 PM"
+    idea from the epic's founding conversation is explicitly **not** in this epic's scope — moved to
+    a new **Calendar 2.0 / Time Blocking** entry in `ROADMAP.md` (Status: Future, not started; a
+    proportional hour-by-hour grid is a different UI paradigm from this epic's exposure work, not a
+    small wiring task).
+  - **Story 3 ✅ (2026-07-19):** Added `ScheduleTaskCommand` (command → `ScheduleTaskCommandHandlerCore`
+    → NestJS handler → `TaskApplicationService.scheduleTask()` → `PATCH /v1/tasks/:id/schedule`),
+    wrapping the existing `Task.schedule()` — the one genuine backend gap this epic found, confirmed
+    exhaustively absent before building anything, per the Working Principle above. `dueDate`/`startDate`
+    are explicit `string | null` (never `undefined`) end to end, matching `relinkGoal`/`relinkCommitment`'s
+    own explicit-null convention. `TaskForm`'s "Fecha límite" field is now editable in edit mode, not
+    just create (previously showed a locked hint); `save()` reschedules only when the value actually
+    changed. **Verified against the real backend, not just demo mode:** curl round-trip — create
+    (`dueDate: 2026-08-01`) → `PATCH .../schedule` (`dueDate: 2026-09-15`, `204`) → `GET` confirms the
+    new date and `version` incremented 1→3, proving the event was applied through the real command bus.
+    Backend `tsc --noEmit` clean, 109/109 Jest passing. Mobile `tsc --noEmit` clean. Live Playwright
+    walkthrough (Goals → Tareas → task detail → overflow menu → Editar) confirmed the field renders
+    editable and pre-filled; the actual click-to-change-date interaction hit a **pre-existing, unrelated**
+    web-platform gap (`TECH_DEBT.md` Item 43 — `ControlledDatePicker`/`PlainDateTimePicker` open no
+    picker on Expo web, confirmed to already affect Habit/Commitment forms too, predates this session)
+    — closed that gap in verification with two new `demoTasksRepository.schedule()` unit tests instead
+    (including a regression guard for a `dueDate ?? undefined` bug caught and fixed in code review
+    before it shipped, which would have silently turned "clear the date" into "don't touch it").
+    **Story 3 formally closed, 2026-07-19:** backend flow verified end to end for real, the one real
+    bug found is fixed and covered, and the sole remaining gap is a Design System / forms concern —
+    not a `ScheduleTaskCommand` defect — so it's deliberately not being fixed inside this story. Split
+    out to its own **Cross-platform Date Picker Parity (Web / iOS / Android)** epic in `ROADMAP.md`
+    (Status: Future) rather than mixed into Task Capability Completion, same reasoning as Story 2's
+    Calendar 2.0 split.
+  - **Story 4 ✅ (2026-07-19):** Domain Exposure Verification confirmed first (per the user's explicit
+    ask): the `Reminder` aggregate and its ports are already fully source-agnostic — zero branching on
+    `sourceType` anywhere — so the only closed piece was the `ReminderSourceType` union itself, not a
+    hidden config/registry mechanism. Widened it to `'commitment' | 'habit' | 'task'` and wired Task
+    into the same automatic, event-driven pattern Commitment already uses (simpler than Habit's — no
+    recurrence, so no dedicated scheduling service needed): `ScheduleReminderOnTaskRegisteredHandler`
+    (on `TaskRegisteredEvent`), `RescheduleReminderOnTaskDueDateChangedHandler` (on
+    `TaskDueDateChangedEvent`, fired by Story 3's `ScheduleTaskCommand` too), and
+    `CancelReminderOnTaskCompletedHandler`/`CancelReminderOnTaskCancelledHandler`. **Scoped
+    deliberately to the automatic wiring only** — did not build the opt-in "Activar recordatorios"
+    toggle endpoint the mobile Task Detail UI already shows, since neither Habit nor Commitment has a
+    precedent for that interaction (both are always-on), and inventing one unilaterally (default
+    behavior, preset offsets) would be a product decision, not an architecture-extension one. Flagged,
+    not built. **Found and fixed a real bug during live verification:** the due-date-changed handler
+    initially called `scheduler.reschedule()`, which no-ops if no reminder exists yet — meaning a task
+    created _without_ a due date that later got one (via edit or Story 3's schedule) would silently
+    never get a reminder. Fixed by using `scheduler.schedule()` (create-or-update) instead, which
+    required adding `identityId` to `TaskDueDateChangedEvent`'s payload (the aggregate already had it;
+    a payload enrichment, not new domain concept) since `schedule()` needs it to create a Reminder from
+    scratch. **Verified against the real backend**, not demo mode — 5 scenarios via curl against the
+    running server, cross-checked against `InMemoryReminderScheduler`'s own log output: register-with-
+    due-date → `Scheduled`; reschedule via Story 3's endpoint → `Scheduled` (updated); clear the due
+    date → `Cancelled`; register-without-then-add-later → `Scheduled` (the bug fix, re-verified);
+    cancel task → `Cancelled`. `packages/domain` 268/268 Jest passing, backend 109/109, mobile 86/86 —
+    all three `tsc --noEmit` clean.
+  - **Story 5 ✅ data layer, ⏸ UI presentation deferred (2026-07-19):** Added `plannedMinutes`/
+    `completedMinutes`/`remainingMinutes`/`completionRatio` to `DailyMetricsPoint` and
+    `totalPlannedMinutes`/`totalCompletedMinutes`/`totalRemainingMinutes`/`completionRatio` to
+    `WeekWindowMetrics` (`packages/domain/src/insights/InsightsContext.ts`), computed in
+    `daily-metrics.ts`'s `computeDailyMetrics`/`aggregateWeek`. Both `planned` and `completed` are
+    scoped by `Task.dueDate` (not `completedAt`, which the existing `focusMinutes` uses) — the same
+    population `productivity` already uses, so the two numbers are directly comparable ("of what I
+    committed to today/this week, how much did I actually get done"), not a redundant duplicate of
+    `focusMinutes` (which answers "how much time did I spend," a different question).
+    `remainingMinutes`/`completionRatio` are pure derivations, computed eagerly. **Found and fixed a
+    design bug before it shipped:** the week-level sums were initially built by summing
+    `dailyMetrics`' per-day values, but `dailyMetrics` only covers the trailing 14 days ending today
+    — days later in the current week (e.g. Thu-Sun when today is Wed) have no point in that series
+    at all, so the sum silently under-counted the current week's planned minutes. Fixed by scoping
+    `totalPlannedMinutes`/`totalCompletedMinutes` the same way `productivity` already correctly does
+    — scanning `tasks` directly by `dueDate` within the window, not summing `dailyMetrics`. Verified:
+    `packages/domain` 268/268 and mobile 90/105 (86 baseline + 4 new tests; 15 failures are the same
+    pre-existing, unrelated `__DEV__` issue) Jest passing, both `tsc --noEmit` clean. **UI
+    presentation deliberately deferred** — asked the user how to surface "comprometido vs completado"
+    given the Insights Overview is documented as a fixed 4-card layout; user's call: leave this a
+    product/UX decision for a future Insights/Analytics epic (see `ROADMAP.md`), not an incidental
+    consequence of this data-layer story. The data is fully available for Coach/Analytics/Calendar to
+    consume today regardless of when/whether the Overview itself changes.
+  - **Story 6 ✅ (2026-07-19):** Domain Exposure Verification confirmed the gap was real and total:
+    backend `TaskView` already returns `startDate`/`tags`/`metadata` in every response, and the
+    backend already accepts `tags`/`metadata` on both register and edit, `startDate` on Story 3's
+    schedule endpoint — zero backend/domain changes needed, purely mobile-side plumbing. Added the 3
+    fields to `TaskModel`; wired `tags`/`metadata` into `tasksApi.create()`/`edit()`. **Found and
+    fixed a real, previously-shipped bug along the way:** `tasksApi.schedule()` (Story 3) only ever
+    sent `dueDate`, never `startDate` — but the backend controller resolves an omitted `startDate` to
+    `null` (`parsed.data.startDate ?? null`), so every reschedule was silently clearing `startDate`.
+    Hadn't caused visible damage yet only because no UI has ever set `startDate` to begin with, but
+    would have as soon as anything did. Fixed by making `startDate` a required third parameter,
+    forcing every call site to explicitly decide; `TaskForm.tsx`'s one call site now passes the
+    task's current `startDate` through unchanged (no UI to edit it yet). **Deliberately did not build
+    new UI** for tags/metadata editing or a `startDate` field in `TaskForm` — nothing currently sets
+    these, so there's nothing to display yet, and a tag/metadata editor is a real UI feature, not an
+    exposure gap; flagged, not built unilaterally, same discipline as Story 4's reminder toggle and
+    Story 5's Insights UI question. Verified: real backend round-trip via curl (tags/metadata
+    create→get; the `startDate` preservation fix specifically — set both, change only `dueDate`,
+    confirm `startDate` survives), `packages/domain` 268/268, backend 109/109, mobile 93/108 Jest (90
+    baseline + 3 new tests; 15 pre-existing unrelated `__DEV__` failures), all three `tsc --noEmit`
+    clean, Playwright smoke test confirming `TaskForm.tsx`'s edit/save path has no regression.
+  - **Post-closure follow-through (2026-07-19) — `dueDate` time-of-day, not a new `scheduledAt`
+    field.** User's own question, applying the same verification discipline: is `dueDate` a full
+    `Date`/instant, or does the domain normalize it to midnight? Verified exhaustively — `Task.ts`'s
+    `dueDate: Date | null` has zero midnight-normalization anywhere (aggregate, projectors, or
+    in-memory persistence), and `build-day-agenda.ts`'s `isoTime()` already anticipated a real
+    time-of-day component (its own "date-only, no real time" comment predates this work). Answer:
+    **yes, already a full instant** — the date-only restriction was purely the frontend picker's
+    `mode="date"`, not a domain limitation, so this closes as an exposure fix, not a new `scheduledAt`
+    domain concept (which still correctly awaits its own future ADR, unchanged). Verified end-to-end
+    against the real backend: creating a task with `dueDate: 2026-08-01T14:30:00.000Z` round-trips
+    exactly, and — the decisive proof this actually completes Reminders/Agenda/Calendar as intended —
+    the Story 4 Reminder Engine automatically scheduled the reminder at `14:30:00.000Z`, not midnight,
+    with zero changes needed to the Reminder Engine itself (it already just uses `dueDate` verbatim).
+  - **Split into independent Fecha/Hora fields (2026-07-19), superseding the combined picker above,
+    per the new Design Principle: Independent Date/Time Fields** (see above — user's follow-up call
+    after seeing the time-of-day exposure work, generalized into an app-wide rule, not Task-specific).
+    `TaskForm` now renders two separate `PlainDateTimePicker`s (`mode="date"` + `mode="time"`,
+    combined via the new shared `mergeDateAndTime()` helper) instead of one `mode="datetime"` field —
+    the Android two-step dialog chaining built for the combined mode was removed again in the same
+    pass rather than left as dead code once split fields made it unnecessary. `TaskDetailScreen` shows
+    "Fecha límite" and "Hora" as two independent rows, "Hora" never hidden — explicitly "Sin definir"
+    when no time is set, so the user can see why a task doesn't sort by time in Calendar rather than
+    wondering if the app forgot it. Calendar (`calendar.tsx`) now visually groups items into a
+    chronological "has a time" section (already correctly sorted by `buildDayAgenda`, this pass added
+    the visual split) followed by a "Sin hora" section for due-date-only items — live-verified:
+    habits with real reminder times sort first chronologically, due-date-only tasks group visibly
+    separately under "Sin hora". `tsc --noEmit` clean, mobile Jest at baseline (93/108, same 15
+    pre-existing unrelated failures), Playwright screenshots confirmed all three surfaces (form,
+    detail, calendar) render per spec.
+  - **Explicitly out of scope, a separate future conversation:** `energyLevel`/`location` as new
+    Task attributes — genuine new domain surface, not an exposure gap, would need its own ADR when
+    prioritized (see Task Domain Review's closing section).
+  - **`scheduledAt` (planned execution time) — verified 2026-07-19, confirmed genuinely new, not
+    implemented.** Before Story 4, checked exhaustively for an existing "when do I plan to work on
+    this" concept across Task/Calendar/Habit/Commitment/Reminder, per the same verification
+    principle. None exists: `AgendaItem.time` (`packages/domain/src/calendar/engine/
+build-day-agenda.ts`) is derived from `dueDate`'s time-of-day component
+    (`isoTime(task.dueDate)`), not a separate field — it conflates deadline and plan today.
+    `Habit.reminderTime` is a recurrence-anchored notification time, Habit-specific, not a general
+    scheduling concept. `Reminder.scheduledFor` is when the _notification_ fires (a delivery detail),
+    not when the user plans to execute the task. Confirms the distinction the user raised
+    (`startDate`=constraint, `dueDate`=deadline, `scheduledAt`=plan, `estimatedMinutes`=budget,
+    `actualMinutes`=actual) is real new domain surface, same category as `energyLevel`/`location` —
+    not scoped or built now, needs its own ADR-level decision (naming confirmed as `scheduledAt`, not
+    `executionTime`, to avoid implying a historical/actual-occurrence record) when prioritized.
 
 - **VS-025:** Dashboard Experience Foundation (Completed — self-labeled)
   - _Track A:_ Dashboard Layout (Container structure, adaptive layout, header, greeting)
@@ -343,6 +696,153 @@ v1.1.0 change history.)
 
 ## 📜 Change History
 
+- **v1.64.0 (2026-07-19):** **Consolidation cycle formally closed.** Product Polish/Stabilization,
+  Task Capability Completion, `SelectableField`/`ChoiceGroup`, ADR-023 — user's own assessment: done,
+  architecture solid enough to shift back to product capabilities. Registered standing direction:
+  next cycle prioritizes user-facing product work, not infrastructure, absent a real Critical tech
+  debt item. ADR-023's implementation explicitly deferred until a concrete use case (surfacing
+  supporting habits, suggestion at Commitment creation, richer Analytics) needs it.
+- **v1.63.0 (2026-07-19):** Added "Implicaciones futuras" to ADR-023 per user review — an explicit
+  boundary statement (no state sync, ownership, cascades, or Reminder/Analytics/Calendar changes
+  implied by `commitmentIds[]` existing) protecting the decision from future scope-creep-by-inference.
+  User's own approval highlighted the domain-precedent finding (`Goal.commitmentIds[]`/`habitIds[]`
+  already existed) as the strongest part of the ADR — extending an established modeling pattern, not
+  inventing an exception.
+- **v1.62.0 (2026-07-19):** **ADR-023 decided: `Closed`.** User rejected mirroring Task's ownership
+  pattern — a Habit's long-lived, identity-building nature doesn't share Task's single-plan scoping,
+  so applying ADR-022's pattern by analogy would have been exactly the mistake Domain Exposure
+  Verification exists to catch. Decision: weak association (`Habit.commitmentIds[]`, 0..n, additive
+  to `goalId`, no cascades, no ownership), following the already-shipped `Goal.commitmentIds[]`/
+  `Goal.habitIds[]` precedent from ADR-021. Commitment's activation invariant formally excludes Habit
+  ("≥1 Task" only) rather than leaving it deferred — updated the stale doc comments in
+  `Commitment.activate()` and `TaskBasedCommitmentActivationPreconditions` to match. Model only —
+  no implementation. See `docs/03-architecture/adr_023_habit_commitment_relationship.md`.
+- **v1.61.0 (2026-07-19):** **ADR-023 domain review complete.** Investigated Habit↔Commitment per the
+  user's explicit ADR-022 §3.1/§12 successor scoping (not a Habit state-machine question). Headline
+  finding: no relationship exists in any layer — domain, API, UI, Reminder Engine, Calendar, or
+  Analytics. `TaskBasedCommitmentActivationPreconditions`'s own doc comment already named this gap.
+  ADR-023 is therefore a "decide whether to introduce this relationship" question, not a "formalize
+  existing edge cases" one like ADR-022 was. Full evidence:
+  `docs/03-architecture/habit_commitment_relationship_review.md`. Awaiting direction before the ADR
+  itself gets written.
+- **v1.60.0 (2026-07-19):** **Product Polish / Stabilization cycle formally `Complete`** — user's own
+  closure, everything since ADR-022 (Theme Audit through `ChoiceGroup`/Item 44) counted as one cycle,
+  mostly structural not just functional improvement. Registered **Working Principles** — the 4-point
+  discipline (verify first, extend before duplicating, fix in the shared component, document only real
+  decisions) that ran through this whole cycle, now the standing default rather than cycle-specific
+  practice. **ADR-023 (Habit Lifecycle) greenlit**, starting with the same discipline: domain
+  investigation before any implementation.
+- **v1.59.0 (2026-07-19):** **"DS-Selectable Chips" — `TECH_DEBT.md` Item 44 resolved, scoped exactly
+  as directed.** New `ChoiceGroup` (`@commitment/design-system`), same interaction wiring as
+  `SelectableField`. Migrated exactly the 4 identified call sites (`ReminderSection`'s 3 `ChoiceRow`s,
+  `DurationInput`, `TaskForm`'s priority and relation-kind selectors) — deliberately not `FilterChip`
+  or the raw Goal/Commitment `Select`, per explicit scope. Found and fixed a real rendering bug before
+  shipping: `FocusRing`'s hug-content default silently collapsed equal-width chip rows. Documented
+  both this and `SelectableField` as explicit, scoped exceptions to the Product Polish milestone's
+  Design System freeze, not violations of it. Verified live via Playwright, all suites at baseline.
+- **v1.58.0 (2026-07-19):** Corrected v1.57.0's iOS claim per user review — reasoning about the
+  library's own type definitions is not the same as observed verification. iOS's `SelectableField`
+  integration is now explicitly "pending device verification," not closed; Android and web remain
+  independently verified as before.
+- **v1.57.0 (2026-07-19):** **Cross-app date/time field affordance fix, Design System level.** New
+  public `SelectableField` component (`@commitment/design-system`) — a generic, labeled, bordered,
+  iconed, chevroned, fully-stateful pressable row, sharing the exact same interaction wiring as
+  `Input`/`Button`. Both existing base date/time components (`PlainDateTimePicker`,
+  `ControlledDatePicker`) now delegate their chrome to it, fixing the "looks like static text, not an
+  editable field" problem on every platform for all 4 real consumers (`TaskForm`, `ReminderSection`,
+  `CommitmentForm`, `HabitForm`) at once — verified live via Playwright without touching any of those
+  4 screens' own code. Also resolved `TECH_DEBT.md` Item 43 in the same pass: web now gets a real,
+  functional native `<input type="date"|"time">` instead of a dead button. iCloud sync corruption hit
+  `CommitmentForm.tsx` again mid-session (4th time, restored byte-identical to HEAD as always).
+- **v1.56.0 (2026-07-19):** Registered **Design Principle: Independent Date/Time Fields** — date and
+  time are always two separate, independently-editable UI fields app-wide, never one combined
+  picker. Implemented for Task: `TaskForm` (create/edit) now shows separate Fecha/Hora fields via a
+  new shared `mergeDateAndTime()` helper; `TaskDetailScreen` shows both as independent rows, "Hora"
+  explicitly "Sin definir" rather than hidden when unset; Calendar visually groups a chronological
+  "has a time" section followed by "Sin hora". This reverses v1.55.0's combined `mode="datetime"`
+  picker (including its Android two-step dialog chaining) — removed rather than left as dead code.
+  Live-verified via Playwright: habits (real reminder times) sort chronologically first, due-date-only
+  tasks group under "Sin hora" as specified. Habit/Commitment/Calendar Events/Focus Sessions
+  registered as the rule's future scope, not touched this pass.
+- **v1.55.0 (2026-07-19):** **`dueDate` time-of-day exposure — completes Reminders/Agenda/Calendar,
+  no new domain concept.** Verified `Task.dueDate` was always a full instant, never
+  midnight-normalized — the date-only picker was a frontend gap. Changed `TaskForm` to
+  `mode="datetime"`; found and fixed a real Android-specific bug before shipping (the native picker
+  library has no combined datetime dialog on Android, only iOS) via two-step dialog chaining in
+  `PlainDateTimePicker.tsx`. Verified against the real backend — a task's due time (`14:30:00.000Z`)
+  round-trips exactly and the Story 4 Reminder Engine schedules at that exact time automatically,
+  with zero Reminder Engine changes needed. `scheduledAt` as a distinct domain concept still
+  correctly awaits its own future ADR — this was purely exposing time-of-day precision `dueDate`
+  already had.
+- **v1.54.0 (2026-07-19):** **Task Capability Completion Story 6 ✅ — epic `Closed`.** Mapped
+  `startDate`/`tags`/`metadata` into mobile's `TaskModel` and `tasksApi`; verified backend/domain
+  needed zero changes (`TaskView` already returned all three, backend commands already accepted
+  them). Found and fixed a real, previously-shipped bug: `tasksApi.schedule()` never sent `startDate`,
+  and the backend resolves an omitted one to `null` — every reschedule was silently clearing it.
+  Deliberately did not build new UI for tags/metadata/startDate editing (nothing sets them yet, and a
+  tag editor is a real feature, not an exposure gap). Verified against the real backend, all three
+  `tsc --noEmit` clean, Jest passing at baseline+3, Playwright regression smoke test clean. With all 6
+  stories done, **Task Capability Completion is now `Closed`** — corrected the epic's own "zero
+  packages/domain changes" claim to note its two small, flagged-in-advance exceptions (Story 4). See
+  `ROADMAP.md` for the closure entry and the two spun-off future epics (Calendar 2.0, Cross-platform
+  Date Picker Parity, Insights/Analytics).
+- **v1.53.0 (2026-07-19):** **Task Capability Completion Story 5 — data layer ✅, UI deferred.** Added
+  `plannedMinutes`/`completedMinutes`/`remainingMinutes`/`completionRatio` to `DailyMetricsPoint`/
+  `WeekWindowMetrics`, both scoped by `Task.dueDate` (matching `productivity`'s existing population,
+  not `focusMinutes`'s `completedAt` scoping) so "comprometido vs completado" compares like with like.
+  Found and fixed a real bug before shipping: the week-level sums were initially built from summing
+  `dailyMetrics`, which only covers the trailing 14 days ending today and silently excludes the rest
+  of the current week — fixed by scoping directly off `tasks`, mirroring `productivity`'s own
+  approach. Asked the user how to surface this in the Insights Overview (documented as a fixed 4-card
+  layout); decision: leave it a future Insights/Analytics epic's product/UX call, not build it as an
+  incidental side effect of this data-layer story. New entry in `ROADMAP.md`.
+- **v1.52.0 (2026-07-19):** **Task Capability Completion Story 4 ✅ — `ReminderSourceType('task')`.**
+  Domain Exposure Verification confirmed the `Reminder` engine is fully generic already; the only real
+  gap was the closed type union and the wiring. Task now schedules/reschedules/cancels reminders
+  automatically via 4 new event handlers, mirroring Commitment's pattern exactly. A real bug was found
+  and fixed during live verification (`reschedule()` no-ops on a missing reminder — fixed by using
+  `schedule()`, which required a small, additive enrichment of `TaskDueDateChangedEvent`'s payload
+  with `identityId`). Verified end to end against the real backend, 5 scenarios via curl + log
+  cross-check. Deliberately did not build the opt-in reminder-toggle endpoint the mobile UI shows —
+  flagged as needing its own product decision, not built unilaterally. Also verified, separately, that
+  a "planned execution time" (`scheduledAt`) concept does **not** already exist anywhere in the domain
+  — confirmed genuinely new surface, same category as `energyLevel`/`location`, not implemented.
+- **v1.51.0 (2026-07-19):** **Task Capability Completion Story 3 formally closed.** Backend verified
+  end to end for real (not demo mode); the one real bug found (`dueDate ?? undefined`) is fixed and
+  covered by tests. The remaining web date-picker gap is deliberately _not_ being fixed inside this
+  story — it's a Design System / cross-platform forms issue (also affects Habit and Commitment), not
+  a `ScheduleTaskCommand` defect. Split into a new **Cross-platform Date Picker Parity (Web / iOS /
+  Android)** epic in `ROADMAP.md` (Status: Future), mirroring how Story 2's bigger calendar idea was
+  split into Calendar 2.0 rather than folded in. Proceeding next to Story 4 (`ReminderSourceType`
+  Task), gated behind a Domain Exposure Verification check on the Reminder Engine first.
+- **v1.50.0 (2026-07-19):** **Task Capability Completion Story 3 ✅.** Added `ScheduleTaskCommand`,
+  exposing the existing `Task.schedule()` via `PATCH /v1/tasks/:id/schedule` — confirmed exhaustively
+  that no equivalent command already existed before building it, per the Working Principle. Verified
+  against the real backend (not just demo mode): a curl create → schedule → get round-trip confirms
+  the due date actually changes and the event applies through the real command bus (`version` 1→3).
+  `TaskForm`'s due-date field is now editable in edit mode, not just create. Live Playwright
+  verification surfaced a **pre-existing, unrelated** bug — registered as `TECH_DEBT.md` Item 43 —
+  where `ControlledDatePicker`/`PlainDateTimePicker` open no picker at all on Expo web (confirmed to
+  predate this session and affect Habit/Commitment forms equally); closed the resulting verification
+  gap with two new `demoTasksRepository.schedule()` unit tests instead, one of which guards a real
+  `dueDate ?? undefined` bug caught and fixed in code review before it ever shipped.
+- **v1.49.0 (2026-07-19):** **Task Capability Completion Story 1 ✅ and Story 2 ✅.** Story 1:
+  exposed `estimatedMinutes` in `TaskForm` via a new reusable `DurationInput` (Design System),
+  shown on `TaskCard`/`TaskDetailScreen`; found and fixed a real pre-existing bug (`TaskForm.tsx`'s
+  save path never invalidated the query cache after an edit). Story 2: verified live and found
+  already satisfied by pre-existing, already-committed code (`calendar.tsx`, commit `a0e865d`) —
+  corrects this board's own Story 2 description, which incorrectly claimed nothing rendered
+  `estimatedMinutes` in Calendar. The Domain Exposure Verification principle caught this before any
+  code was written for Story 2 — exactly the kind of duplicate-work prevention it was registered
+  for. The bigger "proportional visual time-block" calendar idea from the epic's founding
+  conversation is explicitly out of this epic's scope; added as **Calendar 2.0 / Time Blocking**
+  (Status: Future) in `ROADMAP.md` instead of being built here.
+- **v1.48.0 (2026-07-19):** Registered the **Working Principle: Domain Exposure Verification**
+  (verify a capability isn't already modeled on the aggregate, just unexposed, before adding a new
+  domain attribute — reinforces the existing Product Polish domain freeze). Opened **Epic "Task
+  Capability Completion"** with 6 stories, all verified against `Task.ts` to require zero
+  `packages/domain` changes — direct output of the Task Domain Review closing the Stabilization
+  Sprint (see `PROJECT_STATUS.md` v1.69.0, `docs/03-architecture/task_domain_review.md`).
 - **v1.47.0 (2026-07-17):** **ADR-021 approved — Goal Backend / CQRS / Event Store decided.**
   Goal's backend to be built on the same pattern Commitment/Task/Habit already prove in production
   (versioned state, not Event Sourcing), plus a previously-built-but-unused `EventStore` connected

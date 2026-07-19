@@ -1,6 +1,6 @@
 # Commitment v2 — Project Status
 
-Version: 1.68.0
+Version: 1.72.0
 Status: Active
 Owner: Architecture Review Board
 Last Updated: 2026-07-19
@@ -25,11 +25,45 @@ walkthrough, not just `tsc`/`jest`):
   (Domain), 2.2 (Application + Backend), and 2.3 (Frontend), all three approved. See item 14 below
   and `docs/03-architecture/task_frontend_migration_checklist.md`.
 
-**Next priority, per explicit decision (2026-07-19): a short stabilization period, not a new ADR
-immediately.** Reviewing performance, UX, visual/naming consistency, documentation, and any tech
-debt introduced by ADR-021/ADR-022 before opening **ADR-023 (candidate: Habit Lifecycle)** — the
-next major domain block. Do not start ADR-023 work without this stabilization pass first, per
-explicit instruction.
+**Stabilization Sprint: `Closed` (2026-07-19), positive result.** The short stabilization period
+opened above ran across Theme/Design System consistency, Quick Capture navigation, a Habit
+List→Detail→Edit fix, a full Task UX Redesign (List/Detail/Edit screens, quick filters with
+priority-first sorting), a Reminders UI foundation, consolidation of the standalone `/tasks` screen
+into Goals→Tareas (removing a duplicate surface), and a closing **Task Domain Review**
+(`docs/03-architecture/task_domain_review.md`). The review's finding changes what's next: ADR-021/
+ADR-022's domain design already supports `estimatedMinutes`/`actualMinutes`/`dueDate`/`startDate`
+with working aggregate methods (`Task.estimate()`, `Task.schedule()`) — the gap is **exposure**
+(missing UI controls, one missing backend command, unmapped mobile fields), not domain design. No
+domain rework needed. **Epic "Task Capability Completion": `Closed` (2026-07-19), positive result.**
+All 6 stories done (see `ENGINEERING_BOARD.md` v1.54.0) — closed the exposure gap across UI/API/
+Calendar/Progress. Two small, deliberate domain touches across the whole epic (widening
+`ReminderSourceType`'s closed union, enriching one event payload with `identityId`), both flagged in
+advance, neither a new domain concept — the "no domain rework" finding held. Three future epics spun
+out of findings made while closing this one, each needing its own product/UX scoping before starting:
+Calendar 2.0 / Time Blocking, Cross-platform Date Picker Parity, Insights / Analytics (all in
+`ROADMAP.md`). Since then, closed `TECH_DEBT.md` Item 43 (web date/time picker was a dead button) and
+Item 44 (segmented-choice pattern duplicated 4+ times) via two new, deliberately-scoped design-system
+primitives, `SelectableField` and `ChoiceGroup` — both real consolidation, not new product surface,
+and both explicit, documented exceptions to the Product Polish milestone's own Design System freeze.
+
+**Product Polish / Stabilization: `Complete` (2026-07-19), user-declared cycle close.** Everything
+from ADR-022 through `ChoiceGroup` counted as one cycle — the user's own read: "casi todas las
+mejoras fueron estructurales, no solo funcionales." Formalized the discipline that ran through it
+(verify first, extend before duplicating, fix in the shared component, document only real decisions)
+as `ENGINEERING_BOARD.md`'s **Working Principles** — the standing default going forward, not
+cycle-specific practice. **ADR-023 (Habit↔Commitment Relationship): `Decided` same day.** Domain
+review found no relationship exists in any layer; user rejected mirroring Task's ownership pattern
+(a Habit's identity-building nature doesn't share Task's single-plan scoping) in favor of a weak
+association — `Habit.commitmentIds[]`, 0..n, no cascades, no ownership, following the already-shipped
+`Goal.commitmentIds[]` precedent from ADR-021. Commitment's activation invariant formally excludes
+Habit now, not deferred. Model decided, not implemented — see
+`docs/03-architecture/adr_023_habit_commitment_relationship.md`. **Next priority: implementation of
+ADR-023's model, if prioritized, or the next candidate domain question.**
+
+**Working principle registered this stabilization pass** (see `ENGINEERING_BOARD.md`): before
+adding a new attribute to a domain aggregate, verify whether the capability already exists and only
+needs exposing through the upper layers (API, mobile model, UI) — this sprint found `estimatedMinutes`
+and `dueDate` both already fully modeled in `Task.ts`, avoiding duplicate domain work.
 
 ## Current Phase
 
@@ -597,6 +631,55 @@ taskActions.ts` mirroring `commitmentActions.ts`'s "no status conditionals in th
 
 ## 📜 Change History
 
+- **v1.72.0 (2026-07-19):** **ADR-023 decided same day it opened.** Weak Habit↔Commitment
+  association (`Habit.commitmentIds[]`, 0..n, no cascades/ownership) chosen over mirroring Task's
+  ownership pattern — the user's own reasoning: a Habit's long-lived, identity-building nature
+  doesn't share Task's single-plan scoping, so the analogy to ADR-022 doesn't hold. Model only, not
+  implemented. See `ENGINEERING_BOARD.md` v1.62.0.
+- **v1.71.0 (2026-07-19):** **Product Polish / Stabilization cycle formally `Complete`.** User's own
+  closure of everything since ADR-022 — mostly structural improvement, not just functional. Standing
+  discipline (verify first, extend before duplicating, fix in the shared component, document only
+  real decisions) formalized as `ENGINEERING_BOARD.md`'s Working Principles. **ADR-023 (Habit
+  Lifecycle) greenlit**, starting with the same discipline it was extracted from.
+- **v1.70.0 (2026-07-19):** **Epic "Task Capability Completion" closed, positive result.** All 6
+  stories done — `estimatedMinutes` exposed in `TaskForm`, calendar duration (already shipped),
+  `ScheduleTaskCommand`, `ReminderSourceType('task')`, planning-metrics data layer, and `startDate`/
+  `tags`/`metadata` mapped into mobile's `TaskModel`. Confirms the Task Domain Review's "no domain
+  rework needed" finding held — only two small, flagged-in-advance domain touches across the whole
+  epic (a closed-union widening and one event-payload enrichment), neither a new concept. Found and
+  fixed several real bugs along the way (a query-cache invalidation gap, a `dueDate ?? undefined`
+  bug, a `startDate`-clearing bug in `schedule()`) and recovered from a recurring iCloud sync
+  corruption incident mid-epic (`packages/domain/src/index.ts` losing its export surface — see
+  `TECH_DEBT.md`'s dated entries). Three future epics registered in
+  `ROADMAP.md`, each needing its own product/UX scoping: Calendar 2.0 / Time Blocking,
+  Cross-platform Date Picker Parity, Insights / Analytics. Next: ADR-023 (candidate: Habit Lifecycle).
+- **v1.69.0 (2026-07-19):** **Stabilization Sprint closed — positive result, no domain rework
+  needed.** Multi-round stabilization pass following ADR-021/ADR-022: Theme/Design System audit
+  (Switch + opacity token fixes; `docs/03-architecture/design_system_evolution.md`), Quick Capture
+  post-creation auto-navigation (plus a demo-repository id bug found and fixed — `create()` calls
+  were discarding the client-generated id, breaking the new navigation in Demo Mode), a Habit
+  List→Detail→Edit navigation fix (new `HabitDetailScreen`), a full **Task UX Redesign** (`TaskCard`
+  simplified to match `HabitCard`; new `TaskDetailScreen`/`EditTaskScreen` at `/tasks/[id]`,
+  `/tasks/[id]/edit`; lifecycle actions moved off the list card into an overflow `ActionSheet`,
+  fixing a latent untranslated-string bug in that shared Design System component along the way), a
+  **Task Reminders UI foundation** (client-side-only `core/reminders/` store; discovered a real,
+  already-shipped, generic backend Reminder Engine under `apps/backend/src/notifications/` currently
+  wired only for Habit/Commitment — documented the Task extension path in
+  `docs/03-architecture/reminder_engine_extension.md` rather than building a parallel system), **Task
+  List quick filters** (Hoy/Próximas/Bandeja/Vencidas/Completadas/Todas, priority-first sorting,
+  persisted last-selected filter — `features/tasks/utils/task-filters.ts`), and a **consolidation**
+  that deleted the standalone `/tasks` list screen (it duplicated Goals→Tareas behind a tab hidden
+  since VS-031) and fixed 4 dangling navigation references that still pointed at it (Dashboard hero
+  card, `TodayWidget`, `UpcomingTasksWidget`, Calendar agenda — all now route directly to
+  `/tasks/[id]`). Closed with a **Task Domain Review**
+  (`docs/03-architecture/task_domain_review.md`): verified `estimatedMinutes`, `actualMinutes`,
+  `dueDate`, and `startDate` are already fully modeled on the `Task` aggregate with working behavior
+  methods (`estimate()`, `schedule()`) — the real gap is exposure through the API/UI layers, not
+  domain design. Registered a working principle in `ENGINEERING_BOARD.md`: verify a capability isn't
+  already modeled, just unexposed, before adding a new domain attribute. Opens **Epic "Task
+  Capability Completion"** as the immediate next priority (see `ENGINEERING_BOARD.md`), entirely
+  UI/API integration work with zero `packages/domain` changes; ADR-023 (Habit Lifecycle) remains
+  queued behind it. No commits made during this stabilization pass pending final review.
 - **v1.68.0 (2026-07-19):** **ADR-022 Fase 2.3 (Frontend) ✅ COMPLETE.** Mobile Task client migrated
   end to end to the 5-state model: `TaskStatus`/`TaskModel` (+ `blockedType`/`blockedReason`), new
   `TaskCard`/`TaskActionBar`/`shared/domain/taskActions.ts` (status-gated actions, no UI status
