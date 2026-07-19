@@ -1,1 +1,1 @@
-export type ReminderSourceType = 'commitment' | 'habit';
+export type ReminderSourceType = 'commitment' | 'habit' | 'task';

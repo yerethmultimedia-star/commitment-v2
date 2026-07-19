@@ -16,6 +16,12 @@ import { RescheduleReminderOnHabitPostponedHandler } from './application/handler
 import { SuspendReminderOnHabitDisabledHandler } from './application/handlers/suspend-reminder-on-habit-disabled.handler';
 import { ResumeReminderOnHabitEnabledHandler } from './application/handlers/resume-reminder-on-habit-enabled.handler';
 import { CancelReminderOnHabitArchivedHandler } from './application/handlers/cancel-reminder-on-habit-archived.handler';
+import { ScheduleReminderOnTaskRegisteredHandler } from './application/handlers/schedule-reminder-on-task-registered.handler';
+import { RescheduleReminderOnTaskDueDateChangedHandler } from './application/handlers/reschedule-reminder-on-task-due-date-changed.handler';
+import {
+  CancelReminderOnTaskCompletedHandler,
+  CancelReminderOnTaskCancelledHandler,
+} from './application/handlers/cancel-reminder-on-task-terminal-state.handler';
 import { HabitReminderSchedulingService } from './application/services/habit-reminder-scheduling.service';
 import { HabitReminderRolloverService } from './application/services/habit-reminder-rollover.service';
 import { InMemoryReminderScheduler } from './infrastructure/in-memory-reminder-scheduler';
@@ -57,6 +63,10 @@ import { HabitModule } from '../habit/habit.module';
     SuspendReminderOnHabitDisabledHandler,
     ResumeReminderOnHabitEnabledHandler,
     CancelReminderOnHabitArchivedHandler,
+    ScheduleReminderOnTaskRegisteredHandler,
+    RescheduleReminderOnTaskDueDateChangedHandler,
+    CancelReminderOnTaskCompletedHandler,
+    CancelReminderOnTaskCancelledHandler,
     HabitReminderSchedulingService,
     HabitReminderRolloverService,
     ReminderDispatcher,
