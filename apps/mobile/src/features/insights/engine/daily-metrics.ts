@@ -13,6 +13,7 @@ export interface TaskLike {
   completedAt?: string | null;
   dueDate?: string | null;
   actualMinutes?: number | null;
+  estimatedMinutes?: number | null;
 }
 
 export interface GoalLike {
@@ -68,11 +69,26 @@ export function computeDailyMetrics(tasks: TaskLike[], goals: GoalLike[], today:
       (t) => t.status === 'completed' && t.completedAt && toDateOnly(t.completedAt) === dateStr,
     );
     const completedGoalsThatDay = goals.filter((g) => g.completedAt && toDateOnly(g.completedAt) === dateStr);
+
+    // Story 5 — "comprometido vs completado": both scoped by dueDate falling
+    // this day (not completedAt, which focusMinutes above uses), matching
+    // aggregateWeek's productivity population so the two numbers are
+    // directly comparable.
+    const tasksDueThatDay = tasks.filter((t) => t.dueDate && toDateOnly(t.dueDate) === dateStr);
+    const plannedMinutes = tasksDueThatDay.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0);
+    const completedMinutes = tasksDueThatDay
+      .filter((t) => t.status === 'completed')
+      .reduce((sum, t) => sum + (t.actualMinutes ?? 0), 0);
+
     points.push({
       date: dateStr,
       tasksCompleted: completedTasksThatDay.length,
       focusMinutes: completedTasksThatDay.reduce((sum, t) => sum + (t.actualMinutes ?? 0), 0),
       goalsCompleted: completedGoalsThatDay.length,
+      plannedMinutes,
+      completedMinutes,
+      remainingMinutes: Math.max(0, plannedMinutes - completedMinutes),
+      completionRatio: plannedMinutes > 0 ? completedMinutes / plannedMinutes : 0,
     });
   }
   return points;
@@ -107,6 +123,17 @@ export function aggregateWeek(
     return d >= windowStart && d < windowEnd;
   });
   const completedDueInWindow = tasksDueInWindow.filter((t) => t.status === 'completed').length;
+
+  // Story 5 — same tasksDueInWindow population as productivity above, NOT a
+  // sum of dailyMetrics' plannedMinutes/completedMinutes: dailyMetrics only
+  // covers the trailing 14 days ending today, so "this week" days that
+  // haven't happened yet (e.g. Thu-Sun when today is Wed) have no point in
+  // that series at all — summing it would silently under-count minutes
+  // planned for the rest of the current week.
+  const totalPlannedMinutes = tasksDueInWindow.reduce((sum, t) => sum + (t.estimatedMinutes ?? 0), 0);
+  const totalCompletedMinutes = tasksDueInWindow
+    .filter((t) => t.status === 'completed')
+    .reduce((sum, t) => sum + (t.actualMinutes ?? 0), 0);
   const productivityDenominator = tasksDueInWindow.length;
   const productivity = productivityDenominator > 0
     ? Math.round((completedDueInWindow / productivityDenominator) * 100)
@@ -118,6 +145,10 @@ export function aggregateWeek(
     productivity,
     totalFocusMinutes,
     avgFocusMinutesPerDay: inWindow.length > 0 ? Math.round(totalFocusMinutes / inWindow.length) : 0,
+    totalPlannedMinutes,
+    totalCompletedMinutes,
+    totalRemainingMinutes: Math.max(0, totalPlannedMinutes - totalCompletedMinutes),
+    completionRatio: totalPlannedMinutes > 0 ? totalCompletedMinutes / totalPlannedMinutes : 0,
   };
 }
 

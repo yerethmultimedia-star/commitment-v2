@@ -37,6 +37,25 @@ export interface DailyMetricsPoint {
   /** Sum of Task.actualMinutes for tasks completed this day. */
   readonly focusMinutes: number;
   readonly goalsCompleted: number;
+  /**
+   * Task Capability Completion Story 5 — "comprometido vs completado".
+   * `plannedMinutes`/`completedMinutes` are both scoped by Task.dueDate
+   * falling on this day (not Task.completedAt, which is what `focusMinutes`
+   * above uses) — same population `WeekWindowMetrics.productivity` already
+   * uses, so the two numbers describe the same cohort of tasks and are
+   * directly comparable. `remainingMinutes`/`completionRatio` are pure
+   * derivations, computed eagerly rather than left for consumers to
+   * recompute — cheap, and keeps this the single source of truth for the
+   * shape the Coach/Analytics/Calendar will read.
+   */
+  /** Sum of Task.estimatedMinutes for tasks due this day (any status). */
+  readonly plannedMinutes: number;
+  /** Sum of Task.actualMinutes for tasks due this day that are completed. */
+  readonly completedMinutes: number;
+  /** max(0, plannedMinutes - completedMinutes). */
+  readonly remainingMinutes: number;
+  /** completedMinutes / plannedMinutes, 0..1; 0 when plannedMinutes is 0. */
+  readonly completionRatio: number;
 }
 
 /** Pre-aggregated totals for a calendar-week window (Mon-Sun) — computed once by useInsightsContext so the engine's delta math is a single subtraction per stat. */
@@ -47,6 +66,12 @@ export interface WeekWindowMetrics {
   readonly productivity: number;
   readonly totalFocusMinutes: number;
   readonly avgFocusMinutesPerDay: number;
+  /** Story 5 — window sum of DailyMetricsPoint.plannedMinutes/completedMinutes. */
+  readonly totalPlannedMinutes: number;
+  readonly totalCompletedMinutes: number;
+  readonly totalRemainingMinutes: number;
+  /** totalCompletedMinutes / totalPlannedMinutes, 0..1; 0 when totalPlannedMinutes is 0. */
+  readonly completionRatio: number;
 }
 
 export interface WeekActivityFlag {

@@ -79,6 +79,34 @@ describe('computeDailyMetrics', () => {
     const points = computeDailyMetrics([], [], WEDNESDAY);
     expect(points.every((p) => p.tasksCompleted === 0 && p.focusMinutes === 0 && p.goalsCompleted === 0)).toBe(true);
   });
+
+  it('scopes plannedMinutes/completedMinutes by dueDate, not completedAt (Story 5)', () => {
+    const tasks = [
+      // Due today, completed today — counts toward both planned and completed.
+      { status: 'completed', dueDate: '2026-07-15T09:00:00.000Z', completedAt: '2026-07-15T09:00:00.000Z', estimatedMinutes: 30, actualMinutes: 25 },
+      // Due today, still pending — counts toward planned only.
+      { status: 'pending', dueDate: '2026-07-15T09:00:00.000Z', completedAt: null, estimatedMinutes: 20, actualMinutes: 0 },
+      // Due yesterday but completed today (late) — must NOT count toward today's planned/completed (dueDate-scoped, not completedAt-scoped, unlike focusMinutes).
+      { status: 'completed', dueDate: '2026-07-14T09:00:00.000Z', completedAt: '2026-07-15T09:00:00.000Z', estimatedMinutes: 15, actualMinutes: 15 },
+    ];
+    const points = computeDailyMetrics(tasks, [], WEDNESDAY);
+    const today = points.find((p) => p.date === '2026-07-15')!;
+
+    expect(today.plannedMinutes).toBe(50); // 30 + 20, both due today
+    expect(today.completedMinutes).toBe(25); // only the completed one due today
+    expect(today.remainingMinutes).toBe(25); // 50 - 25
+    expect(today.completionRatio).toBeCloseTo(0.5);
+    // focusMinutes (completedAt-scoped) still counts BOTH tasks completed today, including the late one.
+    expect(today.focusMinutes).toBe(40); // 25 + 15
+  });
+
+  it('returns completionRatio 0 (not NaN) when nothing is due that day', () => {
+    const points = computeDailyMetrics([], [], WEDNESDAY);
+    const today = points.find((p) => p.date === '2026-07-15')!;
+    expect(today.plannedMinutes).toBe(0);
+    expect(today.completionRatio).toBe(0);
+    expect(Number.isNaN(today.completionRatio)).toBe(false);
+  });
 });
 
 describe('aggregateWeek', () => {
@@ -132,6 +160,29 @@ describe('aggregateWeek', () => {
     // minutes total / 3 elapsed days, not /7 (which would understate the
     // average by counting unelapsed future days as if they were real zeros).
     expect(thisWeek.avgFocusMinutesPerDay).toBe(Math.round(30 / 3));
+  });
+
+  it('sums plannedMinutes/completedMinutes across the window and derives remaining/ratio (Story 5)', () => {
+    const tasks = [
+      { status: 'completed', completedAt: '2026-07-15T09:00:00.000Z', dueDate: '2026-07-15', estimatedMinutes: 30, actualMinutes: 30 },
+      { status: 'pending', completedAt: null, dueDate: '2026-07-16', estimatedMinutes: 20, actualMinutes: 0 },
+    ];
+    const metrics = computeDailyMetrics(tasks, [], WEDNESDAY);
+    const monday = mondayOf(WEDNESDAY);
+    const thisWeek = aggregateWeek(metrics, tasks, monday, addDays(monday, 7));
+
+    expect(thisWeek.totalPlannedMinutes).toBe(50); // 30 + 20
+    expect(thisWeek.totalCompletedMinutes).toBe(30);
+    expect(thisWeek.totalRemainingMinutes).toBe(20);
+    expect(thisWeek.completionRatio).toBeCloseTo(0.6);
+  });
+
+  it('returns completionRatio 0 (not NaN) when nothing is planned in the window', () => {
+    const monday = mondayOf(WEDNESDAY);
+    const thisWeek = aggregateWeek([], [], monday, addDays(monday, 7));
+    expect(thisWeek.totalPlannedMinutes).toBe(0);
+    expect(thisWeek.completionRatio).toBe(0);
+    expect(Number.isNaN(thisWeek.completionRatio)).toBe(false);
   });
 });
 
