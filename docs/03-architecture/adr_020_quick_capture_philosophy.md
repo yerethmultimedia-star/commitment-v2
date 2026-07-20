@@ -95,4 +95,32 @@ futura, no parte de esta decisión).
 
 ---
 
+## Enmienda (2026-07-19) — Alineación con `THE_COMMITMENT_FRAMEWORK.md` Chapter 4
+
+**Esta ADR fue aprobada el 2026-07-17, antes de la adopción formal del Chapter 4 (la membrana) en el
+Framework.** Misma naturaleza de enmienda que la aplicada a ADR-019, de la cual esta ADR hereda la
+exposición del concepto `Commitment`.
+
+La Decisión 2 original ("`Commitment` pasa a formar parte de Quick Capture") se mantiene intacta en
+su alcance funcional — Commitment sigue siendo capturable con fricción mínima, igual que
+Goal/Habit/Task. Lo que se corrige es cómo se describe la interacción:
+
+**Antes:** el usuario selecciona un tipo de dominio llamado `Commitment` de una lista de tipos.
+
+**Ahora:** el usuario expresa una intención en lenguaje orientado a su objetivo; la membrana traduce
+esa intención al tipo de dominio correspondiente (`Commitment`), tal como ya ocurre, en la práctica,
+con `Goal`/`Habit`/`Task`. La UI puede seguir mostrando "Compromiso" como la representación actual de
+ese tipo (ver enmienda de ADR-019) — lo que cambia es que esa etiqueta es la representación producida
+por la membrana, no el nombre que el usuario está obligado a conocer o elegir como si fuera
+vocabulario de dominio.
+
+Esto mantiene intacto el alcance planeado para la Fase 2B (agregar `commitment` como quinto tipo en
+`CAPTURE_TYPES`, corregir `SOURCE_DEFAULT_TYPE`, permitir que Coach sugiera el tipo) y alinea el flujo
+con el axioma: _"The user owns the intention. The system owns the representation."_
+
+No requiere cambios de dominio ni de arquitectura — no existe código shippeado bajo esta ADR (la Fase
+2B no ha comenzado).
+
+---
+
 🔒 **DOCUMENTO CONGELADO OFICIALMENTE — ARCHITECTURE DECISION RECORDS**

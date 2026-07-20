@@ -32,16 +32,31 @@
 - **Offline by design** – core features work without connectivity.
 - **AI assists but never decides** – AI offers suggestions, users retain control.
 
-## Success Metrics
+## North Star
+
+**Commitment Transformation Index (CTI)**
+
+The Commitment Transformation Index operationalizes the outcomes defined in Chapter 9 of the Framework (`docs/00-framework/THE_COMMITMENT_FRAMEWORK.md`). It is not a new product philosophy, but the primary measurement model derived from it.
+
+The current implementation of the Commitment Transformation Index evaluates multiple dimensions of user transformation, including — but not limited to:
+
+- increasing personalization of Blueprints,
+- healthy adaptation,
+- decreasing system dependence,
+- longitudinal evidence of internalized change.
+
+**No operational metric may replace the Commitment Transformation Index as the North Star unless the Framework itself is deliberately amended.**
+
+## Operational KPIs
+
+- Percentage of active commitments successfully completed.
+
+## Health Metrics
 
 - Adoption rate of new users.
 - Retention after 30 days.
 - Average number of active commitments per user.
 - User‑reported satisfaction (NPS).
-
-## North Star Metric
-
-**Percentage of active commitments successfully completed**.
 
 ## Design Principles
 

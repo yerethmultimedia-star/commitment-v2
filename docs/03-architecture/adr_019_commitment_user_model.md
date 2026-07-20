@@ -221,4 +221,54 @@ de decidir el diseño de la Fase 2.
 
 ---
 
+## Enmienda (2026-07-19) — Alineación con `THE_COMMITMENT_FRAMEWORK.md` Chapter 4
+
+**Esta ADR fue aprobada el 2026-07-17, antes de la adopción formal del Chapter 4 (la membrana) en el
+Framework.** Esta enmienda alinea la ADR con el Framework sin cambiar su intención arquitectónica
+subyacente. No reescribe la decisión — la documenta bajo el principio correcto.
+
+El diagnóstico original sigue siendo válido en su totalidad: `Commitment` es un concepto de dominio
+genuinamente distinto de `Task` (recurrencia, pausa/reanudación, ausencia de medición en minutos,
+frente a una acción finita y medible), y merece su propia superficie de experiencia y su propio flujo
+de creación. **La Decisión 1 queda intacta.**
+
+Lo que esta enmienda corrige es el **nivel** en el que la Decisión 2 fijó su invariante:
+
+> **El invariante pertenece al dominio. La representación pertenece a la membrana.**
+
+La tabla de nomenclatura de la Decisión 2 no describe un contrato fijo entre el nombre del dominio y
+la palabra de UI — describe **la representación actual**, propiedad de la membrana (Chapter 4),
+sujeta a evolución mediante investigación de producto sin que el modelo de dominio deba cambiar.
+
+**Texto revisado de la Decisión 2** (reemplaza la lectura normativa de la tabla original):
+
+> _The current user-facing representation of the domain concept `Commitment` is "Compromiso" (and,
+> analogously, "Objetivo" for `Goal`, "Tarea" for `Task`, "Hábito" for `Habit`). This representation
+> is owned by the membrane and may evolve through product research without changing the domain
+> model. The invariant that must hold is that the domain keeps `Commitment` distinct from `Task` —
+> not that any specific word is permanently reserved._
+
+**Restricciones normativas — revisadas:**
+
+- ✅ `Commitment` sigue siendo, en su experiencia, un concepto de cara al usuario, distinto de
+  `Task` — esto no cambia.
+- ✅ "Compromiso" es la representación actual y, por lo tanto, el término correcto a usar hoy en
+  cualquier superficie nueva — esto tampoco cambia en la práctica inmediata.
+- ❌ ~~"Ninguna superficie de UI puede volver a usar 'Tarea'/'Tareas' para representar un
+  `Commitment`, bajo ninguna circunstancia."~~ Se elimina la prohibición absoluta sobre la palabra.
+  La regla vigente es: ninguna superficie debe **confundir** `Commitment` con `Task` (ese sigue
+  siendo el problema real que esta ADR resolvió) — pero la palabra específica usada para
+  representarlo es una decisión de la membrana, revisable mediante el mismo proceso de gobernanza
+  que produjo esta ADR, no un contrato de código.
+- Un PR que reintroduzca la ambigüedad original (mostrar Commitments bajo la etiqueta "Tareas", o
+  viceversa) sigue considerándose una regresión. Un PR que cambie deliberadamente la palabra de
+  representación (p. ej., de "Compromiso" a otro término), a través de una decisión de producto
+  explícita, no lo es.
+
+Esta enmienda no requiere cambios de dominio, de arquitectura, ni de implementación — no existe
+código shippeado bajo esta ADR al momento de la enmienda (ver encabezado original: "La
+implementación sigue sin empezar").
+
+---
+
 🔒 **DOCUMENTO CONGELADO OFICIALMENTE — ARCHITECTURE DECISION RECORDS**
