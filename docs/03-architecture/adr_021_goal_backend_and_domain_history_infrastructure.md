@@ -57,11 +57,18 @@ Assessment. Resultado, con razonamiento explícito, no solo preferencia:
 
 ## Decisión
 
-**1. Construir `apps/backend/src/goal/`** siguiendo el patrón CQRS + estado versionado ya probado
-por Commitment/Task/Habit — mismo tipo de repositorio en memoria (`Map` + versión para
-concurrencia optimista), mismos comandos derivados de los métodos ya definidos en el agregado de
-dominio (`register`/`rename`/`linkCommitment`/`linkHabit`/`complete`/`archive`). El estado
+**1. Construir `apps/backend/src/goal/`** siguiendo el patrón CQRS + estado versionado ya usado
+por Commitment/Task/Habit — mismo tipo de repositorio en memoria (`Map` + contador de versión),
+mismos comandos derivados de los métodos ya definidos en el agregado de dominio
+(`register`/`rename`/`linkCommitment`/`linkHabit`/`complete`/`archive`). El estado
 versionado del agregado sigue siendo, sin excepción, la fuente de verdad.
+
+> **Corrección (2026-07-20, AR-028):** esta ADR describía el patrón `Map + versión` de
+> Commitment/Task/Habit como concurrencia optimista "ya probada". No lo era — el contador de
+> versión existía, pero ningún repositorio comparaba/rechazaba en `save()` (compare-and-swap real).
+> El diseño de estado-como-fuente-de-verdad y Event Store-como-auditoría descritos en esta ADR
+> siguen siendo correctos y no cambian; **AR-028** (`docs/ARCHITECTURE_REMEDIATION/AR-028/ANALISIS.md`)
+> completa la concurrencia optimista que aquí se asumió prematuramente como ya lograda.
 
 **2. Persistir eventos de dominio como infraestructura común de historial, manteniendo el estado
 versionado como fuente de verdad.** Se conecta el `InMemoryEventStore` ya existente (hoy sin uso)

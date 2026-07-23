@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { RequestWithIds } from '../middleware/request-id.middleware';
+import { OptimisticConcurrencyError } from '../infrastructure/errors/optimistic-concurrency.error';
 
 @Catch()
 export class ProblemDetailsExceptionFilter implements ExceptionFilter {
@@ -46,6 +47,15 @@ export class ProblemDetailsExceptionFilter implements ExceptionFilter {
           errors = obj.errors;
         }
       }
+      type = `https://httpstatuses.io/${status}`;
+    } else if (exception instanceof OptimisticConcurrencyError) {
+      // Single, centralized mapping (AR-028) — deliberately not duplicated
+      // per-controller like the *StateConflictError classes, since this is
+      // one generic infrastructure concern shared identically across all 4
+      // aggregates, not aggregate-specific domain state.
+      status = HttpStatus.CONFLICT;
+      title = exception.name;
+      detail = exception.message;
       type = `https://httpstatuses.io/${status}`;
     } else if (exception instanceof Error) {
       detail = exception.message;

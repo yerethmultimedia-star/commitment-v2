@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Task, TaskId, CommitmentId } from '@commitment/domain';
 import { TaskVersionedRepository } from '../application/ports/task-versioned-repository.port';
+import { getLoadedVersion } from '../../infrastructure/versioning/loaded-version';
+import { OptimisticConcurrencyError } from '../../infrastructure/errors/optimistic-concurrency.error';
 
 @Injectable()
 export class InMemoryTaskRepository implements TaskVersionedRepository {
@@ -8,19 +10,23 @@ export class InMemoryTaskRepository implements TaskVersionedRepository {
   private readonly versions = new Map<string, number>();
 
   /**
-   * Persists the aggregate and returns the new version.
-   * Version increments only when there are uncommitted events (Rule #87).
+   * Persists the aggregate and returns its version, enforcing optimistic
+   * concurrency (AR-028). The repository never computes a new version — it
+   * only reads `task.version` (owned by the Aggregate) and records it.
    */
-  public save(task: Task): Promise<number> {
+  public async save(task: Task): Promise<number> {
+    await Promise.resolve();
     const key = task.id.value;
-    const hasNewEvents = task.getUncommittedEvents().length > 0;
-    const current = this.versions.get(key) ?? 0;
-    const next = hasNewEvents
-      ? current + task.getUncommittedEvents().length
-      : current;
+    const loadedVersion = getLoadedVersion(task);
+    const storedVersion = this.versions.get(key) ?? 0;
+
+    if (loadedVersion !== storedVersion) {
+      throw new OptimisticConcurrencyError(key, loadedVersion, storedVersion);
+    }
+
     this.store.set(key, task);
-    this.versions.set(key, next);
-    return Promise.resolve(next);
+    this.versions.set(key, task.version);
+    return task.version;
   }
 
   public findById(id: TaskId): Promise<Task | null> {
