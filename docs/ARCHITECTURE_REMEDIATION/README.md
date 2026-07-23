@@ -96,6 +96,29 @@ independiente del primero: **¿Metodología v1.0 fue suficiente para llegar a es
 modificarse?** Los dos flujos de evidencia se acumulan en paralelo — uno alimenta el Roadmap/Dashboard
 de arquitectura, el otro alimenta las futuras revisiones transversales y la evaluación de Fase 0.
 
+**Fricción metodológica — concepto registrado, no todavía una métrica de Dashboard (2026-07-23).**
+Operacionaliza el umbral de arriba en un contador único: **Methodological Friction Event (MFE)** — un
+evento en el que una AR no puede continuar correctamente sin modificar la metodología vigente. Cuenta
+como MFE, por ejemplo: el ciclo no ofrece una fase adecuada para lo que la AR necesita hacer; dos
+artefactos de gobernanza entran en conflicto directo; una decisión no tiene propietario claro entre los
+5 artefactos; aparece evidencia que ningún artefacto existente sabe clasificar; una revisión transversal
+no puede evaluar un caso con los criterios ya fijados. **No cuenta como MFE** que alguien proponga una
+idea plausible de mejora — eso es, por definición, lo que el criterio de dos preguntas para v1.1 ya
+descarta. **MFE actual: 0** (consistente con, y una generalización de, "Estabilidad metodológica: 7/7
+ARs cerradas sin excepciones" ya trackeado en el Dashboard — mismo conteo hoy, definición más amplia
+hacia adelante). Deliberadamente no se añade como columna del Dashboard todavía — se mantiene como
+concepto en este documento hasta que exista al menos un caso real que justifique trackearlo
+formalmente como serie temporal.
+
+**La frontera entre el primer y el segundo ciclo del programa (2026-07-23):** el primer ciclo
+(AR-001→AR-054) construyó la metodología. El segundo no debería intentar producir Metodología v1.1 —
+debería intentar acumular casos donde v1.0 resulte suficiente sin necesitar cambios. La carga de la
+prueba se invierte: la pregunta por defecto deja de ser "¿podemos mejorar el proceso?" y pasa a ser
+"¿existe evidencia de que el proceso actual fue insuficiente?". **Patrón simétrico, no diseñado
+deliberadamente sino emergente:** en arquitectura, `Hallazgo → AR → Remediación`; en metodología,
+`Fricción metodológica (MFE) → Revisión transversal → Metodología vX.Y`. El mismo patrón, un nivel de
+abstracción más arriba.
+
 ## Documentos en esta carpeta
 
 - `REMEDIATION_ROADMAP_V1.md` — las 51 Architecture Remediations (AR-001 a AR-050, más AR-051), organizadas en 6 waves por dependencia de causa raíz, con grafo de bloqueos explícito.
