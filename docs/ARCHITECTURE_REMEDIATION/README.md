@@ -4,12 +4,52 @@ Companion to `docs/ARCHITECTURE_REVIEW/` (the immutable diagnosis). This folder 
 
 **Estado formal (2026-07-20):** Architecture Review v1.0 queda cerrada como etapa (histórica, de referencia). Architecture Remediation v1.0 queda formalmente iniciada. A partir de aquí, cada AR se ejecuta con un proceso repetible, medible y trazable hasta su cierre.
 
-## Regla de versionado (los cuatro artefactos del núcleo de gobernanza)
+**Estado formal (2026-07-23, al cerrar el ciclo AR-001→AR-054):** la metodología misma queda reconocida como un segundo objeto de gobernanza, independiente de la arquitectura que remedia, y se congela como **Metodología de Remediación v1.0** (ver más abajo). Dos ciclos de vida distintos a partir de aquí: la arquitectura evoluciona en cada AR; el método evoluciona solo cuando la evidencia acumulada, evaluada por Fase 0, justifica una nueva versión.
+
+## Regla de versionado (los cinco artefactos del núcleo de gobernanza)
 
 - **Architecture Review** (`docs/ARCHITECTURE_REVIEW/`) → diagnóstico. **No se reescribe; se versiona** (v1, v2, v3... cuando se justifique una nueva auditoría completa, no por correcciones puntuales).
 - **Remediation Roadmap** (aquí) → evoluciona continuamente. Los IDs de AR son permanentes; su Wave/Estado/Decisión cambian.
 - **Remediation Dashboard** (aquí) → se actualiza al cerrar cada AR, no en batch.
 - **ADRs** (`docs/01-product/adr/`, `docs/03-architecture/`) → documentan las decisiones que efectivamente cambian la arquitectura. Una AR puede no generar ninguna ADR (ejecución directa); una decisión de gobernanza sin ADR sustituta cuando una ya existe es exactamente el tipo de contradicción que produjo AR-001.
+- **Metodología de Remediación** (esta sección + Fase 0 + el ciclo de 9 fases, más abajo en este mismo documento) → **quinto artefacto versionado, añadido 2026-07-23 al cerrar el ciclo de AR-054.** Ver "Metodología de Remediación v1.0" más abajo — mismo tratamiento que Architecture Review: no se reescribe, se versiona.
+
+## Metodología de Remediación v1.0 (congelada 2026-07-23, al cerrar el ciclo AR-001→AR-054)
+
+Hasta AR-054 el programa tenía un solo objeto de estudio: la arquitectura de Commitment. Con este cierre
+aparece un segundo objeto de estudio, con ciclo de vida propio y mucho más lento: **la metodología con
+la que Commitment evoluciona.** Tratarla con el mismo rigor de versionado que ya se aplica a Architecture
+Review evita dos errores simétricos: reescribir silenciosamente el método cada vez que aparece una
+observación nueva, o nunca poder decir con precisión qué cambió y por qué.
+
+**Metodología de Remediación v1.0 — estado: ✅ Congelada. Compuesta exactamente por:**
+
+- El ciclo de 9 fases (`Análisis → Verificación del framing → Modelo arquitectónico (si aplica) →
+Alternativas → Decisión → Diseño técnico (si aplica) → Implementación → Validación → Dashboard`).
+- **Fase 0** — el criterio de 5 puntos para promover una hipótesis metodológica a regla permanente
+  (repetición independiente, diversidad de contexto, poder predictivo, resistencia a contraejemplos
+  buscados activamente, coste de equivocarse).
+- Todas las reglas permanentes ya registradas en este documento a fecha de cierre de AR-054 (la regla
+  post-AR-001, las 3 decisiones post-AR-028, la escala de ponderación de evidencia, la 4ª/5ª categoría y
+  criterio de AR-023, H-GOV-01, la separación de niveles documentales, la disciplina de comparabilidad
+  para la revisión de 15 ARs).
+- `REMEDIATION_ROADMAP_V1.md` y `REMEDIATION_DASHBOARD.md` como aparato de seguimiento.
+
+**Explícitamente NO forma parte de v1.0** (siguen siendo observación, no metodología congelada): todas las
+hipótesis de la sección "Hipótesis en observación" de más abajo (H-GOV-01 sin promover todavía, cambio de
+propietario, técnica de `git log`, evidencia-vs-argumentación) — son candidatas a v1.1, no parte de la
+línea base actual.
+
+**Consecuencia práctica para las revisiones de 15 y 25 ARs (Fase 0, más abajo):** la pregunta deja de ser
+abierta ("¿qué aprendimos?") y pasa a ser una evaluación acotada contra una línea base congelada: **¿la
+evidencia acumulada justifica pasar de Metodología v1.0 a v1.1?** Si una hipótesis se promueve, v1.1 se
+declara explícitamente, con changelog propio (qué entra, qué evidencia lo justificó, qué AR lo detectó
+por primera vez) — igual que Architecture Review v2.0 comparará métricas contra v1.0 en vez de sustituirla
+en silencio.
+
+**No se modifica nada de esta metodología salvo por necesidad demostrada** — mismo tratamiento que los
+ADRs históricos: cambios mínimos, evidencia explícita, trazabilidad completa, nunca reescribir la
+historia de por qué v1.0 se congeló con este alcance exacto.
 
 ## Documentos en esta carpeta
 
@@ -192,7 +232,9 @@ esa evidencia):** responder exactamente las mismas 4 preguntas que estructuraron
 `REVISION_TRANSVERSAL_7_ARS.md` (cambios de propietario, decisiones simplificadas por evidencia,
 balance de hipótesis refutadas/confirmadas, técnicas de investigación reutilizadas) — no añadir
 preguntas nuevas salvo que alguna resulte imprescindible. La comparabilidad directa entre ambas
-revisiones vale más que ampliar su alcance.
+revisiones vale más que ampliar su alcance. **Con Metodología v1.0 ya congelada (ver más arriba), esta
+revisión deja de ser una reflexión abierta y pasa a ser una evaluación acotada: ¿la evidencia acumulada
+justifica declarar v1.1?**
 
 ### Separación de niveles documentales (fijada 2026-07-23, aplicable a cualquier artefacto futuro del programa)
 
