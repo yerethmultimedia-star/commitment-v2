@@ -18,7 +18,7 @@ graph TD
     BackendAPI -->|Envía notificaciones| ExpoPush[Expo Push Notification Service]
 ```
 
-**Nota sobre autenticación:** el diagrama muestra "Autentica" como interacción conceptual — a la fecha, no existe ningún mecanismo real de autenticación/autorización en el backend (ver AR-043, `docs/ARCHITECTURE_REMEDIATION/REMEDIATION_ROADMAP_V1.md`). `identityId` se acepta sin verificación.
+**Nota sobre autenticación (corregida 2026-07-23, AR-004):** "Autentica" ya no es una interacción conceptual — **AR-043 cerró esta brecha**: existe un `AuthenticationModule` real en el backend (`apps/backend/src/authentication/`, registrado en `app.module.ts`), con JWT (`@nestjs/jwt`), hashing de credenciales vía Argon2, y un `SessionAuthGuard` que verifica `identityId` en cada request. Ya no se acepta sin verificación.
 
 ---
 

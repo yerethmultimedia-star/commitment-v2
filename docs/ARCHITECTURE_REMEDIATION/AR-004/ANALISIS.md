@@ -190,13 +190,76 @@ sistema, sin perder su papel como documento de diseño.
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Implementada.**
+
+**Regla aplicada en cada cambio, sin excepción:** _"cada modificación documental debe poder señalar una
+evidencia concreta en el repositorio."_ Ningún cambio se hizo sin una cita verificable (módulo backend
+registrado en `app.module.ts`, hook/mutación real en mobile, o ambos).
+
+**1. `docs/01-product/PRODUCT_BACKLOG.md` — reescrito, no parcheado:**
+
+- Las 6 capacidades de `EPIC-001` (Commitment) pasan de "Planned"/mixto a `✅ Complete`, cada una citando
+  su método de aggregate + handler + hook de mobile (`useCommitmentActions.ts`, verificado usado en
+  `CommitmentWorkspaceScreen.tsx`).
+- **Promovidas de "Future Epic" a la tabla principal, con evidencia:** Goal (`EPIC-002`), Task
+  (`EPIC-003`), Habit (`EPIC-004`) — ninguna aparecía como epic en absoluto; Authentication
+  (`EPIC-005`, capacidad nueva desde la auditoría, AR-043); Notifications (`EPIC-006`, BullMQ + registro
+  de push real en mobile); Coach (`EPIC-007`, marcado explícitamente "basado en reglas, no IA" — para no
+  sobre-representar su madurez real); Statistics/Insights (`EPIC-008`).
+- **Se mantienen en "Future Epics", sin promoción, por ausencia de evidencia:** Identity (con nota
+  explícita — el aggregate de dominio existe, el módulo de backend no, AR-030 sigue pendiente), Daily
+  Execution, Reflection (sin cambios — no se encontró evidencia nueva en ningún sentido, no se inventa
+  ninguna), Offline Sync (~10%, AR-048), AI (cero código, AR-050).
+
+**2. `docs/ARCHITECTURE_OVERVIEW.md` — nota de autenticación corregida (único punto de este documento
+que citaba una capacidad ya implementada como inexistente):** la nota que decía _"no existe ningún
+mecanismo real de autenticación/autorización en el backend"_ se corrigió citando `AuthenticationModule`,
+`@nestjs/jwt`, Argon2, y `SessionAuthGuard` (AR-043). El resto del documento no se tocó — no se encontró
+ninguna otra referencia obsoleta a Coach/Insights/Identity/Notifications en él (el diagrama C4 no
+enumera features individuales de mobile, solo capas técnicas).
+
+**3. No se tocó `docs/PROJECT_AUDIT.md` ni ningún documento de `docs/ARCHITECTURE_REVIEW/`** — son
+snapshots históricos de auditoría, no documentación viva; corregirlos violaría el principio de gobernanza
+ya establecido (_"los artefactos históricos no se corrigen; se suceden mediante nuevas versiones"_).
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+Las 4 preguntas fijadas en Fase 4A, verificadas contra el resultado real:
+
+1. **¿Toda capacidad arquitectónica implementada tiene representación documental?** Sí — las 6
+   capacidades de Commitment, más Goal/Task/Habit/Authentication/Notifications/Coach/Insights, todas
+   con fila propia y evidencia citada.
+2. **¿Toda capacidad documentada como implementada existe realmente?** Sí — cada evidencia citada fue
+   verificada directamente (grep en `app.module.ts`, lectura de los archivos de hooks/handlers) antes de
+   escribirla, no asumida.
+3. **¿Ningún placeholder permanece describiendo una capacidad ya implementada?** Confirmado por grep:
+   `docs/01-product/PRODUCT_BACKLOG.md` ya no contiene "Planned" en ninguna fila de la tabla (la única
+   coincidencia restante es la nota introductoria citando el estado histórico que se corrigió, no un
+   estado vigente); Coach/Notifications/Statistics ya no aparecen en "Future Epics".
+4. **¿Ninguna capacidad pendiente (como Identity) aparece presentada como existente?** Confirmado:
+   Identity permanece en "Future Epics" con una nota explícita distinguiendo el aggregate de dominio
+   (existe) del módulo de backend (no existe, AR-030 pendiente) — ninguna fila de la tabla principal la
+   incluye.
+
+**Criterio de cierre, respondido:** la documentación arquitectónica describe hoy el sistema que
+realmente existe; no permanecen placeholders para capacidades implementadas; ninguna capacidad pendiente
+se presenta como existente; toda capacidad documentada como implementada se rastrea hasta evidencia
+verificable — sin recurrir a interpretaciones adicionales. D-004.1 queda materializada.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma completamente vigente y sin
-ninguna corrección desde la auditoría. Reencuadrado por la evidencia: no es una brecha documental
-aislada, es una desalineación entre la arquitectura documentada y la arquitectura realmente evolucionada.
-D-004.1 aprobada; diseño técnico congelado en un enfoque de sincronización híbrida (implementación +
-documentación + validación periódica, responsabilidades separadas), con el alcance de Fase 4B ya fijado
-(actualizar diagramas, retirar placeholders obsoletos, incorporar Authentication, promover Coach/
-Insights, excluir explícitamente Identity). Pendiente: **Fase 4B (Implementación)**. Estado: se mantiene
-🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**AR-004 CERRADA (2026-07-23).** El hallazgo se confirmó completamente vigente y sin ninguna corrección
+desde la auditoría, con la brecha creciendo (Authentication ausente, Coach/Insights con motores reales
+todavía listados como placeholder). Reencuadrado por la evidencia: no una brecha documental aislada, una
+desalineación entre arquitectura documentada e implementada. D-004.1 aprobada e implementada mediante
+sincronización híbrida — `PRODUCT_BACKLOG.md` reescrito con evidencia citada por fila, `ARCHITECTURE_
+OVERVIEW.md` corregido en su único punto desalineado (autenticación), documentos históricos de auditoría
+dejados intactos por principio de gobernanza. Identity se mantiene explícitamente fuera, sin anticipar
+ni condicionar AR-030. Las 4 preguntas de validación respondidas afirmativamente. Estado: 🟦 → ✅
+Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
