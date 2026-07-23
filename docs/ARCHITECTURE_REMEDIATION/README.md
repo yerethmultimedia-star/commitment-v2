@@ -187,6 +187,25 @@ aproximadamente la base empírica actual) y, después, 25 ARs cerradas (donde em
 patrones frente a una cantidad considerable de casos). Números elegidos como hitos prácticos, no por
 fundamento estadístico — no se abre una nueva revisión transversal antes de alcanzar el primero.
 
+**Disciplina de comparabilidad para la revisión de las 15 ARs (fijada 2026-07-23, antes de que exista
+esa evidencia):** responder exactamente las mismas 4 preguntas que estructuraron
+`REVISION_TRANSVERSAL_7_ARS.md` (cambios de propietario, decisiones simplificadas por evidencia,
+balance de hipótesis refutadas/confirmadas, técnicas de investigación reutilizadas) — no añadir
+preguntas nuevas salvo que alguna resulte imprescindible. La comparabilidad directa entre ambas
+revisiones vale más que ampliar su alcance.
+
+### Separación de niveles documentales (fijada 2026-07-23, aplicable a cualquier artefacto futuro del programa)
+
+**Nivel 1 — Evidencia histórica.** Responde "¿qué ocurrió?" — nunca prescribe. Ejemplos ya existentes:
+`REVISION_TRANSVERSAL_7_ARS.md`, las tablas de métricas/historial de `REMEDIATION_DASHBOARD.md`.
+
+**Nivel 2 — Gobernanza metodológica.** Responde "¿qué hacemos con esa evidencia?" — aquí viven Fase 0,
+los criterios de promoción, los umbrales, y el estado de cada hipótesis (este mismo `README.md`).
+
+**Regla:** ningún documento mezcla los dos niveles. La evidencia puede crecer (nuevas revisiones
+transversales, nuevos datos en el Dashboard) sin obligar a reescribir las reglas de gobernanza, y las
+reglas de gobernanza pueden precisarse sin alterar el registro histórico de lo ya observado.
+
 ## La regla de gobernanza que sostiene todo esto
 
 > **Ninguna decisión arquitectónica relevante entra al código sin pasar antes por el mismo ciclo de gobernanza, evaluación y remediación que se estableció aquí.**
