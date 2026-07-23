@@ -17,8 +17,10 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { RequestContext } from '@commitment/shared';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthModule } from './observability/health/health.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { MetricsInterceptor } from './observability/interceptors/metrics.interceptor';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { env } from './config/env.config';
 
 import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bullmq';
@@ -75,6 +77,13 @@ import { BullModule } from '@nestjs/bullmq';
           : 6379,
       },
     }),
+    // AR-044/D-044.2: rate-limiting global, configurable sin tocar código de negocio.
+    ThrottlerModule.forRoot([
+      {
+        ttl: env.THROTTLE_TTL_MS,
+        limit: env.THROTTLE_LIMIT,
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [
@@ -82,6 +91,10 @@ import { BullModule } from '@nestjs/bullmq';
     {
       provide: APP_INTERCEPTOR,
       useClass: MetricsInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

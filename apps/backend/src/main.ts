@@ -3,6 +3,7 @@ import { otelSDK } from './otel';
 otelSDK.start();
 
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { env } from './config/env.config';
 import { ProblemDetailsExceptionFilter } from './filters/problem-details-exception.filter';
@@ -13,8 +14,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
 
-  // Configurar CORS
-  app.enableCors();
+  // AR-044/D-044.1: cabeceras de seguridad aplicadas globalmente, un único registro.
+  app.use(helmet());
+
+  // AR-044/D-044.3: solo orígenes explícitamente autorizados por configuración.
+  app.enableCors({ origin: env.CORS_ALLOWED_ORIGINS });
 
   // Prefijo global de API (/v1)
   app.setGlobalPrefix('v1');

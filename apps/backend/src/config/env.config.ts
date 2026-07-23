@@ -22,6 +22,19 @@ export const envSchema = z.object({
     .string()
     .url()
     .default('http://localhost:4318'),
+  // AR-044/D-044.3: orígenes autorizados (plural) — no una única app cliente.
+  CORS_ALLOWED_ORIGINS: z
+    .string()
+    .default('http://localhost:8081')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0),
+    ),
+  // AR-044/D-044.2: valores operativos, no arquitectónicos — configurables sin tocar código.
+  THROTTLE_TTL_MS: z.coerce.number().default(60000),
+  THROTTLE_LIMIT: z.coerce.number().default(100),
 });
 
 export type Env = z.infer<typeof envSchema>;
