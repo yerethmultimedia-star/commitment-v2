@@ -204,16 +204,37 @@ código y no puede activarse solo con cambios de archivos. **No se activó unila
 una decisión explícita del usuario, al ser un cambio de configuración de infraestructura compartida
 (afecta a cualquier futuro PR de cualquier colaborador), no un cambio de código.
 
+**Decisión del usuario (2026-07-23): activar branch protection en `main` exigiendo los 3 checks de CI
+existentes, no solo el nuevo.** Razonamiento explícito del usuario: exigir únicamente
+`preferred-tech-enforcement` habría creado una asimetría sin respaldo arquitectónico — declarar
+obligatoria una sola propiedad de calidad mientras el resto de checks (`backend-ci`, `mobile-ci`)
+seguían siendo opcionales para fusionar. Principio aplicado: _"todo check considerado parte del
+pipeline oficial debe aprobarse antes de integrar cambios en `main`."_ La configuración forma parte de
+la implementación de D-002.1, aunque viva fuera del código fuente versionado.
+
+**Implementado vía `gh api PUT repos/.../branches/main/protection`** (`required_status_checks.strict:
+true`; contexts: `"Backend Lint, Build & Test"`, `"Mobile Typecheck"`,
+`"Preferred Technology Enforcement (D-002.1)"` — nombres exactos verificados contra los check-runs
+reales del último commit en `main` antes de aplicar la configuración, no asumidos). Verificado tras
+aplicar: `gh api .../branches/main/protection --jq '.required_status_checks.contexts'` devuelve los 3
+nombres correctos. **La pregunta de validación queda respondida en su forma fuerte:** una desviación
+objetiva de una Tecnología Preferida ya no solo se detecta — no puede integrarse en `main` sin superar
+el control, porque GitHub ahora exige que el check correspondiente pase antes de permitir el merge.
+
 ---
 
 ## Estado
 
-**Fase 1, Fase 2A, Fase 3, Fase 4A y Fase 4B cerradas.** D-002.1 aprobada e implementada: plantilla de
-PR (`.github/pull_request_template.md`), CI (`preferred-tech-enforcement` en `ci.yml` +
-`check-preferred-tech.mjs`), ADR (proceso existente reutilizado, sin cambios). Fase 5 validada mediante
-prueba de extremo a extremo real (repo git temporal, 4/4 casos), con un hallazgo residual documentado
-explícitamente: la detección funciona, pero el bloqueo real de merge depende de activar branch
-protection en GitHub — configuración de infraestructura compartida, pendiente de decisión explícita del
-usuario antes de cerrar la AR. Estado: 🟦 En análisis (no cierra todavía — ver pendiente de branch
-protection). Decisión: ✅ Decisión aprobada → ✔️ Validada (el diseño y su implementación están
-validados; el cierre de la AR en sí queda condicionado a esa decisión pendiente).
+**AR-002 CERRADA (2026-07-23).** Las 9 fases aplicables completas: D-002.1 aprobada e implementada en
+3 capas sin solapamiento — plantilla de PR (`.github/pull_request_template.md`, declarativa), CI
+(`preferred-tech-enforcement` en `ci.yml` + `check-preferred-tech.mjs`, reglas objetivas sobre
+`package.json` vs. la lista de Tecnologías Preferidas de ADR-024), ADR (proceso existente, sin
+cambios). Fase 5 validada mediante prueba de extremo a extremo real (repo git temporal, 4/4 casos). El
+hallazgo residual (ausencia de branch protection) no se ocultó ni se asumió resuelto — se documentó
+explícitamente y se llevó al usuario como una decisión propia, distinta de la decisión arquitectónica
+(D-002.1) y distinta también del diseño técnico (Fase 4A): **el usuario decidió activar branch
+protection en `main` exigiendo los 3 checks de CI existentes** (no solo el nuevo), razonando que
+exigir uno solo habría creado una asimetría sin respaldo arquitectónico. Implementado y verificado vía
+`gh api`. La pregunta de validación queda respondida en su forma fuerte: una desviación objetiva de
+una Tecnología Preferida no puede integrarse en `main` sin superar el control. Estado: 🟦 → ✅ Cerrada.
+Decisión: ✅ Decisión aprobada → ✔️ Validada.
