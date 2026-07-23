@@ -14,6 +14,19 @@ Companion to `docs/ARCHITECTURE_REVIEW/` (the immutable diagnosis). This folder 
 - **ADRs** (`docs/01-product/adr/`, `docs/03-architecture/`) → documentan las decisiones que efectivamente cambian la arquitectura. Una AR puede no generar ninguna ADR (ejecución directa); una decisión de gobernanza sin ADR sustituta cuando una ya existe es exactamente el tipo de contradicción que produjo AR-001.
 - **Metodología de Remediación** (esta sección + Fase 0 + el ciclo de 9 fases, más abajo en este mismo documento) → **quinto artefacto versionado, añadido 2026-07-23 al cerrar el ciclo de AR-054.** Ver "Metodología de Remediación v1.0" más abajo — mismo tratamiento que Architecture Review: no se reescribe, se versiona.
 
+**Principio de gobernanza consolidado (2026-07-23) — ya no es una hipótesis metodológica, es una decisión de gobernanza que gobierna a los cinco artefactos anteriores por igual:**
+
+> **Los artefactos históricos no se corrigen; se suceden mediante nuevas versiones cuando la evidencia demuestra que la versión vigente ya no es suficiente.**
+
+No depende de una sola observación repetida — es consistente, por diseño, en los 5 artefactos: los ADRs
+se reclasifican, no se editan (AR-001); Architecture Review se versiona, no se reescribe; el Roadmap
+degrada dependencias a "no verificadas" en vez de borrarlas; y ahora la propia Metodología de
+Remediación sigue la misma regla. Con la incorporación de Metodología v1.0 aparece además una jerarquía
+que antes no existía entre los cinco: la arquitectura responde "¿cómo debe construirse Commitment?", la
+metodología responde "¿cómo decidimos cambiar esa arquitectura?" — separar ambas preguntas reduce el
+riesgo, común en procesos largos, de modificar a la vez el objeto de estudio y el método con el que se
+estudia.
+
 ## Metodología de Remediación v1.0 (congelada 2026-07-23, al cerrar el ciclo AR-001→AR-054)
 
 Hasta AR-054 el programa tenía un solo objeto de estudio: la arquitectura de Commitment. Con este cierre
@@ -50,6 +63,25 @@ en silencio.
 **No se modifica nada de esta metodología salvo por necesidad demostrada** — mismo tratamiento que los
 ADRs históricos: cambios mínimos, evidencia explícita, trazabilidad completa, nunca reescribir la
 historia de por qué v1.0 se congeló con este alcance exacto.
+
+**Criterio para cualquier futura v1.1 (fijado 2026-07-23, antes de que exista el primer caso real):**
+cualquier cambio propuesto debe responder explícitamente a una de estas dos preguntas, o no pertenece a
+una nueva versión de la metodología:
+
+1. ¿Qué limitación demostrada de v1.0 resuelve este cambio?
+2. ¿Qué nueva capacidad verificable aporta que v1.0 no podía ofrecer?
+
+Una mejora meramente plausible, sin responder a ninguna de las dos, no justifica una nueva versión —
+mismo principio que ya gobierna el resto del programa: las versiones cambian porque la evidencia
+obliga, no porque existan ideas nuevas.
+
+**El objetivo de v1.0 no es demostrar que cambia — es demostrar que resiste.** Si al llegar a 15 ARs
+cerradas la conclusión es "no hay evidencia suficiente para cambiar nada," eso no es un resultado pobre
+de la revisión — es una validación genuina de que v1.0 sigue explicando adecuadamente el comportamiento
+observado, en el mismo sentido en que una teoría gana credibilidad cada vez que sobrevive a un intento
+serio de refutarla. **El mejor resultado posible de la revisión de las 15 ARs podría ser, precisamente,
+no publicar una v1.1 todavía.** Toda AR ejecutada desde este cierre en adelante es, además de una
+remediación en sí misma, una prueba empírica más de si Metodología v1.0 sigue siendo suficiente.
 
 ## Documentos en esta carpeta
 
