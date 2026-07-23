@@ -120,13 +120,69 @@ usuario ya no perciba dos modelos mentales distintos para describir su progreso.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**Pregunta que gobierna esta fase (distinta en naturaleza a toda AR anterior — no elige tecnología,
+elige un modelo mental de usuario):**
+
+> **¿Qué concepto expresa mejor la filosofía de Commitment y puede sustituir a "streak" de forma
+> consistente en UI, motores internos y narrativa?**
+
+### Alternativas evaluadas
+
+- **A — Mantener "streak".** Descartada, no por razones técnicas sino porque contradice H1 ya aceptada
+  en Fase 2A: el concepto entra en conflicto con el framing de las ADR vigentes.
+- **B — Sustituir por "progreso".** Neutro, pero describe un estado, no el comportamiento que Commitment
+  pretende fomentar. Buen término analítico, débil como eje narrativo. Descartada como reemplazo único.
+- **C — Sustituir por "consistencia".** Más cercano al propósito del producto — de "llevas X días
+  seguidos" a "estás construyendo consistencia," compatible con consolidar hábitos sostenibles en vez de
+  maximizar una racha. Descartada como solución completa: sigue siendo un sinónimo directo, un solo
+  término reemplazando a otro, sin resolver por qué "streak" ocupaba un lugar central en primer término.
+- **D — Integrar en el modelo de Commitment (elegida).** No busca un sinónimo de "streak" — busca que el
+  concepto desaparezca como entidad independiente. El usuario ya tiene un marco conceptual (objetivos,
+  hitos, hábitos, progreso, coach); la continuidad diaria pasa a ser una **propiedad emergente** de ese
+  sistema, no un concepto con identidad propia. `currentStreakDays` puede seguir existiendo
+  internamente (fuera de alcance, según Fase 1), pero deja de ocupar un lugar central en la experiencia.
+
+### Diseño congelado
+
+> **La continuidad diaria deja de presentarse como un objetivo independiente y pasa a representarse
+> únicamente como una dimensión del progreso dentro del modelo conceptual de Commitment.**
+
+No se congela un reemplazo léxico único — distintas expresiones ("consistencia", "progreso", "actividad
+reciente", etc.) pueden aparecer según el contexto en la implementación, siempre que ninguna reintroduzca
+el modelo mental de la racha como objetivo aislado.
+
+**Separación de modelo mental vs. modelo de dominio, la decisión de diseño más importante de esta AR:**
+el modelo mental del usuario (lo que ve, lo que se le comunica) queda gobernado por este diseño;
+`Habit.currentStreakDays` sigue siendo un detalle de implementación del dominio, sin que su existencia
+interna contradiga el diseño — mismo principio que ya usó H-GOV-01 en otras ARs (no perseguir una
+propiedad más fuerte de lo que la evidencia exige: aquí, no hace falta eliminar el campo de dominio para
+resolver el problema de producto).
+
+### Criterio de validación para Fase 5
+
+No basta con confirmar que la palabra "streak" desapareció. Dos preguntas gobiernan el cierre:
+
+1. ¿El usuario recibe una única explicación coherente de cómo progresa en la aplicación?
+2. ¿Ninguna pantalla, motor o componente vuelve a presentar la continuidad diaria como un objetivo
+   aislado del resto del sistema?
+
+Si ambas respuestas son afirmativas, D-036.1 queda materializada, aunque `Habit.currentStreakDays` siga
+existiendo como detalle de implementación del dominio.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma vigente: copy y lógica de
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma vigente: copy y lógica de
 streak/gamificación en al menos 4 áreas funcionales y 2 motores internos, contradiciendo ADR-006/ADR-010.
 Reencuadrado por la evidencia de un problema de copy aislado a un modelo conceptual de producto
-compartido. D-036.1 aprobada: el producto debe usar un único modelo conceptual coherente para el
-progreso del usuario, formulada como propiedad, sin nombrar el término de reemplazo. `Habit.
-currentStreakDays` sigue fuera de alcance. Pendiente: **Fase 4A (Diseño técnico)** — elegir el framing
-concreto de reemplazo. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 →
-✅ Decisión aprobada.
+compartido. D-036.1 aprobada; diseño técnico congelado — la continuidad diaria deja de ser un objetivo
+independiente y pasa a ser una dimensión emergente del progreso dentro del modelo conceptual de
+Commitment, sin fijar un reemplazo léxico único. `Habit.currentStreakDays` sigue fuera de alcance, como
+detalle de dominio separado del modelo mental de usuario. Pendiente: **Fase 4B (Implementación)**.
+Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión
+aprobada.
