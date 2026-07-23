@@ -104,11 +104,52 @@ excepciones para endpoints individuales.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.** Verificación técnica hecha antes de aceptar el diseño, no asumida:
+
+- **`helmet`**: no instalado todavía (confirmado por grep en `package.json`); última versión publicada
+  `8.3.0`, sin restricción de peer-dependency con NestJS (middleware Express puro) — compatible.
+- **`@nestjs/throttler`**: no instalado todavía; última versión publicada `6.5.0`, con
+  `peerDependencies` que aceptan `@nestjs/common`/`@nestjs/core` `^11.0.0` — coincide exactamente con
+  las versiones ya instaladas en este proyecto (`^11.0.1`). Compatible.
+- **Precedente interno para "guard/interceptor global" confirmado**: `app.module.ts:20-21,83` ya
+  registra `MetricsInterceptor` vía `{ provide: APP_INTERCEPTOR, useClass: MetricsInterceptor }`. El
+  patrón estándar de `@nestjs/throttler` (`{ provide: APP_GUARD, useClass: ThrottlerGuard }`) es
+  exactamente la misma forma, ya usada en este archivo para otro cross-cutting concern — no introduce
+  un patrón nuevo en el codebase.
+- **`env.config.ts` ya usa un esquema Zod con `.default(...)` por variable** — confirma que
+  `CORS_ALLOWED_ORIGINS` encaja sin fricción en el estilo ya establecido de configuración.
+
+**Decisiones de materialización:**
+
+| Decisión | Mecanismo                                                            | Alternativas descartadas y por qué                                                                                                 |
+| -------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| D-044.1  | `helmet`, registrado globalmente en `main.ts`                        | Middleware propio — reimplementa una responsabilidad ya resuelta, aumenta superficie de mantenimiento sin ninguna ventaja.         |
+| D-044.2  | `@nestjs/throttler`, registrado globalmente vía `APP_GUARD`          | Middleware manual — sin ventajas; Guard propio — reescribe código que el framework ya provee.                                      |
+| D-044.3  | `app.enableCors(...)` en `main.ts`, orígenes leídos de configuración | Servicio/factory/módulo CORS dedicado — sin evidencia que justifique esa complejidad para una responsabilidad de una sola llamada. |
+
+**Configuración:** nueva variable `CORS_ALLOWED_ORIGINS` (lista separada por comas), no `FRONTEND_URL` —
+la propiedad congelada en D-044.3 habla de "orígenes autorizados" (plural, genérico), no de una única
+aplicación; deja sitio para web/staging/localhost/herramientas administrativas futuras sin tocar código.
+
+**Verificación de diseño pedida antes de cerrar la fase — ¿las tres protecciones viven en el punto más
+alto posible del ciclo de vida de la aplicación?** Confirmado que sí, para las tres: `helmet` y
+`enableCors()` se registran en `main.ts`'s `bootstrap()`, antes de `setGlobalPrefix` y de cualquier
+registro de rutas — el punto más temprano posible del pipeline HTTP. `ThrottlerGuard` vía `APP_GUARD` se
+aplica globalmente por el sistema de DI de Nest a todas las rutas, registrado una única vez en
+`AppModule` — no por controlador. **Propiedad emergente confirmada, no una nueva decisión
+arquitectónica, solo una consecuencia documentada del diseño elegido:** la seguridad HTTP transversal se
+configura centralizadamente y no depende de ningún módulo funcional — ningún módulo futuro puede omitir
+estas protecciones por descuido, porque ninguno las registra individualmente.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2B y Fase 3 cerradas.** D-044.1/D-044.2/D-044.3 aprobadas, formuladas como propiedades
-arquitectónicas sin mecanismo de implementación — mismo patrón que D-043.1/D-054.1. Pendiente: **Fase 4A
-(Diseño técnico)** — elegir el mecanismo concreto para cada una (¿`helmet` u otra librería? ¿qué
-almacén/estrategia de rate-limiting? ¿de dónde lee CORS la lista de orígenes por entorno?). Estado: se
-mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B, mismo patrón que AR-028/AR-043/AR-054). Decisión:
-✅ Decisión aprobada.
+**Fase 1, Fase 2B, Fase 3 y Fase 4A cerradas.** Diseño técnico congelado y verificado: `helmet` +
+`@nestjs/throttler` (vía `APP_GUARD`, mismo patrón ya usado para `MetricsInterceptor`) +
+`enableCors()` con `CORS_ALLOWED_ORIGINS` configurable. Ambas librerías confirmadas compatibles con las
+versiones de NestJS ya instaladas. Pendiente: **Fase 4B (Implementación)** — instalar las 2
+dependencias, registrar las 3 protecciones, y verificar cero regresión. Estado: se mantiene 🟦 En
+análisis (no salta a 🟨 hasta Fase 4B). Decisión: ✅ Decisión aprobada.
