@@ -175,14 +175,125 @@ existiendo como detalle de implementación del dominio.
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Implementada.**
+
+Tratada por las 4 categorías que fijó Fase 4A, cada una con su propio criterio de sustitución (no una
+sustitución mecánica de texto):
+
+**1. Copy de interfaz** (`common.json`, `es`/`en`) — cada aparición reformulada preguntando si explica
+progreso o incentiva mantener una racha. Renombradas y reescritas: `coach.tips.protectStreak` →
+`steadyProgress` ("llevas X días de constancia," sin "mantenerla"); `coach.achievements.weekStreak` →
+`consistencyMilestone`; `coach.risks.habitStreaksAtRisk` → `habitsNeedingAttention` (de "rachas en
+riesgo" a "hábitos pendientes hoy"); `coach.momentum.building.description` ("tu racha está creciendo" →
+"tu constancia está creciendo"); `habits.hero.streakLabel` → `consistencyLabel`; `habits.detail.
+streakDays` → `consistencyDays`; `habits.empty.description` ("empezar una racha" → "empezar a construir
+constancia"); `insights.overview.currentStreak` → `weekActivity` ("RACHA ACTUAL" → "ACTIVIDAD DE LA
+SEMANA" — este header describía un row de actividad Lun-Dom, no un conteo de racha); `insights.
+habitConsistency.averageStreak/activeStreaks` → `averageConsistency`/`activeHabits`; `insights.
+streakHighlight` → `topConsistency` ("Mejor Racha" → "Mayor Constancia"); `dashboard.hero.streak` →
+`weeklyMomentum`; `dashboard.widgets.currentStreak` → `dailyConsistency` ("¡Mantén la llama encendida!"
+→ "¡Vas construyendo constancia!"); `dashboard.widgets.todayHabits.streak` → `consistencyBadge`;
+`goals.workspace.stats.avgStreak` → `avgConsistency`. **Eliminada** `dashboard.summary.streak`
+("Días Seguidos") — confirmado por grep que era código muerto, sin ningún consumidor en toda la app.
+
+**2. Componentes de UI** — los que representaban una "racha" como entidad propia dejaron de existir con
+ese nombre: `CurrentStreakWidget.tsx` → `DailyConsistencyWidget.tsx` (mismo cálculo interno, sin cambiar
+lógica); `StreakHighlightInsight.tsx` → `TopConsistencyInsight.tsx` (mismos datos reales de dominio, sin
+cambiar lógica). Iconos de flama (🔥, `Flame` de lucide) reemplazados por `TrendingUp` en los 5 sitios
+donde aparecían (`HabitCard.tsx`, `HabitsHero.tsx`, `HabitDetailScreen.tsx`, los 2 componentes
+renombrados) — color `$warning` (naranja, asociado a alerta/fuego) cambiado a `$success` donde
+corresponde a una señal positiva. En `coach-descriptors.ts`, icono de `habit-streaks-at-risk` cambiado
+de `AlertTriangle` (amenaza) a `Bell` (recordatorio neutral) — `heavy-day` conserva `AlertTriangle`
+porque es un riesgo operativo genuino (exceso de tareas), no relacionado con gamificación. En
+`default-widgets.ts`, la categoría del widget cambió de `'gamification'` — la única vez que esa
+categoría se usó en todo el registro — a `'progress'`, junto a `weekly-progress-widget`/
+`completion-rate-widget`.
+
+**3. Motores internos** — **sin cambios de lógica**, tal como fijó Fase 4A: las condiciones
+`streak.currentStreakDays > 0`/`>= 7` en `RuleRecommendationProvider.ts`/`CoachRecommendationProvider.ts`
+permanecen intactas. Solo cambiaron los `targetId` que el motor produce (identificadores internos, no
+texto visible): `'protect-streak'` → `'steady-progress'`, `'week-streak'` → `'consistency-milestone'`,
+`'habit-streaks-at-risk'` → `'habits-needing-attention'`, `'current-streak-widget'` →
+`'daily-consistency-widget'`, `'streak'` (hero) → `'weekly-momentum'` — necesario porque estos
+identificadores son, en sí mismos, nombres de componentes de presentación o de elementos del dashboard
+(categoría "no esperada" fijada en el criterio de validación), no lógica de dominio.
+
+**4. Layout y navegación** — verificado que ningún título de sección ni tarjeta destacada sigue
+organizando al dashboard alrededor de la continuidad diaria: el hero "weekly-momentum" ya comunicaba
+tareas completadas esta semana (nunca tuvo framing de racha en su copy, solo en su identificador
+interno); el widget `daily-consistency-widget` pasó de prioridad/categoría "gamification" a "progress",
+mismo nivel que el resto de widgets de progreso, sin tratamiento visual especial que lo distinga como
+un objetivo aparte.
+
+**Hallazgo colateral, limpiado en el mismo paso por estar directamente relacionado:** se encontró
+`HeroCardStrategy.ts`, un módulo explícitamente `@deprecated` ("Kept for backward compatibility...
+Will be removed in VS-031 cleanup"), sin ningún import en el resto del código (confirmado por grep), que
+contenía una `StreakStrategy` referenciando las claves i18n `dashboard.hero.streak.*` recién
+renombradas. Eliminado — ya estaba marcado para su retiro y su presencia habría dejado una referencia
+muerta a un concepto ya removido del modelo mental del usuario.
+
+**Bug de portabilidad, no relacionado con AR-036, encontrado y NO corregido aquí:** al intentar validar
+las suites de test se confirmó una condición ya documentada en el propio Roadmap (**AR-010**,
+`apps/mobile` no tiene script de test, y `babel-preset-expo` no está resuelto para Jest en este
+entorno) — verificado independientemente (`node_modules/babel-preset-expo` ausente en
+`apps/mobile/node_modules` pese a existir en el store de pnpm). Se usó una configuración ad hoc de
+`ts-jest` (no committeada, solo para verificación) para ejecutar los tests reales sin depender de esa
+cadena rota. Fuera de alcance de esta AR — pertenece a AR-010.
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+**Búsqueda estructural completa** (`grep -rin "streak" apps/mobile/src`), clasificada exactamente según
+el criterio fijado en Fase 4A:
+
+- **Esperadas (dominio):** `Habit.currentStreakDays`, `DashboardContext.streak.{currentStreakDays,
+longestStreakDays,atRiskCount}`, `computeHabitStreak()`, y sus consumidores directos en
+  `demo-habits.repository.ts`, `habits.api.ts`, `useDashboardContext.ts`, `useInsightsContext.ts` — el
+  campo de dominio nunca estuvo en alcance, tal como fijó Fase 1.
+- **No esperadas, verificado que ya no existen:** cero ocurrencias de "racha"/"streak" en copy de
+  usuario (`common.json`, ambos locales); cero nombres de componentes de presentación
+  (`CurrentStreakWidget`/`StreakHighlightInsight` renombrados, `HeroCardStrategy` deprecado eliminado);
+  cero textos de recomendaciones con framing de racha; cero categoría "gamification" en el registro de
+  widgets.
+- **Residuales aceptables, documentados explícitamente:** 2 comentarios que citan los nombres antiguos
+  de los componentes por razones históricas (`TopConsistencyInsight.tsx`/`HabitsHero.tsx`, "renamed
+  from X") — no son el concepto reapareciendo, son la traza de por qué cambió.
+
+**Validación funcional (comportamiento, no solo texto):**
+
+- `tsc --noEmit` en `apps/mobile`: limpio, cero errores.
+- Suite de tests real ejecutada con una configuración de verificación (`ts-jest`, ver nota de Fase 4B):
+  `RecommendationEngine.test.ts` (42 tests, actualizados para los `targetId` renombrados) y
+  `DashboardLayoutEngine.test.ts` — **42/42 passing**; `InsightsLayoutEngine.test.ts`/`focus-detail.
+test.ts`/`daily-metrics.test.ts`/`sparkline-math.test.ts` — **41/41 passing**, sin regresión.
+- Verificado con las 2 preguntas fijadas en Fase 4A:
+  1. ¿El usuario recibe una única explicación coherente de cómo progresa? Sí — todo el copy de
+     progreso/consistencia usa el mismo vocabulario ("constancia"/"consistencia"), sin una segunda
+     narrativa de "racha" compitiendo en paralelo.
+  2. ¿Ninguna pantalla, motor o componente vuelve a presentar la continuidad diaria como un objetivo
+     aislado? Sí — el widget correspondiente ya no está categorizado como "gamification"; el hero
+     semanal comunica tareas completadas, no una racha que proteger; los iconos de amenaza/fuego fueron
+     reemplazados por iconos de progreso/recordatorio neutral.
+
+**Criterio de cierre (fijado en Fase 2A), respondido:** las referencias restantes a
+`currentStreakDays` pertenecen exclusivamente al dominio (`packages/domain`, plumbing de aplicación que
+lo consume sin exponerlo como "racha") — ninguna al lenguaje de producto. D-036.1 queda materializada.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma vigente: copy y lógica de
-streak/gamificación en al menos 4 áreas funcionales y 2 motores internos, contradiciendo ADR-006/ADR-010.
-Reencuadrado por la evidencia de un problema de copy aislado a un modelo conceptual de producto
-compartido. D-036.1 aprobada; diseño técnico congelado — la continuidad diaria deja de ser un objetivo
-independiente y pasa a ser una dimensión emergente del progreso dentro del modelo conceptual de
-Commitment, sin fijar un reemplazo léxico único. `Habit.currentStreakDays` sigue fuera de alcance, como
-detalle de dominio separado del modelo mental de usuario. Pendiente: **Fase 4B (Implementación)**.
-Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión
-aprobada.
+**AR-036 CERRADA (2026-07-23).** El hallazgo se confirma vigente en Fase 1 y se reencuadra de una
+inconsistencia de copy aislada a un modelo conceptual de producto ("streak") transversal a UI y 2
+motores internos. D-036.1 aprobada e implementada: la continuidad diaria deja de presentarse como un
+objetivo independiente y pasa a representarse como una dimensión emergente del progreso, tratada en las
+4 categorías fijadas en Fase 4A (copy, componentes, motores — sin cambio de lógica —, layout), sin fijar
+un reemplazo léxico único. `Habit.currentStreakDays` se mantiene íntegro como detalle de dominio, fuera
+del alcance en las 5 fases. Búsqueda estructural completa confirma cero residuos en el modelo mental de
+usuario; 83 tests reales (`tsc` limpio + 2 suites de engine + 4 suites de insights) sin regresión. Un
+hallazgo colateral (`HeroCardStrategy.ts`, código muerto ya deprecado) se limpió por estar directamente
+relacionado; un hallazgo no relacionado (AR-010, entorno de test de mobile roto) se documentó sin
+intentar resolverlo aquí. Estado: 🟦 → ✅ Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
