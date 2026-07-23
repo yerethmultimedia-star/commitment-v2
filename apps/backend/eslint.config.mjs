@@ -33,4 +33,40 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    // AR-054/D-054.1: no Queue/Worker registered by the application counts as
+    // a complete BullMQ integration without an explicit error handler.
+    // BullModule.registerQueue() and @InjectQueue() are restricted to the
+    // 2 files that already own that responsibility (see AR-054/ANALISIS.md
+    // Fase 4A) — this is a Level 2 static restriction, not an absolute
+    // structural guarantee (DiscoveryService was evaluated and deliberately
+    // not adopted, see AR-054/ANALISIS.md).
+    files: ['src/**/*.ts'],
+    ignores: [
+      'src/app.module.ts',
+      'src/notifications/notifications.module.ts',
+      'src/notifications/infrastructure/bullmq-execution-engine.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@nestjs/bullmq',
+              importNames: ['BullModule'],
+              message:
+                'Register BullMQ queues only in notifications.module.ts (the designated single integration point — see AR-054/ANALISIS.md, D-054.1). A new queue/worker registered elsewhere would bypass its mandatory error handler.',
+            },
+            {
+              name: '@nestjs/bullmq',
+              importNames: ['InjectQueue'],
+              message:
+                'Inject BullMQ queues only in bullmq-execution-engine.ts (the designated single integration point — see AR-054/ANALISIS.md, D-054.1), which already registers the mandatory error handler.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );
