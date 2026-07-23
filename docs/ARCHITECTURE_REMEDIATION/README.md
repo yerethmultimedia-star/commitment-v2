@@ -83,6 +83,19 @@ serio de refutarla. **El mejor resultado posible de la revisión de las 15 ARs p
 no publicar una v1.1 todavía.** Toda AR ejecutada desde este cierre en adelante es, además de una
 remediación en sí misma, una prueba empírica más de si Metodología v1.0 sigue siendo suficiente.
 
+**Umbral operativo explícito para tocar la metodología antes de las revisiones de 15/25 ARs (fijado
+2026-07-23):** no modificar nada de Metodología v1.0 hasta que una AR falle **por culpa de la
+metodología, no del problema técnico que investiga** — un umbral bastante más sólido que introducir
+mejoras preventivas basadas en ideas plausibles, y consistente con el criterio de dos preguntas de
+arriba (ninguna mejora preventiva responde a "qué limitación _demostrada_ resuelve").
+
+**Doble plano de evidencia que produce cada AR a partir de este cierre (2026-07-23):** antes, una AR
+cerrada validaba únicamente una remediación (plano técnico: ¿el problema arquitectónico quedó resuelto o
+correctamente delimitado?). A partir de ahora, cada cierre aporta evidencia en un segundo plano,
+independiente del primero: **¿Metodología v1.0 fue suficiente para llegar a esa decisión sin necesitar
+modificarse?** Los dos flujos de evidencia se acumulan en paralelo — uno alimenta el Roadmap/Dashboard
+de arquitectura, el otro alimenta las futuras revisiones transversales y la evaluación de Fase 0.
+
 ## Documentos en esta carpeta
 
 - `REMEDIATION_ROADMAP_V1.md` — las 51 Architecture Remediations (AR-001 a AR-050, más AR-051), organizadas en 6 waves por dependencia de causa raíz, con grafo de bloqueos explícito.
@@ -95,6 +108,7 @@ remediación en sí misma, una prueba empírica más de si Metodología v1.0 sig
 - `ARCHITECTURE_DECISION_LOG.md` — un índice ejecutivo, una fila por decisión (Fecha | AR | ADR | Estado | Impacto), que responda en segundos qué se decidió, cuándo, de qué AR surgió, y qué ADR lo formalizó. No reemplaza las ADRs ni el Roadmap — es navegación, no detalle. Se creará cuando haya suficientes decisiones cerradas para justificarlo (el propio usuario pidió esperar unas semanas), no antes.
 - **Architecture Review v2.0** — no una re-auditoría desde cero. Se hará cuando cierren aproximadamente las primeras 10-15 ARs, para responder una pregunta concreta: ¿las remediaciones realmente mejoraron la arquitectura? Reutiliza la metodología de v1.0 y compara métricas entre versiones (Overall Health, Hardening pendiente, Quick Wins pendientes, ADR pendientes, Riesgos altos) para medir la evolución de forma objetiva, no por percepción.
 - **Propuesta pendiente (2026-07-23, durante AR-043, Paso 4): Architecture Health Dashboard con rúbrica ponderada por área** (15 áreas — Dominio/DDD, Clean Architecture, CQRS, Backend, Frontend, API, Persistencia, Seguridad, Eventos/Sagas, Offline, Sync Engine, IA/AI Coach, Testing, Observabilidad, DevOps/CI —, cada una con peso, sub-score Arquitectura/Implementación, Δ y semáforo, más una franja superior con Proyecto Global/Arquitectura/Implementación/Programa de Remediación/AR completadas/Fase actual/Estabilidad metodológica/Hipótesis abiertas/Bloqueos). Propuesta explícitamente NO adoptada todavía — sometida al mismo escrutinio adversarial que cualquier otra decisión del programa, y rechazada en su forma inmediata por 3 razones: (1) contradice la decisión ya vigente de que `PROJECT_HEALTH_DASHBOARD.md` permanece congelado hasta la Architecture Review v2.0 (arriba); (2) no existen rúbricas objetivas por área todavía — cualquier porcentaje hoy sería una estimación, violando el propio principio de evidencia que motiva la propuesta; (3) ambigüedad documental — no está decidido si sustituye a `PROJECT_HEALTH_DASHBOARD.md`, a `REMEDIATION_DASHBOARD.md`, o es un tercer artefacto. Tratada con el mismo patrón que D-023.2 → AR-052: registrada como pregunta de gobernanza transversal al programa, no resuelta inline, no bloqueante para AR-043. Candidata natural a evaluarse junto con la Architecture Review v2.0, cuando exista evidencia suficiente para diseñar rúbricas reales por área.
+- **"Governance Model" — un sexto artefacto, todavía sin escribir (nombre provisional, 2026-07-23, al cerrar el ciclo de Metodología v1.0).** Los 5 artefactos de gobernanza actuales (ADRs, Architecture Review, Remediation Roadmap/Dashboard, Revisión Transversal, Metodología v1.0) son cada uno gobernado, pero ninguno gobierna explícitamente la relación _entre_ ellos — qué autoridad tiene cada uno sobre los demás, cuáles son históricos vs. versionables, cuáles pueden modificarse dentro de una AR y cuáles solo mediante una revisión transversal, quién puede originar un cambio en cada uno. Hoy esas respuestas existen, pero distribuidas implícitamente. **No se diseña todavía — aplicando el propio H-GOV-01 a esta decisión**: hoy solo existe una versión de la metodología (v1.0), sin conflicto real que un modelo de gobernanza explícito tuviera que resolver. **Condición de disparo registrada, no como hipótesis sino como observación a vigilar:** evaluar la necesidad de un modelo explícito de gobernanza entre artefactos cuando lleguen a coexistir varias versiones de la metodología, o varios artefactos metodológicos activos simultáneamente — no antes.
 
 ## Checkpoint de validación del proceso (planeado, no antes de tiempo)
 
