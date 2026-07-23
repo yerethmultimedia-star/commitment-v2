@@ -95,6 +95,14 @@
       "royalPride": {
         "name": "Royal Pride",
         "description": "Structured royal navy layout with gold and white armor accents."
+      },
+      "neonVioletLight": {
+        "name": "Neon Violet Light",
+        "description": "Soft lavender light canvas accented with vibrant purple and neon green."
+      },
+      "neonVioletDark": {
+        "name": "Neon Violet Dark",
+        "description": "Tactical dark canvas in deep purple highlighted with hyper-vibrant neon green accents."
       }
     }
   },

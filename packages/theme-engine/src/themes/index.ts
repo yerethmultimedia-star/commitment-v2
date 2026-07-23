@@ -17,6 +17,10 @@ export * from './shadow-sentinel.theme.js';
 export * from './arachnid-energy.theme.js';
 export * from './fiery-spirit.theme.js';
 export * from './royal-pride.theme.js';
+export * from './neon-violet-light.theme.js';
+export * from './neon-violet-dark.theme.js';
+
+
 
 
 

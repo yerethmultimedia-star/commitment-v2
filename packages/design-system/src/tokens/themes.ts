@@ -1,4 +1,4 @@
-import { defaultLightTheme, sunriseTheme, midnightTheme, forestTheme, electricVibrancyTheme, neonFocusTheme, freshEnergyTheme, midnightForestTheme, calmLavenderTheme, cosmicCalmTheme, monochromeLightTheme, monochromeDarkTheme, tenderRoseTheme, mintFreshnessTheme, lavenderMistTheme, shadowSentinelTheme, arachnidEnergyTheme, fierySpiritTheme, royalPrideTheme } from '@commitment/theme-engine';
+import { defaultLightTheme, sunriseTheme, midnightTheme, forestTheme, electricVibrancyTheme, neonFocusTheme, freshEnergyTheme, midnightForestTheme, calmLavenderTheme, cosmicCalmTheme, monochromeLightTheme, monochromeDarkTheme, tenderRoseTheme, mintFreshnessTheme, lavenderMistTheme, shadowSentinelTheme, arachnidEnergyTheme, fierySpiritTheme, royalPrideTheme, neonVioletLightTheme, neonVioletDarkTheme } from '@commitment/theme-engine';
 import { adaptThemeToTamagui } from '../adapters/theme-adapter';
 
 export const themes = {
@@ -23,4 +23,8 @@ export const themes = {
   ArachnidEnergy: adaptThemeToTamagui(arachnidEnergyTheme.resolve()),
   FierySpirit: adaptThemeToTamagui(fierySpiritTheme.resolve()),
   RoyalPride: adaptThemeToTamagui(royalPrideTheme.resolve()),
+  NeonVioletLight: adaptThemeToTamagui(neonVioletLightTheme.resolve()),
+  NeonVioletDark: adaptThemeToTamagui(neonVioletDarkTheme.resolve()),
 };
+
+

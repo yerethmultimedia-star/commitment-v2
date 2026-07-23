@@ -1,4 +1,4 @@
-import { ThemeRegistry, defaultLightTheme, sunriseTheme, midnightTheme, forestTheme, electricVibrancyTheme, neonFocusTheme, freshEnergyTheme, midnightForestTheme, calmLavenderTheme, cosmicCalmTheme, monochromeLightTheme, monochromeDarkTheme, tenderRoseTheme, mintFreshnessTheme, lavenderMistTheme, shadowSentinelTheme, arachnidEnergyTheme, fierySpiritTheme, royalPrideTheme } from '@commitment/theme-engine';
+import { ThemeRegistry, defaultLightTheme, sunriseTheme, midnightTheme, forestTheme, electricVibrancyTheme, neonFocusTheme, freshEnergyTheme, midnightForestTheme, calmLavenderTheme, cosmicCalmTheme, monochromeLightTheme, monochromeDarkTheme, tenderRoseTheme, mintFreshnessTheme, lavenderMistTheme, shadowSentinelTheme, arachnidEnergyTheme, fierySpiritTheme, royalPrideTheme, neonVioletLightTheme, neonVioletDarkTheme } from '@commitment/theme-engine';
 
 export const appThemeRegistry = new ThemeRegistry();
 
@@ -24,3 +24,7 @@ appThemeRegistry.register(shadowSentinelTheme);
 appThemeRegistry.register(arachnidEnergyTheme);
 appThemeRegistry.register(fierySpiritTheme);
 appThemeRegistry.register(royalPrideTheme);
+appThemeRegistry.register(neonVioletLightTheme);
+appThemeRegistry.register(neonVioletDarkTheme);
+
+

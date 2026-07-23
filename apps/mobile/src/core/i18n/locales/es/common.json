@@ -95,6 +95,14 @@
       "royalPride": {
         "name": "Orgullo Real",
         "description": "Lienzo azul marino real estructurado con acentos amarillo oro y blanco armadura."
+      },
+      "neonVioletLight": {
+        "name": "Violeta Neón Claro",
+        "description": "Lienzo claro de tono lavanda suave decorado con morado vibrante y acentos en verde neón."
+      },
+      "neonVioletDark": {
+        "name": "Violeta Neón Oscuro",
+        "description": "Lienzo oscuro táctico de tono morado profundo destacado con acentos hiper-vibrantes en verde neón."
       }
     }
   },
