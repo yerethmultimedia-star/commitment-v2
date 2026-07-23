@@ -167,10 +167,87 @@ la condicione.
 
 ---
 
+## Fase 2B — Alternativas
+
+**Estado: ✅ Cerrada.**
+
+### Pregunta de decisión que gobierna esta fase
+
+> **¿Cómo debe cumplir la aplicación el contrato de propagación de errores de BullMQ durante su ciclo de
+> vida?**
+
+Deliberadamente no formulada como _"¿dónde ponemos un `.on('error')`?"_ — esa forma ya presupone una
+implementación concreta y saltaría directamente a Fase 4A sin pasar por la decisión arquitectónica real.
+
+### Alternativas comparadas
+
+**A. Ignorar el contrato (mantener el estado actual).**
+Ventaja: cero cambios. Desventajas: ya produce excepciones no capturadas de forma reproducible;
+incumple el contrato documentado por BullMQ; introduce no determinismo en la ejecución de pruebas.
+**Descartada por la evidencia de Fase 1** — no es una opción neutral, es continuar un defecto ya
+confirmado.
+
+**B. Registrar listeners locales, uno por cada `Queue`/`Worker` existente.**
+Ventajas: simple, poco código, cambio mínimo. Desventajas: duplica el mismo manejo en cada punto de
+integración; nada impide que un futuro `Queue`/`Worker` se añada sin su listener (el propio defecto
+actual es exactamente ese olvido, solo que desde el día de introducción de BullMQ en vez de una
+regresión posterior); el patrón queda distribuido y depende de que cada autor lo recuerde.
+
+**C. Definir un patrón de integración obligatorio para todo componente BullMQ registrado por la
+aplicación.** La decisión se formula como propiedad del sistema, no como ubicación de código: _"ningún
+`Queue`/`Worker` que la aplicación registre puede considerarse una integración válida sin un manejador
+explícito de su evento `error`."_ Cómo se materializa esa propiedad (bootstrap centralizado, factory,
+wrapper, provider) es una pregunta de Fase 4A/Diseño técnico, deliberadamente no resuelta aquí — mismo
+patrón que D-043.1 (formulada sin mencionar JWT/Guards/Passport).
+
+### Por qué C sobre B
+
+El hallazgo de Fase 1 no describe dos puntos de código aislados — describe un contrato que BullMQ exige
+a cualquier integración, presente o futura. Un contrato se expresa como regla general, no como una
+corrección puntual en los 2 sitios ya conocidos. Si mañana se añade un tercer `Worker` (p. ej. para otro
+tipo de recordatorio), su corrección no debería depender de que alguien recuerde replicar el mismo
+`.on('error', ...)` — debería ser consecuencia necesaria de cómo se registra cualquier componente BullMQ
+en la aplicación.
+
+---
+
+## Fase 3 — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-054.1:** _"Ningún `Queue` ni `Worker` de BullMQ registrado por la aplicación se considera una
+integración completa sin un manejador explícito de su evento `error`. Esta obligación es una propiedad
+del sistema, verificable por revisión de código, no una corrección puntual sobre los 2 puntos de
+integración conocidos hoy (`BullMQExecutionEngine`, `ReminderProcessor`)."_
+
+Formulada sin mencionar mecanismo de implementación (bootstrap/factory/wrapper/provider, nivel de log,
+si el error se reintenta o solo se registra) — esas preguntas pertenecen a Fase 4A (Diseño técnico), no a
+esta decisión, siguiendo el mismo patrón que congeló D-043.1 en términos de responsabilidad, no de
+tecnología.
+
+### Criterio de aceptación (fijado antes de Fase 4A, no después)
+
+> **Toda instancia de `Queue` o `Worker` creada por la aplicación registra explícitamente un manejador
+> para el evento `error`.**
+
+Objetivo y verificable por `grep`/revisión de código — mismo estilo que el criterio binario que cerró
+AR-008 ("¿puede fusionarse código que rompa `packages/domain` sin que CI falle?").
+
+### Hallazgo metodológico de esta fase, registrado como hipótesis en observación (no regla todavía)
+
+A diferencia de AR-053 (donde el sistema cumplía correctamente su propio contrato de dominio y el
+defecto estaba en un test desactualizado), aquí el contrato externo — el de BullMQ — estaba bien
+definido desde el principio; lo incompleto era la integración de la aplicación con él. Hipótesis
+registrada en README (1 punto de dato): _"cuando el sistema interactúa con otro sistema, el contrato de
+integración debe tratarse con el mismo rigor que un contrato de dominio."_
+
+---
+
 ## Estado
 
-**Fase 1 cerrada, incluida la comprobación de precedentes.** Tres afirmaciones quedan establecidas por
-evidencia directa: (1) no hay fuga persistente de recursos; (2) el síntoma es no determinista pero el
-mecanismo que lo produce no lo es; (3) existe un incumplimiento concreto y sin precedente interno del
-contrato de integración de BullMQ. Pendiente: Fase 2B (Alternativas de manejo de error) y Decisión — no
-iniciadas todavía, a la espera de que el usuario dé paso.
+**Fase 1, Fase 2B y Fase 3 cerradas.** D-054.1 aprobada: la solución debe ser un patrón de integración
+general (Alternativa C), no listeners locales aislados (Alternativa B) ni mantener el estado actual
+(Alternativa A). Pendiente: Fase 4A (Diseño técnico — dónde y cómo se implementa el patrón) y Fase 4B
+(Implementación) — no iniciadas todavía, a la espera de que el usuario dé paso. Estado (eje Estado):
+se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón que AR-028/AR-043).
+Decisión: ✅ Decisión aprobada.
