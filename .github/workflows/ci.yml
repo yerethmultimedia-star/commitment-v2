@@ -40,6 +40,9 @@ jobs:
       - name: Test Backend
         run: pnpm --filter backend run test
 
+      - name: Test Domain
+        run: pnpm --filter domain run test
+
   mobile-ci:
     name: Mobile Typecheck
     runs-on: ubuntu-latest
