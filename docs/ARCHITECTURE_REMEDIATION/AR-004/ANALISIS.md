@@ -123,14 +123,80 @@ anticipe o condicione el resultado de AR-030.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**Objetivo del diseño:** determinar cómo mantener la correspondencia entre arquitectura documentada y
+arquitectura implementada sin convertir la documentación en un reflejo automático del código — ese es
+el equilibrio que gobierna esta fase.
+
+### Alternativas evaluadas
+
+- **A — Documentación completamente manual.** Máximo control editorial. Descartada: la propia evidencia
+  de AR-004 demuestra que este modelo deriva con el tiempo — es exactamente el modelo que produjo el
+  hallazgo original.
+- **B — Generación automática desde el código.** Elimina la deriva, pero invierte la relación correcta:
+  la arquitectura pasaría a ser un subproducto de la implementación, cuando sigue siendo una decisión
+  deliberada, no un artefacto generado. Descartada.
+- **C — Sincronización híbrida (elegida).** Tres responsabilidades separadas, ninguna sustituye a las
+  otras: **implementación** (describe qué capacidades existen realmente), **documentación
+  arquitectónica** (describe cómo esas capacidades forman parte de la arquitectura), **validación**
+  (comprueba periódicamente que ambas siguen siendo consistentes).
+
+### Diseño congelado
+
+No se congela ningún documento concreto — se congela un mecanismo:
+
+> **Toda capacidad implementada que forme parte de la arquitectura del sistema debe tener una
+> representación explícita en la documentación arquitectónica, y toda representación arquitectónica de
+> una capacidad implementada debe poder justificarse mediante evidencia verificable.**
+
+Funciona en ambos sentidos — evita módulos fantasma documentados y módulos reales invisibles.
+
+### Authentication e Identity
+
+Se mantiene exactamente la separación registrada en Fase 2B: Authentication ya es una capacidad
+implementada y debe aparecer en la arquitectura; Identity sigue siendo objeto de AR-030 y no debe
+aparecer como capacidad implementada simplemente porque Authentication exista. Esto preserva la
+independencia entre remediaciones.
+
+### Alcance fijado para Fase 4B
+
+- Actualizar diagramas y vistas arquitectónicas.
+- Eliminar placeholders que ya no representan el estado real.
+- Incorporar Authentication como capacidad existente.
+- Promover Coach e Insights desde "Future Epic" a su representación real.
+- Dejar explícitamente fuera cualquier elemento cuyo estado siga pendiente (como Identity).
+
+**Ninguna decisión de arquitectura nueva se introduce en Fase 4B** — es materialización del diseño ya
+congelado, no diseño adicional.
+
+### Criterio de validación para Fase 5
+
+1. ¿Toda capacidad arquitectónica implementada tiene representación documental?
+2. ¿Toda capacidad documentada como implementada existe realmente en el repositorio?
+3. ¿Ningún placeholder permanece describiendo una capacidad ya implementada?
+4. ¿Ninguna capacidad pendiente (como Identity) aparece presentada como existente?
+
+Si las 4 respuestas son afirmativas, D-004.1 queda materializada.
+
+### Observación registrada (afinidad con AR-009, no promovida a regla)
+
+AR-009 aseguraba que la **gobernanza** pudiera verificarse contra el estado real; AR-004 persigue que la
+**arquitectura** pueda verificarse contra el estado real. Ambas comparten el mismo principio: la
+documentación deja de ser declarativa únicamente y pasa a ser verificablemente consistente con el
+sistema, sin perder su papel como documento de diseño.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma completamente vigente y sin ninguna
-corrección desde la auditoría — a diferencia de AR-002/AR-009/AR-036, no hubo una parte ya resuelta que
-separar. Reencuadrado por la evidencia: no es una brecha documental aislada, es una desalineación entre
-la arquitectura documentada y la arquitectura realmente evolucionada. D-004.1 aprobada: la documentación
-debe representar únicamente capacidades reales o formalmente aprobadas, con correspondencia verificable
-respecto a la implementación, formulada como propiedad sin mecanismo concreto. Pendiente: **Fase 4A
-(Diseño técnico)** — con la precaución explícita de no fusionar Authentication (ya implementada) con
-Identity (AR-030, todavía pendiente). Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B).
-Decisión: 💭 → ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma completamente vigente y sin
+ninguna corrección desde la auditoría. Reencuadrado por la evidencia: no es una brecha documental
+aislada, es una desalineación entre la arquitectura documentada y la arquitectura realmente evolucionada.
+D-004.1 aprobada; diseño técnico congelado en un enfoque de sincronización híbrida (implementación +
+documentación + validación periódica, responsabilidades separadas), con el alcance de Fase 4B ya fijado
+(actualizar diagramas, retirar placeholders obsoletos, incorporar Authentication, promover Coach/
+Insights, excluir explícitamente Identity). Pendiente: **Fase 4B (Implementación)**. Estado: se mantiene
+🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
