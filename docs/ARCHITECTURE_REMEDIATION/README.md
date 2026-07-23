@@ -134,6 +134,16 @@ metodología nunca permanece estable el tiempo suficiente como para que la revis
 evaluar honestamente si v1.0, tal cual se congeló, fue suficiente. Se estaría evaluando en su lugar una
 secuencia no documentada de v1.0.x.
 
+**"Silencio metodológico" durante el Ciclo 2 (fijado 2026-07-23) — la metodología deja de ser tema de
+conversación por defecto.** Mientras una AR pueda avanzar con las 9 fases tal como están definidas, no
+se abren discusiones metodológicas, no se proponen fases nuevas, no se ajustan criterios, no se crean
+artefactos — no porque sean malas ideas, sino porque contaminarían el experimento del Ciclo 2. La única
+pregunta metodológica se hace al cerrar la AR, no durante: **¿en algún momento fue imposible continuar
+sin modificar la metodología?** Si no, MFE sigue en 0 y no hace falta escribir nada más al respecto. Una
+AR que termina sin haber mencionado Metodología v1.0 ni una sola vez es exactamente el resultado que el
+Ciclo 2 busca — la señal de un proceso maduro no es que se discuta constantemente, es que se vuelva
+invisible.
+
 **Formato esperado del resumen en la revisión de las 15 ARs (fijado de antemano, 2026-07-23), más
 preciso que "15 ARs cerradas":**
 
