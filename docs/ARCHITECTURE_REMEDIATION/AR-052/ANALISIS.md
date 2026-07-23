@@ -287,3 +287,178 @@ como su objeto central.
 principio de fondo:** en AR-043 el objetivo fue demostrar que la implementación no modifica la
 arquitectura; en AR-052, que la gobernanza no modifica el estándar de evidencia para favorecer sus
 propias conclusiones. Ambos son la misma disciplina aplicada a capas distintas del programa.
+
+---
+
+## Fase 3 — Alternativas (intento sistemático de falsación de H-052.3)
+
+**Estado: 🟦 En progreso.** Cambio de enfoque explícito respecto a Fase 2: ya no se busca dónde
+H-052.3 vuelve a acertar, se busca activamente **qué tipo de decisión demostraría que es incompleta o
+falsa**. No se espera pasivamente un caso real futuro — se prepara el terreno con una hipótesis
+competidora nueva y un protocolo de pre-registro.
+
+### H-052.4 — hipótesis competidora, introducida como control
+
+> **La promoción depende principalmente de la irreversibilidad del cambio, no del riesgo
+> epistemológico.**
+
+Formulada para producir predicciones distintas de H-052.3 al menos en algunos casos — no para
+sustituirla de entrada.
+
+### Verificación preliminar: ¿son H-052.3 y H-052.4 realmente independientes?
+
+Antes de diseñar experimentos, se revisa si H-052.4 es una hipótesis genuinamente distinta o si ya
+estaba parcialmente contenida en la formulación original de H-052.3. Relectura de Fase 2: la
+redacción original de H-052.3 ya mezclaba dos ideas — _"el coste... es bajo y fácilmente
+reversible"_ — es decir, la irreversibilidad ya formaba parte de cómo se estaba midiendo el "coste de
+estar equivocado". **Esto significa que H-052.4 no es completamente independiente — extrae un
+componente (irreversibilidad mecánica del artefacto) que H-052.3 ya incluía dentro de un concepto más
+amplio (coste total, que también incluye sesgo epistémico acumulado).** Un experimento discriminante
+real, por tanto, no puede limitarse a buscar "reversible vs. irreversible" en abstracto — necesita un
+caso donde la reversibilidad _mecánica del artefacto_ y el _coste epistémico de sus consecuencias_
+apunten en direcciones distintas.
+
+### Intento de falsación 1 — revisar el Dashboard ponderado bajo esta distinción más fina
+
+Se re-examina el mismo caso ya usado contra H-052.2 (Fase 2), ahora contra H-052.4 directamente:
+
+- **Reversibilidad mecánica del artefacto:** alta — el Dashboard/tabla de porcentajes puede borrarse o
+  reescribirse sin ningún costo técnico. Por H-052.4 (solo mira el artefacto), esto predice
+  **promover ya**.
+- **Coste epistémico de sus consecuencias, si los números fueran estimaciones sin rúbrica real:**
+  alto — una vez que una cifra ("Backend: 52%") se cita en una conversación de priorización, esa
+  decisión ya está tomada; revertir el artefacto no deshace las decisiones ya influidas por él. Por
+  H-052.3 (coste total, incluyendo esto), esto predice **no promover todavía**.
+- **Resultado real:** no promovido, exactamente por las razones ya registradas en el README.
+
+**H-052.4 falla aquí donde H-052.3 acierta.** Este es el primer experimento discriminante genuino
+entre las dos hipótesis (no solo entre H-052.2 y H-052.3) — y usa, de nuevo, un caso que no se
+construyó pensando en esta comparación, lo cual mantiene la misma fuerza evidencial que ya se valoró
+en Fase 2.
+
+### Intento de falsación 2 — búsqueda activa de un caso que rompa a H-052.3, no solo a H-052.4
+
+Se revisan los 13 artefactos del catálogo de Fase 1 buscando específicamente uno con **riesgo
+epistémico alto que, sin embargo, se haya promovido de inmediato** (lo que refutaría a H-052.3 tal
+como se refutó a H-052.2). Candidato más cercano encontrado: **ítem 9, "inversión de la carga de la
+prueba" (Fase 4A→4B), promovida tras 1 sola ocurrencia.** Si esta regla fuera incorrecta en algún caso
+futuro (un diseño genuinamente defectuoso que la implementación revela, pero que la regla empuja a
+tratar primero como "defecto de implementación"), el riesgo epistémico es real: podría enmascarar un
+problema arquitectónico real bajo la apariencia de un simple ajuste de código.
+
+**Por qué esto no rompe a H-052.3, tras análisis:** la regla no es absoluta — incluye su propia
+válvula de escape ("solo si la implementación demuestra una imposibilidad real del diseño se reabre la
+decisión arquitectónica"), lo que acota el riesgo epistémico en vez de eliminarlo. H-052.3, bien leída,
+no dice "coste cero," dice "coste suficientemente bajo o acotado" — una regla que incluye su propio
+mecanismo de reapertura tiene un coste de estar equivocada estructuralmente menor que una regla sin esa
+válvula (como lo sería, por ejemplo, prohibir permanentemente reabrir cualquier decisión de Fase 4A).
+**No se encontró un falsificador aquí — pero se registra el intento explícitamente, incluyendo por qué
+no funcionó, en vez de omitirlo.** Un intento de falsación fallido no es evidencia a favor tan fuerte
+como un experimento discriminante ganado, y se registra con esa distinción.
+
+### Refinamiento de H-052.3, derivado de este intento de falsación
+
+> **H-052.3 (revisada):** el coste relevante no es binario (alto/bajo) sino si la regla incorpora o no
+> un mecanismo propio de reapertura acotada. Una regla con válvula de escape explícita puede
+> promoverse antes que una regla equivalente sin ella, incluso con el mismo riesgo aparente.
+
+Registrada como refinamiento, no como nueva hipótesis separada — no se le asigna número propio todavía
+porque no se ha sometido a su propio experimento discriminante independiente.
+
+### ¿La válvula de escape es contenido de H-052.3, o una condición límite de su ámbito de aplicación?
+
+Pregunta exigida por el usuario antes de aceptar el refinamiento, para evitar el problema clásico de
+una hipótesis que va absorbiendo excepciones cada vez que aparece un caso nuevo (inmunizándose contra
+la refutación en vez de mantenerse falsable). Prueba propuesta: **¿se podría haber escrito la válvula
+de escape antes de revisar el ítem 9, o solo pudo formularse después de ver ese caso concreto?**
+
+**Respuesta: sí se podría haber escrito antes — no es contenido nuevo, es una instancia de la variable
+que H-052.3 ya medía.** La formulación original de Fase 2 ya definía el eje como _"el tipo de riesgo
+que generan si están equivocadas o si se omiten"_ — el riesgo de estar equivocado. Que una regla incluya
+su propio mecanismo de reapertura acotada no introduce una variable distinta: es, precisamente, una de
+las formas en que el riesgo de estar equivocado puede ser bajo (el error es corregible dentro de la
+propia regla, no necesita una intervención externa). No se necesitó ver el ítem 9 para deducir esto —
+se necesitó verlo para **confirmar una instancia concreta** de algo que la definición original ya
+implicaba, sin haberlo hecho explícito hasta ahora.
+
+**Verificación cruzada, buscando si el mismo principio explica también otros ítems del catálogo, no
+solo el 9 — para descartar que sea un parche ad hoc inventado únicamente para salvar ese caso:**
+
+- **Ítem 6** ("dependencia sin evidencia → 'no verificada', no se elimina"): tiene su propia válvula
+  de escape incorporada en el contenido mismo de la regla — _"hasta que la AR dependiente la confirme
+  o descarte en su propia Fase 1."_ Consistente con su promoción inmediata.
+- **Ítem 1** ("todo AR debe demostrar que el problema no es el real"): no tiene una válvula de escape
+  en ese mismo sentido (no hay una cláusula de reapertura), pero tiene un mecanismo distinto que logra
+  el mismo efecto — el coste de verificarlo es barato incluso si resulta innecesario (si el problema sí
+  era el que parecía, solo se gastó esfuerzo de verificación, no hubo error que corregir). Distinto
+  mecanismo, mismo resultado: coste bajo de estar equivocado.
+
+**Conclusión: la válvula de escape no es una excepción añadida a H-052.3 caso por caso — es una
+instancia reconocible de la misma variable que la hipótesis ya definía desde Fase 2.** Se documenta
+como una **condición de aplicación mejor delimitada**, no como contenido nuevo de la hipótesis.
+H-052.3 mantiene exactamente su formulación original; lo que cambia es la precisión con la que se
+identifica cuándo el "coste de estar equivocado" es bajo.
+
+### Protocolo de pre-registro, aplicado retroactivamente a esta misma fase como ejercicio de disciplina
+
+Antes de cerrar Fase 3, se aplica el protocolo que pide el usuario — registrar predicciones de las 3
+hipótesis antes de mirar el resultado — sobre los dos intentos de falsación ya ejecutados arriba,
+para verificar que el orden de razonamiento no se invirtió después de conocer el desenlace:
+
+| Caso                                              | H-052.2                     | H-052.3                                                   | H-052.4                                                                       | Evidencia requerida                       | Resultado real         |
+| ------------------------------------------------- | --------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------- | ---------------------- |
+| Dashboard ponderado                               | Promover (es procedimiento) | No promover (coste epistémico alto y poco reversible)     | Promover (artefacto mecánicamente reversible)                                 | Rúbricas objetivas por área, ya definidas | No promovido           |
+| "Inversión de la carga de la prueba" (Fase 4A→4B) | Promover (es procedimiento) | Promover (riesgo acotado por su propia válvula de escape) | Promover (bajo por sí solo — reversible: basta con dejar de aplicar la regla) | — (ya promovida, caso ya cerrado)         | Promovido de inmediato |
+
+**En el segundo caso las tres hipótesis coinciden — no es discriminante, se incluye en la tabla por
+transparencia (un intento de falsación real, no solo los que salen bien), no porque distinga nada.**
+
+### Dos escenarios hipotéticos futuros, registrados para vigilancia — no fabricados como evidencia retrospectiva
+
+Distintos de los experimentos anteriores: estos son escenarios plausibles que **todavía no han
+ocurrido**, registrados de antemano para reconocerlos si aparecen, con la predicción ya fijada antes
+del desenlace real — cumpliendo genuinamente la prueba prospectiva, no una más retrodictiva:
+
+| Escenario hipotético (no ocurrido todavía)                                                                            | H-052.2                                                 | H-052.3                                                                                                                                                               | H-052.4                                                                          |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Una regla que exija respaldo de base de datos antes de cualquier migración de esquema en producción                   | Depende de si se lee como procedimiento (sí) → promover | Promover (bajo coste si la regla resulta innecesaria; alto coste si se omite y falla)                                                                                 | Promover (una migración fallida sin respaldo es difícil o imposible de revertir) |
+| Una regla que exija aprobación del usuario para el nombre de cualquier bounded context nuevo antes de escribir código | Promover (es procedimiento)                             | No promover (fricción acumulada en cada AR futura + riesgo de anclar el nombre antes de que el modelado de dominio esté completo, como ya pasó con `loginIdentifier`) | No promover (renombrar código después es mecánicamente barato)                   |
+
+El primer escenario no discrimina (las tres coinciden). **El segundo si aparece alguna vez de forma
+real, sí discriminaría entre H-052.3 y H-052.2** (ambas predicen "no promover" aquí, frente a H-052.2
+que diría "promover" por ser procedimiento) — queda registrado con su predicción fijada de antemano.
+
+### Pregunta más ambiciosa, señalada por el usuario y registrada para no perderla, sin forzar una respuesta ahora
+
+> **¿Qué propiedad debe tener una regla para que promoverla reduzca el riesgo total del programa?**
+
+Si esta pregunta terminara respondiéndose, H-052.3 (y su refinamiento de la válvula de escape) podrían
+resultar un caso particular de una teoría más general sobre diseño de reglas, no solo sobre cuándo
+promoverlas. No se persigue todavía — se deja como dirección observada, a retomar si la evidencia la
+exige, no antes.
+
+### Estado de cierre de Fase 3
+
+- H-052.4 introducida, sometida a un experimento discriminante real (Dashboard ponderado) — **falla
+  donde H-052.3 acierta.**
+- Intento de falsación directa contra H-052.3 (ítem 9 del catálogo) — no encontró un falsificador,
+  pero produjo un candidato a refinamiento (la válvula de escape).
+- **Verificado que la válvula de escape es una condición de aplicación mejor delimitada, no contenido
+  nuevo añadido a la hipótesis** — se podría haber escrito antes de revisar el ítem 9 (es una instancia
+  de la variable "coste de estar equivocado" que Fase 2 ya definía, no un axioma añadido para salvar
+  ese caso), y el mismo principio explica también el ítem 6 sin necesitar un mecanismo distinto para
+  cada caso. H-052.3 mantiene su formulación original; solo se precisó su aplicación.
+- Protocolo de pre-registro aplicado por primera vez de forma explícita, incluyendo un caso donde las
+  tres hipótesis coinciden (registrado por transparencia, no por valor discriminante).
+- Dos escenarios futuros registrados con predicciones fijadas de antemano, pendientes de un caso real.
+- **H-052.3 sigue siendo la hipótesis líder — sobrevivió el primer intento sistemático y genuino de
+  romperla, sin necesitar absorber excepciones ad hoc para lograrlo.**
+
+**Cierre de esta ronda de AR-052, decidido explícitamente por el usuario: no se abre Fase 4.** Más
+análisis retrospectivo sobre el mismo catálogo de 13 artefactos tendría rendimientos decrecientes y
+aumentaría el riesgo de sobreajuste de la hipótesis al historial ya conocido — prácticamente todo el
+valor extraíble de esa evidencia ya se obtuvo. **La siguiente evidencia relevante no vendrá de seguir
+investigando el pasado, sino del protocolo ya pre-registrado activándose sobre un candidato real y
+nuevo** — el primer test genuinamente independiente del conjunto de datos con el que nació H-052.3, la
+prueba que puede convertirla de una buena explicación retrospectiva en una hipótesis con poder
+predictivo demostrado. AR-052 queda en pausa a la espera de ese evento, no de más trabajo de análisis.
