@@ -70,12 +70,61 @@ propiedad de código (`CODEOWNERS`) que lo complemente?"**
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**H1 (principal):** _"Las políticas de gobernanza que condicionan la integración de cambios deben ser
+verificables desde el propio repositorio mediante artefactos versionados, sin depender exclusivamente
+de configuración externa del proveedor."_ Respaldada directamente por la evidencia de Fase 1: la branch
+protection existe y funciona, pero su estado solo puede verificarse consultando GitHub con privilegios
+administrativos — el repositorio, por sí mismo, no expresa esa parte de la gobernanza.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — la configuración de GitHub es suficiente y no necesita representación en el repositorio.
+  Descartada: no contradice el funcionamiento técnico, pero deja sin versionar una parte de la
+  gobernanza del proyecto, y dificulta auditorías, revisiones offline y forks.
+- **H3** — `CODEOWNERS` por sí solo resuelve el problema. Descartada: `CODEOWNERS` cubre asignación
+  automática de revisores y propiedad del código; no documenta ni hace verificable la branch
+  protection — son responsabilidades distintas.
+- **H4** — basta con documentar manualmente la configuración en un documento. Mantenida como
+  alternativa de implementación, no como hipótesis arquitectónica — la evidencia exige que la
+  gobernanza sea verificable desde el repositorio, no que se materialice necesariamente en un
+  documento estático.
+
+**H1 sobrevive.** La evidencia no apunta a un problema de protección de ramas (ya resuelto por AR-002);
+apunta a un problema de representación versionada de esa protección.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-009.1:** _"Las políticas de gobernanza que afectan la integración de cambios deben tener una
+representación versionada y verificable dentro del repositorio, complementaria a la configuración
+aplicada en la plataforma de alojamiento."_
+
+**Una sola decisión, no fragmentada.** No congela GitHub, `CODEOWNERS`, un formato concreto, ni un
+archivo específico — solo establece la propiedad: la gobernanza relevante debe ser visible y auditable
+desde el propio repositorio. Mismo patrón que D-002.1/D-043.1/D-054.1/D-044.1-3.
+
+**Explícitamente NO decidido en esta fase:** `CODEOWNERS`, un documento versionado que describa la
+branch protection esperada, un script de verificación que compare la configuración real con la
+declarada, o una combinación — las alternativas de materialización quedan para Fase 4A.
+
+**Pregunta que gobernará Fase 4A (fijada de antemano):**
+
+> **¿Cuál es el conjunto mínimo de artefactos versionados que permite auditar la gobernanza del
+> repositorio sin depender exclusivamente de la configuración externa de GitHub?**
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo original quedó dividido en 2 partes por la evidencia: (a) "¿el CI gatea
-de verdad los merges?" — **ya resuelta indirectamente por AR-002**, confirmado con evidencia de
-comportamiento real, no solo de configuración; (b) "¿es esa configuración verificable desde el propio
-repo, y existe `CODEOWNERS`?" — **sigue sin resolver**, fuera del alcance original de AR-002. Alcance de
-AR-009 se reduce a (b). Estado: ⬜ → 🟦 En análisis. Decisión: pendiente Fase 2A (Owner=Usuario — el
-hallazgo original así lo marca; Fase 1 fue evidencia pura, la fase de hipótesis/decisión sí requiere el
-juicio del usuario sobre qué nivel de garantía vale la pena para un repo de este tamaño).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo original quedó dividido en 2 partes por la
+evidencia: (a) "¿el CI gatea de verdad los merges?" — ya resuelta indirectamente por AR-002; (b) "¿es
+esa configuración verificable desde el propio repo, y existe `CODEOWNERS`?" — sigue sin resolver.
+D-009.1 aprobada: la gobernanza relevante debe tener representación versionada y verificable en el
+repositorio, formulada como propiedad, sin mecanismo concreto. Pendiente: **Fase 4A (Diseño técnico)**
+— elegir el conjunto mínimo de artefactos (posible enfoque multicapa, a evaluar igual que en AR-002).
+Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 → ✅ Decisión aprobada.
