@@ -64,9 +64,51 @@ resueltas en esta fase.
 
 ---
 
+## Fase 2B — Alternativas
+
+**Estado: ✅ Cerrada.** CSRF queda fuera de alcance (descartado en Fase 1 por el diseño Bearer-no-cookie
+de AR-043). Quedan 3 hallazgos independientes: headers de seguridad ausentes, sin rate-limiting, CORS
+sin acotar. La pregunta de decisión no es "¿debemos endurecer la seguridad?" sino **qué propiedades
+mínimas debe garantizar la plataforma** — formulada así para no saltar directamente a nombrar
+`helmet`/`@nestjs/throttler`/orígenes concretos, que son decisiones de Fase 4A, no de esta fase. Mismo
+patrón exacto que D-043.1/D-054.1: congelar la propiedad arquitectónica primero, para que Fase 4A pueda
+evaluar con libertad si la mejor implementación es `helmet`, otra librería, o capacidades nativas de
+NestJS, sin tener que reabrir la decisión.
+
+Para cada uno de los 3 hallazgos, la alternativa rechazada es la misma: definir la decisión directamente
+en términos de una librería/configuración concreta (p. ej. "usar `helmet` con estas opciones", "límite
+de 100 req/min", "permitir estos 3 dominios") en vez de como una propiedad que el sistema debe
+garantizar, dejando el mecanismo concreto para después.
+
+## Fase 3 — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-044.1 — Cabeceras de seguridad.** _"Toda petición HTTP servida por el backend debe incluir un
+conjunto de cabeceras de seguridad mantenidas por la plataforma — no opcionales, no dependientes de cada
+controlador, aplicadas globalmente."_ Sin congelar opciones específicas de `helmet` u otra librería —
+eso es Fase 4A.
+
+**D-044.2 — Rate limiting.** _"Toda API pública debe disponer de un mecanismo global de limitación de
+peticiones, configurable sin modificar código de negocio."_ Deliberadamente sin un número concreto
+(p. ej. "100 req/min") — eso es parametrización operativa, no una decisión arquitectónica, y puede
+variar por entorno sin volver a esta AR.
+
+**D-044.3 — CORS.** _"El backend no acepta orígenes arbitrarios; únicamente los explícitamente
+autorizados mediante configuración."_ La lista concreta de orígenes pertenece al despliegue (desarrollo/
+staging/producción), no a la arquitectura — sirve para los 3 sin recompilar al añadir un dominio.
+
+**Explícitamente NO decidido en esta fase** (pertenece a Fase 4A/Diseño técnico o a configuración de
+despliegue): dominios específicos, número de peticiones por minuto, opciones concretas de `helmet`,
+excepciones para endpoints individuales.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo confirmado vigente, sin cambios desde el día 1 del proyecto, con severidad
-matizada (no CSRF clásico) pero no reducida en el resto de su alcance. Estado: ⬜ → 🟦 En análisis.
-Decisión: N/A (ejecución directa, Owner Claude) — pendiente de definir en Fase 2B/3 los valores
-concretos (orígenes permitidos, límites de rate-limiting).
+**Fase 1, Fase 2B y Fase 3 cerradas.** D-044.1/D-044.2/D-044.3 aprobadas, formuladas como propiedades
+arquitectónicas sin mecanismo de implementación — mismo patrón que D-043.1/D-054.1. Pendiente: **Fase 4A
+(Diseño técnico)** — elegir el mecanismo concreto para cada una (¿`helmet` u otra librería? ¿qué
+almacén/estrategia de rate-limiting? ¿de dónde lee CORS la lista de orígenes por entorno?). Estado: se
+mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B, mismo patrón que AR-028/AR-043/AR-054). Decisión:
+✅ Decisión aprobada.
