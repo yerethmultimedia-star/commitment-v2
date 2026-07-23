@@ -174,9 +174,24 @@ describe('GoalsController (e2e)', () => {
   // ─── Complete ─────────────────────────────────────────────────────────────
 
   it('POST /goals/:id/complete — should complete a goal idempotently', async () => {
+    // AR-053: Goal Lifecycle (Decisión B) — complete() requires Active state;
+    // a Draft goal must go through activate() first, which itself requires a
+    // description and at least one linked Commitment.
     await request(app.getHttpServer())
       .post('/v1/goals')
-      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .send({
+        id: GOAL_ID,
+        identityId: IDENTITY_ID,
+        title: 'Learn DDD',
+        description: 'Read the blue book cover to cover',
+      })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/activate`)
       .expect(200);
 
     const r1 = await request(app.getHttpServer())
@@ -309,9 +324,22 @@ describe('GoalsController (e2e)', () => {
   });
 
   it('POST /goals/:id/habits — should return 409 for a completed goal', async () => {
+    // AR-053: Goal Lifecycle (Decisión B) — complete() requires Active state.
     await request(app.getHttpServer())
       .post('/v1/goals')
-      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .send({
+        id: GOAL_ID,
+        identityId: IDENTITY_ID,
+        title: 'Learn DDD',
+        description: 'Read the blue book cover to cover',
+      })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/activate`)
       .expect(200);
     await request(app.getHttpServer())
       .post(`/v1/goals/${GOAL_ID}/complete`)
@@ -326,13 +354,27 @@ describe('GoalsController (e2e)', () => {
   // ─── History ──────────────────────────────────────────────────────────────
 
   it('GET /goals/:id/history — should return the ordered event history', async () => {
+    // AR-053: Goal Lifecycle (Decisión B) — complete() requires Active state,
+    // which requires a description and at least one linked Commitment.
     await request(app.getHttpServer())
       .post('/v1/goals')
-      .send({ id: GOAL_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .send({
+        id: GOAL_ID,
+        identityId: IDENTITY_ID,
+        title: 'Learn DDD',
+        description: 'Read the blue book cover to cover',
+      })
       .expect(200);
     await request(app.getHttpServer())
       .patch(`/v1/goals/${GOAL_ID}`)
       .send({ title: 'Master DDD' })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/commitments`)
+      .send({ commitmentId: COMMITMENT_ID })
+      .expect(200);
+    await request(app.getHttpServer())
+      .post(`/v1/goals/${GOAL_ID}/activate`)
       .expect(200);
     await request(app.getHttpServer())
       .post(`/v1/goals/${GOAL_ID}/complete`)
@@ -346,10 +388,12 @@ describe('GoalsController (e2e)', () => {
     expect(body.map((h) => h.type)).toEqual([
       'goal.registered',
       'goal.renamed',
+      'goal.commitment_linked',
+      'goal.activated',
       'goal.completed',
     ]);
-    expect(body.map((h) => h.version)).toEqual([1, 2, 3]);
-    expect(body[2]?.summary).toBe('Goal completed');
+    expect(body.map((h) => h.version)).toEqual([1, 2, 3, 4, 5]);
+    expect(body[4]?.summary).toBe('Goal completed');
   });
 
   it('GET /goals/:id/history — should return an empty array for a goal that was never registered', async () => {

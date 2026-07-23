@@ -24,6 +24,7 @@ interface ProblemDetailsResponse {
 
 const COMMITMENT_ID = '018f6b5c-42e1-7000-8000-999999999999';
 const IDENTITY_ID = '018f6b5c-42e1-7000-8000-111111111111';
+const TASK_ID = '018f6b5c-42e1-7000-8000-222222222222';
 
 describe('CommitmentsController (e2e)', () => {
   let app: INestApplication<App>;
@@ -107,11 +108,29 @@ describe('CommitmentsController (e2e)', () => {
   // ─── Activate ─────────────────────────────────────────────────────────────
 
   it('POST /commitments/:id/activate — should activate a registered commitment', async () => {
-    // Register first
+    // Register first — AR-053: activation also requires a non-empty description
+    // (Commitment.activate(), packages/domain/src/commitment/aggregate/commitment.ts).
     await request(app.getHttpServer())
       .post('/v1/commitments')
-      .send({ id: COMMITMENT_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .send({
+        id: COMMITMENT_ID,
+        identityId: IDENTITY_ID,
+        title: 'Learn DDD',
+        description: 'Read the blue book cover to cover',
+      })
       .expect(200);
+
+    // AR-053: activation also requires an execution plan (ADR-022 §3.1) — a linked,
+    // non-cancelled Task. Without either precondition, activate() correctly returns 409.
+    await request(app.getHttpServer())
+      .post('/v1/tasks')
+      .send({
+        id: TASK_ID,
+        identityId: IDENTITY_ID,
+        title: 'Read the blue book',
+        commitmentId: COMMITMENT_ID,
+      })
+      .expect(201);
 
     const res = await request(app.getHttpServer())
       .post(`/v1/commitments/${COMMITMENT_ID}/activate`)
@@ -124,10 +143,27 @@ describe('CommitmentsController (e2e)', () => {
   });
 
   it('POST /commitments/:id/activate — should be idempotent (activate × 3)', async () => {
+    // AR-053: activation requires a non-empty description (see note above).
     await request(app.getHttpServer())
       .post('/v1/commitments')
-      .send({ id: COMMITMENT_ID, identityId: IDENTITY_ID, title: 'Learn DDD' })
+      .send({
+        id: COMMITMENT_ID,
+        identityId: IDENTITY_ID,
+        title: 'Learn DDD',
+        description: 'Read the blue book cover to cover',
+      })
       .expect(200);
+
+    // AR-053: activation requires an execution plan (ADR-022 §3.1).
+    await request(app.getHttpServer())
+      .post('/v1/tasks')
+      .send({
+        id: TASK_ID,
+        identityId: IDENTITY_ID,
+        title: 'Read the blue book',
+        commitmentId: COMMITMENT_ID,
+      })
+      .expect(201);
 
     const r1 = await request(app.getHttpServer())
       .post(`/v1/commitments/${COMMITMENT_ID}/activate`)
