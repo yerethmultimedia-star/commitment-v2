@@ -132,16 +132,83 @@ consumidores se adaptan a ese modelo, no al revés.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**AR-030 es, hasta ahora, la primera remediación cuyo núcleo es el diseño de un nuevo aggregate de
+dominio, no la corrección de uno existente.** Cualquier decisión innecesaria aquí condicionaría
+capacidades futuras.
+
+**Pregunta que gobierna esta fase (deliberadamente no formulada como "¿cómo representamos Identity?"):**
+
+> **¿Cuál es el conjunto mínimo de responsabilidades e invariantes que justifican la existencia de un
+> aggregate `Identity` independiente?**
+
+Esto obliga a modelar el aggregate desde el dominio, no desde los consumidores actuales.
+
+### Alternativas evaluadas
+
+- **A — Identity como simple contenedor de `identityId`.** Descartada: no resuelve D-030.1 — seguiría
+  existiendo un identificador sin comportamiento ni invariantes.
+- **B — Fusionar Identity con Authentication.** Descartada: contradice directamente D-043.1 y mezcla
+  dos responsabilidades distintas (Authentication demuestra quién accede; Identity representa quién es
+  la entidad dentro del dominio).
+- **C — Identity construido alrededor de Session/Credential.** Descartada: los consumidores actuales no
+  deben definir el modelo de dominio — invertiría la dependencia arquitectónica.
+- **D — Identity como aggregate autónomo (elegida).** El aggregate existe porque el dominio lo
+  necesita, no porque otros módulos lo referencian. Los consumidores (Authentication, perfiles, futuras
+  capacidades) dependen de ese modelo, nunca al revés.
+
+### Diseño congelado
+
+No se congelan atributos concretos — se congelan responsabilidades:
+
+> **Identity es un agregado de dominio autónomo cuya responsabilidad es representar una identidad
+> consistente dentro del sistema, definiendo sus propias invariantes y sirviendo como punto de
+> referencia para las relaciones entre capacidades, sin incorporar responsabilidades de autenticación,
+> autorización o gestión de sesiones.**
+
+Deja deliberadamente abierto: atributos, persistencia, APIs, eventos, repositorios — eso pertenece a
+la implementación.
+
+### Relación con Authentication
+
+Dependencia unidireccional: Authentication puede referenciar una `Identity`; Identity no debe conocer
+Authentication. Preserva la separación ya establecida en AR-043/D-043.1.
+
+### Alcance fijado para Fase 4B
+
+- Creación del aggregate `Identity` (ya existe a nivel de dominio — confirmar si necesita ajustes para
+  cumplir las invariantes mínimas fijadas aquí, o si ya las cumple).
+- Definición de sus invariantes mínimas.
+- Adaptación de referencias para que apunten al aggregate real cuando corresponda.
+- **Ninguna incorporación de lógica de autenticación, credenciales o sesiones.**
+
+### Criterio de validación para Fase 5
+
+1. ¿Existe ahora un aggregate `Identity` explícito en el dominio?
+2. ¿`identityId` deja de ser un identificador sin significado y pasa a referenciar ese aggregate?
+3. ¿Authentication continúa separado y no transfiere responsabilidades al nuevo aggregate?
+4. ¿Las invariantes de `Identity` están definidas dentro del propio aggregate, no repartidas entre
+   consumidores?
+5. ¿Los consumidores dependen de `Identity` sin definir su comportamiento?
+
+### Observación registrada (no promovida)
+
+AR-030 tiene el potencial de convertirse en una AR fundacional — a diferencia de otras remediaciones,
+no corrige una representación existente, introduce un concepto de dominio que servirá de base para
+capacidades futuras. El éxito del diseño depende más de mantener el aggregate pequeño, cohesionado y
+con responsabilidades bien delimitadas que de anticipar todos los usos futuros de la identidad.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma completamente vigente, sin ninguna
-corrección ni resolución parcial desde la auditoría — ni siquiera por AR-043, que tocó el mismo
-concepto central (`identityId`) pero, por diseño deliberado, no resolvió la ausencia de un aggregate
-de backend real para `Identity`. Reencuadrado por la evidencia: no es una decisión pendiente de
-formalizar, es una ausencia de concepto de dominio que ya afecta a más de un módulo. D-030.1 aprobada:
-todo identificador compartido usado como fundamento de relaciones entre capacidades debe corresponder
-a un aggregate de dominio explícito — formulada como propiedad, sin fijar estructura ni mecanismo.
-Pendiente: **Fase 4A (Diseño técnico)** — con la precaución explícita de mantener Authentication e
-Identity separados y de modelar desde las responsabilidades propias de Identity, no desde sus
-consumidores actuales. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 →
-✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma completamente vigente, sin
+ninguna corrección ni resolución parcial desde la auditoría — ni siquiera por AR-043, que tocó el mismo
+concepto central (`identityId`) pero, por diseño deliberado, no resolvió la ausencia de un aggregate de
+backend real para `Identity`. D-030.1 aprobada; diseño técnico congelado — Identity como aggregate
+autónomo, responsabilidades fijadas sin atributos concretos, dependencia unidireccional desde
+Authentication hacia Identity. Pendiente: **Fase 4B (Implementación)**. Estado: se mantiene 🟦 En
+análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
