@@ -25,13 +25,16 @@ import {
  * Goal — top-level Aggregate Root for the "what do I want to achieve"
  * layer of the product (VS-031 Product Experience Completion, Revision 2).
  *
- * Hierarchy: Goal -> Commitment -> Task/Habit, plus Goal -> Habit/Milestone
- * directly. Commitment keeps its own aggregate, events and persistence
- * unchanged — Goal only records which Commitment/habit ids belong to it,
- * so existing Commitments become children of a Goal without a schema
- * change on the Commitment side. Milestone is intentionally not modeled
- * yet (see Phase 5 — Goals Workspace); linkCommitment/linkHabit are the
- * only relationships this phase needs.
+ * Planning & Execution (Goal/Commitment/Task/Habit) is one bounded context /
+ * shared kernel, not a strict layered hierarchy (ADR-025) — Goal -> Commitment
+ * is one valid path, but Task and Habit may also link to Goal directly
+ * (Task.goalId, Habit.goalId), exclusively with any Commitment link
+ * (Task.relinkGoal()/relinkCommitment() enforce this). Commitment keeps its
+ * own aggregate, events and persistence unchanged — Goal only records which
+ * Commitment/habit ids belong to it, so existing Commitments become children
+ * of a Goal without a schema change on the Commitment side. Milestone is
+ * intentionally not modeled yet (see Phase 5 — Goals Workspace);
+ * linkCommitment/linkHabit are the only relationships this phase needs.
  */
 export enum GoalState {
   Draft,

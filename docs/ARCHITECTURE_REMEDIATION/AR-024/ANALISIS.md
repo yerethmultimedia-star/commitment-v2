@@ -143,14 +143,104 @@ referencias arquitectónicas necesarias — pero eso pertenece al diseño, no a 
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**Pregunta que gobierna esta fase (distinta a un diseño de dominio):** _"¿Cómo debe incorporarse una
+decisión ya consolidada al corpus arquitectónico sin alterar la historia del proyecto?"_
+
+### Alternativas evaluadas
+
+- **A — Crear una ADR normativa nueva (sin marcarla retrospectiva).** Descartada: transmitiría que la
+  decisión nace ahora, cuando existía antes de la auditoría, estaba implementada, y ya servía de
+  fundamento para ADR-023 — cronológicamente inexacta.
+- **B — Modificar ADR-023 para que absorba la decisión.** Descartada: ADR-023 depende de esta decisión,
+  no debe convertirse retrospectivamente en su origen — rompería la trazabilidad causal.
+- **C — Documentar únicamente el comentario de `Goal.ts`.** Descartada: corrige un síntoma, no resuelve
+  la ausencia de una decisión explícita que otras ADR puedan referenciar.
+- **D — ADR retrospectiva + alineación documental (elegida).** 3 responsabilidades diferenciadas: ADR
+  retrospectiva (formaliza una decisión que ya existía), código (permanece sin cambios funcionales),
+  documentación residual (elimina contradicciones, como el comentario de `Goal.ts`).
+
+### Diseño congelado
+
+> **Las decisiones arquitectónicas descubiertas retrospectivamente se formalizan mediante una ADR
+> explícitamente retrospectiva, preservando la cronología real de implementación, sin introducir
+> cambios funcionales y corrigiendo únicamente la documentación que contradiga la decisión ya vigente.**
+
+**Trazabilidad:** la nueva ADR documenta la decisión; ADR-023 pasa a referenciarla como fundamento
+explícito, sin que su contenido técnico cambie.
+
+### Alcance fijado para Fase 4B
+
+- Creación de la ADR retrospectiva.
+- Corrección del comentario de `Goal.ts`.
+- Actualización de referencias cruzadas necesarias (ADR-023).
+- **Ninguna modificación del comportamiento del dominio.** Si apareciera la necesidad de cambiar
+  código funcional, sería señal de que la evidencia de Fase 1 se interpretó incorrectamente.
+
+### Criterio de validación para Fase 5 (trazabilidad, no comportamiento)
+
+1. ¿La decisión implementada tiene ahora una ADR que la formaliza explícitamente?
+2. ¿La ADR preserva la cronología real en lugar de reescribirla?
+3. ¿ADR-023 puede apoyarse explícitamente en esa decisión sin asumir un antecedente implícito?
+4. ¿Ha desaparecido toda documentación que describa una "jerarquía estricta" incompatible con el
+   comportamiento real?
+5. ¿El código funcional permanece idéntico?
+
+## Fase 4B — Implementación
+
+**Estado: ✅ Implementada.**
+
+- **`docs/03-architecture/adr_025_task_goal_commitment_boundary.md` (nueva, retrospectiva):** declara
+  Planning & Execution (Goal/Commitment/Task/Habit) un bounded context / shared kernel; formaliza la
+  exclusión mutua `Task.goalId`/`Task.commitmentId` ya implementada, con la cronología real preservada
+  (commit `1ead830`, 2026-07-18, 2 días antes de la auditoría) — marcada explícitamente "ADR
+  retrospectiva," sin fingir que la decisión nace hoy. Referencia explícita a ADR-022 (introdujo el
+  código sin discutir el límite) y ADR-023 (depende de esta exclusión como precedente).
+- **`packages/domain/src/goal/aggregate/Goal.ts` (comentario de cabecera corregido, cero cambio
+  funcional):** de _"Hierarchy: Goal -> Commitment -> Task/Habit"_ (lenguaje de jerarquía estricta que
+  la auditoría pidió retirar) a una descripción que refleja el shared kernel real, citando ADR-025 y
+  mencionando explícitamente que `Task` también enlaza directamente a `Goal`, exclusivo con cualquier
+  enlace a `Commitment`.
+- **`docs/03-architecture/adr_023_habit_commitment_relationship.md` (nota añadida, sin cambio de
+  contenido técnico):** referencia explícita a ADR-025 en el punto donde ya citaba la exclusión de
+  `Task` como precedente — la cita queda ahora fundamentada, el razonamiento de ADR-023 no cambia.
+- **Verificado: `packages/domain` — 279/279 tests, cero regresión** (el único cambio de código real
+  fue un comentario; ningún comportamiento de `Task`/`Goal`/`Habit` se tocó).
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+Las 5 preguntas fijadas en Fase 4A, respondidas contra el resultado real:
+
+1. **¿La decisión implementada tiene ahora una ADR que la formaliza explícitamente?** Sí — ADR-025.
+2. **¿La ADR preserva la cronología real en lugar de reescribirla?** Sí — cita el commit `1ead830`
+   (2026-07-18) como origen real, y se marca explícitamente "retrospectiva," con fecha de decisión
+   separada de la fecha de formalización.
+3. **¿ADR-023 puede apoyarse explícitamente en esa decisión sin asumir un antecedente implícito?** Sí
+   — nota añadida con referencia cruzada a ADR-025, sin alterar el contenido técnico de ADR-023.
+4. **¿Ha desaparecido toda documentación que describa una "jerarquía estricta" incompatible con el
+   comportamiento real?** Sí — el comentario de `Goal.ts` ya no la describe; confirmado por grep que
+   no queda ninguna otra ocurrencia de esa jerarquía en `packages/domain`.
+5. **¿El código funcional permanece idéntico?** Sí — verificado por la suite completa de
+   `packages/domain` (279/279 tests, cero regresión); el único cambio fue un comentario.
+
+**Criterio de cierre, respondido:** AR-024 cierra sin alterar el dominio, y elimina una decisión crítica
+que existía en la práctica pero no en la arquitectura explícita. D-024.1 queda materializada.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo original describía una decisión de límite de
-contexto sin tomar. La evidencia muestra que la decisión ya está tomada e implementada en código desde
-antes de la propia auditoría. Reencuadrado por la evidencia: no es diseñar un límite, es cerrar la
-brecha entre una decisión operativa y su trazabilidad arquitectónica. D-024.1 aprobada: toda restricción
-de dominio que sirva de fundamento para decisiones posteriores debe estar formalizada mediante una ADR,
-sin depender solo de la implementación — formulada como propiedad de gobernanza, sin mecanismo
-concreto. Pendiente: **Fase 4A (Diseño técnico)** — con la precaución explícita de no reabrir el modelo
-Goal-Commitment-Task ya estable. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B).
-Decisión: 💭 → ✅ Decisión aprobada.
+**AR-024 CERRADA (2026-07-23).** El hallazgo original describía una decisión de límite de contexto sin
+tomar. La evidencia mostró que la decisión ya estaba tomada e implementada en código desde antes de la
+propia auditoría (exclusión mutua `Task.goalId`/`commitmentId`, commit `1ead830`, 2026-07-18).
+Reencuadrado por la evidencia: no diseñar un límite, cerrar la brecha entre una decisión operativa y su
+trazabilidad arquitectónica. D-024.1 aprobada e implementada mediante una ADR retrospectiva
+(**ADR-025**) que preserva la cronología real, corrección del comentario de `Goal.ts`, y una nota de
+trazabilidad en ADR-023 — sin ningún cambio de comportamiento del dominio (279/279 tests, cero
+regresión). Las 5 preguntas de validación respondidas afirmativamente. Estado: 🟦 → ✅ Cerrada.
+Decisión: ✅ Decisión aprobada → ✔️ Validada.

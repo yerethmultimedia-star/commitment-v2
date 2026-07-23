@@ -105,6 +105,12 @@ tiene esa naturaleza de pertenencia única: mantiene su relación primaria con u
 ya existente) **y**, adicionalmente, puede declarar que apoya varios Commitments a la vez sin que eso
 compita con esa relación. Son dos facetas distintas del mismo agregado, no alternativas.
 
+**Nota añadida 2026-07-23 (AR-024, sin cambio de contenido técnico):** al escribirse esta ADR, la
+exclusión mutua de `Task` citada arriba era ya un comportamiento real e implementado, pero no tenía
+ninguna ADR propia que lo formalizara. **ADR-025** (`adr_025_task_goal_commitment_boundary.md`) cierra
+esa brecha retrospectivamente — esta cita queda ahora fundamentada explícitamente, sin que el
+razonamiento o la decisión de esta ADR-023 cambien en nada.
+
 **Método:** `Habit.linkCommitment(commitmentId: string): void` / `Habit.unlinkCommitment(commitmentId:
 string): void`, idempotentes, mismo estilo que `Goal.linkCommitment()`/`Goal.linkHabit()`. No
 requiere que `Commitment` conozca nada de `Habit` — ninguna consulta cruzada de agregados, ningún
