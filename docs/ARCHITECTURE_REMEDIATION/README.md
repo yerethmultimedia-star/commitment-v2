@@ -16,6 +16,7 @@ Companion to `docs/ARCHITECTURE_REVIEW/` (the immutable diagnosis). This folder 
 - `REMEDIATION_ROADMAP_V1.md` — las 51 Architecture Remediations (AR-001 a AR-050, más AR-051), organizadas en 6 waves por dependencia de causa raíz, con grafo de bloqueos explícito.
 - `REMEDIATION_DASHBOARD.md` — progreso por wave, por eje de Decisión, impacto acumulado, y métricas globales. Se actualiza en cada cambio de estado.
 - `HALLAZGOS_PENDIENTES.md` (añadido 2026-07-23, tras el cierre de AR-054) — registro ligero de hallazgos descubiertos durante el trabajo de una AR cuya investigación (¿es un defecto real? ¿de quién es la responsabilidad? ¿merece una AR propia?) todavía no ha empezado. Distinto del Roadmap: no tiene ID permanente hasta que se promueva a AR formal.
+- `REVISION_TRANSVERSAL_7_ARS.md` (añadido 2026-07-23, tras el cierre de AR-054) — revisión metodológica transversal de las 7 ARs cerradas hasta ahora, pedida explícitamente por el usuario en vez de abrir un nuevo frente técnico. Tally verificado por grep (no por impresión) de: cambios de propietario del problema, decisiones simplificadas por evidencia (H-GOV-01), balance de hipótesis refutadas/confirmadas, y técnicas de investigación reutilizadas entre ARs. Deliberadamente no promueve nada a regla permanente — solo señala qué patrones ya acumulan repetición suficiente para vigilancia prioritaria.
 
 ## Artefactos futuros (deliberadamente no creados todavía)
 
