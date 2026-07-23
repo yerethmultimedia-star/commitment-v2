@@ -89,14 +89,68 @@ ya demostró para el caso de `Habit`.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+AR-024 presenta un patrón distinto a AR-002/AR-009/AR-036/AR-004: no es que la decisión aún deba
+tomarse, ni que la documentación se haya desalineado de una decisión existente — **la decisión ya
+existe en el sistema, pero carece de formalización arquitectónica.**
+
+**H1 (principal):** _"La exclusión mutua entre `goalId` y `commitmentId` constituye una decisión
+arquitectónica ya implementada y utilizada como precedente por otras decisiones, pero no formalizada
+mediante una ADR. La remediación consiste en hacer explícita esa decisión y alinear la documentación
+residual."_ Respaldada por la evidencia de Fase 1: la regla existe en código desde antes de la
+auditoría; la auditoría inspeccionó la estructura de datos, no el comportamiento; ADR-023 ya depende
+implícitamente de esa regla; persiste una única inconsistencia documental (`Goal.ts`).
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — la decisión aún debe diseñarse. Descartada: el comportamiento ya está implementado y
+  estable; rediseñarlo implicaría reabrir una decisión que el sistema ya tomó de facto.
+- **H3** — el problema es únicamente un comentario incorrecto. Descartada: el comentario es un
+  síntoma — el problema real es la ausencia de una decisión arquitectónica explícita que explique por
+  qué el código funciona así y permita que otras ADR la referencien correctamente.
+- **H4** — ADR-023 formalizó implícitamente esta decisión. Descartada: la evidencia muestra lo
+  contrario — ADR-023 utiliza la exclusión como antecedente, pero no la crea; una ADR no debería
+  adquirir autoridad retrospectiva sobre una decisión distinta simplemente porque la menciona.
+
+**H1 sobrevive.** El objeto de AR-024 ya no es definir un límite de dominio — es cerrar la brecha entre
+una decisión operativa y su trazabilidad arquitectónica.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+No se vuelve a decidir la exclusión mutua — esa decisión ya está materializada. La propiedad
+arquitectónica congelada es otra.
+
+**D-024.1:** _"Toda restricción de dominio que condicione la interpretación del modelo y sirva de
+fundamento para decisiones arquitectónicas posteriores debe estar formalizada mediante una ADR o un
+artefacto arquitectónico equivalente, de forma que su existencia no dependa exclusivamente de la
+implementación."_
+
+**No dice** "Goal y Commitment son excluyentes" — eso ya lo demuestra el código. Establece una
+propiedad de gobernanza arquitectónica: las decisiones fundamentales del dominio deben ser
+explícitamente trazables. Mismo patrón que D-002.1/D-009.1/D-036.1/D-004.1/D-043.1/D-054.1/D-044.1-3.
+
+**Aspecto a vigilar en Fase 4A, registrado de antemano:** no convertir esta AR en una revisión del
+modelo Goal-Commitment-Task — ese modelo ya mostró estabilidad. El diseño debe centrarse en responder:
+_"¿cuál es el mejor mecanismo para convertir una decisión ya operativa en una decisión arquitectónica
+explícita, sin reescribir la historia del proyecto?"_ La respuesta probablemente implica una ADR
+retrospectiva (mismo patrón que AR-001), corrección del comentario de `Goal.ts`, y actualización de
+referencias arquitectónicas necesarias — pero eso pertenece al diseño, no a esta decisión.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo original describía una decisión de límite de contexto sin tomar. La
-evidencia muestra que **la decisión ya está tomada e implementada en código desde antes de la propia
-auditoría** (exclusión mutua Goal/Commitment en `Task`, `commit 1ead830`, 2026-07-18) — solo falta
-formalizarla en una ADR y corregir el comentario de `Goal.ts` que sigue describiendo una jerarquía
-estricta ya contradicha por el propio dominio. ADR-023 (Habit↔Commitment) ya construyó sobre esta
-exclusión sin haberla decidido ella misma, evidencia adicional de que la ausencia de una ADR dedicada es
-el problema real, no la ausencia de una decisión. Estado: ⬜ → 🟦 En análisis. Decisión: pendiente Fase
-2A (Owner=Ambos — requiere el juicio del usuario sobre si formalizar la exclusión mutua ya operativa es
-la decisión correcta, o si la evidencia amerita reabrir la pregunta de fondo).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo original describía una decisión de límite de
+contexto sin tomar. La evidencia muestra que la decisión ya está tomada e implementada en código desde
+antes de la propia auditoría. Reencuadrado por la evidencia: no es diseñar un límite, es cerrar la
+brecha entre una decisión operativa y su trazabilidad arquitectónica. D-024.1 aprobada: toda restricción
+de dominio que sirva de fundamento para decisiones posteriores debe estar formalizada mediante una ADR,
+sin depender solo de la implementación — formulada como propiedad de gobernanza, sin mecanismo
+concreto. Pendiente: **Fase 4A (Diseño técnico)** — con la precaución explícita de no reabrir el modelo
+Goal-Commitment-Task ya estable. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B).
+Decisión: 💭 → ✅ Decisión aprobada.
