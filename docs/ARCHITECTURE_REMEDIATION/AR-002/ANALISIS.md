@@ -140,9 +140,80 @@ AR.
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Implementada.**
+
+**Capa 1 — Plantilla de PR (`.github/pull_request_template.md`):** 3 preguntas declarativas exactas a
+D-002.1 (¿introduce tecnología nueva? ¿reemplaza/elimina una Tecnología Preferida? ¿requiere ADR
+nueva/actualizada?), como checkboxes. Sin ningún script que las valide — su función es exclusivamente
+declarativa, tal como fija Fase 4A. GitHub inyecta este archivo automáticamente en todo PR nuevo contra
+este repositorio (comportamiento nativo de la plataforma, no requiere configuración adicional).
+
+**Capa 2 — CI (`.github/scripts/check-preferred-tech.mjs` + job `preferred-tech-enforcement` en
+`.github/workflows/ci.yml`):** reglas objetivas, sin interpretación arquitectónica. Lista de
+Tecnologías Preferidas gobernadas, tomada directamente de ADR-024 (única fuente normativa vigente):
+`@nestjs/core`/`bullmq` en `apps/backend/package.json`; `expo`/`react-native` en
+`apps/mobile/package.json`. El script compara `package.json` entre la rama base y `HEAD` de un PR
+(`git show <ref>:<archivo>`) y señala una violación solo en 2 casos objetivos: (a) una dependencia
+gobernada existía en base y desaparece en `HEAD`; (b) su versión mayor cambia. Si detecta una
+violación, revisa si el mismo diff modifica algún archivo `docs/03-architecture/adr_*.md` — de ser así,
+la trata como excepción respaldada (D-002.1 cumplido) y no falla; si no, falla con código de salida 1 y
+detalla exactamente qué dependencia y por qué. El job solo corre en eventos `pull_request` (no en
+`push` a `main`, donde ya no aplica prevenir la integración).
+
+**Capa 3 — ADR:** sin implementación nueva, tal como fijó Fase 4A — el script reutiliza el patrón ya
+existente (`docs/03-architecture/adr_*.md`), no crea un proceso de ADR paralelo.
+
+**Verificación de no-solapamiento (pedida en Fase 4A):** la plantilla no ejecuta ninguna lógica de
+validación (grep exhaustivo del archivo: cero referencias a `github-script`, cero llamadas a APIs); el
+CI no interpreta las respuestas de la plantilla ni ningún texto libre — solo diffs de `package.json` y
+nombres de archivo. Cero solapamiento de responsabilidad entre capas.
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada, con un hallazgo residual documentado explícitamente (no oculto).**
+
+**Prueba de extremo a extremo real, no solo inspección de archivos** (`.github/scripts/check-preferred-tech.e2e.test.mjs`, `node --test`, 4/4 passing): construye un repositorio git temporal real (no
+mockeado) y ejecuta las funciones exactas que usa el job de CI contra refs reales:
+
+1. **Sin desviación** → `findViolations` devuelve `[]`. ✅
+2. **`bullmq` eliminado de `apps/backend/package.json`, sin ADR en el diff** → 1 violación detectada,
+   `hasBackingAdrChange` = `false`. Replica el caso "CI debe fallar." ✅
+3. **La misma eliminación, pero el mismo commit añade `docs/03-architecture/adr_099_....md`** → la
+   violación se detecta igual, pero `hasBackingAdrChange` = `true` — el caso "excepción respaldada por
+   ADR, D-002.1 cumplido." ✅
+4. **Cambio de versión mayor de `@nestjs/core` (`^11.0.0` → `^12.0.0`), sin ADR** → 1 violación
+   detectada con el mensaje correcto. ✅
+
+Además, el script se ejecutó directamente contra este mismo repositorio (`HEAD~3` como base) para
+confirmar que no falla por un error de entorno/ruta real, más allá de los repos sintéticos de la
+prueba — exit code 0, sin excepciones.
+
+**Hallazgo residual, verificado explícitamente vía `gh api`, no asumido:** el repositorio remoto
+(`yerethmultimedia-star/commitment-v2`) **no tiene branch protection configurada en `main`**
+(`gh api repos/.../branches/main/protection` → `404 Branch not protected`). Esto significa que, hoy,
+aunque el job `preferred-tech-enforcement` detecte correctamente una violación y falle (demostrado
+arriba), **nada en la configuración actual de GitHub impide fusionar el PR de todas formas** — un
+mantenedor podría hacer merge ignorando un check en rojo. La pregunta de validación de Fase 4A
+("¿puede una desviación llegar a `main` sin ser detectada?") tiene respuesta **no** — el mecanismo de
+detección es real y demostrado. Pero la pregunta más fuerte, "¿puede llegar a `main` sin ser
+**bloqueada**?", hoy tiene respuesta **sí**, porque el bloqueo depende de un ajuste de configuración del
+repositorio (`Require status checks to pass before merging`) que vive fuera de este repositorio de
+código y no puede activarse solo con cambios de archivos. **No se activó unilateralmente** — requiere
+una decisión explícita del usuario, al ser un cambio de configuración de infraestructura compartida
+(afecta a cualquier futuro PR de cualquier colaborador), no un cambio de código.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 3 y Fase 4A cerradas.** D-002.1 aprobada; diseño técnico congelado en un enfoque
-multicapa (plantilla de PR + CI + ADR), sin redundancia entre capas. Pendiente: **Fase 4B
-(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: ✅ Decisión
-aprobada.
+**Fase 1, Fase 2A, Fase 3, Fase 4A y Fase 4B cerradas.** D-002.1 aprobada e implementada: plantilla de
+PR (`.github/pull_request_template.md`), CI (`preferred-tech-enforcement` en `ci.yml` +
+`check-preferred-tech.mjs`), ADR (proceso existente reutilizado, sin cambios). Fase 5 validada mediante
+prueba de extremo a extremo real (repo git temporal, 4/4 casos), con un hallazgo residual documentado
+explícitamente: la detección funciona, pero el bloqueo real de merge depende de activar branch
+protection en GitHub — configuración de infraestructura compartida, pendiente de decisión explícita del
+usuario antes de cerrar la AR. Estado: 🟦 En análisis (no cierra todavía — ver pendiente de branch
+protection). Decisión: ✅ Decisión aprobada → ✔️ Validada (el diseño y su implementación están
+validados; el cierre de la AR en sí queda condicionado a esa decisión pendiente).

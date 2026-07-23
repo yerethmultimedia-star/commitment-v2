@@ -69,3 +69,16 @@ jobs:
 
       - name: Typecheck Mobile
         run: pnpm --filter mobile exec tsc --noEmit
+
+  preferred-tech-enforcement:
+    name: Preferred Technology Enforcement (D-002.1)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Tecnologías Preferidas changes have a backing ADR
+        run: node .github/scripts/check-preferred-tech.mjs
