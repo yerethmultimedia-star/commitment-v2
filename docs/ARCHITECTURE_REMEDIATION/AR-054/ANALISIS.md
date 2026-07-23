@@ -243,11 +243,28 @@ integración debe tratarse con el mismo rigor que un contrato de dominio."_
 
 ---
 
+## Plan de reanudación para Fase 4A (Diseño técnico) — registrado 2026-07-23, sesión cerrada aquí
+
+Misma disciplina que AR-043: Fase 4A no discute código todavía, discute invariantes de diseño. Preguntas
+de apertura, en orden, antes de elegir mecanismo (provider/factory/bootstrap/wrapper):
+
+1. ¿Quién es el propietario del contrato de integración con BullMQ dentro de la aplicación?
+2. ¿Dónde debe existir el registro del manejador de error para que no pueda omitirse accidentalmente al
+   añadir un futuro `Queue`/`Worker`?
+3. ¿Cómo se evita que una futura integración BullMQ viole D-054.1 sin que nadie lo note?
+4. ¿El cumplimiento de D-054.1 debe ser obligatorio por construcción (imposible de omitir) o solo
+   verificable por convención (posible de omitir, pero detectable por revisión/lint)?
+
+Solo después de responder estas 4 preguntas corresponde elegir la materialización concreta.
+
+---
+
 ## Estado
 
 **Fase 1, Fase 2B y Fase 3 cerradas.** D-054.1 aprobada: la solución debe ser un patrón de integración
 general (Alternativa C), no listeners locales aislados (Alternativa B) ni mantener el estado actual
 (Alternativa A). Pendiente: Fase 4A (Diseño técnico — dónde y cómo se implementa el patrón) y Fase 4B
-(Implementación) — no iniciadas todavía, a la espera de que el usuario dé paso. Estado (eje Estado):
-se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón que AR-028/AR-043).
-Decisión: ✅ Decisión aprobada.
+(Implementación) — no iniciadas todavía. **Sesión cerrada aquí a petición del usuario** — D-054.1 queda
+congelada, Fase 4A queda para la próxima sesión, con el plan de reanudación de arriba ya registrado.
+Estado (eje Estado): se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón
+que AR-028/AR-043). Decisión: ✅ Decisión aprobada.
