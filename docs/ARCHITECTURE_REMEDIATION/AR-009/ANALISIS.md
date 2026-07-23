@@ -119,12 +119,65 @@ declarada, o una combinación — las alternativas de materialización quedan pa
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+### Alternativas evaluadas
+
+- **A — Solo `CODEOWNERS`.** Resuelve propiedad del código y asignación automática de revisores.
+  Descartada como solución completa: no resuelve branch protection, required status checks, ni reglas
+  de merge.
+- **B — Solo documento versionado** (p. ej. `docs/governance/branch-protection.md`) describiendo la
+  configuración esperada. Auditable, versionado, independiente de GitHub. Descartada como único
+  mecanismo: puede divergir de la configuración real si nadie la verifica.
+- **C — Solo script de verificación.** Consulta GitHub y compara contra un estado esperado. Detecta
+  deriva, pero necesita una fuente de verdad versionada contra la cual comparar — sin ella, solo
+  inspecciona el estado actual. No basta por sí mismo.
+- **D — Diseño multicapa (elegida).** Cada artefacto cubre una responsabilidad distinta, sin
+  redundancia:
+
+  | Artefacto                      | Responsabilidad                                                                                       |
+  | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+  | `CODEOWNERS`                   | Declarar propiedad y revisión del código.                                                             |
+  | Archivo de política versionado | Declarar el estado esperado de la gobernanza (branch protection, required checks, reglas relevantes). |
+  | Script de verificación         | Comparar la configuración real de GitHub con la política declarada y detectar deriva.                 |
+
+  Uno declara responsables; otro declara la política; otro verifica que la plataforma sigue esa
+  política.
+
+### Lo que no haría
+
+No se intentaría exportar toda la configuración de GitHub — eso acoplaría innecesariamente el
+repositorio a una implementación concreta del proveedor. El archivo de política versionado contiene
+únicamente lo que constituye una decisión de gobernanza del proyecto, no un espejo 1:1 de la API de
+GitHub.
+
+### Criterio de diseño
+
+> **Si mañana hubiera que reconstruir la gobernanza del repositorio en otra instancia de GitHub (o
+> incluso en otro proveedor), ¿los artefactos versionados describen completamente la política del
+> proyecto y permiten verificar su correcta aplicación?**
+
+Si la respuesta es afirmativa, D-009.1 queda materializada sin depender exclusivamente de la
+configuración externa.
+
+### Preparación para Fase 4B
+
+Cada artefacto congelado con un único propósito, sin decisiones arquitectónicas adicionales esperadas
+en la implementación (mismo patrón que AR-002/AR-044):
+
+- **`CODEOWNERS`** → propiedad y revisión.
+- **Política versionada** → fuente de verdad declarativa.
+- **Script de comprobación** → verificación automática de conformidad.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo original quedó dividido en 2 partes por la
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo original quedó dividido en 2 partes por la
 evidencia: (a) "¿el CI gatea de verdad los merges?" — ya resuelta indirectamente por AR-002; (b) "¿es
 esa configuración verificable desde el propio repo, y existe `CODEOWNERS`?" — sigue sin resolver.
-D-009.1 aprobada: la gobernanza relevante debe tener representación versionada y verificable en el
-repositorio, formulada como propiedad, sin mecanismo concreto. Pendiente: **Fase 4A (Diseño técnico)**
-— elegir el conjunto mínimo de artefactos (posible enfoque multicapa, a evaluar igual que en AR-002).
-Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 → ✅ Decisión aprobada.
+D-009.1 aprobada; diseño técnico congelado en un enfoque multicapa (`CODEOWNERS` + política versionada +
+script de verificación), sin redundancia entre capas. Pendiente: **Fase 4B (Implementación)**. Estado:
+se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
