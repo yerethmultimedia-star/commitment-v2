@@ -72,11 +72,61 @@ separó D-023.1 de D-023.2, y AR-008 aisló AR-053/AR-054 sin expandir su propio
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**H1 (principal):** _"El término 'streak' representa un concepto de producto que ya no coincide con el
+framing definido por las ADR vigentes y, por tanto, debe eliminarse o redefinirse de forma consistente
+en todas las capas donde aparezca, excepto donde forme parte explícita del modelo de dominio
+preservado."_ Respaldada por la evidencia de Fase 1: ADR-006/ADR-010 siguen vigentes, la auditoría ya
+identificó el conflicto, el uso es transversal (UI + 2 motores internos), y `Habit.currentStreakDays`
+fue separado deliberadamente y queda fuera de alcance.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — el problema es únicamente terminológico (copy/UI). Descartada: la presencia en motores de
+  recomendación y layout demuestra que el concepto influye también en comportamiento, no solo en texto.
+- **H3** — el problema es exclusivamente de dominio. Descartada: la evidencia muestra precisamente lo
+  contrario — el dominio (`currentStreakDays`) fue excluido del alcance.
+- **H4** — deben convivir dos significados de "streak," uno interno y otro de producto. No aceptada con
+  la evidencia actual: aumentaría la carga cognitiva y mantendría una ambigüedad conceptual sin
+  justificación explícita en las ADR.
+
+**H1 sobrevive.** Lo que debe remediarse no es un conjunto de archivos, sino un concepto de producto que
+dejó de estar alineado con la dirección arquitectónica vigente.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-036.1:** _"El producto debe utilizar un modelo conceptual único y consistente para representar el
+progreso del usuario, alineado con las ADR vigentes, evitando conceptos heredados que entren en
+conflicto con dicho modelo."_
+
+**No congela:** el reemplazo de "streak", el texto concreto, la terminología final, ni el diseño
+visual — solo fija la propiedad: existe un único modelo conceptual coherente. Mismo patrón que
+D-002.1/D-009.1/D-043.1/D-054.1/D-044.1-3.
+
+**Explícitamente NO decidido en esta fase:** sustituir "streak" por un concepto centrado en compromiso,
+por progreso, absorberlo dentro del sistema de objetivos e hitos, o mantener `currentStreakDays` como
+implementación interna mientras desaparece del lenguaje del producto — las alternativas de framing
+concreto quedan para Fase 4A.
+
+**Criterio que gobernará Fase 4A (fijado de antemano):** la decisión no debe basarse en facilidad
+técnica, sino en la coherencia con la narrativa de producto de Commitment. **Propiedad de éxito, distinta
+de las AR anteriores:** no se mide por una API más robusta o un pipeline más seguro, sino por que el
+usuario ya no perciba dos modelos mentales distintos para describir su progreso.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo se confirma vigente y sin corregir: copy y lógica de streak/gamificación
-en al menos 4 áreas funcionales y 2 motores internos, contradiciendo ADR-006 (exclusión de gamificación)
-y ADR-010 (eliminación de rachas), ambas normativas hoy. El campo de dominio `Habit.currentStreakDays`
-queda explícitamente fuera de alcance, como cuestión separada. Estado: ⬜ → 🟦 En análisis. Decisión:
-pendiente Fase 2A (Owner=Ambos — la fase de hipótesis/decisión requiere el juicio del usuario sobre el
-framing de producto a adoptar, no solo la corrección técnica de las cadenas de texto).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma vigente: copy y lógica de
+streak/gamificación en al menos 4 áreas funcionales y 2 motores internos, contradiciendo ADR-006/ADR-010.
+Reencuadrado por la evidencia de un problema de copy aislado a un modelo conceptual de producto
+compartido. D-036.1 aprobada: el producto debe usar un único modelo conceptual coherente para el
+progreso del usuario, formulada como propiedad, sin nombrar el término de reemplazo. `Habit.
+currentStreakDays` sigue fuera de alcance. Pendiente: **Fase 4A (Diseño técnico)** — elegir el framing
+concreto de reemplazo. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 →
+✅ Decisión aprobada.
