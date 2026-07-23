@@ -119,6 +119,40 @@ deliberadamente sino emergente:** en arquitectura, `Hallazgo → AR → Remediac
 `Fricción metodológica (MFE) → Revisión transversal → Metodología vX.Y`. El mismo patrón, un nivel de
 abstracción más arriba.
 
+**Disciplina de trabajo para el Ciclo 2 (fijada 2026-07-23) — más una regla de conducta que una regla
+metodológica.** Cualquier conversación durante una AR que termine en "deberíamos añadir esto a
+Metodología v1.0" debe responder primero, y solo, a esta pregunta:
+
+> **¿La AR quedó bloqueada sin ello?**
+
+Si la respuesta es **no**, la conversación termina ahí — la idea puede registrarse como observación
+suelta (o, si se repite, como candidata en "Hipótesis en observación"), pero no genera trabajo
+metodológico ni cuenta como MFE. El riesgo del Ciclo 2 ya no es cometer un error arquitectónico — es la
+**deriva metodológica**: refinar v1.0 continuamente por entusiasmo, sin que ninguna AR individual haya
+demostrado la necesidad, produce el mismo efecto que reescribir un ADR en vez de sucederlo — la
+metodología nunca permanece estable el tiempo suficiente como para que la revisión de las 15 ARs pueda
+evaluar honestamente si v1.0, tal cual se congeló, fue suficiente. Se estaría evaluando en su lugar una
+secuencia no documentada de v1.0.x.
+
+**Formato esperado del resumen en la revisión de las 15 ARs (fijado de antemano, 2026-07-23), más
+preciso que "15 ARs cerradas":**
+
+```
+Metodología vigente: v1.0
+AR ejecutadas:        15
+MFE:                   0
+Cambios metodológicos: 0
+```
+
+**El experimento real del Ciclo 2, nombrado explícitamente:** ya no evalúa arquitectura — evalúa una
+afirmación falsable de nivel superior: _"Metodología v1.0 es suficientemente completa para conducir una
+secuencia diversa de remediaciones arquitectónicas sin requerir modificaciones."_ Tiene criterio de
+fallo (MFE > 0), hitos de revisión (15 y 25 ARs), y un mecanismo de versionado si resulta insuficiente
+(el criterio de dos preguntas para v1.1). Es, desde AR-001, la primera hipótesis metodológica de nivel
+superior sometida a prueba continua sin alterar las condiciones del propio experimento — si sobrevive
+hasta la revisión de las 15 ARs sin necesitar ninguna excepción, ese resultado pesará más que cualquier
+refinamiento incremental que se hubiera podido incorporar por el camino.
+
 ## Documentos en esta carpeta
 
 - `REMEDIATION_ROADMAP_V1.md` — las 51 Architecture Remediations (AR-001 a AR-050, más AR-051), organizadas en 6 waves por dependencia de causa raíz, con grafo de bloqueos explícito.
