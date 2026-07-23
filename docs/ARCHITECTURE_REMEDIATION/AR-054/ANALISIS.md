@@ -341,12 +341,69 @@ una decisión de infraestructura de Fase 3.
 
 ---
 
-## Estado
+## Fase 4B — Implementación
 
-**Fase 1, Fase 2B, Fase 3 y Fase 4A cerradas.** D-054.1 aprobada, diseño técnico congelado: Worker vía
-`@OnWorkerEvent('error')` nativo de la librería; Queue vía punto único de integración + restricción
-estática de lint (Nivel 2) + criterio de aceptación por grep. `DiscoveryService` evaluado y descartado
-por desproporción evidencia/complejidad, no por inviabilidad. Pendiente: **Fase 4B (Implementación)** —
-materializar exactamente este diseño, sin reabrir ninguna de las decisiones ya congeladas. Estado (eje
-Estado): se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón que
-AR-028/AR-043). Decisión: ✅ Decisión aprobada.
+**Estado: ✅ Cerrada.** Materializado exactamente el diseño congelado en Fase 4A, sin reabrir ninguna
+decisión:
+
+- **Worker:** `ReminderProcessor` (`apps/backend/src/notifications/infrastructure/reminder.processor.ts`)
+  añade `@OnWorkerEvent('error')` con un método `onError` que registra el error vía `Logger`. Sin
+  wrapper, sin clases nuevas — el mecanismo nativo de `@nestjs/bullmq`.
+- **Queue:** `BullMQExecutionEngine`
+  (`apps/backend/src/notifications/infrastructure/bullmq-execution-engine.ts`) implementa
+  `OnModuleInit` y registra `this.queue.on('error', ...)` sobre la única `Queue` inyectada en todo el
+  codebase (confirmado por grep: `@InjectQueue` no se usa en ningún otro archivo).
+- **Lint:** `apps/backend/eslint.config.mjs` añade una regla `@typescript-eslint/no-restricted-imports`
+  que prohíbe importar `BullModule`/`InjectQueue` de `@nestjs/bullmq` fuera de los 3 archivos legítimos
+  (`app.module.ts` — solo `BullModule.forRoot()`, la configuración de conexión compartida;
+  `notifications.module.ts` — el registro de la cola; `bullmq-execution-engine.ts` — la inyección de la
+  cola, que ya registra el manejador). Verificado en ambas direcciones: cero falsos positivos en los 3
+  archivos permitidos, y dispara correctamente en un archivo de prueba fuera de la lista.
+
+**Verificación técnica, no asumida:** `eslint "src/**/*.ts"` limpio (0 errores) en todo `apps/backend`;
+31 suites / 139 tests unitarios pasando, cero regresión.
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.** Criterio de aceptación de D-054.1 ("toda instancia de `Queue`/`Worker` creada por
+la aplicación registra explícitamente un manejador para el evento `error`") **verificado y cumplido** —
+confirmado por lectura de código y por los logs de ejecución real (`[ReminderProcessor] BullMQ Worker
+error...` aparece en los logs cuando el Worker recibe un error, confirmando que el manejador está
+activo, no solo declarado).
+
+**Hallazgo adicional durante esta fase, tratado como colateral fuera de alcance, no como fracaso de
+D-054.1:** el síntoma `Unhandled error (Connection is closed)` sigue apareciendo de forma intermitente
+en la suite e2e completa, pese a la implementación correcta. Instrumentado directamente
+`EventEmitter.prototype.emit` para confirmar, sin especular, el origen exacto: el emisor sin listener es
+la propia `RedisConnection` interna de BullMQ (no la `Queue` ni el `Worker` de la aplicación) — una
+condición de carrera en el propio `RedisConnection.close()` de `bullmq@5.79.3`, entre la resolución
+tardía de `this.initializing` y `this.removeAllListeners()` en el bloque `finally`. **El propietario de
+este síntoma cambió: ya no es la integración de la aplicación (que cumple correctamente D-054.1), es el
+ciclo de vida interno de una dependencia externa.** Investigado (sin intentar mitigarlo) y registrado
+como hallazgo independiente en `HALLAZGOS_PENDIENTES.md` (H-P-001) — incluye confirmación de que existe
+un issue upstream abierto ([taskforcesh/bullmq#3546](https://github.com/taskforcesh/bullmq/issues/3546))
+describiendo exactamente el mismo síntoma y stack trace, sin mitigación oficial todavía.
+
+### Respuesta a la pregunta que realmente gobernaba esta AR
+
+> **¿La aplicación cumple correctamente el contrato de integración con BullMQ respecto al manejo
+> explícito de errores?**
+
+**Sí.** Esa fue siempre la pregunta de AR-054 — no "eliminar todo `Unhandled error` posible". El
+residuo que persiste tiene un propietario distinto (BullMQ, no la aplicación), documentado por separado,
+sin bloquear ni condicionar el cierre de esta AR.
+
+---
+
+## Estado final
+
+**AR-054 CERRADA (2026-07-23).** Las 5 fases (Evidencia → Verificación del framing → Alternativas →
+Decisión → Diseño técnico → Implementación → Validación) se completaron sin excepción al ciclo. D-054.1
+implementada y validada: todo `Queue`/`Worker` que la aplicación registra tiene un manejador de error
+explícito, verificable por grep/revisión, reforzado por una restricción de lint. Riesgo residual
+documentado y explícitamente fuera de alcance — ver `HALLAZGOS_PENDIENTES.md` (H-P-001). Estado: 🟦 → ✅
+Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
+
+**Nueva hipótesis de observación registrada en README (segundo punto de dato, tras AR-053):** _"la
+localización precisa del propietario de un síntoma puede cambiar durante la investigación, y ese cambio
+debe delimitar el alcance de la AR en lugar de expandirla indefinidamente."_
