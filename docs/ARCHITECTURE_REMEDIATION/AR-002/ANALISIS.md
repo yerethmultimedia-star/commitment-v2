@@ -52,9 +52,97 @@ hace falta un proceso nuevo, ADR-011 ya especifica el correcto — falta el meca
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**H1 (principal):** _"Las decisiones arquitectónicas sobre tecnologías preferidas deben estar
+respaldadas por un mecanismo automático de enforcement que detecte desviaciones durante el ciclo de
+desarrollo antes de que lleguen a la rama principal."_ Respaldada directamente por la evidencia de Fase
+1: existe la política (ADR-011), existe la documentación, no existe ningún mecanismo que la haga
+verificable.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — la revisión manual de PR es suficiente. Descartada: depende de memoria y disciplina humana,
+  no de un control reproducible — exactamente el mismo gap que ya describía la auditoría original.
+- **H3** — la propia ADR ya constituye el mecanismo de enforcement. Descartada: una ADR documenta una
+  decisión, no verifica su cumplimiento — son categorías distintas.
+- **H4** — el enforcement debe materializarse únicamente vía CI. Descartada, pero no por estar mal
+  encaminada — la evidencia exige que exista enforcement, no que se materialice exclusivamente en una
+  capa concreta; restringiría prematuramente el diseño técnico (Fase 4A).
+
+**H1 sobrevive.** Las demás o bien no automatizan el cumplimiento (H2/H3) o restringen prematuramente la
+implementación (H4).
+
+## Fase 3 — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-002.1:** _"Las decisiones clasificadas como 'Tecnología Preferida' deben disponer de un mecanismo de
+enforcement verificable que detecte desviaciones antes de su integración en la rama principal."_
+Formulada como propiedad — no nombra herramienta, capa, ni mecanismo concreto (nada de "usar GitHub
+Actions", "usar Danger", "usar una plantilla de PR"). Mismo patrón exacto que D-043.1/D-054.1/D-044.1-3.
+
+**Una sola decisión, no fragmentada en varias.** El hallazgo restante tras Fase 1 es único (ausencia de
+enforcement) — una eventual combinación multicapa (plantilla de PR + lint + CI) pertenece al diseño
+técnico de Fase 4A, si la evidencia allí la justifica, no a una fragmentación arquitectónica aquí.
+
+**Explícitamente NO decidido en esta fase:** checklist documental vs. plantilla de PR vs. validación
+automática en CI vs. combinación híbrida — las 4 alternativas de materialización quedan para Fase 4A,
+junto con qué aspecto exacto cubre cada capa si se combinan.
+
+---
+
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+### Alternativas evaluadas
+
+- **A — Solo plantilla de PR.** Muy simple, sin infraestructura adicional. Descartada como único
+  mecanismo: sigue dependiendo de que el revisor detecte la violación, sin enforcement automático — no
+  materializa D-002.1 por sí sola.
+- **B — Solo CI.** Un job del pipeline analiza las decisiones marcadas como "Tecnología Preferida" y
+  falla si detecta una desviación. Totalmente automático y reproducible, no depende del revisor.
+  Descartada como único mecanismo: el desarrollador recibe el feedback tarde (después del push).
+- **C — Solo lint local.** Feedback inmediato. Descartada: puede omitirse, depende del entorno local, no
+  garantiza cumplimiento en la rama principal.
+- **D — Enfoque multicapa (elegida).** No añade herramientas por acumulación — cada capa cubre una
+  responsabilidad distinta, sin redundancia entre ellas:
+
+  | Capa            | Responsabilidad                                                                            |
+  | --------------- | ------------------------------------------------------------------------------------------ |
+  | Plantilla de PR | Declarar conscientemente si se introduce una nueva tecnología o se modifica una preferida. |
+  | CI              | Verificar automáticamente el cumplimiento de las reglas objetivas.                         |
+  | ADR             | Documentar y justificar cualquier excepción aprobada.                                      |
+
+  La plantilla recoge la intención del cambio; el CI verifica hechos; la ADR preserva la decisión
+  arquitectónica. Cada pieza cumple una función diferente — ninguna sustituye a las otras.
+
+### Precaución de diseño
+
+El CI no debe "entender la arquitectura" — solo verificar reglas objetivas (aparición de un framework
+prohibido, modificación de un archivo catalogado como tecnología preferida, incorporación de una
+dependencia no permitida). La interpretación arquitectónica sigue siendo responsabilidad humana,
+delegada a la plantilla de PR y a la ADR, no al CI.
+
+### Criterio de validación para Fase 5
+
+La pregunta de validación no es "¿existe una plantilla?" ni "¿existe un workflow?", sino:
+
+> **¿Una futura desviación respecto a una Tecnología Preferida puede llegar a `main` sin ser detectada
+> por ningún mecanismo del proyecto?**
+
+Si la respuesta es **no**, D-002.1 queda materializada independientemente de las herramientas concretas
+usadas. Este es el criterio que gobierna la aceptación de la implementación (Fase 4B) y el cierre de la
+AR.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo parcialmente resuelto (la violación histórica concreta) y parcialmente
-vigente (el enforcement general, todavía ausente). Estado: ⬜ → 🟦 En análisis. Decisión: pendiente de
-Fase 2A/2B — ¿qué forma debe tener el enforcement (checklist de PR, lint, CI check) y sobre qué debe
-verificar exactamente?
+**Fase 1, Fase 2A, Fase 3 y Fase 4A cerradas.** D-002.1 aprobada; diseño técnico congelado en un enfoque
+multicapa (plantilla de PR + CI + ADR), sin redundancia entre capas. Pendiente: **Fase 4B
+(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: ✅ Decisión
+aprobada.
