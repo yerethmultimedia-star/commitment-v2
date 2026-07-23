@@ -3,6 +3,7 @@
 // arquitectura cambió". Solo detecta eliminación o cambio de versión mayor de una dependencia
 // listada como Tecnología Preferida por ADR-024, y exige que el mismo diff incluya una ADR.
 import { execSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 export const GOVERNED_DEPENDENCIES = {
   'apps/backend/package.json': ['@nestjs/core', 'bullmq'],
@@ -104,6 +105,6 @@ function main() {
   process.exit(1);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }

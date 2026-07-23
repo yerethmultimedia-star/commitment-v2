@@ -1,0 +1,13 @@
+{
+  "$comment": "AR-009 / D-009.1 — Capa 2: fuente de verdad declarativa de la gobernanza del repositorio. Solo decisiones de gobernanza del proyecto, no un espejo de la API de GitHub. Verificado por .github/scripts/verify-governance-policy.mjs.",
+  "branch": "main",
+  "codeownersRequired": true,
+  "requiredStatusChecks": {
+    "strict": true,
+    "contexts": [
+      "Backend Lint, Build & Test",
+      "Mobile Typecheck",
+      "Preferred Technology Enforcement (D-002.1)"
+    ]
+  }
+}

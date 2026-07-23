@@ -1,0 +1,5 @@
+# AR-009 / D-009.1 — Capa 1: declaración de propiedad y revisión de código.
+# Una sola regla, sin ambigüedad: todo el repositorio tiene un propietario explícito.
+# GitHub aplica la última coincidencia — si en el futuro se añaden reglas más específicas
+# para una ruta concreta, deben ir DESPUÉS de esta para no quedar sombreadas por ella.
+* @yerethmultimedia-star

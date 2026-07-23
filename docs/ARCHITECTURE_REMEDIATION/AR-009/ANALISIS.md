@@ -173,11 +173,87 @@ en la implementación (mismo patrón que AR-002/AR-044):
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Implementada.**
+
+**Capa 1 — `CODEOWNERS`** (`.github/CODEOWNERS`): una sola regla (`* @yerethmultimedia-star`), sin
+ambigüedad ni solapamiento — el repositorio tiene un único contribuidor confirmado (`git shortlog -sne
+--all` → 1 autor), así que una regla global es la asignación mínima correcta, no una simplificación
+insuficiente. Comentario explícito en el archivo advirtiendo que reglas más específicas futuras deben
+ir _después_ de esta línea (GitHub aplica la última coincidencia).
+
+**Capa 2 — Política versionada** (`.github/governance-policy.json`): fuente de verdad declarativa —
+rama protegida, `codeownersRequired`, y `requiredStatusChecks` (strict + los 3 contexts exactos que
+AR-002 activó vía `gh api`). Contiene únicamente decisiones de gobernanza del proyecto, no un espejo de
+la API de GitHub (sin `enforce_admins`, sin metadatos de `checks[].app_id`, etc. — deliberadamente
+excluidos por no ser decisiones de gobernanza, solo detalles de implementación de la plataforma).
+
+**Capa 3 — Script de verificación** (`.github/scripts/verify-governance-policy.mjs`): lee la política,
+consulta `gh api repos/{owner}/{repo}/branches/{branch}/protection`, compara `strict` + el conjunto de
+`contexts` en ambas direcciones (falta en GitHub / falta en la política) y la existencia de
+`CODEOWNERS`, y falla solo ante una desviación objetiva. No autocorrige nada.
+
+**Hallazgo técnico verificado antes de fijar cómo se ejecuta este script (mismo rigor que AR-054 con
+`DiscoveryService`):** el listado completo y documentado de scopes otorgables a `GITHUB_TOKEN` (`actions,
+attestations, checks, contents, deployments, id-token, issues, models, discussions, packages, pages,
+pull-requests, security-events, statuses`) **no incluye `administration`** — leer o escribir branch
+protection es una operación de administración del repositorio, fuera del alcance de `GITHUB_TOKEN` bajo
+cualquier configuración de `permissions:`. Requiere un PAT de administrador (exactamente el mismo tipo
+de credencial usado manualmente en esta sesión para activar branch protection en AR-002). **Consecuencia
+de diseño:** el script está pensado para ejecutarse localmente o vía un `workflow_dispatch` manual
+autenticado por un administrador — no como gate automático de cada PR. Añadir un PAT de admin como
+secreto del repositorio para automatizarlo por completo sería una decisión de infraestructura/credenciales
+separada, no tomada aquí, siguiendo el mismo criterio que AR-002 aplicó a branch protection.
+
+**Bug real encontrado y corregido durante la implementación, no en el diseño:** el guard
+`import.meta.url === \`file://${process.argv[1]}\``(usado tanto aquí como en`check-preferred-tech.mjs`de AR-002) falla silenciosamente en rutas con espacios —`import.meta.url`codifica el espacio como`%20`, `process.argv[1]`no, así que la comparación de strings nunca coincide
+y`main()`nunca se ejecuta al invocar el script directamente (por ejemplo, en este mismo repositorio,
+cuya ruta contiene "Comm v2"). Confirmado ejecutando el script sin capturar ningún`console.log`esperado. Corregido en ambos scripts con`pathToFileURL(process.argv[1]).href`, que codifica la ruta
+de la misma forma que `import.meta.url`. Reverificado: la suite e2e de AR-002
+(`check-preferred-tech.e2e.test.mjs`) sigue en 4/4 tras el fix — sin regresión.
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+Los 3 escenarios pedidos, todos ejecutados como prueba de comportamiento real (no de existencia de
+archivos), contra el repositorio real vía `gh api`:
+
+1. **Estado conforme:** `node .github/scripts/verify-governance-policy.mjs` contra la configuración
+   real → `OK: la configuración real de "yerethmultimedia-star/commitment-v2"@main coincide con
+governance-policy.json.`, exit 0.
+2. **Deriva, en ambas direcciones** (usando una copia temporal de la política vía
+   `GOVERNANCE_POLICY_PATH`, sin tocar la política real):
+   - Política exige un check inexistente en GitHub → `FALLO: ... Falta el check requerido "Bogus Check
+That Does Not Exist" en la configuración real de GitHub.`, exit 1.
+   - GitHub exige un check que la política no declara (se quitó `"Mobile Typecheck"` de una copia) →
+     `FALLO: ... GitHub exige "Mobile Typecheck", pero no está declarado en la política versionada.`,
+     exit 1.
+   - `CODEOWNERS` ausente (`compare()` invocada con un `cwd` sin el archivo) → `La política exige
+CODEOWNERS, pero no existe en ninguna ubicación reconocida.`
+3. **Reconstrucción:** comparación directa, campo por campo, entre `gh api
+.../branches/main/protection` real y `governance-policy.json` — mismo `strict`, mismo conjunto de
+   `contexts` (verificado con normalización de orden, no solo un diff textual bruto que habría fallado
+   por reordenamiento de claves JSON sin significado). Confirma que un tercero podría reconstruir
+   exactamente la configuración esperada leyendo solo el archivo versionado.
+
+**Criterio de cierre (fijado en Fase 4A), respondido:** los artefactos versionados constituyen una
+descripción completa de la política de gobernanza (Capa 2) y permiten verificar automáticamente que la
+configuración real la sigue respetando (Capa 3), complementados por una señal de propiedad de código
+(Capa 1) que tampoco existía antes. D-009.1 queda materializada.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo original quedó dividido en 2 partes por la
-evidencia: (a) "¿el CI gatea de verdad los merges?" — ya resuelta indirectamente por AR-002; (b) "¿es
-esa configuración verificable desde el propio repo, y existe `CODEOWNERS`?" — sigue sin resolver.
-D-009.1 aprobada; diseño técnico congelado en un enfoque multicapa (`CODEOWNERS` + política versionada +
-script de verificación), sin redundancia entre capas. Pendiente: **Fase 4B (Implementación)**. Estado:
-se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**AR-009 CERRADA (2026-07-23).** Las fases aplicables completas: D-009.1 aprobada e implementada en 3
+capas sin solapamiento — `CODEOWNERS` (propiedad/revisión), política versionada
+(`governance-policy.json`, fuente de verdad declarativa) y script de verificación
+(`verify-governance-policy.mjs`, detecta deriva en ambas direcciones + ausencia de `CODEOWNERS`). Fase 5
+validada con los 3 escenarios reales pedidos (conforme / deriva / reconstrucción) contra el repositorio
+real, no simulados. Verificado y documentado un límite técnico real antes de fijar el modo de ejecución
+del script (`GITHUB_TOKEN` carece del scope `administration`), consistente con el rigor ya aplicado en
+AR-054. Un bug real de portabilidad (guard de ejecución directa roto en rutas con espacios) se encontró
+y corrigió durante la implementación, con regresión verificada en la suite de AR-002. Estado: 🟦 → ✅
+Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
