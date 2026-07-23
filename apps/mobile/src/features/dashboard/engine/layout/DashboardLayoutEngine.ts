@@ -64,13 +64,13 @@ function resolveGenericHero(recommendations: Recommendation[]): HeroCardDescript
     };
   }
 
-  if (topPin.targetId === 'streak') {
+  if (topPin.targetId === 'weekly-momentum') {
     return {
       kind: 'generic',
-      titleKey: 'dashboard.hero.streak.title',
+      titleKey: 'dashboard.hero.weeklyMomentum.title',
       titleParams: { count: topPin.metadata?.count ?? 0 },
-      subtitleKey: 'dashboard.hero.streak.subtitle',
-      illustration: '🔥',
+      subtitleKey: 'dashboard.hero.weeklyMomentum.subtitle',
+      illustration: '📈',
       actionRoute: '/(tabs)/insights',
       themeVariant: 'success',
       dismissible: true,
@@ -110,7 +110,7 @@ function resolveHero(context: DashboardContext, recommendations: Recommendation[
 // ---------------------------------------------------------------------------
 
 const DEFAULT_WIDGET_ORDER: LayoutWidgetSlot[] = [
-  { widgetId: 'current-streak-widget', size: 'small' },
+  { widgetId: 'daily-consistency-widget', size: 'small' },
   { widgetId: 'today-widget', size: 'medium' },
   { widgetId: 'today-agenda-widget', size: 'medium' },
   { widgetId: 'today-habits-widget', size: 'medium' },
@@ -129,7 +129,7 @@ const PRIMARY_WIDGET_IDS = new Set([
   'today-agenda-widget',
   'coach-message-widget',
   'upcoming-tasks-widget',
-  'current-streak-widget',
+  'daily-consistency-widget',
 ]);
 
 const FOOTER_WIDGET_IDS = new Set([

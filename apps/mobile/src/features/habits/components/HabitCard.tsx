@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
-import { Check, Flame, ChevronRight } from '@tamagui/lucide-icons';
+import { Check, TrendingUp, ChevronRight } from '@tamagui/lucide-icons';
 import {
   Card, Body, useInteractionState, useInteractionAnimation, toPlatformAccessibilityProps,
 } from '@commitment/design-system';
@@ -22,7 +22,7 @@ export interface HabitCardProps {
  * visible at once, no dominant action). Rebuilt around a single principle,
  * explicitly requested: a list exists to *execute* habits fast, everything
  * else belongs in the detail. This card shows exactly five things —
- * completion circle, name, recurrence/time, streak, a chevron — and has
+ * completion circle, name, recurrence/time, consistency, a chevron — and has
  * exactly two tap targets: the circle (complete, stays on this screen) and
  * the rest of the card (opens the habit's detail, currently `/habits/[id]/edit`
  * which now also hosts Postpone/Archive/Goal-context — see that screen).
@@ -108,8 +108,8 @@ export function HabitCard({ habit, onToggle, onPress }: HabitCardProps) {
 
           {habit.currentStreakDays > 0 && (
             <XStack gap="$1" alignItems="center">
-              <Flame size={14} color="$warning" />
-              <Body fontSize="$3" fontWeight="700" color="$warning">
+              <TrendingUp size={14} color="$success" />
+              <Body fontSize="$3" fontWeight="700" color="$success">
                 {habit.currentStreakDays}
               </Body>
             </XStack>

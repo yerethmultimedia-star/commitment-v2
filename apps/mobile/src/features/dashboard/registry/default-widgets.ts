@@ -5,7 +5,7 @@ import { QuickActionsWidget } from '../ui/components/widgets/QuickActionsWidget'
 import { UpcomingTasksWidget } from '../ui/components/widgets/UpcomingTasksWidget';
 import { CompletionRateWidget } from '../ui/components/widgets/CompletionRateWidget';
 import { RecentActivityWidget } from '../ui/components/widgets/RecentActivityWidget';
-import { CurrentStreakWidget } from '../ui/components/widgets/CurrentStreakWidget';
+import { DailyConsistencyWidget } from '../ui/components/widgets/DailyConsistencyWidget';
 import { MotivationWidget } from '../ui/components/widgets/MotivationWidget';
 import { TodayHabitsWidget } from '../ui/components/widgets/TodayHabitsWidget';
 import { TodayAgendaWidget } from '../ui/components/widgets/TodayAgendaWidget';
@@ -181,13 +181,17 @@ export function registerDefaultWidgets() {
   });
 
   appWidgetRegistry.register({
-    id: 'current-streak-widget',
-    titleKey: 'dashboard.widgets.currentStreak.title',
-    iconToken: 'flame',
-    category: 'gamification',
+    // AR-036/D-036.1 — renamed from 'current-streak-widget', category
+    // reclassified from 'gamification' (the only widget ever using that
+    // category — ADR-006 prohibits gamification outright) to 'progress',
+    // alongside weekly-progress-widget/completion-rate-widget.
+    id: 'daily-consistency-widget',
+    titleKey: 'dashboard.widgets.dailyConsistency.title',
+    iconToken: 'trending-up',
+    category: 'progress',
     priority: 8,
     defaultSize: 'small',
-    component: CurrentStreakWidget,
+    component: DailyConsistencyWidget,
     capabilities: {
       refreshable: true,
       collapsible: false,

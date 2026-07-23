@@ -5,7 +5,7 @@ import { Card, Title, Body } from '@commitment/design-system';
 import { useHabits } from '@/features/habits/hooks/useHabits';
 
 /**
- * Streak consistency across ALL enabled habits — real via currentStreakDays,
+ * Consistency across ALL enabled habits — real via currentStreakDays,
  * no fabricated per-day history (the domain model doesn't track one).
  *
  * Deliberately NOT "today's due/completed habits" (the previous version of
@@ -18,14 +18,14 @@ export function HabitConsistencyInsight() {
   const { t } = useTranslation('common');
   const { data: habits = [] } = useHabits();
 
-  const { averageStreak, activeStreakCount, totalCount } = useMemo(() => {
+  const { averageConsistency, activeHabitCount, totalCount } = useMemo(() => {
     const enabled = habits.filter((h) => h.enabled);
     const total = enabled.length;
     const active = enabled.filter((h) => h.currentStreakDays > 0).length;
     const average = total > 0
       ? Math.round(enabled.reduce((sum, h) => sum + h.currentStreakDays, 0) / total)
       : 0;
-    return { averageStreak: average, activeStreakCount: active, totalCount: total };
+    return { averageConsistency: average, activeHabitCount: active, totalCount: total };
   }, [habits]);
 
   return (
@@ -33,12 +33,12 @@ export function HabitConsistencyInsight() {
       <Title i18nKey="insights.habitConsistency.title" fontSize="$5" />
       <XStack gap="$4">
         <YStack alignItems="center" flex={1}>
-          <Title fontSize="$7" fontWeight="bold" color="$success">{averageStreak}</Title>
-          <Body tone="secondary" fontSize="$2" textAlign="center">{t('insights.habitConsistency.averageStreak')}</Body>
+          <Title fontSize="$7" fontWeight="bold" color="$success">{averageConsistency}</Title>
+          <Body tone="secondary" fontSize="$2" textAlign="center">{t('insights.habitConsistency.averageConsistency')}</Body>
         </YStack>
         <YStack alignItems="center" flex={1}>
-          <Title fontSize="$7" fontWeight="bold">{t('insights.habitConsistency.fraction', { count: activeStreakCount, total: totalCount })}</Title>
-          <Body tone="secondary" fontSize="$2" textAlign="center">{t('insights.habitConsistency.activeStreaks')}</Body>
+          <Title fontSize="$7" fontWeight="bold">{t('insights.habitConsistency.fraction', { count: activeHabitCount, total: totalCount })}</Title>
+          <Body tone="secondary" fontSize="$2" textAlign="center">{t('insights.habitConsistency.activeHabits')}</Body>
         </YStack>
       </XStack>
     </Card>

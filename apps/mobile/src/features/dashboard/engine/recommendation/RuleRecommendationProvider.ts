@@ -6,10 +6,10 @@
  *
  * Rules encoded here (schemaVersion 2):
  *   1. No pending tasks today → promote 'motivation-widget'
- *   2. Active streak > 0      → promote 'current-streak-widget'
+ *   2. Active streak > 0      → promote 'daily-consistency-widget'
  *   3. No active commitments  → promote 'quick-actions-widget'
  *   4. Tasks pending today    → pin 'daily-focus' hero variant
- *   5. Week completions > 0   → pin 'streak' hero variant
+ *   5. Week completions > 0   → pin 'weekly-momentum' hero variant
  */
 
 import { DashboardContext, Recommendation } from '@commitment/domain';
@@ -34,11 +34,11 @@ export class RuleRecommendationProvider implements RecommendationProvider {
       });
     }
 
-    // Rule 2 – promote streak widget when user has an active streak
+    // Rule 2 – promote consistency widget when user has an active streak
     if (streak.currentStreakDays > 0) {
       recommendations.push({
         type: 'PROMOTE_WIDGET',
-        targetId: 'current-streak-widget',
+        targetId: 'daily-consistency-widget',
         source: PROVIDER_ID,
         priority: 70,
       });
@@ -65,11 +65,11 @@ export class RuleRecommendationProvider implements RecommendationProvider {
       });
     }
 
-    // Rule 5 – pin 'streak' hero when weekly completions exist
+    // Rule 5 – pin 'weekly-momentum' hero when weekly completions exist
     if (tasks.completedThisWeek > 0) {
       recommendations.push({
         type: 'PIN_HERO',
-        targetId: 'streak',
+        targetId: 'weekly-momentum',
         source: PROVIDER_ID,
         priority: 50,
         metadata: { count: tasks.completedThisWeek },

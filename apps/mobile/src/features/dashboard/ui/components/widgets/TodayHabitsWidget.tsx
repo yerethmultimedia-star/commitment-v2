@@ -81,7 +81,7 @@ export const TodayHabitsWidget = React.memo(function TodayHabitsWidget() {
                 </Body>
                 {habit.currentStreakDays > 0 && (
                   <Body fontSize="$3" tone="tertiary">
-                    {t('dashboard.widgets.todayHabits.streak', { count: habit.currentStreakDays })}
+                    {t('dashboard.widgets.todayHabits.consistencyBadge', { count: habit.currentStreakDays })}
                   </Body>
                 )}
               </XStack>

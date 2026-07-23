@@ -37,7 +37,7 @@ export function TodayHabitsScreen() {
 
   const completedCount = useMemo(() => todayHabits.filter((h) => h.completedToday).length, [todayHabits]);
 
-  const currentStreak = useMemo(
+  const consistencyDays = useMemo(
     () => todayHabits.reduce((max, h) => Math.max(max, h.currentStreakDays), 0),
     [todayHabits]
   );
@@ -60,7 +60,7 @@ export function TodayHabitsScreen() {
           />
         ) : (
           <>
-            <HabitsHero completed={completedCount} total={todayHabits.length} currentStreak={currentStreak} />
+            <HabitsHero completed={completedCount} total={todayHabits.length} consistencyDays={consistencyDays} />
             <YStack gap="$3">
               {todayHabits.map((habit) => (
                 <HabitCard

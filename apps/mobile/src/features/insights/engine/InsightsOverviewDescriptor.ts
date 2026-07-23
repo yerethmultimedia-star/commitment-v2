@@ -5,7 +5,7 @@
  *
  * Pure data model — no React, no UI imports. Replaces the old flat
  * insight-card InsightsLayoutDescriptor: the "Tu Progreso" overview is a
- * fixed 4-stat-card + streak-row layout with no runtime-varying membership,
+ * fixed 4-stat-card + week-activity-row layout with no runtime-varying membership,
  * so there's nothing for a Registry lookup-by-id indirection to resolve —
  * see InsightsLayoutEngine.ts's doc comment for the full reasoning.
  */

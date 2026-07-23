@@ -70,19 +70,19 @@ describe('DashboardLayoutEngine', () => {
       expect(layout.hero.titleParams?.count).toBe(5);
     });
 
-    it('pins streak hero when PIN_HERO streak has highest priority', () => {
+    it('pins weekly-momentum hero when PIN_HERO weekly-momentum has highest priority', () => {
       const recs: Recommendation[] = [
-        { type: 'PIN_HERO', targetId: 'streak', source: 'test', priority: 50, metadata: { count: 7 } },
+        { type: 'PIN_HERO', targetId: 'weekly-momentum', source: 'test', priority: 50, metadata: { count: 7 } },
       ];
       const layout = resolve(baseContext, recs);
-      expect(layout.hero.titleKey).toBe('dashboard.hero.streak.title');
+      expect(layout.hero.titleKey).toBe('dashboard.hero.weeklyMomentum.title');
       expect(layout.hero.themeVariant).toBe('success');
       expect(layout.hero.dismissible).toBe(true);
     });
 
     it('selects higher-priority hero when two PIN_HERO recommendations exist', () => {
       const recs: Recommendation[] = [
-        { type: 'PIN_HERO', targetId: 'streak', source: 'test', priority: 50, metadata: { count: 3 } },
+        { type: 'PIN_HERO', targetId: 'weekly-momentum', source: 'test', priority: 50, metadata: { count: 3 } },
         { type: 'PIN_HERO', targetId: 'daily-focus', source: 'test', priority: 100, metadata: { count: 5 } },
       ];
       const layout = resolve(baseContext, recs);

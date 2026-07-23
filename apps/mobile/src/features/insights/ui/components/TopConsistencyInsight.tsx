@@ -1,11 +1,15 @@
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack, Circle } from 'tamagui';
+import { TrendingUp } from '@tamagui/lucide-icons';
 import { Card, Title, Body } from '@commitment/design-system';
 import { useHabits } from '@/features/habits/hooks/useHabits';
 
-/** The real best current streak across enabled habits — not a hardcoded 0 like DashboardContext.streak still is. */
-export function StreakHighlightInsight() {
+// AR-036/D-036.1 — renamed from StreakHighlightInsight. Same underlying data
+// (the real best current streak across enabled habits — not a hardcoded 0
+// like DashboardContext.streak still is), reframed as consistency rather
+// than a "streak," and without the flame icon.
+export function TopConsistencyInsight() {
   const { t } = useTranslation('common');
   const { data: habits = [] } = useHabits();
 
@@ -24,14 +28,14 @@ export function StreakHighlightInsight() {
 
   return (
     <Card variant="elevated" gap="$3">
-      <Title i18nKey="insights.streakHighlight.title" fontSize="$5" />
+      <Title i18nKey="insights.topConsistency.title" fontSize="$5" />
       <XStack alignItems="center" gap="$3" padding="$2">
         <Circle size={48} backgroundColor="$accent" justifyContent="center" alignItems="center">
-          <Body fontSize="$6">🔥</Body>
+          <TrendingUp size={24} color="$contentOnAccent" />
         </Circle>
         <YStack flex={1}>
           <Title fontSize="$6" fontWeight="bold">
-            {t('insights.streakHighlight.days', { count: best.currentStreakDays })}
+            {t('insights.topConsistency.days', { count: best.currentStreakDays })}
           </Title>
           <Body tone="secondary" numberOfLines={1} ellipsizeMode="tail">{best.title}</Body>
         </YStack>

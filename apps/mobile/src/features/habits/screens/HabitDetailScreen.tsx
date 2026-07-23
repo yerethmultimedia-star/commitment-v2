@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { YStack, XStack, ScrollView, Switch, Circle } from 'tamagui';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
-import { ChevronRight, Clock, Archive as ArchiveIcon, Flame, Target } from '@tamagui/lucide-icons';
+import { ChevronRight, Clock, Archive as ArchiveIcon, TrendingUp, Target } from '@tamagui/lucide-icons';
 import {
   Title, Body, Button, Card, ConfirmationDialog, LoadingState, ErrorState, toPlatformAccessibilityProps,
 } from '@commitment/design-system';
@@ -81,9 +81,9 @@ export function HabitDetailScreen() {
           <XStack gap="$4">
             {habit.currentStreakDays > 0 && (
               <XStack gap="$1" alignItems="center">
-                <Flame size={16} color="$warning" />
-                <Body fontWeight="700" color="$warning">
-                  {t('habits.detail.streakDays', { count: habit.currentStreakDays })}
+                <TrendingUp size={16} color="$success" />
+                <Body fontWeight="700" color="$success">
+                  {t('habits.detail.consistencyDays', { count: habit.currentStreakDays })}
                 </Body>
               </XStack>
             )}

@@ -19,7 +19,7 @@ export function DashboardSkeleton() {
         {/* Weekly Progress Skeleton */}
         <YStack height={120} width="100%" backgroundColor="$surfaceRaised" borderRadius="$4" />
         
-        {/* Streak Skeleton */}
+        {/* Consistency Skeleton */}
         <XStack gap="$4">
           <YStack flex={1} height={100} backgroundColor="$surfaceRaised" borderRadius="$4" />
           <YStack flex={1} height={100} backgroundColor="$surfaceRaised" borderRadius="$4" />

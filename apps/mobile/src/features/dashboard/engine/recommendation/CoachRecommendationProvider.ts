@@ -51,7 +51,7 @@ export class CoachRecommendationProvider implements RecommendationProvider {
     }
     if (streak.currentStreakDays > 0) {
       recommendations.push({
-        type: 'COACH_TIP', targetId: 'protect-streak', source: PROVIDER_ID, priority: 70,
+        type: 'COACH_TIP', targetId: 'steady-progress', source: PROVIDER_ID, priority: 70,
         metadata: { count: streak.currentStreakDays },
       });
     }
@@ -88,7 +88,7 @@ export class CoachRecommendationProvider implements RecommendationProvider {
 
     if (streak.currentStreakDays >= 7) {
       recommendations.push({
-        type: 'COACH_ACHIEVEMENT', targetId: 'week-streak', source: PROVIDER_ID, priority: 45,
+        type: 'COACH_ACHIEVEMENT', targetId: 'consistency-milestone', source: PROVIDER_ID, priority: 45,
         metadata: { count: streak.currentStreakDays },
       });
     }
@@ -111,7 +111,7 @@ export class CoachRecommendationProvider implements RecommendationProvider {
 
     if (habits.atRiskCount > 0) {
       recommendations.push({
-        type: 'COACH_RISK', targetId: 'habit-streaks-at-risk', source: PROVIDER_ID, priority: 85,
+        type: 'COACH_RISK', targetId: 'habits-needing-attention', source: PROVIDER_ID, priority: 85,
         metadata: { count: habits.atRiskCount },
       });
     }

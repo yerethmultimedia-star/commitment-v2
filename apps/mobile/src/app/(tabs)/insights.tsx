@@ -7,11 +7,11 @@
  *     → InsightsLayoutEngine.resolveOverview (pure, deterministic)
  *     → InsightsOverviewDescriptor
  *
- * A fixed 4-stat-card + streak-row layout — no Registry/Renderer indirection
- * (unlike Dashboard), since there's no runtime-varying card membership to
- * resolve. The "More" section below reuses the 3 pre-existing insight cards
- * (Goal Progress / Habit Consistency / Streak Highlight) directly, imported
- * and rendered inline for the same reason.
+ * A fixed 4-stat-card + week-activity-row layout — no Registry/Renderer
+ * indirection (unlike Dashboard), since there's no runtime-varying card
+ * membership to resolve. The "More" section below reuses the 3 pre-existing
+ * insight cards (Goal Progress / Habit Consistency / Top Consistency)
+ * directly, imported and rendered inline for the same reason.
  */
 
 import React from 'react';
@@ -26,7 +26,7 @@ import { Sparkline } from '@/features/insights/ui/components/Sparkline';
 import { WeekActivityRow } from '@/features/insights/ui/components/WeekActivityRow';
 import { GoalProgressInsight } from '@/features/insights/ui/components/GoalProgressInsight';
 import { HabitConsistencyInsight } from '@/features/insights/ui/components/HabitConsistencyInsight';
-import { StreakHighlightInsight } from '@/features/insights/ui/components/StreakHighlightInsight';
+import { TopConsistencyInsight } from '@/features/insights/ui/components/TopConsistencyInsight';
 import { useTabBarHeightStore } from '@/shared/store/use-tab-bar-height-store';
 
 const STAT_CARD_META: Record<string, { titleKey: string; valueFormatter: (v: number) => string }> = {
@@ -88,7 +88,7 @@ export default function InsightsScreen() {
               })}
             </YStack>
 
-            <Title i18nKey="insights.overview.currentStreak" fontSize="$5" />
+            <Title i18nKey="insights.overview.weekActivity" fontSize="$5" />
             <WeekActivityRow flags={overview.weekActivity} />
 
             {/* Not in the mockup — preserved from the old flat insight-card layout so goal-progress-at-a-glance and habit-consistency don't lose their only home in the app. */}
@@ -96,7 +96,7 @@ export default function InsightsScreen() {
             <YStack gap="$3">
               <GoalProgressInsight />
               <HabitConsistencyInsight />
-              <StreakHighlightInsight />
+              <TopConsistencyInsight />
             </YStack>
           </>
         )}

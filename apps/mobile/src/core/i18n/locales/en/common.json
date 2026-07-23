@@ -245,9 +245,9 @@
         "title": "You have {{count}} tasks today",
         "description": "Tackling a few now keeps your day on track."
       },
-      "protectStreak": {
-        "title": "You're on a {{count}}-day streak",
-        "description": "Complete a task today to keep it alive."
+      "steadyProgress": {
+        "title": "You're on {{count}} days of consistency",
+        "description": "Keep going — consistency is what drives real change."
       },
       "weeklyMomentum": {
         "title": "{{count}} tasks completed this week",
@@ -269,8 +269,8 @@
       }
     },
     "achievements": {
-      "weekStreak": {
-        "title": "{{count}}-day streak!",
+      "consistencyMilestone": {
+        "title": "{{count}} days of consistency!",
         "description": "You're building real consistency."
       },
       "goalsCompleted": {
@@ -287,9 +287,9 @@
       }
     },
     "risks": {
-      "habitStreaksAtRisk": {
-        "title": "{{count}} habit streaks at risk",
-        "description": "Complete them today to keep the streak alive."
+      "habitsNeedingAttention": {
+        "title": "{{count}} habits pending today",
+        "description": "Complete them to keep building consistency."
       },
       "heavyDay": {
         "title": "{{count}} tasks pending today",
@@ -327,7 +327,7 @@
     "momentum": {
       "building": {
         "title": "Building momentum",
-        "description": "Your streak is growing — keep it up."
+        "description": "Your consistency is growing — keep it up."
       },
       "steady": {
         "title": "Steady",
@@ -431,7 +431,7 @@
       "statistics": "Statistics",
       "stats": {
         "tasks": "Tasks",
-        "avgStreak": "Avg. Streak",
+        "avgConsistency": "Avg. Consistency",
         "milestones": "Milestones",
         "days": "{{count}}d"
       },
@@ -503,7 +503,7 @@
   },
   "habits": {
     "hero": {
-      "streakLabel": "Current streak",
+      "consistencyLabel": "Current consistency",
       "completedLabel": "Completed today"
     },
     "detail": {
@@ -511,7 +511,8 @@
       "postpone": "Postpone reminder",
       "archive": "Archive habit",
       "editAction": "Edit",
-      "streakDays": "{{count}} day streak",
+      "consistencyDays": "{{count}} day of consistency",
+      "consistencyDays_other": "{{count}} days of consistency",
       "confirmArchive": {
         "title": "Archive \"{{title}}\"?",
         "description": "This habit will stop appearing in your daily list. You can't undo this from here."
@@ -519,7 +520,7 @@
     },
     "empty": {
       "title": "No habits yet",
-      "description": "Small, repeatable actions build the biggest changes. Add your first habit to start a streak.",
+      "description": "Small, repeatable actions build the biggest changes. Add your first habit to start building consistency.",
       "cta": "Add your first habit"
     },
     "recurrence": {
@@ -610,7 +611,7 @@
     "overview": {
       "title": "Your Progress",
       "weeklySummary": "WEEKLY SUMMARY",
-      "currentStreak": "CURRENT STREAK",
+      "weekActivity": "WEEK ACTIVITY",
       "more": "More",
       "range": {
         "week": "Week",
@@ -651,12 +652,12 @@
     },
     "habitConsistency": {
       "title": "Habit Consistency",
-      "averageStreak": "Avg. streak",
-      "activeStreaks": "With an active streak",
+      "averageConsistency": "Avg. consistency",
+      "activeHabits": "With active consistency",
       "fraction": "{{count}}/{{total}}"
     },
-    "streakHighlight": {
-      "title": "Best Streak",
+    "topConsistency": {
+      "title": "Top Consistency",
       "days": "{{count}} Days"
     }
   },
@@ -708,7 +709,7 @@
         "title": "You have {{count}} focus tasks today",
         "subtitle": "Tap here to continue your daily progress."
       },
-      "streak": {
+      "weeklyMomentum": {
         "title": "You completed {{count}} tasks this week!",
         "subtitle": "Keep the momentum going."
       },
@@ -736,8 +737,7 @@
     "loading": "Loading...",
     "summary": {
       "activeCommitments": "Commitments",
-      "pendingTasks": "Tasks Today",
-      "streak": "Day Streak"
+      "pendingTasks": "Tasks Today"
     },
     "error": {
       "title": "Widget Error",
@@ -762,7 +762,7 @@
           "description": "Add a habit from Quick Capture to see it here."
         },
         "itemA11y": "Habit: {{title}}",
-        "streak": "{{count}}d"
+        "consistencyBadge": "{{count}}d"
       },
       "todayAgenda": {
         "title": "Today's Agenda",
@@ -789,12 +789,12 @@
       "coachMessage": {
         "label": "Message from your coach"
       },
-      "currentStreak": {
-        "title": "Daily Streak",
+      "dailyConsistency": {
+        "title": "Daily Consistency",
         "count_one": "{{count}} Day",
         "count_other": "{{count}} Days",
-        "activeMsg": "Keep the flame burning!",
-        "inactiveMsg": "Complete a task today to start a streak!"
+        "activeMsg": "You're building consistency!",
+        "inactiveMsg": "Complete a task today to get started!"
       },
       "recentActivity": {
         "title": "Recent Activity",

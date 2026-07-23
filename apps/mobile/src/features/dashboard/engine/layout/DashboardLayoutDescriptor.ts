@@ -26,7 +26,7 @@ export const LAYOUT_SCHEMA_VERSION = 3 as const;
  * branches on `kind`.
  *
  * - 'generic': the original recommendation-driven hero (default/dailyFocus/
- *   streak) — i18n-templated, no real user data.
+ *   weeklyMomentum) — i18n-templated, no real user data.
  * - 'priorityTask': today's single highest-scoring task + a resolved
  *   context label (Goal/Commitment/generic fallback) and, when
  *   commitment-linked, its progress — takes precedence over 'generic'

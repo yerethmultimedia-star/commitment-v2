@@ -36,7 +36,7 @@ export function addDays(d: Date, n: number): Date {
   return date;
 }
 
-/** Monday of the calendar week containing `d` — the codebase's "this week"/"last week" convention is otherwise rolling-7-day; this feature deliberately uses calendar weeks instead (Mon-Sun), to match the streak row's fixed weekday boxes. */
+/** Monday of the calendar week containing `d` — the codebase's "this week"/"last week" convention is otherwise rolling-7-day; this feature deliberately uses calendar weeks instead (Mon-Sun), to match the week activity row's fixed weekday boxes. */
 export function mondayOf(d: Date): Date {
   const date = startOfDay(d);
   const dayIndex = (date.getDay() + 6) % 7; // 0 = Monday

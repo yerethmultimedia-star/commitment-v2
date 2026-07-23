@@ -245,9 +245,9 @@
         "title": "Tienes {{count}} tareas hoy",
         "description": "Resolver algunas ahora mantiene tu día encaminado."
       },
-      "protectStreak": {
-        "title": "Llevas una racha de {{count}} días",
-        "description": "Completa una tarea hoy para mantenerla."
+      "steadyProgress": {
+        "title": "Llevas {{count}} días de constancia",
+        "description": "Sigue así — la constancia es lo que genera cambios reales."
       },
       "weeklyMomentum": {
         "title": "{{count}} tareas completadas esta semana",
@@ -269,8 +269,8 @@
       }
     },
     "achievements": {
-      "weekStreak": {
-        "title": "¡Racha de {{count}} días!",
+      "consistencyMilestone": {
+        "title": "¡{{count}} días de constancia!",
         "description": "Estás construyendo constancia real."
       },
       "goalsCompleted": {
@@ -287,9 +287,9 @@
       }
     },
     "risks": {
-      "habitStreaksAtRisk": {
-        "title": "{{count}} rachas de hábitos en riesgo",
-        "description": "Complétalas hoy para mantener la racha."
+      "habitsNeedingAttention": {
+        "title": "{{count}} hábitos pendientes hoy",
+        "description": "Complétalos para seguir construyendo constancia."
       },
       "heavyDay": {
         "title": "{{count}} tareas pendientes hoy",
@@ -327,7 +327,7 @@
     "momentum": {
       "building": {
         "title": "Tomando impulso",
-        "description": "Tu racha está creciendo — sigue así."
+        "description": "Tu constancia está creciendo — sigue así."
       },
       "steady": {
         "title": "Estable",
@@ -431,7 +431,7 @@
       "statistics": "Estadísticas",
       "stats": {
         "tasks": "Tareas",
-        "avgStreak": "Racha Prom.",
+        "avgConsistency": "Constancia Prom.",
         "milestones": "Hitos",
         "days": "{{count}}d"
       },
@@ -503,7 +503,7 @@
   },
   "habits": {
     "hero": {
-      "streakLabel": "Racha actual",
+      "consistencyLabel": "Constancia actual",
       "completedLabel": "Completados hoy"
     },
     "detail": {
@@ -511,8 +511,8 @@
       "postpone": "Posponer recordatorio",
       "archive": "Archivar hábito",
       "editAction": "Editar",
-      "streakDays": "Racha de {{count}} día",
-      "streakDays_other": "Racha de {{count}} días",
+      "consistencyDays": "{{count}} día de constancia",
+      "consistencyDays_other": "{{count}} días de constancia",
       "confirmArchive": {
         "title": "¿Archivar \"{{title}}\"?",
         "description": "Este hábito dejará de aparecer en tu lista diaria. No puedes deshacer esto desde aquí."
@@ -520,7 +520,7 @@
     },
     "empty": {
       "title": "Aún no tienes hábitos",
-      "description": "Las acciones pequeñas y repetibles generan los cambios más grandes. Agrega tu primer hábito para empezar una racha.",
+      "description": "Las acciones pequeñas y repetibles generan los cambios más grandes. Agrega tu primer hábito para empezar a construir constancia.",
       "cta": "Agregar tu primer hábito"
     },
     "recurrence": {
@@ -611,7 +611,7 @@
     "overview": {
       "title": "Tu Progreso",
       "weeklySummary": "RESUMEN SEMANAL",
-      "currentStreak": "RACHA ACTUAL",
+      "weekActivity": "ACTIVIDAD DE LA SEMANA",
       "more": "Más",
       "range": {
         "week": "Semana",
@@ -652,12 +652,12 @@
     },
     "habitConsistency": {
       "title": "Consistencia de Hábitos",
-      "averageStreak": "Racha promedio",
-      "activeStreaks": "Con racha activa",
+      "averageConsistency": "Constancia promedio",
+      "activeHabits": "Con constancia activa",
       "fraction": "{{count}}/{{total}}"
     },
-    "streakHighlight": {
-      "title": "Mejor Racha",
+    "topConsistency": {
+      "title": "Mayor Constancia",
       "days": "{{count}} Días"
     }
   },
@@ -709,7 +709,7 @@
         "title": "Tienes {{count}} tareas de enfoque hoy",
         "subtitle": "Toca aquí para continuar tu progreso diario."
       },
-      "streak": {
+      "weeklyMomentum": {
         "title": "¡Completaste {{count}} tareas esta semana!",
         "subtitle": "Mantén el impulso."
       },
@@ -737,8 +737,7 @@
     "loading": "Cargando...",
     "summary": {
       "activeCommitments": "Compromisos",
-      "pendingTasks": "Tareas Hoy",
-      "streak": "Días Seguidos"
+      "pendingTasks": "Tareas Hoy"
     },
     "error": {
       "title": "Error de Widget",
@@ -763,7 +762,7 @@
           "description": "Agrega un hábito desde Captura Rápida para verlo aquí."
         },
         "itemA11y": "Hábito: {{title}}",
-        "streak": "{{count}}d"
+        "consistencyBadge": "{{count}}d"
       },
       "todayAgenda": {
         "title": "Agenda de Hoy",
@@ -790,12 +789,12 @@
       "coachMessage": {
         "label": "Mensaje de tu coach"
       },
-      "currentStreak": {
-        "title": "Racha Diaria",
+      "dailyConsistency": {
+        "title": "Constancia Diaria",
         "count_one": "{{count}} Día",
         "count_other": "{{count}} Días",
-        "activeMsg": "¡Mantén la llama encendida!",
-        "inactiveMsg": "¡Completa una tarea hoy para empezar una racha!"
+        "activeMsg": "¡Vas construyendo constancia!",
+        "inactiveMsg": "¡Completa una tarea hoy para comenzar!"
       },
       "recentActivity": {
         "title": "Actividad Reciente",

@@ -11,7 +11,7 @@
  * under Jest) since nothing here needs it.
  *
  * Unlike the old flat insight-card layout this replaced, the overview is a
- * FIXED 4-stat-card + streak-row shape — no runtime-varying membership to
+ * FIXED 4-stat-card + week-activity-row shape — no runtime-varying membership to
  * resolve — so there's no Registry/InsightRenderer indirection here; this
  * function just shapes context data into the descriptor directly.
  */

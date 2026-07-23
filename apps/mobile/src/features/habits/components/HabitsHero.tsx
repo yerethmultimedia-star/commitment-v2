@@ -1,26 +1,30 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { XStack, YStack } from 'tamagui';
-import { Flame, CheckCircle2 } from '@tamagui/lucide-icons';
+import { TrendingUp, CheckCircle2 } from '@tamagui/lucide-icons';
 import { Card, Title, Body, ProgressMetric } from '@commitment/design-system';
 
 export interface HabitsHeroProps {
   completed: number;
   total: number;
-  currentStreak: number;
+  consistencyDays: number;
 }
 
 /**
  * The "Today's Habits" summary — iteration 2 (2026-07-15), closer to
  * Activity Rings per explicit reference: the ring carries the raw "4/7"
- * count (not a percentage), and streak/completed are two calm stat rows
+ * count (not a percentage), and consistency/completed are two calm stat rows
  * beside it rather than one combined sentence. `ProgressMetric` has no
  * slot for custom center content (it only renders its own percentage
  * label), so the ratio is layered on top via absolute positioning from
  * this feature-local component — `ProgressMetric` itself is untouched,
  * per "no new/modified Design System components".
+ *
+ * AR-036/D-036.1 — renamed prop from `currentStreak`; same value
+ * (`Habit.currentStreakDays`, out of scope), reframed at the presentation
+ * layer only.
  */
-export function HabitsHero({ completed, total, currentStreak }: HabitsHeroProps) {
+export function HabitsHero({ completed, total, consistencyDays }: HabitsHeroProps) {
   const { t } = useTranslation('common');
   const progress = total > 0 ? completed / total : 0;
 
@@ -41,10 +45,10 @@ export function HabitsHero({ completed, total, currentStreak }: HabitsHeroProps)
 
         <YStack flex={1} gap="$3">
           <XStack gap="$2" alignItems="center">
-            <Flame size={18} color="$warning" />
+            <TrendingUp size={18} color="$success" />
             <YStack>
-              <Title fontSize="$6" fontWeight="bold">{currentStreak}</Title>
-              <Body tone="secondary" fontSize="$2">{t('habits.hero.streakLabel')}</Body>
+              <Title fontSize="$6" fontWeight="bold">{consistencyDays}</Title>
+              <Body tone="secondary" fontSize="$2">{t('habits.hero.consistencyLabel')}</Body>
             </YStack>
           </XStack>
           <XStack gap="$2" alignItems="center">

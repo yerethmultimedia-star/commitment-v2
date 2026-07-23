@@ -20,7 +20,7 @@ export interface BestWorstDayResult {
  * Picks the highest/lowest focusMinutes day among `days` (already filtered
  * to exclude future/not-yet-happened days by the caller). If every day has
  * 0 minutes, both are suppressed (null) rather than showing a misleading
- * "Mejor día: Monday (0 min)" — mirrors StreakHighlightInsight's existing
+ * "Mejor día: Monday (0 min)" — mirrors TopConsistencyInsight's existing
  * pattern of hiding rather than showing an empty/zero highlight.
  * Ties: first occurrence wins (stable, deterministic).
  */

@@ -56,16 +56,16 @@ describe('RecommendationEngine', () => {
     });
   });
 
-  describe('Rule: PIN_HERO streak', () => {
-    it('produces PIN_HERO streak when completedThisWeek > 0', () => {
+  describe('Rule: PIN_HERO weekly-momentum', () => {
+    it('produces PIN_HERO weekly-momentum when completedThisWeek > 0', () => {
       const recs = getRecommendations(makeContext({ completedThisWeek: 5 }));
-      const pin = recs.find((r) => r.type === 'PIN_HERO' && r.targetId === 'streak');
+      const pin = recs.find((r) => r.type === 'PIN_HERO' && r.targetId === 'weekly-momentum');
       expect(pin).toBeDefined();
     });
 
-    it('does NOT produce PIN_HERO streak when completedThisWeek = 0', () => {
+    it('does NOT produce PIN_HERO weekly-momentum when completedThisWeek = 0', () => {
       const recs = getRecommendations(makeContext({ completedThisWeek: 0 }));
-      const pin = recs.find((r) => r.type === 'PIN_HERO' && r.targetId === 'streak');
+      const pin = recs.find((r) => r.type === 'PIN_HERO' && r.targetId === 'weekly-momentum');
       expect(pin).toBeUndefined();
     });
   });
@@ -77,9 +77,9 @@ describe('RecommendationEngine', () => {
       expect(promote).toBeDefined();
     });
 
-    it('promotes current-streak-widget when streak > 0', () => {
+    it('promotes daily-consistency-widget when streak > 0', () => {
       const recs = getRecommendations(makeContext({ currentStreakDays: 3 }));
-      const promote = recs.find((r) => r.type === 'PROMOTE_WIDGET' && r.targetId === 'current-streak-widget');
+      const promote = recs.find((r) => r.type === 'PROMOTE_WIDGET' && r.targetId === 'daily-consistency-widget');
       expect(promote).toBeDefined();
     });
 
@@ -161,14 +161,14 @@ describe('RecommendationEngine', () => {
   });
 
   describe('Coach: Achievements', () => {
-    it('celebrates a 7+ day streak', () => {
+    it('celebrates a 7+ day consistency milestone', () => {
       const recs = getRecommendations(makeContext({ currentStreakDays: 7 }));
-      expect(recs.find((r) => r.type === 'COACH_ACHIEVEMENT' && r.targetId === 'week-streak')).toBeDefined();
+      expect(recs.find((r) => r.type === 'COACH_ACHIEVEMENT' && r.targetId === 'consistency-milestone')).toBeDefined();
     });
 
-    it('does not celebrate a streak under 7 days', () => {
+    it('does not celebrate a consistency milestone under 7 days', () => {
       const recs = getRecommendations(makeContext({ currentStreakDays: 6 }));
-      expect(recs.find((r) => r.type === 'COACH_ACHIEVEMENT' && r.targetId === 'week-streak')).toBeUndefined();
+      expect(recs.find((r) => r.type === 'COACH_ACHIEVEMENT' && r.targetId === 'consistency-milestone')).toBeUndefined();
     });
 
     it('celebrates completed goals', () => {
@@ -189,9 +189,9 @@ describe('RecommendationEngine', () => {
   });
 
   describe('Coach: Upcoming Risks', () => {
-    it('flags habit streaks at risk', () => {
+    it('flags habits needing attention', () => {
       const recs = getRecommendations(makeContext({ atRiskCount: 2 }));
-      const rec = recs.find((r) => r.type === 'COACH_RISK' && r.targetId === 'habit-streaks-at-risk');
+      const rec = recs.find((r) => r.type === 'COACH_RISK' && r.targetId === 'habits-needing-attention');
       expect(rec?.metadata?.count).toBe(2);
     });
 

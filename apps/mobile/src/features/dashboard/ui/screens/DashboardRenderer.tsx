@@ -10,7 +10,7 @@
  * Today's default view only shows Agenda + Habits + the Coach message
  * (matching the target design) — the rest of the registered widgets
  * (UpcomingTasks, WeeklyProgress, CompletionRate, QuickActions,
- * CurrentStreak, RecentActivity, Motivation, the old TodayWidget) stay fully
+ * DailyConsistency, RecentActivity, Motivation, the old TodayWidget) stay fully
  * registered and testable via DashboardLayoutEngine (unchanged, see its own
  * test suite) for a future personalization feature — this is a
  * presentation-layer filter, not a data model change, per explicit user

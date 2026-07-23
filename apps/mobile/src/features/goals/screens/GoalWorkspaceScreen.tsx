@@ -99,14 +99,14 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
 
   const stats = useMemo(() => {
     const completedTasks = linkedTasks.filter((tk) => tk.status === 'completed').length;
-    const avgStreak = linkedHabits.length > 0
+    const avgConsistency = linkedHabits.length > 0
       ? Math.round(linkedHabits.reduce((sum, h) => sum + h.currentStreakDays, 0) / linkedHabits.length)
       : 0;
     const completedMilestones = goal?.milestones.filter((m) => m.completed).length ?? 0;
     return {
       totalTasks: linkedTasks.length,
       completedTasks,
-      avgStreak,
+      avgConsistency,
       completedMilestones,
       totalMilestones: goal?.milestones.length ?? 0,
     };
@@ -191,7 +191,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                     <MetricCard icon={<ListChecks color="$accent" size={20} />} i18nKey="goals.workspace.stats.tasks" value={`${stats.completedTasks}/${stats.totalTasks}`} />
                   </YStack>
                   <YStack flex={1} minWidth={100}>
-                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgStreak" value={t('goals.workspace.stats.days', { count: stats.avgStreak })} />
+                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgConsistency" value={t('goals.workspace.stats.days', { count: stats.avgConsistency })} />
                   </YStack>
                   <YStack flex={1} minWidth={100}>
                     <MetricCard icon={<CheckCircle2 color="$accent" size={20} />} i18nKey="goals.workspace.stats.milestones" value={`${stats.completedMilestones}/${stats.totalMilestones}`} />
@@ -394,7 +394,7 @@ export function GoalWorkspaceScreen({ goalId }: GoalWorkspaceScreenProps) {
                 <SectionHeader title={{ i18nKey: 'goals.workspace.statistics' }} />
                 <XStack gap="$3" flexWrap="wrap">
                   <YStack flex={1} minWidth={100}>
-                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgStreak" value={t('goals.workspace.stats.days', { count: stats.avgStreak })} />
+                    <MetricCard icon={<Repeat color="$accent" size={20} />} i18nKey="goals.workspace.stats.avgConsistency" value={t('goals.workspace.stats.days', { count: stats.avgConsistency })} />
                   </YStack>
                   <YStack flex={1} minWidth={100}>
                     <MetricCard icon={<CheckCircle2 color="$accent" size={20} />} i18nKey="goals.workspace.stats.milestones" value={`${stats.completedMilestones}/${stats.totalMilestones}`} />

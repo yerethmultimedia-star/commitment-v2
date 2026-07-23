@@ -15,7 +15,7 @@ export interface WeekActivityRowProps {
   flags: readonly WeekActivityFlagLike[];
 }
 
-/** "RACHA ACTUAL" — Mon-Sun app-wide activity streak (at least one task completed that day). Future days render neutral, never as "missed." */
+/** "WEEK ACTIVITY" — Mon-Sun app-wide activity (at least one task completed that day). Future days render neutral, never as "missed." */
 export function WeekActivityRow({ flags }: WeekActivityRowProps) {
   const { t } = useTranslation('common');
 
