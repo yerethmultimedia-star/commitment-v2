@@ -79,11 +79,69 @@ real y total, confirmada por `git log` desde el primer día del proyecto.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+AR-030 presenta un patrón distinto al de AR-024: la evidencia no muestra una decisión implícita
+pendiente de formalizar — muestra **una ausencia de concepto de dominio** que ya empieza a afectar a
+más de un módulo. Observación clave: AR-043 no creó deuda, simplemente hizo más visible una deuda ya
+existente.
+
+**H1 (principal):** _"El sistema necesita que `Identity` deje de ser un identificador opaco y pase a
+constituir un agregado de dominio explícito con invariantes propias, de modo que las referencias
+mediante `identityId` tengan un significado verificable dentro del modelo de dominio."_ Respaldada por
+la evidencia de Fase 1: existe un identificador ampliamente utilizado, no existe el aggregate que le da
+significado, y el número de consumidores está creciendo (Authentication es el segundo).
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — Authentication debería validar directamente contra Identity. Descartada: contradice
+  explícitamente D-043.1; Authentication resolvió un problema distinto (autenticación y sesión), no la
+  existencia del aggregate de identidad.
+- **H3** — el problema es únicamente de validación de cadenas (`string`). Descartada: el tipo del
+  identificador es un síntoma; la ausencia del aggregate es el problema arquitectónico.
+- **H4** — puede mantenerse indefinidamente un `identityId` sin aggregate mientras exista una
+  convención común. Descartada: las convenciones no sustituyen invariantes de dominio; cuantos más
+  consumidores aparezcan, mayor la dependencia de una regla que hoy no está materializada.
+
+**H1 sobrevive.** El problema no consiste en validar un identificador — consiste en que el dominio
+todavía no posee la entidad que justifica la existencia de ese identificador.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+No se decide todavía cómo será `Identity` — eso pertenece al diseño. Se congela únicamente la
+propiedad arquitectónica.
+
+**D-030.1:** _"Todo identificador compartido que represente una entidad de dominio y sea utilizado
+como fundamento de relaciones entre múltiples capacidades del sistema debe corresponder a un agregado
+de dominio explícito que defina su identidad e invariantes."_
+
+**No fija deliberadamente:** la estructura de `Identity`, sus atributos, sus relaciones, el mecanismo
+de persistencia, ni el modelo de autenticación. Solo establece una propiedad: los identificadores
+compartidos no pueden ser conceptos vacíos dentro del dominio. Mismo patrón que
+D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-043.1/D-054.1/D-044.1-3.
+
+**Aspecto a vigilar en Fase 4A, registrado de antemano:** mantener estricta la separación con AR-043 —
+Authentication seguirá autenticando, Identity deberá representar la identidad del dominio; ninguno debe
+absorber al otro. El diseño no debe partir de los consumidores actuales (`Session`, `Credential`,
+etc.) — el aggregate `Identity` debe modelarse desde sus propias responsabilidades e invariantes; los
+consumidores se adaptan a ese modelo, no al revés.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo se confirma completamente vigente, sin ninguna corrección ni resolución
-parcial desde la auditoría — ni siquiera por AR-043, que tocó el mismo concepto central (`identityId`)
-pero, por diseño deliberado, no resolvió la ausencia de un módulo de backend de `Identity`. El dominio de
-`Identity` no ha cambiado desde el primer commit del proyecto (2026-07-04). Estado: ⬜ → 🟦 En análisis.
-Decisión: pendiente Fase 2A (Owner=Claude — ejecución directa; la fase de decisión trata sobre todo el
-alcance mínimo del módulo de backend, no un juicio estratégico de producto).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma completamente vigente, sin ninguna
+corrección ni resolución parcial desde la auditoría — ni siquiera por AR-043, que tocó el mismo
+concepto central (`identityId`) pero, por diseño deliberado, no resolvió la ausencia de un aggregate
+de backend real para `Identity`. Reencuadrado por la evidencia: no es una decisión pendiente de
+formalizar, es una ausencia de concepto de dominio que ya afecta a más de un módulo. D-030.1 aprobada:
+todo identificador compartido usado como fundamento de relaciones entre capacidades debe corresponder
+a un aggregate de dominio explícito — formulada como propiedad, sin fijar estructura ni mecanismo.
+Pendiente: **Fase 4A (Diseño técnico)** — con la precaución explícita de mantener Authentication e
+Identity separados y de modelar desde las responsabilidades propias de Identity, no desde sus
+consumidores actuales. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: 💭 →
+✅ Decisión aprobada.
