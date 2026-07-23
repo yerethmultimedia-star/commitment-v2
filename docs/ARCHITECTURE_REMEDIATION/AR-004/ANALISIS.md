@@ -72,11 +72,65 @@ cuando se auditó.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+Esta AR tiene una naturaleza distinta de AR-002/AR-009/AR-036: no corrige una decisión errónea ni
+realinea un concepto de producto — resuelve una **desalineación entre la arquitectura documentada y la
+arquitectura realmente evolucionada**.
+
+**H1 (principal):** _"La arquitectura debe reflejar explícitamente las capacidades reales del sistema.
+Mantener componentes 'placeholder' cuando ya existen implementaciones funcionales genera una
+representación arquitectónica incorrecta y aumenta la deuda de documentación y gobierno."_ Respaldada
+por la evidencia de Fase 1: Authentication ya existe como módulo, Coach e Insights ya no son simples
+ideas futuras, y la documentación sigue tratándolos como capacidades futuras.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — el problema es únicamente documental. Descartada: la documentación es donde se manifiesta el
+  problema, pero el efecto es arquitectónico — cualquier decisión futura parte de un mapa del sistema
+  que ya no representa la realidad.
+- **H3** — deben mantenerse los placeholders hasta cerrar todas las AR relacionadas. Descartada: eso
+  convertiría la arquitectura en un registro histórico, cuando su función es describir el estado
+  arquitectónico vigente — el historial ya está preservado mediante ADRs, commits y el Roadmap.
+- **H4** — debe modelarse todo el estado futuro previsto, aunque todavía no exista. Descartada: la
+  arquitectura debe describir capacidades existentes y decisiones aprobadas, no anticipar
+  implementaciones aún no materializadas.
+
+**H1 sobrevive.** El problema no es que falten módulos, sino que la representación arquitectónica ha
+dejado de corresponder con el sistema real.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+**D-004.1:** _"La documentación arquitectónica debe representar únicamente capacidades existentes o
+formalmente aprobadas, manteniendo correspondencia verificable con la implementación y evitando que
+componentes implementados permanezcan descritos como placeholders o capacidades futuras."_
+
+**No congela:** cómo actualizar los diagramas, qué documentos modificar, la organización exacta de
+módulos, ni la nomenclatura — solo fija la propiedad: arquitectura documentada y arquitectura
+implementada deben permanecer alineadas y ser verificablemente consistentes. Mismo patrón que
+D-002.1/D-009.1/D-036.1/D-043.1/D-054.1/D-044.1-3.
+
+**Aspecto a vigilar en Fase 4A, registrado de antemano:** Authentication ya existe; `IdentityModule` no.
+Autenticación e identidad no deben fusionarse automáticamente durante el diseño — AR-030 sigue abierta y
+podría introducir responsabilidades adicionales para identidad (perfil, identidad unificada,
+proveedores, etc.). Fase 4A debe evaluar Authentication exclusivamente como una capacidad ya
+implementada y tratar Identity como una decisión todavía pendiente, evitando que la resolución de AR-004
+anticipe o condicione el resultado de AR-030.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo se confirma completamente vigente y sin ninguna corrección desde la
-auditoría — a diferencia de AR-002/AR-009/AR-036, no hay una parte ya resuelta que separar. La brecha
-entre `PRODUCT_BACKLOG.md` y el estado real del código creció desde la auditoría (Authentication es un
-módulo nuevo, no contemplado originalmente, también ausente del backlog). Estado: ⬜ → 🟦 En análisis.
-Decisión: pendiente Fase 2A (Owner=Claude — ejecución directa; la fase de decisión aquí es sobre todo de
-alcance/formato de la reescritura, no de juicio estratégico).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma completamente vigente y sin ninguna
+corrección desde la auditoría — a diferencia de AR-002/AR-009/AR-036, no hubo una parte ya resuelta que
+separar. Reencuadrado por la evidencia: no es una brecha documental aislada, es una desalineación entre
+la arquitectura documentada y la arquitectura realmente evolucionada. D-004.1 aprobada: la documentación
+debe representar únicamente capacidades reales o formalmente aprobadas, con correspondencia verificable
+respecto a la implementación, formulada como propiedad sin mecanismo concreto. Pendiente: **Fase 4A
+(Diseño técnico)** — con la precaución explícita de no fusionar Authentication (ya implementada) con
+Identity (AR-030, todavía pendiente). Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B).
+Decisión: 💭 → ✅ Decisión aprobada.
