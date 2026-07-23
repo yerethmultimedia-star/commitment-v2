@@ -2,6 +2,8 @@
 
 Este documento detalla la arquitectura global del sistema, los diagramas C4 (Contexto y Contenedores), los flujos de interacción clave, las directrices de diseño calmo y las políticas operativas del monorepo.
 
+**Corregido 2026-07-20 como parte de AR-001** (`docs/ARCHITECTURE_REMEDIATION/AR-001/ANALISIS.md`). La versión anterior de este documento describía PostgreSQL, SQLite local, Event Sourcing y Firebase Push — ninguno de los cuales existe en el código real — y enlazaba a rutas absolutas de otro repositorio (`file:///Users/yereth/Desktop/Commitment-v2/...`). La arquitectura de plataforma oficial y vigente está en **ADR-024** (`docs/03-architecture/adr_024_official_technology_platform.md`); la cronología de cómo este documento llegó a desactualizarse está en `docs/03-architecture/ARCHITECTURE_TRANSITION_2026.md`.
+
 ---
 
 ## 1. C4 Context Diagram
@@ -12,9 +14,11 @@ El diagrama de contexto ilustra cómo interactúan los usuarios con la plataform
 graph TD
     User([Usuario]) -->|Interactúa con la app| MobileApp[Commitment Mobile Application]
     MobileApp -->|Sincroniza datos / Autentica| BackendAPI[NestJS Backend API]
-    BackendAPI -->|Persiste datos| PostgreSQL[(PostgreSQL Database)]
-    BackendAPI -->|Envía notificaciones / Eventos| Firebase[Push Notification Services]
+    BackendAPI -->|Persiste datos, en memoria hoy| InMemoryStore[(In-Memory Repositories — persistencia real pendiente, ver AR-028)]
+    BackendAPI -->|Envía notificaciones| ExpoPush[Expo Push Notification Service]
 ```
+
+**Nota sobre autenticación:** el diagrama muestra "Autentica" como interacción conceptual — a la fecha, no existe ningún mecanismo real de autenticación/autorización en el backend (ver AR-043, `docs/ARCHITECTURE_REMEDIATION/REMEDIATION_ROADMAP_V1.md`). `identityId` se acepta sin verificación.
 
 ---
 
@@ -30,28 +34,29 @@ graph TB
         ThemeEngine[@commitment/theme-engine]
         Localization[@commitment/localization]
         PlatformSDK[@commitment/platform]
-        SQLite[(SQLite Local Db)]
 
         Features -->|Renderiza UI| DS
-        Features -->|Consulta Datos| SQLite
+        Features -->|Server state| ReactQuery[React Query cache, en memoria]
         DS -->|Inyecta adapters| PlatformSDK
         DS -->|Valores de tema| ThemeEngine
         DS -->|Traducciones y fechas| Localization
     end
 
     subgraph apps/backend (NestJS Server)
-        APIControllers[REST/GraphQL Controllers]
-        CQRSHandlers[CQRS Command/Query Handlers]
-        DomainModels[Pure Domain Domain Models]
-        DBRepository[Postgres Repositories]
+        APIControllers[REST Controllers]
+        CQRSHandlers[CQRS Command/Query Handlers vía @nestjs/cqrs]
+        DomainModels[Domain Models — sin dependencias de framework]
+        InMemoryRepos[In-Memory Repositories]
 
         APIControllers --> CQRSHandlers
         CQRSHandlers --> DomainModels
-        CQRSHandlers --> DBRepository
+        CQRSHandlers --> InMemoryRepos
     end
 
-    Features -->|HTTP / Sync| APIControllers
+    Features -->|HTTP| APIControllers
 ```
+
+**No existe almacenamiento local persistente en mobile** (ni SQLite ni AsyncStorage ni MMKV) — confirmado por `docs/ARCHITECTURE_REVIEW/fase-3-escalabilidad/11-offline-first.md`. El caché de React Query no sobrevive el cierre de la app. Offline First está en ~10% de implementación real.
 
 ---
 
@@ -59,14 +64,17 @@ graph TB
 
 El diseño del monorepo está dictado por decisiones arquitectónicas intencionales orientadas al aislamiento de negocio y flexibilidad ante el cambio tecnológico:
 
-| Decisión Clave                    | Motivo / Justificación                                                                                                                               | Estado    | Enlace                                                                          |
-| :-------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :------------------------------------------------------------------------------ |
-| **Domain sin React / Frameworks** | Evita la degradación del dominio. Las reglas de negocio permanecen portables, testeables unitariamente y reutilizables en backend y frontend.        | 🟢 Activo | [ADR-002](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md)         |
-| **Theme Engine Agnóstico**        | Permite evaluar e interpretar temas ( Sunrise, Midnight, Forest) en Node.js, Web o Mobile sin dependencias visuales de React/Tamagui.                | 🟢 Activo | [ADR-014](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md)         |
-| **Platform SDK Aislado**          | Desacopla por completo las APIs físicas (Haptics, Teclado, Almacenamiento Seguro) de los componentes de UI calmos.                                   | 🟢 Activo | [ADR-011](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md)         |
-| **Localization SDK Único**        | Protege la internacionalización unificando la traducción y el parseo temporal en un único módulo para evitar fragmentación o dependencias de `Intl`. | 🟢 Activo | [ADR-013](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md)         |
-| **Widget Registry Desacoplado**   | Fomenta la extensibilidad del Dashboard móvil. Los widgets se registran independientemente sin acoplar la pantalla principal.                        | 🟢 Activo | [Widget Registry](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md) |
-| **Focus Stack con Prioridad**     | Resuelve el comportamiento e interacción accesible (Teclas Escape, Back y Tab-trapping) a través de un stack dinámico y priorizado.                  | 🟢 Activo | [Focus System](file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md)    |
+| Decisión Clave                                       | Motivo / Justificación                                                                                                                               | Estado    | Enlace                                                                          |
+| :--------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :-------- | :------------------------------------------------------------------------------ |
+| **Plataforma oficial (frontend/backend/mensajería)** | Formaliza React Native+Expo, NestJS, y BullMQ+Redis como arquitectura vigente, tras resolver la divergencia con ADR-001–010.                         | 🟢 Activo | [ADR-024](adr_024_official_technology_platform.md)                              |
+| **Domain sin React / Frameworks**                    | Evita la degradación del dominio. Las reglas de negocio permanecen portables, testeables unitariamente y reutilizables en backend y frontend.        | 🟢 Activo | Verificado en `docs/ARCHITECTURE_REVIEW/fase-1-nucleo/02-clean-architecture.md` |
+| **Theme Engine Agnóstico**                           | Permite evaluar e interpretar temas ( Sunrise, Midnight, Forest) en Node.js, Web o Mobile sin dependencias visuales de React/Tamagui.                | 🟢 Activo | [ADR-014](03-architecture/adr_014_activity_history_recommendations.md)          |
+| **Platform SDK Aislado**                             | Desacopla por completo las APIs físicas (Haptics, Teclado, Almacenamiento Seguro) de los componentes de UI calmos.                                   | 🟢 Activo | [ADR-011](03-architecture/adr_011_tech_stack_flexibility.md)                    |
+| **Localization SDK Único**                           | Protege la internacionalización unificando la traducción y el parseo temporal en un único módulo para evitar fragmentación o dependencias de `Intl`. | 🟢 Activo | [ADR-013](03-architecture/adr_013_internationalization_first.md)                |
+| **Widget Registry Desacoplado**                      | Fomenta la extensibilidad del Dashboard móvil. Los widgets se registran independientemente sin acoplar la pantalla principal.                        | 🟢 Activo | Sin ADR dedicada — ver `apps/mobile/src/features/dashboard/`                    |
+| **Focus Stack con Prioridad**                        | Resuelve el comportamiento e interacción accesible (Teclas Escape, Back y Tab-trapping) a través de un stack dinámico y priorizado.                  | 🟢 Activo | Sin ADR dedicada — ver `packages/design-system/src/focus/`                      |
+
+**Nota (2026-07-20):** las filas de esta tabla enlazaban previamente a `file:///Users/yereth/Desktop/Commitment-v2/docs/DECISIONS.md` — una ruta absoluta a un repositorio distinto de este (`iCloud/Desktop/Commitment-v2`). Corregido para enlazar dentro de este repo; donde no existe una ADR real correspondiente, se dice explícitamente en vez de inventar un enlace.
 
 ---
 
@@ -97,26 +105,28 @@ Domain Read Model (DB PostgreSQL)
 
 ### Flujo de Escrituras (Comandos / Modificaciones del Compromiso)
 
-Las mutaciones operan bajo principios de Event Sourcing y consistencia eventual:
+**Corregido 2026-07-20:** las mutaciones operan bajo **CQRS de estado versionado** (ADR-021), no Event Sourcing — el estado del agregado nunca se reconstruye reproduciendo eventos; los repositorios in-memory guardan el estado ya resuelto como fuente de verdad. Los eventos de dominio sí se emiten (vía `@nestjs/cqrs`'s EventBus) para disparar Sagas y proyecciones de lectura, pero no son el mecanismo de persistencia:
 
 ```text
 Usuario (Ejecuta Acción)
    │
    ▼
 Command Dispatcher (mobile / backend)
-   │  (Valida datos mediante Zod Contract)
+   │  (Valida datos mediante Zod Schema en el controller)
    ▼
 Aggregate Root (Domain)
    │  (Valida invariantes de regla de negocio)
    ▼
-Domain Event (Generación de Evento inmutable)
+Domain Event (emitido vía EventBus)
    │
-   ├─► Event Store (Postgres / SQLite local)
+   ├─► In-Memory Repository (guarda el estado ya resuelto — persistencia real pendiente, ver AR-028)
    │
-   ├─► Activity Logger / Proyecciones (Procesa métricas)
+   ├─► Sagas (p. ej. RecurringCommitmentSaga) — coreografía, no todos los agregados la usan
    │
-   └─► Timeline Projection (Actualiza Read Model visible)
+   └─► Query Services / Read Model (actualiza la proyección visible)
 ```
+
+Excepción: `Goal` mantiene además un log de eventos aditivo real (`saveEvents`, con optimistic concurrency propio) como historial de auditoría no-autoritativo — ver `docs/ARCHITECTURE_REVIEW/fase-1-nucleo/05-event-store.md`. `Task` tiene el mismo mecanismo registrado pero nunca invocado (código muerto). `Commitment`/`Habit` no tienen esta feature.
 
 ---
 
@@ -124,7 +134,7 @@ Domain Event (Generación de Evento inmutable)
 
 Para garantizar la estabilidad ante actualizaciones (como la migración a RNTL v14 y React 19), se define la siguiente matriz de pruebas:
 
-- **packages/domain:** Cobertura estricta del 100% de la lógica de agregados, invariantes y flujos de comandos utilizando pruebas unitarias puras en Jest (sin mocks externos).
+- **packages/domain:** Suite real, guiada por invariantes e idempotencia, considerada la mejor testeada del monorepo (`docs/ARCHITECTURE_REVIEW/fase-2-plataforma/10-testing.md`). **Corrección 2026-07-20:** esta suite y la e2e de backend existen y pasan, pero **CI no las ejecuta** (`.github/workflows/ci.yml` solo corre tests unitarios de backend y typecheck de mobile) — un badge verde de CI hoy implica más cobertura de la que realmente se valida. Ver AR-008.
 - **packages/design-system:** Pruebas de integración asíncronas (`renderWithTheme` y `rerender` asíncronos en RNTL v14) para validar:
   - Comportamiento de los componentes calmos.
   - Accesibilidad semántica mediante roles (`getByRole` con `accessible={true}`).
