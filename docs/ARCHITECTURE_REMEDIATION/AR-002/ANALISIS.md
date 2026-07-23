@@ -221,6 +221,20 @@ nombres correctos. **La pregunta de validación queda respondida en su forma fue
 objetiva de una Tecnología Preferida ya no solo se detecta — no puede integrarse en `main` sin superar
 el control, porque GitHub ahora exige que el check correspondiente pase antes de permitir el merge.
 
+**Precisión de alcance (no un hallazgo pendiente, no una desviación):** el push directo de cierre de
+esta misma AR fue aceptado por GitHub con el aviso _"Bypassed rule violations... 3 of 3 required status
+checks are expected"_, porque el repositorio mantiene `enforce_admins=false`. Esto no indica que
+D-002.1 haya fallado — GitHub distingue dos políticas independientes: (1) enforcement para PRs/merges
+(`required_status_checks`, lo que D-002.1 exige) y (2) enforcement para administradores
+(`enforce_admins`, una política de administración del repositorio, nunca congelada por esta decisión).
+La implementación materializa D-002.1 mediante branch protection y required status checks para la
+integración normal de cambios; el repositorio mantiene `enforce_admins=false`, por lo que los
+administradores conservan la capacidad de realizar pushes directos que omiten dichos checks — un
+comportamiento fuera del alcance de D-002.1, no una limitación suya. No se abre ningún hallazgo, AR ni
+decisión adicional por esto: solo sería relevante si el programa definiera en el futuro una propiedad
+más fuerte ("ningún cambio puede llegar a `main` sin superar los checks, incluyendo administradores"),
+que hoy no existe.
+
 ---
 
 ## Estado
