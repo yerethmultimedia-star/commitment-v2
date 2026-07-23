@@ -1,4 +1,4 @@
-import { AggregateRoot } from '../../core/aggregate-root.base.js';
+import { AggregateRoot } from '../../shared/aggregate-root.js';
 import { DomainEvent } from '../../core/domain-event.interface.js';
 import { AppearanceSettings, AppearanceSettingsProps } from './appearance-settings.model.js';
 
@@ -8,12 +8,25 @@ export interface AppearanceProps {
   updatedAt: Date;
 }
 
-export class Appearance extends AggregateRoot {
-  protected readonly aggregateType = 'Appearance';
-  
+/**
+ * Migrated from core/aggregate-root.base.ts to shared/aggregate-root.ts (AR-023, D-023.1):
+ * the operative architecture uses shared/AggregateRoot exclusively (ADR-021, matches the
+ * versioned-state pattern all 7 real aggregates and AR-028's optimistic concurrency use).
+ * Appearance never used core/'s Event-Sourcing-specific capabilities (applyEvent stayed empty;
+ * updateSettings() mutates state directly, never calling recordEvent()) — this migration is
+ * purely a base-class swap, no behavioral change. See docs/ARCHITECTURE_REMEDIATION/AR-023/ANALISIS.md.
+ * `id` is typed as plain `string` (not a dedicated Value Object) — introducing one is out of this
+ * AR's approved scope (D-023.1 is about which hierarchy to use, not about redesigning Appearance's
+ * domain model conventions).
+ */
+export class Appearance extends AggregateRoot<string> {
   private _userId!: string;
   private _settings!: AppearanceSettings;
   private _updatedAt!: Date;
+
+  private constructor(userId: string) {
+    super(userId);
+  }
 
   public get userId(): string {
     return this._userId;
@@ -40,8 +53,7 @@ export class Appearance extends AggregateRoot {
   }
 
   public static create(props: { userId: string; settings?: AppearanceSettings; updatedAt?: Date }): Appearance {
-    const instance = new Appearance();
-    instance.id = props.userId; // use userId as aggregate id
+    const instance = new Appearance(props.userId);
     instance._userId = props.userId;
     instance._settings = props.settings ?? AppearanceSettings.create({});
     instance._updatedAt = props.updatedAt ?? new Date();
