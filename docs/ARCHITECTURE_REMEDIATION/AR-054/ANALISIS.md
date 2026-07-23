@@ -243,28 +243,110 @@ integración debe tratarse con el mismo rigor que un contrato de dominio."_
 
 ---
 
-## Plan de reanudación para Fase 4A (Diseño técnico) — registrado 2026-07-23, sesión cerrada aquí
+## Fase 4A — Diseño técnico
 
-Misma disciplina que AR-043: Fase 4A no discute código todavía, discute invariantes de diseño. Preguntas
-de apertura, en orden, antes de elegir mecanismo (provider/factory/bootstrap/wrapper):
+**Estado: ✅ Cerrada.** Respondidas las 4 preguntas de invariantes en orden, sin discutir código hasta el
+final. **Hallazgo central de esta fase: la evidencia obliga a dividir la decisión — Worker y Queue no
+tienen las mismas capacidades disponibles en la librería, así que el diseño no tiene por qué ser
+simétrico.**
 
-1. ¿Quién es el propietario del contrato de integración con BullMQ dentro de la aplicación?
-2. ¿Dónde debe existir el registro del manejador de error para que no pueda omitirse accidentalmente al
-   añadir un futuro `Queue`/`Worker`?
-3. ¿Cómo se evita que una futura integración BullMQ viole D-054.1 sin que nadie lo note?
-4. ¿El cumplimiento de D-054.1 debe ser obligatorio por construcción (imposible de omitir) o solo
-   verificable por convención (posible de omitir, pero detectable por revisión/lint)?
+### Pregunta 1 — ¿Quién es el propietario del contrato de integración con BullMQ?
 
-Solo después de responder estas 4 preguntas corresponde elegir la materialización concreta.
+**Infraestructura, no el dominio ni el módulo de notificaciones como concepto funcional.** Confirmado por
+evidencia directa: `packages/domain` no contiene ninguna referencia a BullMQ (mismo patrón de
+independencia arquitectónica que AR-043 auditó para Authentication). El contrato pertenece a la
+integración técnica con BullMQ, no a la funcionalidad de recordatorios en sí.
+
+### Pregunta 2 — ¿Dónde debe vivir el registro del manejador de error?
+
+**Verificación adversarial contra el código real de `@nestjs/bullmq` antes de responder** (no solo
+`bullmq`): la librería NO ofrece las mismas herramientas para `Queue` y `Worker`, así que la respuesta se
+divide.
+
+- **Worker:** `@nestjs/bullmq` ya expone `@OnWorkerEvent('error')` — un decorador de primera clase,
+  pensado exactamente para este caso, conectado automáticamente por el mismo `BullExplorer` que ya
+  descubre `@Processor` vía `DiscoveryService`. Completamente sin usar en este codebase hoy. **Decisión:
+  usar el mecanismo nativo de la librería, dentro de la propia clase `ReminderProcessor` — no crear un
+  wrapper para esto.** Envolverlo detrás de una abstracción propia empeoraría el diseño sin ganar nada:
+  ya es el camino previsto por el framework.
+- **Queue:** no existe decorador equivalente. `@OnQueueEvent`/`@QueueEventsListener` es un mecanismo
+  distinto — conecta a `bullmq.QueueEvents` (una tercera conexión Redis, para eventos distribuidos entre
+  procesos), no al objeto `Queue` que devuelve `@InjectQueue`. Verificado explícitamente para no
+  confundir ambos mecanismos. Para la Queue, **sí hay una decisión arquitectónica real que tomar** — ver
+  Pregunta 3/4.
+
+### Pregunta 3 y 4 — ¿Cómo se previenen violaciones futuras, y el cumplimiento debe ser obligatorio por construcción o verificable por convención?
+
+**La respuesta inicial ("obligatorio por construcción") se sometió a su propia verificación y no
+sobrevivió en su forma absoluta.** Verificado explícitamente: nada en TypeScript/NestJS impide que un
+futuro módulo llame `BullModule.registerQueue(...)` directamente, sin pasar por ningún wrapper que la
+aplicación defina — son APIs públicas de la librería. Esto significa que un "único punto de creación"
+por sí solo es una **convención reforzada**, no una garantía estructural.
+
+**Se evaluó explícitamente introducir `DiscoveryService`** (buscar todas las `Queue` por el patrón de
+token `BullQueue_*`, adjuntando un manejador de error automáticamente sin importar cómo se registraron)
+como la única vía hacia una garantía verdaderamente estructural para el lado Queue. **Rechazada por
+desproporción evidencia/complejidad, no por inviabilidad técnica** (se confirmó que es técnicamente
+viable — el propio `BullExplorer` usa exactamente esta técnica internamente). Razones para rechazarla
+ahora: (1) cero precedente de `DiscoveryService` en todo `apps/backend/src`; (2) cero precedente de
+clases base abstractas para processors/handlers en el codebase — introducir cualquiera de las dos sería
+un patrón genuinamente nuevo, no una extensión de un estilo ya establecido; (3) la evidencia acumulada
+hoy describe un incumplimiento en 2 puntos concretos, sin ningún caso real de múltiples módulos
+olvidando registrar listeners — no hay evidencia de que el proyecto necesite hoy un mecanismo global de
+descubrimiento, solo de que podría necesitarlo en el futuro si el patrón se repite.
+
+**Pregunta 4 reformulada de binaria a 3 niveles** (en vez de "por construcción" vs. "por convención"):
+
+1. **Nivel 1 — Convención/documentación.** Débil, descartado (es el estado actual, ya demostrado
+   insuficiente por la Fase 1).
+2. **Nivel 2 — Restricción estática (lint).** No depende del revisor humano; deja de ser un checklist
+   para convertirse en una regla que el CI puede hacer cumplir. No convierte la propiedad en imposible
+   de violar, pero sí en muy difícil de violar accidentalmente. **Nivel elegido para la Queue.**
+3. **Nivel 3 — Garantía estructural absoluta (Discovery/reflexión).** Reservada para cuando exista
+   evidencia real de que el Nivel 2 no basta (varios módulos BullMQ, o el patrón repitiéndose pese al
+   lint) — no antes.
+
+**Verificación técnica de viabilidad del Nivel 2, hecha antes de aceptarlo (no asumida):** el proyecto ya
+usa ESLint 9 + `typescript-eslint` 8 (flat config, `apps/backend/eslint.config.mjs`), que soportan
+`@typescript-eslint/no-restricted-imports` con `importNames` y overrides por archivo (`files`/glob) — sin
+necesidad de ninguna dependencia nueva. Confirmado viable con las herramientas ya presentes en el
+proyecto.
+
+### Decisión de diseño resultante
+
+- **Worker:** `@OnWorkerEvent('error')` dentro de `ReminderProcessor`, sin wrapper — mecanismo nativo de
+  la librería, cero patrones nuevos.
+- **Queue:** un punto único recomendado de integración (ya existe de facto — `BullModule.registerQueue`
+  vive hoy en un solo lugar, `notifications.module.ts`) + una regla de lint (Nivel 2) que impida el uso
+  directo de `BullModule`/`@InjectQueue` fuera de ese punto designado + el criterio de aceptación ya
+  fijado en Fase 3 (grep/revisión).
+- **`DiscoveryService` explícitamente NO se introduce en esta AR** — evaluado, técnicamente viable,
+  descartado por desproporción evidencia/complejidad. Candidato legítimo de reevaluación futura si
+  aparece evidencia de que el Nivel 2 no es suficiente.
+
+### Principio reforzado por esta fase (no nuevo — refinamiento de una regla ya permanente)
+
+La pregunta de apertura de Fase 4A ya establecida por AR-028/AR-043 ("¿cuál es el diseño técnico de menor
+complejidad que implementa exactamente la decisión aprobada, sin introducir capacidades que el producto
+todavía no necesita?") se precisa aquí con una formulación más afilada, aportada por el usuario:
+
+> **No perseguir una propiedad de diseño más fuerte que la que la evidencia del problema justifica —
+> incluso cuando esa propiedad más fuerte sea técnicamente alcanzable.**
+
+`DiscoveryService` no se rechazó por ser inviable — se rechazó porque la evidencia actual (2 puntos de
+integración, sin precedente de repetición) no justifica su coste. Segundo punto de dato para esta regla,
+tras el criterio ya aplicado en el Paso 6B de AR-043 (H-GOV-01, rechazar Redis/Postgres para Auth sin
+evidencia específica) — mismo principio, aplicado ahora a una decisión de diseño de Fase 4A en vez de a
+una decisión de infraestructura de Fase 3.
 
 ---
 
 ## Estado
 
-**Fase 1, Fase 2B y Fase 3 cerradas.** D-054.1 aprobada: la solución debe ser un patrón de integración
-general (Alternativa C), no listeners locales aislados (Alternativa B) ni mantener el estado actual
-(Alternativa A). Pendiente: Fase 4A (Diseño técnico — dónde y cómo se implementa el patrón) y Fase 4B
-(Implementación) — no iniciadas todavía. **Sesión cerrada aquí a petición del usuario** — D-054.1 queda
-congelada, Fase 4A queda para la próxima sesión, con el plan de reanudación de arriba ya registrado.
-Estado (eje Estado): se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón
-que AR-028/AR-043). Decisión: ✅ Decisión aprobada.
+**Fase 1, Fase 2B, Fase 3 y Fase 4A cerradas.** D-054.1 aprobada, diseño técnico congelado: Worker vía
+`@OnWorkerEvent('error')` nativo de la librería; Queue vía punto único de integración + restricción
+estática de lint (Nivel 2) + criterio de aceptación por grep. `DiscoveryService` evaluado y descartado
+por desproporción evidencia/complejidad, no por inviabilidad. Pendiente: **Fase 4B (Implementación)** —
+materializar exactamente este diseño, sin reabrir ninguna de las decisiones ya congeladas. Estado (eje
+Estado): se mantiene 🟦 En análisis (no salta a 🟨 hasta que arranque Fase 4B, mismo patrón que
+AR-028/AR-043). Decisión: ✅ Decisión aprobada.
