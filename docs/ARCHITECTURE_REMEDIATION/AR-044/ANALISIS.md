@@ -145,11 +145,73 @@ estas protecciones por descuido, porque ninguno las registra individualmente.
 
 ---
 
-## Estado
+## Fase 4B — Implementación
 
-**Fase 1, Fase 2B, Fase 3 y Fase 4A cerradas.** Diseño técnico congelado y verificado: `helmet` +
-`@nestjs/throttler` (vía `APP_GUARD`, mismo patrón ya usado para `MetricsInterceptor`) +
-`enableCors()` con `CORS_ALLOWED_ORIGINS` configurable. Ambas librerías confirmadas compatibles con las
-versiones de NestJS ya instaladas. Pendiente: **Fase 4B (Implementación)** — instalar las 2
-dependencias, registrar las 3 protecciones, y verificar cero regresión. Estado: se mantiene 🟦 En
-análisis (no salta a 🟨 hasta Fase 4B). Decisión: ✅ Decisión aprobada.
+**Estado: ✅ Cerrada.** Materializado exactamente el diseño congelado en Fase 4A, sin desviaciones ni
+decisiones nuevas:
+
+- **`helmet`/`@nestjs/throttler` instalados** (`pnpm add helmet @nestjs/throttler` en `apps/backend`).
+- **`env.config.ts`** — añadidas `CORS_ALLOWED_ORIGINS` (Zod, `.transform` a array separado por comas,
+  default `http://localhost:8081`), `THROTTLE_TTL_MS` (default `60000`), `THROTTLE_LIMIT` (default
+  `100`) — mismo estilo Zod-con-default ya usado para el resto de `envSchema`.
+- **`main.ts`** — `app.use(helmet())` y `app.enableCors({ origin: env.CORS_ALLOWED_ORIGINS })`, ambos
+  antes de `setGlobalPrefix`, sin ningún otro cambio al orden de bootstrap existente.
+- **`app.module.ts`** — `ThrottlerModule.forRoot([{ ttl: env.THROTTLE_TTL_MS, limit:
+env.THROTTLE_LIMIT }])` en `imports`, `{ provide: APP_GUARD, useClass: ThrottlerGuard }` en
+  `providers` — mismo patrón exacto que el ya existente `{ provide: APP_INTERCEPTOR, useClass:
+MetricsInterceptor }`.
+
+**Verificado, no asumido:**
+
+- `tsc --noEmit`: solo los 2 errores preexistentes de `TECH_DEBT.md` Item 6, sin errores nuevos.
+- `eslint "src/**/*.ts"`: limpio.
+- 31 suites / 139 tests unitarios: sin regresión.
+- Grep exhaustivo confirma exactamente un `helmet()`, un `enableCors(`, y un `APP_GUARD` en todo
+  `apps/backend/src` — ninguna duplicación.
+
+**Nuevo test e2e dedicado** (`test/security.e2e-spec.ts`, 4 tests, replicando en su `beforeEach` el
+mismo registro que `main.ts` — igual que ya hacían `commitments.e2e-spec.ts`/`goals.e2e-spec.ts` con
+`setGlobalPrefix`, dado que los tests e2e no invocan `bootstrap()` directamente):
+
+- D-044.1: confirma `x-content-type-options: nosniff`, `x-dns-prefetch-control: off`, y ausencia de
+  `x-powered-by` (helmet lo elimina).
+- D-044.3: confirma que un origen autorizado recibe `access-control-allow-origin` reflejado, y que un
+  origen no autorizado no recibe esa cabecera.
+- D-044.2: envía `env.THROTTLE_LIMIT + 5` peticiones secuenciales contra `/v1/health` y confirma que
+  aparece un `429` — usa el límite real configurado, no un valor artificialmente bajo, para no depender
+  de un hack de override de variables de entorno.
+
+**4/4 tests nuevos pasan.** Suite e2e completa (4 archivos): 30/33 tests pasan — los 3 fallos son el
+mismo `Unhandled error (Connection is closed)` ya documentado como H-P-001 (`HALLAZGOS_PENDIENTES.md`),
+confirmado por el mensaje de error idéntico y por afectar a un test distinto (`goals.e2e-spec.ts`) en
+cada ejecución — no una regresión de AR-044.
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.** Los 5 puntos fijados antes de implementar, verificados:
+
+- ✅ D-044.1/D-044.2/D-044.3 implementadas exactamente como se congelaron en Fase 4A.
+- ✅ Ninguna decisión arquitectónica nueva apareció durante la implementación — mismo patrón exacto que
+  se congeló, sin necesidad de volver a Fase 4A.
+- ✅ Cero regresiones funcionales (139/139 unitarios; e2e sin fallos atribuibles a AR-044).
+- ✅ Configuración externalizada donde correspondía (`CORS_ALLOWED_ORIGINS`, `THROTTLE_TTL_MS`,
+  `THROTTLE_LIMIT` vía entorno, no constantes en código).
+- ✅ Seguridad transversal centralizada en el bootstrap — confirmado por grep, cero registros
+  duplicados o dispersos por módulo.
+
+### Respuesta a la pregunta que gobernaba esta fase
+
+> **¿La implementación materializa completamente las tres propiedades arquitectónicas sin introducir
+> comportamiento no contemplado por D-044.1/D-044.2/D-044.3?**
+
+**Sí.** La implementación actuó como verificación de que el diseño congelado en Fase 4A era suficiente
+para llegar a una solución técnica completa — ninguna fase posterior a la Decisión reabrió una decisión
+de arquitectura.
+
+---
+
+## Estado final
+
+**AR-044 CERRADA (2026-07-23).** Las 7 fases aplicables (Evidencia → Verificación del framing →
+Alternativas → Decisión → Diseño técnico → Implementación → Validación) se completaron sin excepción al
+ciclo. Estado: 🟦 → ✅ Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
