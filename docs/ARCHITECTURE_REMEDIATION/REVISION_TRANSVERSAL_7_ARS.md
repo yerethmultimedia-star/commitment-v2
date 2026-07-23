@@ -26,6 +26,14 @@ consistente con lo que ya habías señalado; el tercero (AR-001) es el mismo pat
 general y es, de hecho, el origen histórico de la regla "el problema formulado originalmente no es el
 problema real."**
 
+**Reinterpretación histórica del propio AR-001 (2026-07-23, del usuario):** hasta esta revisión, AR-001
+se leía sobre todo como la validación inicial del proceso de remediación (la plantilla metodológica de
+gobernanza). Esta revisión le añade un segundo papel, visible solo en retrospectiva: **es el primer
+precedente del cambio de propietario del problema** — el patrón que luego reapareció en AR-053 y AR-054
+ya existía desde el origen del programa, simplemente no se había identificado como una instancia
+recurrente hasta tener 3 casos para compararlos. No cambia ninguna decisión tomada en AR-001; cambia
+cómo se interpreta su lugar en la historia del programa.
+
 Ningún otro cierre (AR-028, AR-023, AR-043, AR-008) mostró un cambio de propietario — en esos casos el
 propietario permaneció el mismo (la propia arquitectura/implementación de la aplicación); lo que cambió
 fue la causa raíz identificada dentro de ese mismo propietario, no el propietario en sí.
@@ -116,6 +124,14 @@ convierte una sospecha ("esto parece desactualizado / esto parece un remanente")
 verificable. Es la técnica con más respaldo empírico de todo el programa hasta ahora, más incluso que la
 propia escala de ponderación de evidencia (que solo se ha reutilizado una vez desde que se introdujo).
 
+**Precisión del usuario (2026-07-23), importante para no sobregeneralizar este hallazgo:** no se
+formula como "ejecutar siempre `git log`" — eso convertiría una observación condicional en un ritual. Se
+formula como: **cuando la hipótesis de una AR involucra causalidad o evolución temporal (¿esto se
+escribió antes o después de aquello? ¿qué cambió y cuándo?), la reconstrucción histórica vía Git ha
+demostrado hasta ahora un alto poder explicativo en este programa.** Formulada así, deja abierta la
+posibilidad de que existan futuras ARs donde Git simplemente no aporte valor (preguntas que no son de
+naturaleza temporal/causal) sin que eso contradiga el patrón observado aquí.
+
 ---
 
 ## Síntesis — qué está listo para convertirse en guía y qué debe seguir en observación
@@ -142,3 +158,29 @@ confirma ni refuta por defecto.
 **No se promueve nada a regla permanente en este documento.** Este ejercicio es deliberadamente
 observacional — su valor es dejar constancia de qué heurísticas ya acumulan repetición suficiente para
 merecer vigilancia prioritaria en las próximas ARs, no decidir todavía que sean universales.
+
+---
+
+## Observación adicional (2026-07-23, del usuario) — no visible en los 4 puntos anteriores, pero emerge de ellos
+
+Un patrón transversal a los 3 casos de cambio de dirección significativo revisados en detalle en esta
+sesión: **el cambio siempre vino provocado por evidencia nueva, nunca por argumentación.**
+
+- AR-053 cambió de dirección por reconstrucción histórica (`git log` mostrando el día exacto en que
+  cambió el contrato de dominio).
+- AR-054 cambió de dirección por instrumentación directa (`EventEmitter.prototype.emit` revelando el
+  emisor real sin listener).
+- AR-052 cambió de dirección por experimentos discriminantes (casos donde dos hipótesis predicen
+  resultados opuestos, no solo ejemplos que las confirman a ambas).
+
+En ningún caso revisado un cambio de dirección importante ocurrió porque una alternativa se defendió de
+forma más convincente en la discusión — siempre fue una observación nueva la que lo forzó.
+
+**Hipótesis candidata registrada en observación (README), explícitamente NO promovida — tamaño de
+muestra todavía pequeño (3 casos, y los 3 de esta misma sesión, lo que pesa en contra de tratarla como
+independiente de quien la señala):**
+
+> Los cambios sustanciales de dirección en una AR deben estar impulsados por nueva evidencia, no por
+> argumentación.
+
+Ver `README.md`, sección "Hipótesis en observación", para el registro formal.
