@@ -593,15 +593,101 @@ incremento no toca `packages/domain`).
 
 ---
 
+### Incremento 6 — Memory
+
+**Estado: ✅ Cerrado.**
+
+El incremento más delicado de toda la AR — no por complejidad técnica, sino por la tentación de
+convertir Memory en un nuevo centro arquitectónico. Objetivo: introducir una fuente adicional de
+contexto, no un sistema de memoria. La plataforma debe seguir funcionando exactamente igual si Memory
+desaparece.
+
+**Implementado — 3 archivos nuevos, todos en `packages/domain`:**
+
+- `ai-proposal/ai-memory.ts` — `AIMemory<TMemory>`: una sola operación, `recall(key)`, deliberadamente
+  de solo lectura (misma forma que `AIPlatform.propose()`). Memory nunca ejecuta lógica de dominio,
+  nunca se convierte en propietaria de `Identity` ni de ningún otro aggregate, nunca sustituye a las
+  fuentes originales del sistema.
+- `ai-proposal/in-memory-ai-memory.ts` — `InMemoryAIMemory<TMemory>`: la implementación concreta
+  mínima, un `Map` simple. `remember()` existe solo para poder sembrar datos en tests — no forma parte
+  del puerto `AIMemory`, que permanece de solo lectura.
+- `ai-proposal-transformation/enrich-context-with-memory.ts` — `enrichContextWithMemory(context,
+memory, key)`: el único lugar donde un contexto base y `AIMemory` se encuentran. Los campos del
+  contexto base siempre tienen prioridad sobre lo recordado — Memory enriquece, nunca sustituye.
+
+**Deliberadamente fuera de alcance:** recuperación semántica, embeddings, índices vectoriales,
+compresión, ranking sofisticado, sincronización distribuida — evoluciones futuras, no necesarias para
+validar D-050.1.
+
+**Ni `AIPlatform`, ni `consumeAIPlatform`, ni `LLMProposalAdapter` se modificaron** — verificado por
+grep, cero menciones de `memory`/`AIMemory` en ninguno de los tres. Un consumidor puede llamar a
+`enrichContextWithMemory` antes de `consumeAIPlatform`, o simplemente no usarla — ninguna de las dos
+funciones sabe que la otra existe.
+
+**Validación del incremento:**
+
+1. **¿La plataforma funciona sin Memory?** Sí — los tests del Incremento 4 (`consumeAIPlatform`) nunca
+   mencionan Memory y siguen pasando sin cambios.
+2. **¿Con Memory únicamente mejora el contexto disponible?** Sí, probado — un contexto enriquecido
+   añade campos nuevos recordados, sin alterar los ya existentes.
+3. **¿Memory no altera `AIPlatform`?** Confirmado por grep — cero cambios en
+   `packages/domain/src/ai-proposal/ai-platform.ts`.
+4. **¿Los consumidores siguen siendo idénticos?** Confirmado por grep — cero cambios en
+   `consume-ai-platform.ts`.
+5. **¿El proveedor LLM permanece completamente ajeno a la existencia de Memory?** Confirmado por
+   grep — cero menciones de `memory`/`AIMemory` en `llm-proposal-adapter.ts`.
+
+**Evidencia de ejecución:** `pnpm --filter @commitment/domain test` → 294/294 passing (4 nuevos:
+`InMemoryAIMemory` recuerda y olvida correctamente; `enrichContextWithMemory` no modifica el contexto
+cuando no hay nada que recordar; añade campos nuevos sin sobrescribir los del contexto base); `eslint`
+limpio; `pnpm --filter @commitment/domain build` limpio; `pnpm --filter backend test`/`build` →
+148/148, sin cambios.
+
+---
+
+## Fase 5 — Validación final de AR-050
+
+**Estado: ✅ Validada.**
+
+Con los 6 incrementos cerrados, se valida la AR completa contra las 5 propiedades congeladas en
+D-050.1, no contra el volumen de código producido:
+
+1. **¿La plataforma sigue siendo una capacidad independiente?** Sí — `AIPlatform` no pertenece a Coach,
+   Dashboard, Mobile ni Backend; todos son consumidores potenciales, ninguno propietario (Incrementos
+   2, 4).
+2. **¿Consume contexto estructurado?** Sí — `AIContext = object`, un concepto de dominio mínimo, nunca
+   un DTO de infraestructura (Incremento 3), opcionalmente enriquecido sin ser redefinido (Incremento
+   6).
+3. **¿Produce exclusivamente `AIProposal`?** Sí — verificado en los 6 incrementos, incluido el único
+   adaptador concreto (Incremento 5), cuyo parseo defensivo garantiza que nada más cruce el límite.
+4. **¿Mantiene explícita la relación con `Recommendation`?** Sí —
+   `AIProposalToRecommendationTransformer` (Incremento 1), sin herencia ni coincidencia estructural.
+5. **¿Toda ejecución del dominio sigue pasando por los límites establecidos en AR-047?** Sí —
+   `AIProposal` como única salida en todos los incrementos; `packages/domain` sigue sin dependencia de
+   `@nestjs/cqrs` (D-047.1 intacta, reverificado).
+6. **¿El proveedor permanece encapsulado en infraestructura?** Sí — `LLMProposalAdapter` es el único
+   archivo de la AR fuera de `packages/domain`; cero SDK real instalado (Incremento 5).
+7. **¿Memory enriquece el contexto sin redefinir la arquitectura?** Sí — Memory no altera `AIPlatform`
+   ni `consumeAIPlatform`, es opcional y aditiva (Incremento 6).
+
+**Evidencia acumulada de ejecución (los 6 incrementos, verificación final):** `pnpm --filter
+@commitment/domain test` → 294/294 passing; `pnpm --filter @commitment/domain build` limpio; `pnpm
+--filter backend test` → 148/148 passing; `pnpm --filter backend build` limpio. Cero regresión en
+ningún paquete a lo largo de los 6 incrementos.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1-5 de 6 cerrados.** D-050.1
-aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incrementos 1-4:** modelo,
-contrato, contexto y dirección de dependencias, todos definidos antes de tocar tecnología concreta.
-**Incremento 5:** `LLMProposalAdapter` (`apps/backend/src/ai-platform/infrastructure/`) — primer y único
-archivo de esta AR fuera de `packages/domain`, primer adaptador concreto de `AIPlatform<AIContext>`,
-sin proveedor real integrado (formato propio, genérico), sin wiring de producción (sin consumidor
-todavía). 290/290 tests de dominio sin cambios, 148/148 backend (5 nuevos). Queda 1 incremento (Memory),
-que debe enriquecer la plataforma, no definirla — "sin Memory la plataforma funciona; con Memory
-funciona mejor". Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada.
-Pendiente: **Fase 4B — Incremento 6 (Memory), el último de esta AR**.
+**AR-050 CERRADA.** Las 9 fases del ciclo completas: Fase 1 (Evidencia) confirmó 4 de 5 sub-hallazgos
+vigentes y 1 parcialmente resuelto por AR-047; Fase 2A/2B congelaron D-050.1 (la plataforma de IA como
+capacidad arquitectónica independiente); Fase 4A congeló el diseño incremental (Alternativa C, 6 pasos);
+Fase 4B ejecutó los 6 incrementos — modelo conceptual, contrato de plataforma (reutilizando AR-047 sin
+duplicar), contexto mínimo, dirección de dependencias, un adaptador de proveedor genérico, y Memory como
+enriquecimiento opcional — cada uno resolviendo una única incertidumbre arquitectónica antes de pasar a
+la siguiente, ninguno redefiniendo lo ya congelado; Fase 5 validó las 7 propiedades de D-050.1
+directamente, no por proxy. **Decimosexta remediación del programa completada de principio a fin — la
+de mayor volumen de implementación hasta ahora (6 incrementos, 2 paquetes tocados), y una de las más
+disciplinadas: cada decisión de diseño se apoyó en AR-028/AR-030/AR-047 ya cerradas, sin reabrir ni
+redefinir ninguna de ellas.** 294/294 tests de dominio, 148/148 backend, cero regresión en 6
+incrementos consecutivos. Estado: 🟨 → ✅ Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
