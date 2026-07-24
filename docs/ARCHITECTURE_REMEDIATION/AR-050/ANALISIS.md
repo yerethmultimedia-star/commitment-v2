@@ -538,16 +538,70 @@ existente) como el `CoachContext` de ejemplo — sin inventar un tipo nuevo solo
 
 ---
 
+### Incremento 5 — Proveedor LLM
+
+**Estado: ✅ Cerrado.**
+
+Primer incremento con una tecnología concreta — por eso, el proveedor debe ser el elemento **menos**
+importante del diseño. Objetivo: demostrar que la plataforma puede usar un proveedor sin dejar de ser
+independiente de él, no integrar un proveedor real específico (OpenAI/Anthropic/Gemini/etc.).
+
+**Implementado — nuevo `apps/backend/src/ai-platform/infrastructure/llm-proposal-adapter.ts`
+(primer archivo de esta AR fuera de `packages/domain`, porque llamar por red es una responsabilidad de
+infraestructura, no de dominio):**
+
+`LLMProposalAdapter implements AIPlatform<AIContext>` — un único adaptador concreto. Conoce: URL del
+endpoint, cabecera de autenticación, identificador de modelo, y el formato de petición/respuesta
+(inventado deliberadamente genérico — sin atarse a la forma real de un SDK de un proveedor concreto,
+porque ninguno está integrado hoy; `hoy podría ser OpenAI, mañana otro`, tal como fija D-050.1).
+`AIPlatform` no conoce nada de esto — el adaptador es solo una implementación más de un contrato que
+ya existía.
+
+**`fetchImpl` es inyectable** (por defecto, el `fetch` global de Node) precisamente para que los tests
+nunca necesiten una llamada de red real ni una clave de API real — los 5 tests usan un `fetchImpl` de
+prueba que nunca toca la red.
+
+**Deliberadamente fuera de alcance:** selección dinámica de proveedores, failover, múltiples modelos,
+estrategias de routing, optimización de coste, cachés — evoluciones futuras, no este incremento. Tampoco
+se registró ningún módulo NestJS ni token de DI en `app.module.ts`: nada consume este adaptador todavía
+(igual que AR-047 con `AIProposalSource`), así que wiring de producción sería infraestructura anticipada
+sin consumidor real — se difiere a cuando exista una necesidad concreta.
+
+**Validación del incremento:**
+
+1. **¿Cambiar de proveedor solo modifica el adaptador?** Sí — `AIPlatform`/`AIContext`/`AIProposal` no
+   se tocaron; solo se añadió una nueva implementación de un contrato ya congelado.
+2. **¿`AIPlatform` permanece sin cambios?** Sí, verificado — cero modificaciones en
+   `packages/domain/src/ai-proposal/`.
+3. **¿Los consumidores permanecen sin cambios?** Sí — `consumeAIPlatform` (Incremento 4) no se tocó;
+   seguiría funcionando igual si este adaptador lo implementara.
+4. **¿`AIProposal` sigue siendo la única salida?** Sí — `propose()` retorna
+   `Promise<readonly AIProposal[]>`, con parseo defensivo que descarta cualquier entrada malformada
+   antes de que cruce el límite de la plataforma (probado explícitamente: un objeto sin forma de
+   `AIProposal` y un string suelto en la respuesta se descartan, no se propagan).
+5. **¿Ningún tipo específico del SDK cruza el límite hacia la plataforma?** Sí — no se instaló ningún
+   SDK de proveedor (cero dependencias nuevas en `package.json`); el adaptador usa `fetch` genérico y
+   un formato de petición/respuesta propio, no atado a ningún proveedor real.
+
+**Evidencia de ejecución:** `pnpm --filter backend test` → 148/148 passing (5 nuevos: envía contexto
+con cabecera/modelo configurados; parsea una respuesta bien formada; descarta entradas malformadas sin
+propagarlas; devuelve lista vacía si el proveedor omite `proposals`; lanza excepción ante una respuesta
+no-2xx, sin tragarse el fallo en silencio); `eslint` limpio (corregidos `require-await` en funciones de
+prueba sin `await` real y accesos `any` sin tipar tras el parseo de `JSON.parse`); `pnpm --filter
+backend build` limpio; `pnpm --filter @commitment/domain test`/`build` → 290/290 sin cambios (este
+incremento no toca `packages/domain`).
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1, 2, 3 y 4 de 6 cerrados.**
-D-050.1 aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incrementos 1-3:**
-modelo conceptual, contrato de plataforma y contexto, los tres pilares definidos antes del primer
-consumidor. **Incremento 4:** `consumeAIPlatform<TContext>` fija la dirección de dependencias
-(Consumidor → `AIPlatform` → `AIProposal[]` → Transformation → `Recommendation[]`), demostrado con un
-consumidor de prueba tipo Coach (usando `DashboardContext` real) y verificado reutilizable con un
-segundo consumidor completamente distinto — Coach real en mobile permanece sin tocar, por diseño.
-290/290 tests de dominio, 143/143 backend sin cambios. Quedan 2 incrementos (proveedor LLM, Memory), que
-ahora son adaptadores alrededor de una arquitectura ya cerrada, no elementos que la definan. Estado: se
-mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada. Pendiente: **Fase 4B —
-Incremento 5 (proveedor LLM)**.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1-5 de 6 cerrados.** D-050.1
+aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incrementos 1-4:** modelo,
+contrato, contexto y dirección de dependencias, todos definidos antes de tocar tecnología concreta.
+**Incremento 5:** `LLMProposalAdapter` (`apps/backend/src/ai-platform/infrastructure/`) — primer y único
+archivo de esta AR fuera de `packages/domain`, primer adaptador concreto de `AIPlatform<AIContext>`,
+sin proveedor real integrado (formato propio, genérico), sin wiring de producción (sin consumidor
+todavía). 290/290 tests de dominio sin cambios, 148/148 backend (5 nuevos). Queda 1 incremento (Memory),
+que debe enriquecer la plataforma, no definirla — "sin Memory la plataforma funciona; con Memory
+funciona mejor". Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada.
+Pendiente: **Fase 4B — Incremento 6 (Memory), el último de esta AR**.
