@@ -160,14 +160,65 @@ implementación se ejecuta de una vez o mediante una secuencia controlada de inc
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+A partir de H1, se congela una decisión lo suficientemente estable como para sobrevivir a cambios de
+proveedor, modelo o estrategia de IA.
+
+**D-050.1:** _"La plataforma de IA constituye una capacidad arquitectónica independiente cuya única
+responsabilidad es transformar contexto del dominio en propuestas estructuradas. Dichas propuestas
+deberán integrarse con el modelo conceptual de recomendaciones del producto y solo podrán producir
+efectos sobre el dominio a través de los límites de aplicación ya establecidos."_
+
+Congela 5 propiedades arquitectónicas:
+
+1. **Independencia de la capacidad.** La plataforma de IA no pertenece a Coach, Dashboard, Mobile ni
+   Backend — todos ellos podrán ser consumidores; ninguno será su propietario.
+2. **Entrada basada en contexto.** La IA consume contexto del dominio, no infraestructura. El origen
+   del contexto (Context Builder, Memory, etc.) queda deliberadamente abierto para fases posteriores.
+3. **Salida basada en propuestas.** La salida arquitectónica es siempre una propuesta estructurada —
+   nunca comandos, nunca efectos laterales, nunca mutaciones del dominio. Reutiliza D-047.1 sin
+   redefinirla.
+4. **Relación explícita con `Recommendation`.** El punto nuevo que la auditoría no contemplaba y que la
+   evidencia de Fase 1 sí reveló. No se congela todavía **cómo** se relacionan (si `Recommendation`
+   desaparece, si implementa `AIProposal`, o si ambas convergen en un tercer concepto) — se congela que
+   **la relación debe quedar explícitamente definida**, no implícita ni duplicada. Es una propiedad del
+   modelo conceptual, no una decisión de diseño.
+5. **Neutralidad tecnológica.** La decisión no menciona OpenAI, Anthropic, Gemini, Ollama, MCP, agentes,
+   RAG ni embeddings — todo eso pertenece al diseño e implementación (Fase 4A). La arquitectura debe
+   seguir siendo válida si cualquiera de ellos cambia.
+
+**Deja deliberadamente abierto (pertenece a Fase 4A):** cuántos módulos existirán, dónde vivirá Context
+Builder, cómo se implementará Memory, qué proveedor LLM utilizar, cómo se cachearán respuestas, si habrá
+streaming, cómo se secuenciará una implementación XL.
+
+**Consistencia con las AR previas, sin solapamiento:** AR-028 (la IA opera sobre un modelo de escritura
+consistente), AR-030 (la identidad sigue siendo la referencia del usuario), AR-047 (la IA solo produce
+propuestas, nunca ejecuta). AR-050 no sustituye ninguna de las tres — se apoya en todas.
+
+**Criterio de validación para Fase 5** (registrado ahora, para responder cuando llegue):
+
+1. ¿La plataforma de IA existe como capacidad independiente y no como parte de un consumidor concreto?
+2. ¿Toda entrada a la IA está basada en contexto del dominio y no en dependencias de infraestructura
+   específicas?
+3. ¿Toda salida de la IA consiste en propuestas estructuradas?
+4. ¿La relación conceptual entre `Recommendation` y `AIProposal` quedó definida de forma explícita?
+5. ¿La plataforma puede cambiar de proveedor o modelo sin invalidar D-050.1?
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** El hallazgo original se confirma vigente en 4 de sus 5 sub-hallazgos
-(integración IA/LLM, interfaz de Coach, Context Builder, Memory), sin ningún cambio desde la auditoría.
-El quinto (enforcement del axioma propuesta/ejecución) fue parcialmente resuelto por AR-047 — AR-050 lo
-consume, no lo diseña. H1 sobrevive: introducir la plataforma de IA como capacidad arquitectónica
-independiente, reutilizando las propiedades ya establecidas (Identity/AR-030, Proposal/AR-047,
-consistencia de escritura/AR-028), definiendo explícitamente la relación `Recommendation`↔`AIProposal`.
-Pregunta de secuenciación (única decisión vs. entregables incrementales) registrada para Fase 4A.
-Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭
-Pendiente de análisis (pendiente de que el usuario congele D-050.1 en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo original se confirma vigente en 4 de sus 5
+sub-hallazgos (integración IA/LLM, interfaz de Coach, Context Builder, Memory); el quinto (enforcement
+propuesta/ejecución) ya lo resolvió AR-047 — AR-050 lo consume. H1 sobrevive. **D-050.1 aprobada:** la
+plataforma de IA es una capacidad arquitectónica independiente que transforma contexto en propuestas
+estructuradas, se integra explícitamente con el modelo de `Recommendation` ya existente, y solo produce
+efectos sobre el dominio a través de los límites de aplicación ya establecidos — 5 propiedades
+congeladas (independencia, entrada por contexto, salida por propuesta, relación explícita con
+`Recommendation`, neutralidad tecnológica), atributos/módulos/proveedor/secuenciación deliberadamente
+diferidos a Fase 4A. Mismo patrón que D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-030.1/D-043.1/D-054.1/
+D-044.1-3/D-047.1. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En análisis. Decisión:
+💭 → ✅ Decisión aprobada.
