@@ -12,11 +12,6 @@ export const envSchema = z.object({
     .default('development'),
   PORT: z.coerce.number().default(4000),
   REDIS_URL: z.string().url().default('redis://localhost:6379'),
-  SUPABASE_URL: z
-    .string()
-    .url()
-    .default('https://placeholder-project.supabase.co'),
-  SUPABASE_ANON_KEY: z.string().min(1).default('placeholder-anon-key'),
   OTEL_SERVICE_NAME: z.string().default('backend-service'),
   OTEL_EXPORTER_OTLP_ENDPOINT: z
     .string()

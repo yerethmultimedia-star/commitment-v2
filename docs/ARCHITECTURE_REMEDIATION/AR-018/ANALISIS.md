@@ -97,12 +97,129 @@ para que el usuario decida cómo prefiere proceder antes de continuar.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+A diferencia de AR-022 (donde la evidencia dejaba una única conclusión técnica sin alternativas
+arquitectónicas reales), aquí sí existen dos hipótesis genuinamente distintas sobre qué representan
+estas variables hoy. El criterio de esta fase es someter a prueba adversarial la hipótesis débil (H2),
+no solo enunciarla — si sobrevive con evidencia nueva, cambia el resultado; si no, H1 queda confirmada
+con más fuerza que por descarte simple.
+
+**H1 (principal) — las variables son residuos de una decisión arquitectónica descartada.** Nunca hubo
+consumo, nunca hubo SDK, nunca hubo documentación operativa, y la plataforma oficial (NestJS,
+ADR-024) nunca dependió de ellas. Bajo esta hipótesis, la configuración debe eliminarse, no
+endurecerse — no hay nada que "proteger con fallo fuerte" porque no hay ningún comportamiento real que
+dependa de esos valores.
+
+**H2 (alternativa) — las variables representan una integración futura todavía prevista.** Bajo esta
+hipótesis, sí tendría sentido conservarlas y endurecer su validación como preparación.
+
+### Prueba adversarial de H2, no solo ausencia de evidencia a favor
+
+Antes de descartar H2 solo por falta de indicios, se buscó explícitamente el único lugar del proyecto
+donde SÍ existe una reserva arquitectónica formal y vigente sobre persistencia/infraestructura real:
+**ADR-021**, que AR-003 (D-003.1) ya identificó como la fuente de una "opción arquitectónica abierta"
+para 2 documentos del dominio (`postgresql_physical_model.md`, `event_store_model.md` — clasificados
+en `docs/02-domain/CLASSIFICATION_STATUS.md` como "Opción arquitectónica abierta", no "Histórico").
+**Verificado: `grep -n -i "supabase" adr_021_...md` devuelve cero coincidencias.** La reserva que ADR-021
+mantiene vigente es sobre el **patrón** (Event Sourcing real respaldado por PostgreSQL, con replay),
+explícitamente independiente del proveedor — los propios documentos de dominio lo declaran así
+("¿Es independiente del proveedor tecnológico? Sí", repetido en `bounded_contexts.md`,
+`offline_sync_engine.md`, `postgresql_physical_model.md`). **Ni siquiera la única opción arquitectónica
+todavía abierta en todo el proyecto menciona ni depende de Supabase específicamente.** Los 2 documentos
+que sí mencionan Supabase con más detalle operativo (`bounded_contexts.md`,
+`offline_sync_engine.md`) ya están clasificados por AR-003 como **"Histórico (íntegro)"**, con "cero
+evidencia reutilizada" — el registro central del propio proyecto ya determinó, antes de esta AR, que
+esas menciones no representan intención vigente.
+
+**H2 no sobrevive la prueba adversarial.** No solo falta evidencia a favor — se buscó explícitamente en
+el lugar más favorable posible para encontrarla (la única reserva arquitectónica formal del proyecto) y
+esa reserva, verificada línea por línea, no menciona ni requiere Supabase. **H1 queda confirmada con
+evidencia más fuerte que un simple descarte por ausencia.**
+
+**Precedente registrado, mismo patrón que AR-055 con el plugin de `react-hooks`:** una referencia a algo
+nunca realmente adoptado, sin rastro de intención arquitectónica vigente en ningún documento — incluso
+el más generoso — se trata como configuración huérfana, no como capacidad pendiente.
+
+---
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-018.1 aprobada.**
+
+**D-018.1:**
+
+> **La configuración correspondiente a tecnologías oficialmente descartadas por una decisión
+> arquitectónica posterior (aquí, Supabase, superado por ADR-024) debe eliminarse cuando no exista
+> consumo real, dependencia de código, ni intención arquitectónica vigente que la respalde — no debe
+> conservarse "por si acaso" ni endurecerse como si protegiera una integración real.**
+
+**2 propiedades congeladas:**
+
+1. **La configuración huérfana se elimina, no se endurece.** Fallar fuerte sobre una variable sin
+   ningún consumidor no es una mejora de seguridad — es una dependencia de arranque artificial sobre
+   nada.
+2. **El criterio de "intención vigente" se verifica contra la evidencia disponible, no se asume.** Antes
+   de decidir "descartar" una pieza de configuración ligada a una tecnología abandonada, corresponde
+   comprobar — como se hizo en Fase 2A — que ninguna reserva arquitectónica formal (ADR, decisión
+   vigente) la respalda todavía. Si en el futuro apareciera una AR o ADR que reintroduce explícitamente
+   una integración con Supabase (o un BaaS equivalente), esa sería una decisión nueva, no una excepción
+   a D-018.1.
+
+**Deja deliberadamente abierto (implementación):** si además de eliminar las 2 variables corresponde
+tocar algún otro archivo (documentación, `.env.example` — ya no las menciona, por lo que probablemente
+no aplica). Fase 4A se omite explícitamente por ser un caso de mecanismo único, sin alternativas reales
+que comparar (mismo criterio que AR-022): la única forma de "eliminar 2 campos de un schema Zod sin
+consumidores" es eliminarlos.
+
+---
+
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+**Cambio realizado:** eliminadas las 2 propiedades `SUPABASE_URL`/`SUPABASE_ANON_KEY` de `envSchema` en
+`apps/backend/src/config/env.config.ts`. Ningún otro archivo requería cambios — `.env.example` nunca las
+mencionó, ningún test las referenciaba, y `grep` confirmó cero consumidores en el resto del código antes
+de tocar nada.
+
+**Validaciones ejecutadas, con evidencia real:**
+
+1. **Cero referencias residuales tras el cambio** — `grep -rn "SUPABASE" apps/backend/src
+apps/backend/test` no devuelve ninguna coincidencia.
+2. **El backend sigue arrancando y validando su configuración correctamente** — `validateEnv()` sigue
+   funcionando sobre el resto de variables (`NODE_ENV`, `PORT`, `REDIS_URL`, `OTEL_*`,
+   `CORS_ALLOWED_ORIGINS`, `THROTTLE_*`), sin ningún campo Supabase.
+3. **Build y suite completa del backend, sin regresión** — `tsc --noEmit` limpio; suite completa de
+   tests pasa sin cambios de comportamiento (ninguna prueba dependía de estas 2 variables).
+4. **`git diff` limitado exclusivamente a `env.config.ts`** — 2 líneas eliminadas, cero archivos
+   adicionales tocados.
+
+---
+
+## Fase 5 — Cierre
+
+**Estado: ✅ Cerrada.**
+
+D-018.1 materializada por completo: la configuración huérfana fue eliminada, no endurecida. El
+razonamiento de la auditoría original (fallar fuerte) queda explícitamente descartado, con la razón
+documentada — respondía a un estado del proyecto anterior a AR-001/ADR-024/AR-003, no al estado
+arquitectónico vigente.
+
+**Primer caso del programa enmarcado explícitamente como decisión de retiro (decommissioning), no de
+incorporación de capacidad** — mismo rigor de Fase 2 que las decisiones de adopción (AR-034/AR-055),
+aplicado a la dirección opuesta: qué hacer cuando una tecnología queda oficialmente descartada y su
+configuración residual sobrevive sin consumidores.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo original se confirma vigente en su síntoma (placeholders silenciosos)
-pero su remedio recomendado queda obsoleto por evidencia posterior a la auditoría (AR-001/ADR-024): las
-variables no tienen ningún consumidor real en el código, ningún SDK de Supabase fue instalado, y no
-están documentadas en `.env.example`. Pendiente: decidir entre eliminar las variables (tratarlas como
-configuración muerta) vs. conservarlas con validación de fallo fuerte (tratarlas como configuración
-legítima pendiente de uso futuro) vs. alguna alternativa intermedia. Estado: ⬜ → 🟦 En análisis.
-Decisión: pendiente.
+**Fase 1, Fase 2A, Fase 2B, Fase 4B y Fase 5 cerradas (Fase 4A omitida explícitamente, mecanismo único
+sin alternativas). AR-018 CERRADA.** D-018.1 aprobada e implementada: eliminadas `SUPABASE_URL`/
+`SUPABASE_ANON_KEY` de `env.config.ts`, sin consumidores ni intención arquitectónica vigente que las
+respaldara (verificado adversarialmente contra la única reserva arquitectónica abierta del proyecto,
+ADR-021, que no menciona Supabase). Build y suite de tests sin regresión. `git diff` limitado a 2 líneas
+en un único archivo.
