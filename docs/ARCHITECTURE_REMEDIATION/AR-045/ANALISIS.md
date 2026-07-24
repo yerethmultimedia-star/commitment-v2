@@ -137,11 +137,69 @@ esta AR — sin convertir AR-045 en una remediación de infraestructura distribu
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-045.1 aprobada.**
+
+La evidencia acumulada en Fase 1/2A ya no deja abierta la pregunta de **si** debe existir una
+capacidad de despliegue — deja abierta únicamente **qué propiedad arquitectónica** debe congelarse
+para cualquier mecanismo de despliegue futuro.
+
+**D-045.1:**
+
+> **La plataforma deberá disponer de una capacidad de despliegue reproducible, consistente con la
+> arquitectura vigente y desacoplada de decisiones ya resueltas o de restricciones operativas que
+> pertenezcan a otras remediaciones.**
+
+Esta formulación mantiene el alcance exactamente donde H1 lo dejó: ni más amplio ni más estrecho.
+
+**4 propiedades congeladas:**
+
+1. **El despliegue es una capacidad arquitectónica.** La arquitectura deja de asumir despliegues
+   manuales o implícitos; la reproducibilidad pasa a ser una propiedad del sistema. No congela
+   **cómo** desplegar, solo que el despliegue debe ser repetible.
+2. **Debe reflejar el estado arquitectónico actual.** El proceso de despliegue se construye sobre la
+   arquitectura realmente vigente (ADR-024, AR-001, decisiones posteriores), nunca sobre
+   contradicciones históricas ya resueltas — la antigua tensión ADR-004↔ADR-011 queda completamente
+   fuera de D-045.1.
+3. **Independencia de la infraestructura concreta.** La decisión no congela Docker, EAS, GitHub
+   Actions, AWS, Amplify, Kubernetes, Railway ni Render — todos ellos son mecanismos posibles, no
+   propiedades arquitectónicas.
+4. **Respeto por las restricciones existentes.** El despliegue debe respetar las limitaciones
+   actuales de la plataforma — en particular, si el estado continúa residente en memoria, el
+   mecanismo de despliegue no debe asumir escalado horizontal que contradiga esa propiedad. Esto no
+   convierte el estado en memoria en una decisión permanente; solo impide que AR-045 intente resolver
+   un problema que pertenece a otra remediación.
+
+**Deja deliberadamente abierto (Fase 4A):** contenedores, pipelines, imágenes, CI/CD, secretos,
+registro de imágenes, estrategia blue/green, rolling updates, número de instancias, balanceadores,
+proveedores cloud.
+
+**Consistencia con el programa:** mismo patrón que AR-047 (congeló la separación
+propuesta/ejecución, no el proveedor de IA), AR-050 (congeló la plataforma de IA, no el modelo LLM) y
+AR-003 (congeló la clasificación del conocimiento, no la organización documental) — AR-045 congela la
+reproducibilidad del despliegue, no la tecnología de despliegue. En todos los casos la decisión fija
+una propiedad estable y deja los mecanismos para fases posteriores.
+
+**Criterio de validación registrado para Fase 5** (5 preguntas): ¿existe un mecanismo de despliegue
+reproducible?; ¿refleja la arquitectura vigente y no decisiones históricas ya superadas?; ¿es
+independiente de un proveedor o tecnología concreta?; ¿respeta las restricciones arquitectónicas
+actuales sin intentar resolverlas?; ¿sería posible sustituir la tecnología de despliegue sin
+modificar D-045.1?
+
+**Observación registrada, no promovida:** AR-045 marca una transición similar a la de otras
+remediaciones recientes — el objetivo no es introducir una herramienta concreta, sino asegurar que la
+plataforma posea una capacidad arquitectónica (despliegue reproducible) cuya implementación pueda
+evolucionar con el tiempo, manteniendo la decisión estable incluso si cambian por completo las
+tecnologías o la infraestructura utilizadas.
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** El componente de gobernanza (ADR-004↔ADR-011) del hallazgo original
-está completamente resuelto por AR-001. H1 sobrevive: el alcance se reduce a establecer una capacidad
-de despliegue reproducible acorde con la arquitectura vigente, sin reabrir la contradicción de
-gobernanza ya cerrada. La restricción del estado en memoria queda registrada para Fase 4A, sin ampliar
-el alcance. Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se
-mantiene 💭 Pendiente de análisis (pendiente de que el usuario congele D-045.1 en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** D-045.1 aprobada: la plataforma deberá disponer de una
+capacidad de despliegue reproducible, consistente con la arquitectura vigente y desacoplada de
+decisiones ya resueltas o de restricciones operativas de otras remediaciones. Pendiente: **Fase 4A
+(Diseño técnico)** — comparar alternativas concretas de mecanismo de despliegue sin reabrir ninguna
+de las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión
+aprobada.
