@@ -220,5 +220,89 @@ efectos sobre el dominio a través de los límites de aplicación ya establecido
 congeladas (independencia, entrada por contexto, salida por propuesta, relación explícita con
 `Recommendation`, neutralidad tecnológica), atributos/módulos/proveedor/secuenciación deliberadamente
 diferidos a Fase 4A. Mismo patrón que D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-030.1/D-043.1/D-054.1/
-D-044.1-3/D-047.1. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En análisis. Decisión:
-💭 → ✅ Decisión aprobada.
+D-044.1-3/D-047.1.
+
+---
+
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**Objetivo concreto de esta fase:** diseñar la materialización de D-050.1 sin convertir AR-050 en una
+implementación monolítica. Cambio importante respecto a toda AR anterior: aquí el diseño debe absorber
+un Esfuerzo XL — la secuenciación deja de ser un detalle de gestión y pasa a ser una decisión de diseño
+en sí misma.
+
+### Alternativas evaluadas
+
+- **A — Implementación monolítica** (plataforma + Context Builder + Memory + integración LLM +
+  relación `Recommendation`↔`AIProposal` + primer consumidor, en una sola entrega). Descartada: no por
+  ser arquitectónicamente incorrecta, sino porque dificulta la validación incremental — si algo falla,
+  resulta difícil aislar si el problema pertenece al modelo, al contexto, a la memoria o al proveedor.
+- **B — Diseñar primero la infraestructura** (Context Builder, Memory y proveedor antes de tener un
+  consumidor). Descartada: repetiría el patrón de infraestructura anticipada que el programa ha evitado
+  sistemáticamente (H-GOV-01) cuando no está respaldado por evidencia inmediata de un consumidor real.
+- **C — Plataforma incremental alrededor del contrato (elegida).** La implementación se organiza
+  alrededor de D-050.1, no alrededor de componentes técnicos — cada incremento introduce una capacidad
+  reutilizable que preserva la decisión ya congelada.
+
+### Secuencia de incrementos congelada (orden, no calendario)
+
+1. **Modelo conceptual** — definir la relación explícita `Recommendation ↔ AIProposal`; resolver el
+   modelo antes que la infraestructura.
+2. **Contrato de plataforma** — materializar la capacidad arquitectónica independiente, manteniendo
+   neutralidad respecto al proveedor.
+3. **Contexto** — introducir el mecanismo que suministra contexto a la plataforma, sin asumir todavía
+   memoria persistente.
+4. **Primer consumidor** — adaptar Coach para consumir la plataforma mediante el contrato ya definido,
+   reutilizando íntegramente D-047.1.
+5. **Proveedor LLM** — incorporar el primer adaptador concreto, intercambiable desde el primer día.
+6. **Memory** — añadir memoria solo cuando exista un flujo real que la necesite.
+
+### Recommendation ↔ AIProposal — propiedad de diseño, no mecanismo
+
+El punto más delicado de AR-050 no se resuelve por herencia ni reutilización prematura. Se congela
+únicamente una propiedad: **"debe existir una transformación explícita entre ambos conceptos o una
+unificación explícita; nunca una equivalencia implícita por coincidencia estructural."** Evita
+duplicaciones silenciosas sin imponer todavía el mecanismo — ese mecanismo se decide en el Incremento 1.
+
+### Neutralidad tecnológica — regla estricta para toda la implementación
+
+> **La plataforma conoce capacidades; los adaptadores conocen proveedores.**
+
+La plataforma no incorpora conceptos específicos de ningún proveedor (modelos, APIs, formatos, SDKs) —
+esos pertenecen exclusivamente a los adaptadores (Incremento 5).
+
+### Criterios de validación para Fase 5 (antes de pasar a Fase 4B)
+
+1. ¿Puede implementarse por incrementos sin modificar D-050.1?
+2. ¿Cada incremento añade una capacidad reutilizable y verificable?
+3. ¿La relación `Recommendation ↔ AIProposal` queda resuelta en el modelo antes que en la
+   infraestructura?
+4. ¿El primer proveedor LLM puede sustituirse sin alterar la plataforma?
+5. ¿El primer consumidor reutiliza íntegramente D-047.1 sin introducir un camino alternativo hacia el
+   dominio?
+
+### Observación registrada (no promovida)
+
+AR-050 es la primera remediación donde la arquitectura ya no necesita descubrir el problema — AR-028,
+AR-030 y AR-047 prepararon deliberadamente el terreno. El éxito de esta fase depende menos de elegir
+tecnologías y más de mantener esa disciplina: introducir la plataforma de IA como una capacidad
+arquitectónica independiente, donde cada incremento materialice una parte del diseño sin obligar a
+reabrir D-050.1.
+
+---
+
+## Estado
+
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-050.1 aprobada. **Diseño técnico congelado (Fase
+4A):** Alternativa C — plataforma incremental alrededor del contrato, 6 incrementos ordenados (modelo
+conceptual → contrato de plataforma → contexto → primer consumidor/Coach → proveedor LLM → Memory), cada
+uno una capacidad reutilizable y verificable sin reabrir D-050.1. `Recommendation`↔`AIProposal` resuelto
+como propiedad ("transformación o unificación explícita, nunca equivalencia implícita"), mecanismo
+diferido al Incremento 1. Regla de neutralidad tecnológica ("la plataforma conoce capacidades; los
+adaptadores conocen proveedores") fijada para toda la implementación. Pendiente: **Fase 4B
+(Implementación)** — dado el Esfuerzo XL, se espera que Fase 4B se ejecute ella misma como una
+secuencia de sub-entregas, cada una con su propia validación, no como un solo paso. Estado: se mantiene
+🟦 En análisis (no salta a 🟨 hasta que arranque el primer incremento de Fase 4B). Decisión: se
+mantiene ✅ Decisión aprobada.
