@@ -46,7 +46,6 @@ export function ControlledSelect({
   const selectedLabel = useMemo(() => {
     const option = options.find((o) => o.value === value);
     return option ? resolveOptionLabel(option) : resolvedPlaceholder;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, options, t, resolvedPlaceholder, ns]);
 
   return (

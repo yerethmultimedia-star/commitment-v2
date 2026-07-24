@@ -23,6 +23,54 @@
         "@typescript-eslint/no-unused-vars": "warn",
         "no-unused-vars": "off"
       }
+    },
+    {
+      "files": ["apps/mobile/src/**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "ecmaFeatures": {
+          "jsx": true
+        },
+        "sourceType": "module",
+        "ecmaVersion": "latest"
+      }
+    },
+    {
+      "files": [
+        "apps/mobile/src/app/(tabs)/insights.tsx",
+        "apps/mobile/src/app/+not-found.tsx",
+        "apps/mobile/src/app/_layout.tsx",
+        "apps/mobile/src/core/auth/auth-guard.tsx",
+        "apps/mobile/src/features/appearance/components/ThemePreviewCard.tsx",
+        "apps/mobile/src/features/commitments/components/CommitmentActionBar.tsx",
+        "apps/mobile/src/features/commitments/components/forms/CommitmentForm.tsx",
+        "apps/mobile/src/features/commitments/screens/CommitmentWorkspaceScreen.tsx",
+        "apps/mobile/src/features/commitments/screens/CreateCommitmentScreen.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/DashboardStateRenderer.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/QuickCaptureDialog.tsx",
+        "apps/mobile/src/features/goals/components/GoalTabStrip.tsx",
+        "apps/mobile/src/features/goals/components/RenameGoalDialog.tsx",
+        "apps/mobile/src/features/habits/components/PostponeSheet.tsx",
+        "apps/mobile/src/features/habits/components/forms/HabitForm.tsx",
+        "apps/mobile/src/features/habits/screens/HabitDetailScreen.tsx",
+        "apps/mobile/src/features/insights/ui/components/TimeRangeTabs.tsx",
+        "apps/mobile/src/features/insights/ui/screens/FocusDetailScreen.tsx",
+        "apps/mobile/src/features/tasks/components/ReminderSection.tsx",
+        "apps/mobile/src/features/tasks/components/TaskForm.tsx",
+        "apps/mobile/src/features/tasks/screens/TaskDetailScreen.tsx",
+        "apps/mobile/src/shared/forms/PlainDateTimePicker.tsx",
+        "apps/mobile/src/shared/ui/themed-view.tsx",
+        "apps/mobile/src/shared/ui/timeline/Timeline.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineDate.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineIcon.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineItem.tsx"
+      ],
+      "rules": {
+        "no-unused-vars": "off",
+        "no-console": "off",
+        "no-empty": "off",
+        "no-undef": "off"
+      }
     }
   ]
 }

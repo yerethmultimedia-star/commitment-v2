@@ -271,10 +271,136 @@ migración.
 
 ---
 
+## Corrección de datos (registrada durante Fase 4B)
+
+Durante la implementación se descubrieron **dos correcciones** sobre las cifras citadas en Fase 1,
+2A, 2B y 4A. Se documentan aquí de forma transparente, sin reescribir el texto original de esas fases
+— el mismo criterio ya aplicado antes en este programa ante otros errores de conteo autodetectados.
+
+**Corrección 1 — "93 hallazgos" era una cifra incorrecta.** La Fase 1 obtuvo ese número mediante
+`grep` de texto sobre la salida con colores ANSI de `expo lint`, sin filtrar con precisión por
+extensión de archivo. Al repetir la medición en Fase 4B con salida JSON (`expo lint -- --format
+json`), filtrada exactamente por extensión, la cifra real es otra: **48 problemas ya existían en la
+línea base actual (cero cambios de configuración), todos en archivos `.ts`, sin ninguna relación con
+`.tsx` ni con esta AR.** Habilitar `.tsx` añade **45 problemas reales nuevos, en 28 de los 126
+archivos** (no 93). La cifra "93" citada en Fase 1-4A es la suma de ambos conjuntos, indebidamente
+mezclados: 48 (deuda de `.ts`, preexistente, ajena a AR-055) + 45 (deuda de `.tsx`, la que sí
+corresponde a esta AR) = 93. Los dos conjuntos nunca debieron sumarse — la política D-055.1 y el
+diseño de Fase 4A siguen siendo correctos porque hablan de "la deuda histórica que expone activar
+`.tsx`", que siempre fue 45, no 93; ninguna decisión necesita revisarse por este motivo.
+
+**Corrección 2 — limpieza de configuración residual, no deuda funcional.** Durante la validación de
+Fase 4B apareció un hallazgo adicional: 2 de esos problemas (uno en la línea base de 48, otro en los
+45 de `.tsx`) eran el mismo patrón — un comentario `// eslint-disable-next-line
+react-hooks/exhaustive-deps` que ESLint no puede resolver porque `eslint-plugin-react-hooks` nunca
+estuvo instalado en el repositorio (confirmado por ausencia total en `package.json`, lockfile,
+`node_modules` e historial de git de ambos). No existe ninguna evidencia — ni ADR, ni entrada previa
+de decisión, ni un tercer caso — de que el proyecto pretendiera adoptar ese plugin; son dos comentarios
+huérfanos del mismo autor, en commits distintos, sin relación arquitectónica declarada. Se eliminaron
+ambos comentarios como limpieza de configuración residual (no como corrección de deuda de lint): uno
+en `apps/mobile/src/features/insights/hooks/useCountUp.ts` (línea base `.ts`) y otro en
+`apps/mobile/src/shared/forms/ControlledSelect.tsx` (deuda histórica de `.tsx`). Esto no modifica el
+comportamiento de ningún componente — ninguno de los dos comentarios tenía efecto alguno, porque la
+regla a la que apuntaban nunca estuvo activa.
+
+**Cifras finales, verificadas, que gobiernan el cierre de Fase 4B:**
+
+- Línea base preexistente (ajena a AR-055): **47** problemas, todos en `.ts` (48 − 1 por la limpieza
+  residual).
+- Deuda histórica atribuible a habilitar `.tsx` (el objeto real de la transición de D-055.1): **44**
+  problemas en **27** archivos (45 − 1 por la limpieza residual), desglosados por regla:
+  `no-unused-vars` (29), `no-console` (6), `no-undef` (8), `no-empty` (1).
+  `react-hooks/exhaustive-deps` deja de aparecer en este desglose: no era deuda de `.tsx`, era una
+  referencia muerta ya resuelta en la Corrección 2.
+
+Ninguna de las dos correcciones invalida D-055.1 ni la Alternativa A de Fase 4A: la política ("`.tsx`
+forma parte permanente del alcance; la deuda histórica se gestiona con transición explícita, sin
+excluir la extensión") y el mecanismo elegido (parser permanente + override temporal para archivos
+históricos) siguen siendo exactamente los correctos — solo cambian las cifras que describen cuánta
+deuda hay y de qué tipo.
+
+---
+
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+**Cambios realizados**, exactamente los que Fase 4A autorizó más la limpieza residual descrita arriba:
+
+1. **Override de capacidad** (`.eslintrc.json`) — `"files": ["apps/mobile/src/**/*.tsx"]` con
+   `"parser": "@typescript-eslint/parser"` y el `parserOptions` mínimo identificado en Fase 1
+   (`ecmaFeatures.jsx`, `sourceType`, `ecmaVersion`). Sin `extends` ni `rules` propias — no se activa
+   ningún conjunto de reglas nuevo.
+2. **Override de transición temporal** (`.eslintrc.json`) — lista explícita de los 27 archivos con
+   deuda histórica real, con las 4 reglas correspondientes (`no-unused-vars`, `no-console`,
+   `no-empty`, `no-undef`) en `"off"` **únicamente para esos 27 archivos**. Cualquier archivo `.tsx`
+   nuevo o no listado queda sujeto al conjunto normal de reglas desde el primer día.
+3. **Limpieza de configuración residual** — eliminación de 2 comentarios `eslint-disable-next-line
+react-hooks/exhaustive-deps` huérfanos (`useCountUp.ts`, `ControlledSelect.tsx`), documentada en la
+   sección anterior. Sin este paso, la validación no podía alcanzar la línea base exacta, porque ese
+   patrón producía un diagnóstico (`Definition for rule ... was not found`) que la severidad `"off"`
+   no puede suprimir — no es una violación de regla normal, es una referencia irresoluble.
+
+**Validaciones ejecutadas, con evidencia real (no inferida):**
+
+1. **Capacidad institucionalizada, no incidental** — el override de capacidad no depende de ningún
+   otro archivo de configuración ni de un flag manual; `expo lint` (sin `--ext`) parsea los 126
+   archivos `.tsx` de forma consistente en cada ejecución.
+2. **Bloqueo de parseo eliminado** — `grep -i "parsing error\|unexpected token"` sobre la salida
+   completa de `expo lint --no-cache`: **0 coincidencias**. 126/126 archivos `.tsx` parsean
+   correctamente.
+3. **La deuda histórica permanece exactamente la esperada (tras la corrección de cifras)** —
+   `expo lint --no-cache -- --format json`, parseado por extensión: **47 problemas, 100% en `.ts`,
+   0 en `.tsx`.** Coincide exactamente con la línea base corregida (47) — ni 44, ni 50, ni ninguna
+   cifra intermedia; los 44 hallazgos históricos de `.tsx` quedan completamente cubiertos por el
+   mecanismo de transición, sin ocultar el conteo (siguen siendo detectables quitando el override de
+   transición, como se hizo para verificarlos).
+4. **El mecanismo de transición no exime archivos nuevos** — se creó un archivo `.tsx` temporal fuera
+   de la lista de excepción (`__ar055_temp_probe.tsx`) con una violación deliberada de `no-console`;
+   `expo lint` lo reportó normalmente (`warning Unexpected console statement`); el archivo se eliminó
+   inmediatamente después de la prueba.
+5. **Alcance del `git diff` limitado a lo estrictamente necesario** — `git diff --stat`: `.eslintrc.json`
+   (configuración) + 1 línea eliminada en `useCountUp.ts` + 1 línea eliminada en `ControlledSelect.tsx`
+   (ambas, la eliminación de un comentario sin efecto, no un cambio de lógica). Cero archivos `.tsx`
+   modificados en su comportamiento, JSX, props o lógica de componente.
+
+**Criterio de cierre — los 5 puntos de Fase 4B, verificados:**
+
+1. ✅ `.tsx` forma parte permanente del análisis (override sin condiciones, sin flags manuales).
+2. ✅ El bloqueo de parseo desapareció completamente (0 errores de parseo).
+3. ✅ Los 44 hallazgos históricos (cifra corregida) quedan explícitamente gestionados, no ocultos.
+4. ✅ Los nuevos archivos `.tsx` quedan sujetos al conjunto normal de reglas (verificado con archivo
+   de prueba).
+5. ✅ La implementación no modificó código de producción — los 2 archivos tocados solo perdieron un
+   comentario de ESLint sin efecto.
+
+---
+
+## Fase 5 — Cierre
+
+**Estado: ✅ Cerrada.**
+
+AR-055 cierra con los 5 criterios de Fase 4B satisfechos y sin desviación del alcance congelado en
+D-055.1/Fase 4A: no se instaló ningún plugin nuevo, no se corrigió deuda funcional de `.tsx`, no se
+tocó ningún componente más allá de la limpieza de 2 comentarios muertos (autorizada explícitamente
+como excepción acotada, evidenciada con `git log`/`git blame`/búsqueda exhaustiva de referencias antes
+de actuar).
+
+**Desbloqueo de AR-034:** la precondición que bloqueaba `AR-034/Fase 4B` (`.tsx` nunca se analizaba)
+queda resuelta. `AR-034` puede retirar su estado de bloqueo y reanudar su Fase 4B exactamente donde se
+detuvo, sin reabrir `D-034.1` ni su diseño de Fase 4A ya aprobado.
+
+**Hallazgo metodológico confirmado, no solo hipotetizado:** la hipótesis registrada en `README.md`
+("Una Fase 4B puede descubrir una precondición técnica no conocida durante las fases anteriores que
+impide materializar una decisión ya validada, sin invalidar dicha decisión") se confirma dos veces
+dentro de esta misma AR — la propia AR-055 nació de ese patrón (vía AR-034), y su propia Fase 4B
+encontró una instancia más pequeña y acotada del mismo patrón (el plugin ausente), resuelta dentro del
+mismo alcance por ser proporcional (2 líneas de configuración residual, no una capacidad faltante).
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-055.1 aprobada; diseño técnico elegido: habilitar
-permanentemente `.tsx` (parser + parserOptions), severidad `error`, con un mecanismo temporal de
-transición para los 93 hallazgos históricos (Alternativa A). Pendiente: **Fase 4B (Implementación)** —
-construir el `overrides` concreto con las exclusiones. Estado: se mantiene 🟦 En análisis (no salta a
-🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B, Fase 4A, Fase 4B y Fase 5 cerradas. AR-055 cerrada.** D-055.1 aprobada e
+implementada: `.tsx` habilitado permanentemente (parser + parserOptions), severidad `error`, deuda
+histórica (44 hallazgos/27 archivos, cifra corregida desde 45/28) gestionada mediante override
+temporal y explícito. Línea base final verificada: 47 problemas, 100% preexistentes en `.ts`, 0 en
+`.tsx`. Desbloquea a `AR-034`.
