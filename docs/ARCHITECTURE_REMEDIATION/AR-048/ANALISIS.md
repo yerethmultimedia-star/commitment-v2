@@ -202,12 +202,69 @@ la decisión ya congelada.
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-048.1 aprobada.**
+
+D-048.1 no decide **cuándo** existirá Offline First funcional, sino **cómo debe organizarse la
+arquitectura para que pueda incorporarse sin rediseño cuando la persistencia canónica esté
+disponible**.
+
+**D-048.1:**
+
+> **La plataforma deberá separar explícitamente las responsabilidades de almacenamiento local,
+> gestión de operaciones pendientes y sincronización con el backend, de forma que la sincronización
+> pueda incorporarse posteriormente sobre una persistencia canónica suficiente, sin modificar la
+> arquitectura Offline.**
+
+Esta formulación congela exactamente las propiedades arquitectónicas derivadas de H1.
+
+**4 propiedades congeladas:**
+
+1. **Separación explícita de responsabilidades.** Offline deja de entenderse como una única
+   capacidad — la arquitectura distingue tres responsabilidades independientes (almacenamiento
+   local, gestión de operaciones pendientes/cola, sincronización); ninguna debe absorber a las
+   demás.
+2. **Sincronización desacoplada de la persistencia actual.** La sincronización no depende del estado
+   actual del backend — depende únicamente de una interfaz arquitectónica preparada para una
+   persistencia canónica futura, evitando que la arquitectura Offline quede acoplada a una
+   limitación temporal.
+3. **Evolución incremental.** La arquitectura debe permitir incorporar progresivamente
+   almacenamiento, cola, sincronización y resolución de conflictos, sin rediseñar las
+   responsabilidades ya establecidas.
+4. **Independencia de implementación.** La decisión no congela SQLite, AsyncStorage, MMKV,
+   IndexedDB, WatermelonDB, Realm, CRDT, políticas de retry, OCC ni mecanismos de reconciliación o
+   estrategias de sincronización — todos ellos son mecanismos de implementación, no propiedades
+   arquitectónicas.
+
+**Deja deliberadamente abierto (Fase 4A y futuras remediaciones relacionadas con persistencia):**
+sincronización real, conflictos, replicación, background sync, persistencia física, protocolos de
+transporte, formato de operaciones.
+
+**Consistencia con el programa:** mismo patrón que AR-047 (propuesta ↔ ejecución), AR-050 (plataforma
+IA ↔ proveedor), AR-003 (conocimiento ↔ documento), AR-045 (capacidad de despliegue ↔ tecnología de
+despliegue) — AR-048 congela la separación almacenamiento ↔ cola ↔ sincronización. En todos los casos
+la decisión estabiliza límites arquitectónicos y deja abiertas las implementaciones concretas.
+
+**Criterio de validación registrado para Fase 5** (5 preguntas): responsabilidades de
+almacenamiento/cola/sincronización claramente separadas; la arquitectura permite introducir
+sincronización después sin rediseñar esos límites; independencia de tecnología concreta de
+almacenamiento o sincronización; no presupone una persistencia canónica que aún no existe; una futura
+implementación de persistencia real podría integrarse sin modificar D-048.1.
+
+**Observación registrada, no promovida:** AR-048 continúa una pauta emergente en varias
+remediaciones — estabilizar primero la estructura de responsabilidades y posponer la capacidad
+completa hasta que sus dependencias arquitectónicas existan. La arquitectura Offline se convierte en
+un punto de integración preparado para la futura persistencia canónica, del mismo modo que AR-050
+preparó la plataforma de IA antes de incorporar capacidades completas.
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado íntegramente vigente. H1 sobrevive:
-AR-048 debe estabilizar la arquitectura Offline (límites entre storage/cola/sincronización) sin
-implementar sincronización offline completa mientras la persistencia canónica del backend siga
-siendo insuficiente. H2/H3/H4 descartadas. 3 conceptos separados (Capacidad Offline / Arquitectura
-Offline / Persistencia canónica). Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En
-análisis. Decisión: se mantiene 💭 Pendiente de análisis (pendiente de que el usuario congele D-048.1
-en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** D-048.1 aprobada: separación explícita de responsabilidades
+entre almacenamiento local, cola de operaciones pendientes y sincronización, de forma que la
+sincronización pueda incorporarse sobre una persistencia canónica futura sin rediseñar la
+arquitectura Offline. Pendiente: **Fase 4A (Diseño técnico)** — comparar alternativas concretas de
+organización de estas 3 responsabilidades sin reabrir ninguna de las 4 propiedades congeladas.
+Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión aprobada.
