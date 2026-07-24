@@ -108,12 +108,66 @@ necesita diseñarlo, solo adoptarlo.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**AR-050 es cualitativamente distinta al resto del programa hasta ahora:** en la mayoría de las ARs
+previas, la investigación consistía en descubrir el alcance real de un hallazgo ya existente. Aquí, por
+primera vez, las dependencias (AR-028, AR-030, AR-047) ya prepararon el terreno de antemano, y la
+pregunta pasa a ser cómo introducir una capacidad nueva sin romper las propiedades arquitectónicas ya
+consolidadas. Por eso el framing se trata con especial conservadurismo: **AR-050 no se trata como
+"implementar IA"** — eso la convertiría en una épica de implementación en vez de seguir siendo una
+remediación arquitectónica; el objetivo sigue siendo responder al hallazgo del audit, no construir una
+plataforma completa por sí misma.
+
+**Reencuadre del 5º sub-hallazgo (Fase 1):** el enforcement propuesta/ejecución ya no pertenece
+realmente a AR-050 como problema de diseño — AR-047 cambió el estado del sistema; AR-050 **consume** esa
+propiedad, ya no la diseña. Esto reduce el alcance efectivo de la AR a los 4 sub-hallazgos restantes,
+más la pregunta nueva descubierta en Fase 1: la relación entre `Recommendation` y `AIProposal`.
+
+**H1 (principal):** _"El problema arquitectónico consiste en introducir una plataforma de IA como una
+nueva capacidad del sistema, reutilizando las propiedades ya establecidas (Identity, Proposal,
+separación propuesta/ejecución), sin convertir la IA en un nuevo centro del dominio."_ Integra
+naturalmente AR-030 (Identity), AR-047 (Proposal, separación propuesta/ejecución) y AR-028
+(concurrencia/consistencia del estado que cualquier escritura de dominio debe respetar) — deja claro que
+la IA llega a una arquitectura existente, no al revés.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — el objetivo es integrar un proveedor LLM. Descartada: pertenece al diseño (Fase 4A), no a la
+  decisión arquitectónica; hoy podría ser un proveedor, mañana otro, sin que eso cambie el problema que
+  esta AR resuelve.
+- **H3** — el objetivo es crear el nuevo Coach. Descartada: Coach es un consumidor: la plataforma de IA
+  debe existir independientemente de él.
+- **H4** — el objetivo es resolver `Recommendation` vs. `AIProposal`. Descartada: es un problema
+  importante y real (el hallazgo más significativo de Fase 1, no anticipado por la auditoría original,
+  y que nace precisamente porque AR-047 ya existe) — pero es una consecuencia del nuevo modelo, no el
+  propósito principal de la AR.
+
+**H1 sobrevive.** Resumen final: _"La plataforma de IA debe incorporarse como una capacidad
+arquitectónica independiente que produzca propuestas reutilizando las propiedades establecidas por las
+remediaciones previas, mientras define explícitamente la relación conceptual entre las recomendaciones
+existentes y las nuevas propuestas generadas por IA."_ Deliberadamente sin mencionar proveedor, LLM,
+MCP, prompts, embeddings, agentes ni RAG — ninguno de esos elementos define el problema arquitectónico.
+
+**Pregunta registrada para Fase 4A, sin resolverla aquí:** con Esfuerzo XL, ¿existe una única decisión de
+diseño capaz de materializar D-050.x, o la evidencia obliga a secuenciar la implementación en entregables
+independientes dentro de la misma AR? No es una división de la AR (no se propone ahora, y con la
+evidencia actual no se haría) — es una pregunta legítima de diseño que Fase 4A deberá responder: si la
+implementación se ejecuta de una vez o mediante una secuencia controlada de incrementos, preservando una
+única decisión arquitectónica.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo original se confirma vigente en 4 de sus 5 sub-hallazgos (integración
-IA/LLM, interfaz de Coach, Context Builder, Memory), sin ningún cambio desde la auditoría. El quinto
-(enforcement del axioma propuesta/ejecución) fue parcialmente resuelto por AR-047 — el mecanismo existe
-y está probado, pero AR-050 será su primer consumidor real. Pendiente: **Fase 2A (Hipótesis)** — dada
-la magnitud (Impacto Muy Alto, Esfuerzo XL, Owner=Ambos), la decisión de cómo secuenciar/acotar esta AR
-requiere el juicio estratégico del usuario, no ejecución directa. Estado: ⬜ → 🟦 En análisis. Decisión:
-💭 Pendiente de análisis.
+**Fase 1 y Fase 2A cerradas.** El hallazgo original se confirma vigente en 4 de sus 5 sub-hallazgos
+(integración IA/LLM, interfaz de Coach, Context Builder, Memory), sin ningún cambio desde la auditoría.
+El quinto (enforcement del axioma propuesta/ejecución) fue parcialmente resuelto por AR-047 — AR-050 lo
+consume, no lo diseña. H1 sobrevive: introducir la plataforma de IA como capacidad arquitectónica
+independiente, reutilizando las propiedades ya establecidas (Identity/AR-030, Proposal/AR-047,
+consistencia de escritura/AR-028), definiendo explícitamente la relación `Recommendation`↔`AIProposal`.
+Pregunta de secuenciación (única decisión vs. entregables incrementales) registrada para Fase 4A.
+Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭
+Pendiente de análisis (pendiente de que el usuario congele D-050.1 en Fase 2B).
