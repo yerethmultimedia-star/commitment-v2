@@ -323,12 +323,98 @@ sin modificar las responsabilidades ya congeladas por D-048.1.
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Mismo criterio que AR-050/AR-045: materializar la arquitectura, no la funcionalidad. El objetivo no
+es obtener Offline First operativo, sino demostrar que las 3 responsabilidades ya existen como
+componentes independientes.
+
+**Implementado — 7 archivos nuevos, todos en `apps/mobile/src/core/offline/`** (no en
+`packages/domain`: Storage/Queue/Sync describen infraestructura de cliente propia de `apps/mobile`,
+igual que `core/storage/secure-storage.ts` ya existente, no reglas de negocio de dominio):
+
+- **`storage.ts`** — `OfflineStorage<TRecord>` (`get`/`set`/`remove`) + `InMemoryOfflineStorage`.
+  Cero imports — no conoce la cola ni la sincronización.
+- **`operation-queue.ts`** — `OperationQueue<TPayload>` (`enqueue`/`listPending`/`dequeue`) +
+  `PendingOperation<TPayload>` + `InMemoryOperationQueue`. Cero imports — no conoce el almacenamiento
+  ni la sincronización.
+- **`synchronization-engine.ts`** — `SynchronizationEngine` (`synchronize()`) + único archivo que
+  importa tanto `OfflineStorage` como `OperationQueue`. `NoOpSynchronizationEngine` implementa el
+  contrato sin ninguna lógica de reconciliación — cuerpo de `synchronize()` deliberadamente vacío.
+- **`index.ts`** — barrel export de los 3 contratos y sus implementaciones mínimas.
+  **`__tests__/{storage,operation-queue,synchronization-engine}.test.ts`** — 12 tests reales.
+
+**Nombres ajustados respecto a los propuestos por el usuario, por una razón concreta:** `OfflineStorage`
+en vez de `Storage` a secas — el `tsconfig.json` de `apps/mobile` incluye `"lib": ["DOM", "ESNext"]`
+(heredado de `expo/tsconfig.base`), que ya declara un `Storage` global (Web Storage API); y
+`apps/mobile/src/core/storage/storage.interface.ts` ya define `StorageAdapter` para el token de
+sesión seguro (`expo-secure-store`). Nombrar igual el contrato de datos de dominio habría creado una
+colisión de lectura con dos conceptos distintos ("almacenamiento seguro de sesión" vs "almacenamiento
+de datos de dominio offline") — la separación de responsabilidades que D-048.1 exige aplica también
+al naming, no solo a la estructura de dependencias. `OperationQueue`/`SynchronizationEngine` se
+mantuvieron sin cambios, sin colisión.
+
+**Verificado empíricamente, no asumido — dirección de dependencias exacta de Fase 4A:**
+`grep "^import" storage.ts` → 0 resultados; `grep "^import" operation-queue.ts` → 0 resultados;
+`grep "^import" synchronization-engine.ts` → 2 resultados, exactamente `./storage` y
+`./operation-queue`. Confirma Storage⊥Queue, ambos sin conocer Synchronization, Synchronization
+consume a ambos — igual que el grafo congelado en Fase 4A.
+
+**Validación real ejecutada:**
+
+- `npx jest --config src/core/offline/jest.config.js` → **3 suites, 12/12 tests passing.**
+  (Runtime de ~240s por el mismo motivo que ya afecta a los jest.config.js existentes de
+  `dashboard/engine` e `insights/engine`: `tsconfig.jest.json` hereda el `tsconfig.json` completo de
+  `apps/mobile`, que incluye todo el árbol de fuentes vía `"include": ["**/*.ts", ...]` — ts-jest
+  construye el programa completo antes de tipar los tests. Característica preexistente del patrón ya
+  usado en el repo, no una regresión introducida aquí; no se investiga más a fondo, fuera de alcance
+  de AR-048.)
+- `pnpm --filter mobile exec tsc --noEmit` → **limpio, cero errores** (incluye los 3 archivos nuevos).
+- `npx expo lint` sobre todo `apps/mobile` → 48 problemas preexistentes, **cero en
+  `src/core/offline/`** (verificado filtrando el output completo por ruta).
+
+**Explícitamente NO implementado, tal como fijó Fase 4A:** SQLite/MMKV/AsyncStorage/Realm/
+WatermelonDB, formato de la cola, OCC, CRDT, merge policies, retries, background sync, push/pull,
+WebSocket, polling, persistencia física, serialización.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.**
+
+Las 5 preguntas de Fase 4A, respondidas con evidencia real:
+
+1. **¿Existen tres contratos independientes?** Sí — `OfflineStorage`, `OperationQueue`,
+   `SynchronizationEngine`, cada uno en su propio archivo.
+2. **¿Cada implementación inicial respeta una única responsabilidad?** Sí — `InMemoryOfflineStorage`
+   solo persiste pares clave/valor; `InMemoryOperationQueue` solo encola/lista/desencola;
+   `NoOpSynchronizationEngine` no ejecuta ninguna lógica de reconciliación.
+3. **¿Synchronization depende de Storage y Queue, pero no existe ninguna dependencia inversa?** Sí —
+   verificado por grep, no por inspección visual: `synchronization-engine.ts` importa ambos;
+   `storage.ts`/`operation-queue.ts` no importan nada.
+4. **¿Puede sustituirse cualquiera de las implementaciones sin modificar los otros contratos?** Sí
+   por construcción — las 3 clases `InMemory*`/`NoOp*` son intercambiables detrás de sus interfaces;
+   ningún archivo referencia una clase concreta de otro componente, solo sus interfaces.
+5. **¿La incorporación futura de persistencia canónica y sincronización real requerirá únicamente
+   nuevas implementaciones, sin rediseñar las interfaces?** Sí por diseño — una futura
+   `SqliteOfflineStorage`/`HttpSynchronizationEngine` implementarían las mismas interfaces sin tocar
+   `storage.ts`/`operation-queue.ts`/`synchronization-engine.ts`.
+
+**Criterio de cierre de AR-048 (fijado en la Fase 2B/4A), verificado:** el repositorio ya expresa
+explícitamente la arquitectura Offline mediante los 3 componentes, aunque todos sus comportamientos
+sigan siendo mínimos o `NoOp`. La futura incorporación de almacenamiento persistente, sincronización
+real y resolución de conflictos pasa a ser una cuestión de implementar adaptadores sobre una
+arquitectura ya estabilizada, no de volver a diseñarla.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-048.1 aprobada; diseño técnico elegido: tres
-capacidades independientes con dependencias unidireccionales (Storage, Operation Queue,
-Synchronization Engine — Alternativa A), mecanismos de implementación concretos diferidos a Fase 4B.
-Pendiente: **Fase 4B (Implementación)** — construir el esqueleto mínimo de las 3 interfaces/
-componentes en `packages/domain` o `apps/mobile` según corresponda, sin implementar sincronización
-real ni elegir tecnología de almacenamiento todavía. Estado: se mantiene 🟦 En análisis (no salta a
-🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**AR-048 CERRADA.** Fases 1, 2A, 2B, 4A, 4B y 5 completas. D-048.1 materializada mediante
+`apps/mobile/src/core/offline/` — 3 contratos independientes (`OfflineStorage`, `OperationQueue`,
+`SynchronizationEngine`) con dependencias unidireccionales verificadas por grep, implementaciones
+mínimas (`InMemory*`/`NoOp*`), 12/12 tests reales pasando, `tsc --noEmit` limpio, cero lint nuevo.
+Ningún hallazgo colateral. Estado: 🟦 → ✅ Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
