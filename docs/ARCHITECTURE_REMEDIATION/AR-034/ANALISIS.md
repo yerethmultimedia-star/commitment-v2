@@ -101,13 +101,47 @@ alcance antes de pasar a Fase 4B.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**Decisión sobre el propio proceso, tomada antes de la fase:** esta AR sí abre Fase 2, pero acotada —
+no porque exista una decisión arquitectónica pendiente (la arquitectura objetivo ya está decidida:
+_"el único punto de entrada permitido debe ser `@commitment/design-system`"_, dada por la propia
+evidencia de Fase 1), sino porque existe una **decisión de transición** genuina: cómo introducir la
+restricción sin romper el estado actual del repositorio (82 violaciones). Saltar directamente a Fase
+4B habría significado congelar una política de adopción sin comparar alternativas — precisamente lo
+que Fase 2 existe para evitar.
+
+**H1 (principal, la que se espera que sobreviva):** introducir la regla permitiendo una adopción
+incremental (mecanismo de baseline/exclusiones temporales para las violaciones ya existentes, bloqueo
+estricto solo para imports nuevos).
+
+**Hipótesis alternativas:**
+
+- **H2** — activar `error` inmediatamente para todo el código, incluidas las 82 violaciones
+  existentes.
+- **H3** — introducir únicamente `warn`, sin bloqueo real en ningún caso.
+
+**Expectativa registrada, sin resolverla formalmente todavía en esta fase:** se anticipa que sobrevive
+una variante de H1 — la evidencia ya demuestra que las 82 violaciones son deuda existente, y que el
+propósito de esta AR es impedir deuda **futura**, no bloquear el desarrollo hasta migrar los 82
+archivos de una vez.
+
+**Diferencia explícita con AR-022, registrada como criterio de cuándo abrir Fase 2 pese a
+Owner=Claude:** AR-022 no tenía ningún estado intermedio posible — la implementación correcta era
+única. Aquí existen varias implementaciones distintas, todas compatibles con la misma arquitectura
+objetivo, con consecuencias distintas sobre el proceso de desarrollo — cuando eso ocurre, corresponde
+un ciclo completo de Fase 2 → Fase 2B → Fase 4A antes de Fase 4B, no porque la arquitectura esté en
+duda, sino porque la estrategia de transición todavía no está decidida.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo original confirmado vigente y agravado en volumen (82 archivos). La
-instancia puntual citada por la auditoría ya se corrigió sin construir prevención. `@commitment/design-system`
-ya es capaz arquitectónicamente de ser el único punto de entrada (re-exporta el 100% de `tamagui`).
-Identificada una elección real de severidad/alcance para introducir la regla de lint con 82
-violaciones ya existentes — misma clase de tensión que llevó a AR-054/AR-044/AR-002/AR-004/AR-030 a
-requerir una decisión real pese a Owner=Claude. Pendiente: el usuario decide si esto amerita Fase 2/2B
-o fija directamente el criterio de alcance. Estado: ⬜ → 🟦 En análisis. Decisión: se mantiene N/A
-(ejecución directa), pendiente de confirmación explícita.
+**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado vigente y agravado en volumen (82
+archivos). H1 (adopción incremental) se espera que sobreviva sobre H2 (error inmediato total) y H3
+(solo warn), pero la decisión formal (Fase 2B) todavía no se ha congelado. Pendiente: **Fase 2B
+(Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene N/A (ejecución directa) —
+pendiente de re-evaluar si el eje Decisión debe pasar a Owner=Ambos, como ya ocurrió con
+AR-054/AR-044/AR-002/AR-004/AR-030, una vez el usuario congele D-034.1.
