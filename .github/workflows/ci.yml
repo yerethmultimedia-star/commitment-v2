@@ -28,6 +28,17 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache Turbo build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            packages/*/.turbo
+            apps/*/.turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json') }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
       - name: Build Packages
         run: pnpm run build
 
@@ -63,6 +74,17 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Cache Turbo build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .turbo
+            packages/*/.turbo
+            apps/*/.turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'turbo.json') }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
 
       - name: Build Packages
         run: pnpm run build
