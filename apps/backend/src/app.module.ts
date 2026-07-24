@@ -11,6 +11,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { DevicesModule } from './devices/devices.module';
 import { MessagingModule } from './messaging/messaging.module';
 import { AuthenticationModule } from './authentication/authentication.module';
+import { IdentityModule } from './identity/identity.module';
 import { RequestContextMiddleware } from './observability/middleware/request-context.middleware';
 import { LoggerModule } from 'nestjs-pino';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
@@ -68,6 +69,7 @@ import { BullModule } from '@nestjs/bullmq';
     DevicesModule,
     MessagingModule,
     AuthenticationModule,
+    IdentityModule,
     ScheduleModule.forRoot(),
     BullModule.forRoot({
       connection: {

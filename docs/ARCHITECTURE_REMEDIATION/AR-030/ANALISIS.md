@@ -203,12 +203,121 @@ con responsabilidades bien delimitadas que de anticipar todos los usos futuros d
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Implementación deliberadamente conservadora: materializar el aggregate en el sistema en ejecución, no
+completar la visión futura de identidad.
+
+### 1. Aggregate `Identity`
+
+Confirmado (no modificado): `packages/domain/src/identity/aggregate/identity.ts` ya cumplía las
+invariantes mínimas fijadas en Fase 4A — Value Objects propios (`Email`, `DisplayName`,
+`PreferredLanguage`, `PreferredTimeZone`) que validan en su propio constructor, `register()`/`update()`
+como única superficie de mutación, cero referencias a `Session`/`Credential`/`Authentication`. No se
+añadió ningún atributo nuevo — no había ningún consumidor concreto pidiendo uno, y la regla fijada en
+Fase 4A es explícita: un atributo que exista solo para satisfacer a un consumidor no pertenece al
+aggregate.
+
+### 2. Módulo de backend (lo que no existía)
+
+Nuevo `apps/backend/src/identity/`:
+
+- `infrastructure/in-memory-identity.repository.ts` — implementa `IdentityRepository`
+  (`save`/`findById`), mismo patrón que `InMemoryCredentialRepository`.
+- `application/commands/register-identity.{command,handler}.ts` — la capacidad de crear una
+  `Identity` real: construye los Value Objects, invoca `Identity.register()`, persiste, publica el
+  evento. Sin controller HTTP — no hay ningún requisito documentado que pida una API pública todavía
+  (misma postura que adoptó `RegisterCredentialHandler` en AR-043 Paso 2: la capacidad, no un
+  compromiso con un llamador concreto).
+- `identity.module.ts` — registra `InMemoryIdentityRepository` bajo el token `'IdentityRepository'`,
+  importado en `apps/backend/src/app.module.ts`. Esto es, literalmente, lo que el hallazgo original
+  decía que no existía: ahora hay un `IdentityModule` en el árbol de módulos en ejecución.
+
+### 3. Adaptación de referencias — por qué no se tocó Authentication
+
+Fase 4A dejó esto condicionado a "cuando corresponda". Se investigó el único consumidor real de
+`identityId` hoy: `AuthenticationController.register()` (`apps/backend/src/authentication/api/
+authentication.controller.ts:65-66`) genera `identityId = randomUUID()` sin invocar ningún aggregate.
+
+**No se adaptó ese punto.** Razón: `Identity.register()` exige `email`, `displayName`,
+`preferredLanguage` y `preferredTimeZone` — el DTO de registro de Authentication
+(`RegisterCredentialDto`) solo recoge `loginIdentifier` y `secret`, deliberadamente, porque ese
+endpoint (AR-043 Paso 2) **no es un flujo de alta pública**, es solo aprovisionamiento de credencial.
+Fabricar `displayName`/`preferredLanguage`/`preferredTimeZone` con valores por defecto para poder
+llamar a `Identity.register()` habría significado inventar datos de perfil enriquecido — exactamente lo
+que esta AR excluye explícitamente de su alcance. Adaptar esa referencia sin datos reales de dominio no
+habría materializado D-030.1, lo habría simulado.
+
+### 4. Exclusiones respetadas
+
+Ningún cambio en `Session`, `Credential`, `authentication.module.ts`, ni en ningún handler de
+Authentication. `grep` confirma cero imports cruzados entre `identity/` y `authentication/` en ambas
+direcciones salvo el comentario ya existente (`authentication.module.ts:16`).
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+### Comprobaciones estructurales
+
+1. **¿Existe un aggregate `Identity` con invariantes propias?** Sí — ya existía, confirmado sin
+   cambios; ahora además tiene un punto de materialización real en el backend (`IdentityModule`).
+2. **¿Depende de Authentication?** No. `grep -rn "authentication" apps/backend/src/identity/` → cero
+   resultados.
+
+### Comprobación de dirección de dependencia
+
+`grep` sobre `apps/backend/src/authentication/` no muestra ningún import de `identity/`,
+`IdentityRepository` ni `IdentityModule` — solo coincidencias léxicas no relacionadas
+(`ValidatedIdentity`, campo `identityId`). Es decir: la dependencia unidireccional (Authentication →
+Identity, nunca al revés) queda disponible pero, hoy, **ningún lado la ejercita todavía** — consistente
+con no haber forzado la adaptación de Authentication (punto 3 de Fase 4B).
+
+### Las 5 preguntas de dominio (Fase 4A)
+
+1. **¿Puede explicarse `Identity` sin mencionar Authentication?** Sí — el aggregate representa una
+   identidad de dominio (email, nombre, idioma, zona horaria); nada en su código o su test menciona
+   sesión, credencial o autenticación.
+2. **¿Las invariantes pertenecen exclusivamente al aggregate?** Sí — las cuatro validan en su propio
+   constructor (Value Object), no en ningún consumidor.
+3. **¿Los consumidores referencian una entidad de dominio real, no un string opaco?** Parcialmente: la
+   capacidad de hacerlo existe y está probada (`RegisterIdentityHandler` + `InMemoryIdentityRepository`,
+   4/4 tests); el único consumidor real actual (Authentication) sigue sin ejercitarla, por la razón de
+   diseño documentada en el punto 3 de Fase 4B — no por una limitación del aggregate o del módulo.
+4. **¿El aggregate se mantiene pequeño y cohesionado?** Sí — cero atributos nuevos, cero
+   responsabilidades nuevas.
+5. **¿Se evitó anticipar necesidades futuras?** Sí — no se construyó API pública, ni perfil
+   enriquecido, ni lógica de autenticación; solo la capacidad mínima de crear y persistir el aggregate.
+
+### Evidencia de ejecución (no solo inspección)
+
+- `pnpm --filter backend test` → **143/143 passing** (incluye los 4 tests nuevos de `identity/`:
+  registro válido, rechazo de email inválido vía el Value Object, guardado/recuperación por id,
+  `findById` de un id inexistente devuelve `null`).
+- `pnpm --filter backend build` → compila sin errores (`nest build`, `tsc` limpio).
+
+### Observación registrada (no promovida a hallazgo)
+
+El punto 3 de la pregunta de dominio #3 queda parcial de forma consciente, no por omisión: es la misma
+clase de precisión de alcance que AR-002 registró con `enforce_admins` — una AR puede clausurar su
+diseño (D-030.1) sin migrar a todos los consumidores existentes, cuando migrar exigiría violar una
+exclusión explícita de su propio alcance (aquí: perfiles enriquecidos). Si en el futuro Authentication
+necesita un flujo de alta real con datos de perfil, esa es una decisión de producto de
+**AR-043/Authentication**, no una tarea pendiente de AR-030.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma completamente vigente, sin
-ninguna corrección ni resolución parcial desde la auditoría — ni siquiera por AR-043, que tocó el mismo
-concepto central (`identityId`) pero, por diseño deliberado, no resolvió la ausencia de un aggregate de
-backend real para `Identity`. D-030.1 aprobada; diseño técnico congelado — Identity como aggregate
-autónomo, responsabilidades fijadas sin atributos concretos, dependencia unidireccional desde
-Authentication hacia Identity. Pendiente: **Fase 4B (Implementación)**. Estado: se mantiene 🟦 En
-análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B, Fase 4A, Fase 4B y Fase 5 cerradas. AR-030 cerrada.** El hallazgo original
+("Identity domain-complete, integration-incomplete... no `IdentityModule` anywhere in `app.module.ts`")
+queda resuelto en su forma mínima y correcta: el aggregate ya existía y no necesitó cambios; ahora
+también existe su límite de aplicación en el backend en ejecución (`IdentityModule`, registrado,
+probado). La adaptación de `Authentication` se evaluó explícitamente y se descartó por una razón de
+diseño documentada, no por alcance insuficiente. Dependencia unidireccional Authentication → Identity
+preservada (D-043.1 intacta). 143/143 tests backend passing, build limpio. Decisión: ✅ Decisión
+aprobada → ✔️ Validada.
