@@ -195,11 +195,60 @@ tecnologías o la infraestructura utilizadas.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+Restricción fundamental que gobierna toda la fase: ninguna alternativa puede reabrir las 4
+propiedades congeladas en D-045.1. La comparación se hace exclusivamente sobre el **mecanismo** de
+despliegue.
+
+**Alternativa A — Docker como artefacto principal de despliegue (elegida).** La plataforma define un
+artefacto ejecutable y reproducible mediante contenedores; distintos mecanismos de despliegue (local,
+CI, cloud) pueden construirse a partir de ese artefacto. Ventajas: desacopla el despliegue del
+proveedor; produce un artefacto reproducible; compatible con la mayoría de plataformas de hosting
+actuales; no presupone CI/CD concreto; respeta D-045.1 al centrarse en la capacidad de despliegue, no
+en infraestructura específica. Limitación reconocida: no resuelve por sí mismo el escalado
+horizontal, pero tampoco lo contradice — una única instancia sigue siendo una configuración válida
+mientras exista estado en memoria.
+
+**Alternativa B — Pipeline específico de un proveedor (descartada).** Amplify, Railway, Render,
+Fly.io, Vercel u otro proveedor concreto. Descartada: liga el despliegue a una plataforma específica,
+contradice directamente la 3ª propiedad de D-045.1 (independencia del mecanismo concreto).
+
+**Alternativa C — CI/CD como punto de partida (descartada).** Comenzar por GitHub Actions, scripts de
+release, automatización de despliegue. Descartada: la automatización presupone que ya existe un
+artefacto reproducible; sin ese artefacto, el pipeline solo automatiza un proceso que sigue
+dependiendo del entorno.
+
+**Alternativa elegida: A.** Secuencia conceptual: (1) definir el artefacto reproducible; (2) validar
+que puede ejecutarse de forma consistente; (3) incorporar automatización después; (4) integrar
+proveedores de despliegue al final. Este orden mantiene las responsabilidades separadas.
+
+**Explícitamente fuera de alcance de Fase 4A** (mecanismos posteriores construibles sobre el
+artefacto reproducible, no decisiones de esta fase): GitHub Actions, EAS Build, Docker Compose,
+Kubernetes, ECS, Helm, Terraform, secretos, balanceadores, múltiples entornos, blue/green, rolling
+deployment.
+
+**Criterio de validación fijado antes de Fase 4B** (5 preguntas): el despliegue puede reproducirse
+sin depender del entorno del desarrollador; cambiar de proveedor no exige modificar D-045.1; la
+solución no presupone escalado horizontal; la automatización puede añadirse después sin rediseñar el
+mecanismo; el artefacto generado representa fielmente la arquitectura vigente.
+
+**Observación registrada, no promovida:** AR-045 repite la misma secuencia de diseño que AR-050 en
+otro dominio — primero estabilizar el contrato/artefacto independiente, después conectar
+implementaciones concretas (en AR-050, el contrato de la plataforma de IA antes que
+`LLMProposalAdapter`; aquí, el artefacto de despliegue —Docker— antes que automatización/CI-CD o un
+proveedor cloud concreto). "Primero se estabiliza el punto de integración independiente; después se
+conectan las implementaciones específicas."
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** D-045.1 aprobada: la plataforma deberá disponer de una
-capacidad de despliegue reproducible, consistente con la arquitectura vigente y desacoplada de
-decisiones ya resueltas o de restricciones operativas de otras remediaciones. Pendiente: **Fase 4A
-(Diseño técnico)** — comparar alternativas concretas de mecanismo de despliegue sin reabrir ninguna
-de las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión
-aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-045.1 aprobada; diseño técnico elegido: Docker
+como artefacto reproducible de despliegue (Alternativa A), automatización y proveedor concreto
+diferidos a iteraciones/mecanismos posteriores. Pendiente: **Fase 4B (Implementación)** — construir
+el artefacto Docker mínimo para `apps/backend` (y valorar `apps/mobile`/`eas.json` si aplica) sin
+introducir CI/CD ni proveedor cloud todavía. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta
+Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
