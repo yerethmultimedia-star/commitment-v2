@@ -250,14 +250,14 @@ el programa.
 
 ### Hallazgo transversal de este bloque, no una hipótesis nueva
 
-**Ninguna de las 12 hipótesis del catálogo ha sido sometida jamás al criterio 4 de Fase 0 (resistencia a
-contraejemplos buscados activamente) de forma rigurosa — todas se han evaluado únicamente por
-repetición y diversidad.** Esto no es una falla de las hipótesis individuales; es una brecha en cómo el
-programa ha aplicado su propio criterio de promoción hasta ahora. Fase 0 exige buscar activamente un
-caso donde la hipótesis debería fallar, no solo constatar que no ha fallado todavía — y esta revisión es
-la primera vez que esa búsqueda se intenta explícitamente (para H9 y H2), en vez de darla por hecha. Se
-registra como observación para el Bloque IV: el criterio 4 puede necesitar una definición operativa más
-concreta (¿cuánto esfuerzo de búsqueda es "activo" y suficiente?), no solo una declaración de intención.
+**Hecho constatado, no propuesta de solución:** la revisión transversal identificó que ninguna hipótesis
+promovible había sido sometida a un intento explícito de falsación — todas las 12 se han evaluado
+únicamente por repetición y diversidad, nunca por una búsqueda activa de un caso donde debieran fallar.
+Fase 0 exige esa búsqueda como su cuarto criterio; hasta esta revisión, ningún cierre de AR ni revisión
+anterior la había intentado, solo constatado la ausencia de fallos observados. Esta revisión es la
+primera vez que se intenta explícitamente (para H9 y H2). **Si esto justifica algún cambio en cómo Fase
+0 se aplica en la práctica es una pregunta que corresponde exclusivamente al Bloque IV** — este bloque
+solo documenta el hecho, no prejuzga la respuesta.
 
 ### Conclusión del Bloque II
 
@@ -271,7 +271,100 @@ contra un criterio que no le corresponde.
 
 ## Bloque III — Calidad del filtro programático
 
-_(pendiente)_
+**Objetivo: medir el filtro, no cambiarlo.** Reconstruido leyendo la sección "Selección" (o su
+equivalente narrativo) de los 25 `ANALISIS.md`, no por recuerdo de sesión.
+
+### Cómo se seleccionó cada una de las 25 AR
+
+| Método                                                                                                          | n   | AR                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Filtro programático explícito, sobre el backlog completo (Impacto desc, Esfuerzo asc, Riesgo asc, Bloquea desc) | 15  | AR-003, AR-004, AR-005, AR-009, AR-018, AR-022, AR-024, AR-030, AR-034, AR-036, AR-045, AR-047, AR-048, AR-049, AR-050         |
+| Selección manual/narrativa, previa a o explícitamente al margen del filtro                                      | 7   | AR-001, AR-002 (primeras 2 AR del programa, antes de que el filtro existiera como tal), AR-008, AR-023, AR-028, AR-043, AR-044 |
+| Apertura inmediata como spin-off (nunca compitió contra el backlog)                                             | 3   | AR-053, AR-054, AR-055                                                                                                         |
+
+**El filtro programático explícito gobernó el 60% de las AR cerradas** — el resto se explica por
+razones documentadas, no por desviaciones sin registrar: las 2 primeras AR precedieron la existencia
+del filtro; 5 de las 7 restantes (AR-008, AR-023, AR-028, AR-043, AR-044) corresponden a un tramo del
+programa donde el usuario dirigió explícitamente la secuencia por razones metodológicas registradas en
+`README.md` (validar el ciclo en 4 clases de remediación distintas antes de abordar AR-052); los
+spin-offs, por construcción, nunca fueron candidatos del backlog general — nacieron ya con alcance
+único y se abrieron de inmediato por decisión explícita del usuario en cada caso.
+
+### ¿La priorización produjo el orden esperado? — verificación por muestreo, no solo por confianza
+
+Se releyó el razonamiento de selección completo (no solo la cifra final) de las 15 AR con filtro
+explícito. En las 15, la justificación documentada nombra explícitamente por qué la AR elegida vence a
+sus competidoras más cercanas — nunca "se eligió X" sin más. Ejemplos verificados directamente en esta
+sesión:
+
+- **AR-036**: "la mejor relación impacto/esfuerzo... única con Esfuerzo S; el resto de Impacto Alto son
+  Medio/L/XL."
+- **AR-045**: "única candidata con Impacto Alto... AR-048 empata en Impacto pero tiene Esfuerzo XL
+  frente al Esfuerzo L de AR-045."
+- **AR-024**: "empatada con AR-030/AR-047 en este tier" — el empate se documenta explícitamente, no se
+  oculta.
+- **AR-018 / AR-005** (esta misma revisión de sesiones): ambas verificadas con script reproducible, no
+  solo lectura.
+
+**No se encontró ninguna inversión de prioridad sin justificar** en las 15 selecciones — ningún caso
+donde una AR de menor Impacto se seleccionara existiendo una de mayor Impacto ya elegible y sin
+explicación. La consistencia observada en Bloque I (76% Impacto Alto/Muy Alto entre las 25 cerradas) es
+la consecuencia esperada de esto, no una coincidencia: mientras existió una AR Alta/Muy Alta elegible,
+el filtro (o la decisión narrativa equivalente) la priorizó.
+
+### ¿Hubo AR seleccionadas "por accidente"? ¿Existieron inversiones injustificadas?
+
+**No, en ninguno de los dos sentidos**, con una precisión importante: "accidente" no aplica a las 7 de
+selección manual/narrativa — cada una tiene una razón explícita registrada en `README.md` o en su propia
+Fase 1, nunca "se trabajó porque sí." La única vez que el programa comparó explícitamente una
+_expectativa humana_ contra el resultado del filtro fue **esta sesión, AR-005 vs. AR-025**: el usuario
+asumió que la siguiente sería AR-025; el filtro, ejecutado y verificado con un script reproducible,
+seleccionó AR-005 (Esfuerzo Bajo, un nivel por debajo del Esfuerzo Medio de AR-025). **Éste no fue un
+caso anecdótico aislado en el sentido de ser inusual — fue el primer caso donde existía una expectativa
+previa registrada que comparar contra el filtro.** En las otras 14 selecciones filtradas, nadie había
+formulado una expectativa distinta de antemano, así que no había nada que el filtro pudiera "corregir"
+visiblemente — el caso de AR-005 no revela que el filtro falle menos ahora; revela que es la primera vez
+que se le puso a prueba contra una predicción humana explícita, y la superó.
+
+### ¿El filtro evitó correctamente sesgos humanos?
+
+**Sí, en el único caso donde existía un sesgo humano explícito que evitar (AR-005).** No puede
+generalizarse más allá de ese caso único con la evidencia disponible — sería exactamente el error que
+Bloque II ya identificó (tratar un caso no contrastado activamente como si fuera una regla). Lo que sí
+puede afirmarse con evidencia: el filtro es **determinista y reproducible** (un script idéntico,
+ejecutado dos veces sobre el mismo estado del Roadmap, produce el mismo resultado) — una propiedad que
+una decisión puramente narrativa no garantiza por construcción.
+
+### El defecto real: la escala de Esfuerzo, cuantificado con precisión
+
+Bloque I ya señaló que el Roadmap mezcla escalas de Esfuerzo sin normalizar. Esta sesión cuantifica el
+problema exactamente: contando las 55 filas completas del Roadmap (no solo las 25 cerradas), el campo
+Esfuerzo usa **7 etiquetas distintas** — `Medio` (16), `S` (15), `XS` (12), `Bajo` (4), `L` (3), `XL`
+(3), `Muy Bajo` (1) — más un **octavo caso, único y no normalizado: `M` (1 fila, AR-052)**, que no
+coincide con ninguna de las otras 7 variantes (ni con la palabra completa `Medio`, ni con el patrón de
+letras `XS/S/L/XL`, que nunca usa `M` en ningún otro lado del documento).
+
+**Por qué esto es un riesgo real, no solo una inconsistencia estética:** el filtro programático de esta
+sesión tuvo que construir un diccionario de equivalencia (`{'XS': 0, 'Muy Bajo': 0, 'S': 1, 'Bajo': 1,
+'Medio': 2, 'Alto': 3, 'L': 3, 'XL': 4, 'Muy Alto': 4}`) para poder comparar filas de escalas distintas.
+`AR-052` con Esfuerzo `M` no está cubierto por ningún mapeo de ese diccionario — **si `AR-052` no
+estuviera ya excluido explícitamente del filtro por estar pausada, un filtro programático construido sin
+conocer este caso concreto habría fallado silenciosamente al intentar comparar `M` contra cualquier otra
+etiqueta**, no por un error de lógica de priorización, sino por un dato de entrada no normalizado. No
+causó ningún error real todavía **solo porque AR-052 nunca compitió en una ejecución real del filtro** —
+no por ninguna protección estructural contra este caso.
+
+### Conclusión del Bloque III
+
+**El filtro programático, en su lógica de decisión, no mostró ningún error en las 25 AR cerradas** —
+ninguna inversión de prioridad, ninguna selección sin justificación documentada, y su único
+enfrentamiento directo contra una expectativa humana (AR-005 vs. AR-025) lo resolvió correctamente y de
+forma verificable. **El riesgo real no está en el algoritmo de selección — está en la calidad de los
+datos sobre los que opera**: 8 variantes de una misma escala de Esfuerzo en 55 filas, incluyendo un caso
+único (`M`) que ningún mapeo de equivalencia documentado cubre todavía. Esto es exactamente la misma
+distinción que Bloque I ya había anticipado ("la ejecución fue robusta; la representación del dato,
+no") — Bloque III la confirma ahora desde el ángulo del filtro específicamente, con una cifra exacta en
+vez de una impresión.
 
 ## Bloque IV — Metodología
 
