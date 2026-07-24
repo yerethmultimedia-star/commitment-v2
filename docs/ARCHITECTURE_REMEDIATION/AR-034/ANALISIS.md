@@ -272,15 +272,57 @@ superior a lo que D-034.1 congeló — exactamente el tipo de "migración masiva
 presenta al usuario para decidir cómo proceder, sin haber tocado ningún archivo de producción (los 3
 experimentos de arriba fueron revertidos con `git checkout` inmediatamente después de cada prueba).
 
+### Decisión del usuario sobre cómo proceder (2026-07-24)
+
+El bloqueo se considera **arquitectónicamente legítimo, no un problema de implementación**. La
+evidencia reunida en Fase 4B cambia el contexto de la decisión sin invalidarla:
+
+- **Antes de Fase 4B**, la restricción conocida era: "hay 82 importaciones históricas."
+- **Después de la investigación**, aparece una restricción nueva: "el mecanismo de validación
+  actualmente ni siquiera analiza los archivos donde existen esas 82 importaciones." Esto no era
+  conocido durante Fase 2 ni Fase 4A.
+
+**D-034.1 no se reabre.** La política sigue siendo correcta; lo que cambia es la planificación de la
+implementación. Explícitamente descartado: forzar AR-034 activando el lint de `.tsx` de forma general
+ahora mismo — los 3 experimentos ya demostraron que eso produce ~150 problemas preexistentes ajenos al
+objetivo de esta AR, convirtiendo la implementación en una migración transversal — exactamente la
+Alternativa C que Fase 4A ya descartó.
+
+**Decisión: AR-034 queda formalmente abierta y bloqueada, dependiente de una AR nueva (AR-055,
+spin-off — mismo patrón que AR-052/AR-053/AR-054) cuyo alcance es exclusivamente activar el análisis
+de `.tsx` de forma controlada**, con su propio ciclo completo (Evidencia → Hipótesis → Decisión →
+Diseño → Implementación → Validación) resolviendo parser, configuración, estrategia incremental, deuda
+histórica y baseline — una responsabilidad completamente distinta de la de AR-034. La dependencia es
+unidireccional: AR-055 → Fase 4B de AR-034, no al revés.
+
+**Distinción explícita, registrada por el usuario:** no se trata AR-034 como mal diseñada, que
+necesite reabrirse, ni que necesite cambiar D-034.1. Se trata como: _"la implementación quedó
+bloqueada por una dependencia arquitectónica descubierta durante la validación."_ Esto preserva la
+propiedad que el programa ha respetado durante 21 AR — cada remediación modifica exactamente una
+dimensión del sistema. Si AR-034 empezara ahora a resolver también descubrimiento de archivos,
+configuración de ESLint, parser TSX, deuda histórica de linting y enforcement de imports a la vez,
+dejaría de ser una remediación XS y pasaría a ser otra cosa.
+
+**Hallazgo de la remediación, registrado explícitamente (no promovido todavía a principio
+metodológico — primer caso de este tipo):**
+
+> **Una Fase 4B puede descubrir una precondición técnica cuya ausencia impide materializar una
+> decisión previamente correcta. En ese caso, la decisión permanece válida y la precondición debe
+> resolverse mediante una remediación independiente antes de reanudar la implementación.**
+
+A diferencia de la observación sobre los tests registrada en AR-022 (que el usuario decidió mantener
+solo "mentalmente", sin registrarla en ningún artefacto por tratarse de un único punto de dato), este
+hallazgo sí se documenta formalmente — porque explica objetivamente por qué la implementación no
+puede continuar sin ampliar indebidamente el alcance, y queda como precedente para futuras Fase 4B que
+encuentren una brecha similar.
+
 ---
 
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-034.1 aprobada; diseño técnico elegido: regla
-`no-restricted-imports` en severidad `error` con exclusiones explícitas y temporales para los 82
-archivos históricos (Alternativa A). **Fase 4B en progreso, bloqueada:** los 82 archivos objetivo son
-todos `.tsx`, y `expo lint` no analiza ningún archivo `.tsx` en este repositorio hoy — confirmado con
-3 experimentos controlados y revertidos. El mecanismo elegido no puede materializarse ni validarse
-contra los archivos reales sin antes resolver esa brecha, cuyo alcance excede lo que D-034.1 congeló.
-Pendiente: decisión del usuario sobre cómo proceder. Estado: se mantiene 🟦 En análisis. Decisión: se
-mantiene ✅ Decisión aprobada (D-034.1 no se reabre).
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B abierta y formalmente bloqueada, dependiente de
+AR-055.** D-034.1 aprobada y no reabierta; diseño técnico elegido (Alternativa A) sigue vigente. El
+bloqueo descubierto en Fase 4B (82 archivos objetivo son `.tsx`, `expo lint` no analiza ningún `.tsx`
+hoy) se resuelve mediante una AR independiente (AR-055), no mediante ampliar el alcance de esta AR.
+Pendiente: cierre de AR-055 antes de reanudar Fase 4B. Estado: se mantiene 🟦 En análisis. Decisión: se
+mantiene ✅ Decisión aprobada.
