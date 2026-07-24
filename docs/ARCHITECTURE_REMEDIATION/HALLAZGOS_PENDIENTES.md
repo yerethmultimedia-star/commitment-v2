@@ -68,3 +68,60 @@ D-054.1 congeló.
   significativa la señal de CI (hoy no ocurre — ver AR-054/ANALISIS.md, Fase 5).
 - Revisar de nuevo cuando el proyecto actualice `bullmq` a una versión posterior, para confirmar si
   sigue reproduciendo.
+
+---
+
+## H-P-002 — `turbo run build --filter=<pkg>` falla dentro de contenedores Linux/musl cuando una dependencia de workspace no tiene script `build`
+
+**Estado: Pendiente de investigación.** **Propietario: Turborepo (posible incompatibilidad
+Alpine/musl) o, alternativamente, ausencia de un script `build` no-op en `@commitment/config`, no la
+arquitectura del backend.** **Origen: descubierto durante la Fase 4B de AR-045 (2026-07-23)** — ver
+`AR-045/ANALISIS.md` para el contexto completo.
+
+### Síntoma
+
+`pnpm turbo run build --filter=backend` (o `--filter=@commitment/shared`) falla dentro de una imagen
+`node:20-alpine` con:
+
+```
+@commitment/shared:build: cache miss, executing <hash>
+@commitment/shared#build:  ERROR  command finished with error: No such file or directory (os error 2)
+ ERROR  @commitment/shared#build: unable to spawn child process: No such file or directory (os error 2)
+```
+
+El mismo comando (`pnpm run build` en la raíz, sin `--filter`, ejecutado en el host macOS) no produce
+ningún error visible — los paquetes sin script `build` (como `@commitment/config`) simplemente no
+cuentan entre las tareas ejecutadas ("8 successful, 8 total" de 10 paquetes en scope).
+
+### Diagnóstico (2026-07-23)
+
+`pnpm turbo run build --filter=@commitment/shared --dry=json` revela que `@commitment/config`
+(dependencia de desarrollo de `@commitment/shared`/`@commitment/domain`, sin campo `scripts.build` en
+su `package.json`) resuelve a `"command": "<NONEXISTENT>"` en el grafo de tareas — un valor placeholder
+que, en este entorno (Linux, imagen Alpine/musl, invocado con `--filter`), turbo intenta ejecutar
+literalmente como un proceso real, produciendo el `os error 2` observado. Se descartaron como causa:
+ausencia de `bash` (instalado, mismo error), ausencia de `libc6-compat` (instalado, mismo error),
+ausencia de un shell (`/bin/sh` funciona correctamente y `pnpm --filter=<pkg> run build` funciona sin
+problema usándolo).
+
+### Por qué no se investiga más a fondo todavía
+
+Mismo criterio que H-P-001: no está claro todavía si el defecto es de Turborepo (manejo del
+placeholder `<NONEXISTENT>` en un entorno Linux/musl con `--filter`) o simplemente la ausencia de un
+script `build` no-op en `@commitment/config` — ninguna de las dos hipótesis se ha confirmado ni
+descartado con evidencia suficiente, y decidir cuál corregir (parchear/reportar Turborepo vs. añadir
+un script trivial a un paquete ajeno a AR-045) excede el alcance de esta AR. **Evitado, no corregido,
+en `apps/backend/Dockerfile`:** el build de la imagen invoca `pnpm --filter=<pkg> run build`
+explícitamente en el orden real de dependencias (`@commitment/shared` → `@commitment/domain` →
+`backend`) en vez de delegar en `turbo run build --filter=backend`, evitando el fallo sin modificar
+`packages/config` ni ningún otro paquete.
+
+### Próximos pasos posibles (ninguno decidido todavía)
+
+- Reproducir el `--dry=json` fuera de un contenedor Linux (p. ej. una VM Linux nativa, no Docker) para
+  aislar si el factor determinante es Alpine/musl específicamente o Linux en general.
+- Evaluar añadir un script `"build": "true"` (no-op) a `packages/config/package.json` si el patrón
+  vuelve a aparecer en una futura AR de CI/CD (Fase 4A de AR-045 dejó GitHub Actions explícitamente
+  fuera de alcance) — decisión que le corresponde a esa AR, no a esta.
+- Reportar el comportamiento a Turborepo si se confirma que es específico del proyecto/entorno y no un
+  error de configuración local.

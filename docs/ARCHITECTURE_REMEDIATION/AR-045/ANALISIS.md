@@ -244,11 +244,109 @@ conectan las implementaciones específicas."
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Alcance deliberadamente pequeño: no construir una plataforma de despliegue completa, materializar
+exactamente la capacidad arquitectónica congelada en D-045.1 mediante el artefacto mínimo
+reproducible elegido en Fase 4A (Docker).
+
+**Implementado — 2 archivos nuevos, ambos en la raíz del repositorio y `apps/backend/`:**
+
+- **`apps/backend/Dockerfile`** — build multi-stage: etapa `builder` (`node:20-alpine`, `corepack
+enable`, `python3`/`make`/`g++` para compilar el binario nativo de `argon2`) que copia el
+  repositorio completo, ejecuta `pnpm install --frozen-lockfile` y construye explícitamente en el
+  orden de dependencias real (`@commitment/shared` → `@commitment/domain` → `backend`); etapa
+  `runner` (`node:20-alpine` limpia) que copia el árbol completo de `/app` ya construido desde
+  `builder` y arranca `node apps/backend/dist/main.js`. `NODE_ENV=production` fijado en la etapa de
+  ejecución; ninguna variable de entorno específica, secreto o URL queda fijada en el Dockerfile
+  (Propiedad 4 del Diseño técnico).
+- **`.dockerignore`** (raíz) — excluye `node_modules`, `dist`, `build`, `.turbo`, `coverage`, `.git`
+  y directorios irrelevantes para el build (`docs`, `apps/mobile/ios`, `apps/mobile/android`),
+  garantizando que la instalación de dependencias ocurra siempre dentro del contenedor, nunca
+  reutilizando el estado de la máquina del desarrollador (Propiedad de "contexto de construcción").
+
+**Dos hallazgos reales encontrados durante la implementación, ninguno reabre D-045.1 ni el diseño de
+Fase 4A:**
+
+1. **`argon2` (dependencia nativa de `Authentication`, AR-043) no compila en `node:20-alpine` sin
+   herramientas de compilación.** `node-gyp` requiere Python y un compilador C/C++, ausentes en la
+   imagen base mínima. Resuelto instalando `python3 make g++` únicamente en la etapa `builder` (no
+   en `runner`) — un defecto de implementación esperado al compilar un binario nativo en Alpine, no
+   una decisión de diseño nueva.
+2. **`turbo run build --filter=backend` falla dentro del contenedor** con `unable to spawn child
+process: No such file or directory (os error 2)`, reproducible incluso instalando `bash`/
+   `libc6-compat`. Diagnóstico con `turbo run build --dry=json`: `@commitment/config` (dependencia
+   de desarrollo de `@commitment/shared`/`@commitment/domain`, sin script `build` en su
+   `package.json`) resuelve a un comando literal `"<NONEXISTENT>"` que turbo intenta ejecutar como
+   proceso real — falla con el mismo `os error 2` observado. En el host (macOS, `turbo run build`
+   sin `--filter`) este caso no produce error visible; con `--filter` dentro de un contenedor Linux
+   sí lo hace. **No es un hallazgo de esta AR ni se corrige aquí** — evitado en la implementación sin
+   tocar `packages/config` ni ningún paquete ajeno a AR-045: el Dockerfile invoca `pnpm --filter=<pkg>
+run build` explícitamente en el orden de dependencias real (`shared` → `domain` → `backend`) en
+   lugar de delegar en turbo. Registrado en `HALLAZGOS_PENDIENTES.md` como debt de tooling
+   independiente, mismo criterio que AR-028 con `InMemoryEventStore.saveEvents()`.
+
+**Validación real ejecutada (no solo `docker build`, el contenedor arrancado y consultado):**
+
+- `docker build --no-cache -f apps/backend/Dockerfile .` — build completo desde cero, sin caché,
+  éxito.
+- `docker run` con el JWT_SECRET mínimo requerido — arranca, inicializa los 17 módulos de Nest
+  (incluyendo `AuthenticationModule` de AR-043 y las cabeceras/CORS de AR-044), mapea todas las rutas
+  HTTP reales.
+- `curl /v1/health` → `200 {"status":"ok",...}` (outbox backlog y projection lag reales, no mocks).
+- `curl /api/docs` (Swagger) → `200`.
+- Los errores `ECONNREFUSED 127.0.0.1:6379` de BullMQ al arrancar son **esperados y fuera de
+  alcance**: Redis no está expuesto dentro del contenedor de prueba — la integración con
+  infraestructura de colas/mensajería pertenece a un mecanismo posterior (Fase 4A ya excluyó
+  explícitamente `docker-compose.yml`/orquestación), no a este artefacto.
+- Segundo build limpio (`--no-cache`, sin ninguna capa cacheada) reproduce exactamente el mismo
+  resultado — confirma que el artefacto no depende de estado previo de la máquina.
+
+**Explícitamente NO implementado, tal como fijó Fase 4A:** `docker-compose.yml` de aplicación,
+GitHub Actions, `eas.json`, despliegue automático, múltiples imágenes, balanceadores, health checks
+avanzados, escalado horizontal, observabilidad adicional, orquestadores. El `docker-compose.yml` ya
+existente en el repo (Redis/OTel/Prometheus/Grafana, stack de observabilidad local) no se modificó —
+sigue siendo un stack de desarrollo, no el mecanismo de despliegue de producción.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.**
+
+Las 5 preguntas de Fase 4A, respondidas con evidencia real, no por inspección:
+
+1. **¿Existe un `Dockerfile` reproducible para `apps/backend`?** Sí — `apps/backend/Dockerfile`,
+   build multi-stage verificado dos veces (con y sin caché).
+2. **¿La imagen puede construirse desde un entorno limpio sin depender de la máquina del
+   desarrollador?** Sí — `docker build --no-cache` reprodujo el mismo resultado; `.dockerignore`
+   excluye `node_modules`/`dist` del contexto, forzando instalación y build íntegros dentro del
+   contenedor.
+3. **¿El contenedor ejecuta exactamente el backend previsto por la arquitectura vigente?** Sí — los
+   17 módulos de Nest se inicializan (incluidos `AuthenticationModule`/AR-043,
+   cabeceras-CORS/AR-044), `/v1/health` y `/api/docs` responden 200 con datos reales.
+4. **¿Cambiar de proveedor cloud no requiere modificar el Dockerfile?** Sí por construcción — el
+   Dockerfile no referencia ningún proveedor, servicio gestionado, secreto ni URL; produce una
+   imagen OCI estándar ejecutable en cualquier entorno compatible con contenedores.
+5. **¿La implementación respeta la restricción actual de una única instancia derivada del estado en
+   memoria, sin intentar resolverla?** Sí — el Dockerfile no asume ni configura múltiples réplicas,
+   balanceador ni coordinación entre instancias; la restricción permanece explícita y sin alterar.
+
+**Criterio de cierre de AR-045 (fijado en Fase 4A), verificado:** existe un artefacto Docker
+reproducible; la capacidad de despliegue deja de depender de procesos manuales implícitos; el
+artefacto es independiente del proveedor; las restricciones arquitectónicas actuales permanecen
+explícitas y sin alteración; futuras automatizaciones (CI/CD, despliegues gestionados o proveedores
+cloud) pueden añadirse sin modificar D-045.1 — el Dockerfile no presupone ninguna de ellas.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-045.1 aprobada; diseño técnico elegido: Docker
-como artefacto reproducible de despliegue (Alternativa A), automatización y proveedor concreto
-diferidos a iteraciones/mecanismos posteriores. Pendiente: **Fase 4B (Implementación)** — construir
-el artefacto Docker mínimo para `apps/backend` (y valorar `apps/mobile`/`eas.json` si aplica) sin
-introducir CI/CD ni proveedor cloud todavía. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta
-Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
+**AR-045 CERRADA.** Fases 1, 2A, 2B, 4A, 4B y 5 completas. D-045.1 materializada mediante
+`apps/backend/Dockerfile` + `.dockerignore` — artefacto Docker reproducible, independiente de
+proveedor, que respeta la restricción de estado en memoria sin intentar resolverla. Un hallazgo de
+tooling (turbo + Alpine + paquete sin script `build`) evitado sin tocar código ajeno a esta AR,
+registrado como debt independiente en `HALLAZGOS_PENDIENTES.md`. Estado: 🟦 → ✅ Cerrada. Decisión:
+✅ Decisión aprobada → ✔️ Validada.
