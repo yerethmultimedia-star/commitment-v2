@@ -108,12 +108,59 @@ verificar.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**AR-003 tiene un perfil distinto al de las últimas remediaciones:** no se está corrigiendo
+arquitectura ni introduciendo una capacidad — se está decidiendo cómo preservar conocimiento
+arquitectónico histórico sin degradar la documentación viva.
+
+**H1 (principal):** _"El problema no consiste en archivar documentación de dominio, sino en
+reclasificar cada documento según el valor arquitectónico que todavía conserva, preservando
+explícitamente aquellos fragmentos que siguen siendo evidencia válida o mantienen opciones
+arquitectónicas aprobadas."_ Explica simultáneamente los tres hallazgos de Fase 1: la dependencia con
+AR-001 carece de respaldo y no debe condicionar la decisión; ADR-021 mantiene abierta la opción de
+Event Sourcing, por lo que ciertos documentos conservan valor prospectivo; `domain_state_machines.md`
+ya fue usado por AR-047 como evidencia operativa, luego no puede tratarse como documentación
+completamente obsoleta.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — todos los documentos deben archivarse porque ya no representan el estado actual.
+  Descartada: la propia evidencia demuestra que algunos fragmentos siguen siendo relevantes para
+  decisiones arquitectónicas posteriores.
+- **H3** — todos los documentos deben mantenerse activos. Descartada: confundiría documentación
+  histórica con documentación normativa y reintroduciría ambigüedad en la arquitectura viva.
+- **H4** — la decisión depende de AR-001. Descartada: la dependencia no tiene soporte documental real
+  (verificado en Fase 1); no debería influir en el análisis.
+
+**H1 sobrevive, con una precisión adicional:** _"La unidad de decisión deja de ser el documento
+completo y pasa a ser el conocimiento arquitectónico que contiene."_ Uno de los hallazgos de Fase 1 ya
+demuestra que un solo documento (`domain_state_machines.md`) puede contener tanto material archivable
+como evidencia que debe preservarse — la misma estructura que AR-024 encontró al descubrir que la
+unidad correcta no era "la ADR" sino "la decisión arquitectónica". Aquí la unidad correcta no es "el
+documento" sino "el contenido con valor arquitectónico". Esto no implica todavía fragmentar los
+documentos — esa es una cuestión de diseño para Fase 4A — pero redefine correctamente el problema para
+Fase 2B.
+
+**Expectativa registrada para Fase 2B, sin resolverla aquí:** D-003.1 no debería decir "archivar estos
+documentos" ni "mantener estos documentos" — debería fijar que la documentación histórica de dominio se
+clasifica según el valor arquitectónico vigente de la información que contiene, preservando
+explícitamente tanto las evidencias reutilizadas por decisiones posteriores como las opciones
+arquitectónicas que permanezcan abiertas por ADR vigente — dejando abierto si eso implica preservar un
+documento entero, extraer secciones, crear anexos, mover contenido, o mantener referencias cruzadas
+(todo eso pertenece a Fase 4A).
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo se confirma vigente para los 7 documentos, sin ningún cambio desde la
-auditoría. La dependencia declarada con AR-001 no tiene respaldo real y se resuelve directamente aquí
-(la reserva normativa de ADR-021, no una decisión pendiente de AR-001). Se identifican 3 categorías
-distintas dentro de los 7 documentos, con una conexión directa al 5º criterio de evaluación ya
-establecido por AR-023 y a la evidencia textual que AR-047 ya usó de `domain_state_machines.md`.
-Pendiente: **Fase 2A (Hipótesis)**. Estado: ⬜ → 🟦 En análisis. Decisión: 💭 Pendiente de análisis
-(Owner=Ambos).
+**Fase 1 y Fase 2A cerradas.** El hallazgo se confirma vigente para los 7 documentos, sin ningún cambio
+desde la auditoría. La dependencia declarada con AR-001 no tiene respaldo real y se resuelve
+directamente en Fase 1 (la reserva normativa de ADR-021, no una decisión pendiente de AR-001). H1
+sobrevive, refinada: la unidad de decisión es el conocimiento arquitectónico que cada documento
+contiene, no el documento como bloque uniforme — mismo patrón que AR-024 estableció para las
+decisiones arquitectónicas frente a las ADRs que las formalizan. Pendiente: **Fase 2B (Decisión)**.
+Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de análisis (pendiente de que el
+usuario congele D-003.1 en Fase 2B).
