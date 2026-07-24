@@ -180,12 +180,69 @@ precondiciones arquitectónicas existan.
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-049.1 aprobada.**
+
+Con H1 ya validada, D-049.1 congela la **responsabilidad arquitectónica exclusiva** del
+`SynchronizationEngine`, sin introducir todavía comportamiento operativo. La decisión es coherente
+con AR-048 y con la restricción de persistencia que sigue vigente.
+
+**D-049.1:**
+
+> **El `SynchronizationEngine` será el único componente responsable de coordinar la reconciliación
+> entre `OfflineStorage`, `OperationQueue` y la futura persistencia canónica, permaneciendo
+> independiente de cualquier mecanismo concreto de sincronización, transporte, almacenamiento o
+> resolución de conflictos.**
+
+Esta decisión estabiliza la responsabilidad, no la implementación.
+
+**4 propiedades congeladas:**
+
+1. **Responsabilidad exclusiva de reconciliación.** El `SynchronizationEngine` es el único componente
+   autorizado para coordinar la reconciliación — `OfflineStorage` nunca sincroniza, `OperationQueue`
+   nunca sincroniza, ningún otro componente asume esa responsabilidad. Evita duplicación futura de
+   lógica.
+2. **Coordinación, no ejecución tecnológica.** La responsabilidad consiste en coordinar lectura del
+   estado local, consumo de operaciones pendientes e interacción con la persistencia canónica cuando
+   exista — no congela HTTP, GraphQL, WebSockets, polling, Edge Functions, colas ni eventos.
+3. **Independencia de resolución de conflictos.** D-049.1 no define OCC, CRDT, merge, last-write-wins
+   ni estrategias híbridas — la reconciliación existe como responsabilidad arquitectónica, pero sus
+   algoritmos permanecen abiertos.
+4. **Compatibilidad con evolución futura.** La futura incorporación de persistencia canónica,
+   sincronización efectiva, resolución de conflictos y ejecución en background debe poder
+   implementarse sin modificar la responsabilidad ya congelada del `SynchronizationEngine` — la
+   principal garantía de estabilidad de D-049.1.
+
+**Deja deliberadamente fuera:** proveedor backend, protocolo, frecuencia de sincronización, estrategia
+push/pull, retries, serialización, formato de operaciones, almacenamiento físico — todo diseño e
+implementación posteriores.
+
+**Consistencia con las AR anteriores:** progresión limpia — AR-048 define **dónde** vive la
+sincronización; AR-049 define **qué responsabilidad** tiene ese componente; futuras AR definirán
+**cómo** ejecuta esa responsabilidad. Cada remediación añade una única dimensión arquitectónica, sin
+reabrir las decisiones anteriores.
+
+**Criterio de validación registrado para Fase 5** (5 preguntas): existe un único componente
+responsable de la reconciliación; `OfflineStorage` permanece libre de lógica de sincronización;
+`OperationQueue` permanece libre de lógica de sincronización; el `SynchronizationEngine` coordina sin
+imponer tecnologías concretas; la futura sincronización real podrá implementarse sin modificar
+D-049.1.
+
+**Observación registrada, no promovida:** AR-049 completa una secuencia de refinamiento arquitectónico
+iniciada en AR-048 — separación de responsabilidades (AR-048, estructura), asignación exclusiva de
+responsabilidades (AR-049, contrato), incorporación del comportamiento (remediaciones futuras,
+implementación). Cada AR introduce una única decisión arquitectónica nueva, reutilizando las
+propiedades ya estabilizadas por las anteriores.
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado vigente, refinado por el cierre reciente
-de AR-028 (riesgo de OCC ya resuelto), AR-003 (documento ya clasificado) y AR-048 (el punto de
-extensión ya existe como contrato vacío). H1 sobrevive: AR-049 debe estabilizar exclusivamente el
-contrato de reconciliación del `SynchronizationEngine`, sin implementar sincronización efectiva
-mientras la persistencia canónica siga siendo insuficiente. H2/H3/H4 descartadas. Pendiente: **Fase
-2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de análisis
-(pendiente de que el usuario congele D-049.1 en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** D-049.1 aprobada: el `SynchronizationEngine` es el único
+componente responsable de coordinar la reconciliación entre `OfflineStorage`, `OperationQueue` y la
+futura persistencia canónica, independiente de mecanismo concreto de sincronización/transporte/
+almacenamiento/resolución de conflictos. Pendiente: **Fase 4A (Diseño técnico)** — comparar
+alternativas concretas de cómo el `SynchronizationEngine` coordina esa reconciliación sin reabrir
+ninguna de las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅
+Decisión aprobada.
