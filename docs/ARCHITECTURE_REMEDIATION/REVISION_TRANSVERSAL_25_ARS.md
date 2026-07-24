@@ -366,6 +366,94 @@ distinción que Bloque I ya había anticipado ("la ejecución fue robusta; la re
 no") — Bloque III la confirma ahora desde el ángulo del filtro específicamente, con una cifra exacta en
 vez de una impresión.
 
+**Clasificación explícita del hallazgo, para que no se lea mal en el futuro:** esto no es un defecto del
+filtro — es **Data Governance del Roadmap**. El algoritmo de priorización (Impacto desc, Esfuerzo asc,
+Riesgo asc, Bloquea desc) no necesita cambiar; lo que necesita cambiar es el contrato del dato que
+consume (una única escala de Esfuerzo, normalizada, en las 55 filas). Cualquier corrección futura de
+`REMEDIATION_ROADMAP_V1.md` en este sentido pertenece a esa categoría — mantenimiento de datos del
+catálogo — no a una revisión del criterio de selección.
+
 ## Bloque IV — Metodología
 
-_(pendiente)_
+**Objetivo: decidir, con el criterio explícito fijado por el usuario antes de empezar este bloque, si
+alguna parte de la metodología debe modificarse a la luz de la evidencia de Bloques I-III.**
+
+> Un cambio metodológico sólo se adopta si resuelve un patrón observado repetidamente y mejora el
+> proceso sin introducir complejidad desproporcionada. Si la evidencia solo identifica un caso
+> interesante o una posible mejora, se registra como observación para las siguientes AR, no se
+> incorpora todavía.
+
+Este criterio se aplica aquí con el mismo rigor con el que Bloque II lo aplicó a cada hipótesis
+individual — la revisión debe poder resistir su propio estándar, no solo exigirlo de las AR.
+
+### Revisión candidato por candidato
+
+| Candidato a cambio                                                                                                   | Origen          | ¿Patrón repetido?                                                                                                       | ¿Mejora sin complejidad desproporcionada?                                                            | Decisión                                                                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Normalizar la escala de Esfuerzo en el Roadmap                                                                       | Bloques I y III | N/A — no es una decisión metodológica, es un dato                                                                       | N/A                                                                                                  | **Fuera de alcance de este bloque** — ya reclasificado como Data Governance del Roadmap, no como cambio de metodología (ver cierre de Bloque III) |
+| Añadir un cuarto criterio operativo a Fase 0 (definir qué cuenta como "búsqueda activa" de contraejemplo)            | Bloque II       | **No** — es la primera vez que esta revisión lo intenta; ningún cierre de AR anterior lo señaló como problema           | Sin evidencia suficiente para evaluarlo — no se ha probado ninguna definición operativa todavía      | **No se adopta. Se registra como observación (ver abajo)**                                                                                        |
+| Promover H9 o H-GOV-01 a regla permanente                                                                            | Bloque II       | Sí, en repetición — pero no en el criterio 4 específicamente                                                            | No aplica — no cumplen los 5 criterios de Fase 0 todavía                                             | **No se adopta** (ya resuelto en Bloque II, confirmado aquí)                                                                                      |
+| Exigir que la sección "Selección" de cada AR declare explícitamente su método (filtro / manual-narrativo / spin-off) | Bloque III      | No — es la primera vez que se pidió esta clasificación, para esta revisión, no como práctica repetida que fallara antes | Mejora marginal de trazabilidad, pero añade un campo obligatorio nuevo a un formato ya estable       | **No se adopta como obligatorio. Se registra como práctica recomendada, no exigida**                                                              |
+| Medir tiempo por fase                                                                                                | Bloque I        | No aplica — es una ausencia de dato, no un patrón de fallo                                                              | La granularidad necesaria (horas/minutos) no existe hoy y añadirla exigiría instrumentar cada sesión | **No se adopta** — coste de instrumentación no justificado por el valor todavía no demostrado del dato                                            |
+
+### Resultado: cero cambios permanentes a la Metodología de Remediación v1.0 en esta revisión
+
+**Metodología v1.0 se mantiene sin cambios — tercera vez consecutiva (7 ARs → 15 ARs → 25 ARs) que una
+revisión transversal concluye esto.** No es que Bloques I-III no hayan encontrado nada — encontraron
+una hipótesis con el historial más fuerte del programa (H9) y una con la mayor diversidad de contexto
+(H-GOV-01), además de una carencia real en cómo se ha aplicado Fase 0 hasta ahora. Pero ninguno de esos
+hallazgos cumple el propio criterio que el usuario fijó para actuar sobre ellos: **un patrón observado
+repetidamente**, no un caso interesante detectado una vez. La carencia del criterio 4 se identificó
+exactamente una vez, en esta misma revisión — adoptar un cambio a partir de un único punto de dato sería
+precisamente el error que Fase 0 fue creada para prevenir en las hipótesis técnicas, aplicado ahora a la
+metodología misma.
+
+### Observaciones registradas para el próximo tramo (no reglas, no cambios — vigilancia explícita)
+
+1. **Búsqueda activa de contraejemplo, pendiente para H9 y H-GOV-01.** La próxima vez que cualquiera de
+   las dos se cite como respaldo de una decisión, buscar explícitamente un caso donde debiera fallar
+   antes de aplicarla — no solo constatar que no ha fallado. Si esa búsqueda se intenta y H9 o H-GOV-01
+   la sobreviven, ambas quedarían con los 5 criterios de Fase 0 satisfechos por primera vez.
+2. **Definición operativa del criterio 4 de Fase 0**, todavía sin resolver: ¿qué constituye una
+   "búsqueda activa" suficiente? Un candidato a considerar en la próxima revisión, no antes: exigir que
+   quien cite una hipótesis como evidencia describa explícitamente qué caso intentó encontrar en su
+   contra y por qué no lo consiguió — no solo que no apareció uno por casualidad.
+3. **Clasificación del método de selección** (filtro / manual-narrativo / spin-off) en la sección
+   "Selección" de cada AR nueva — recomendada, no exigida, para que la próxima revisión transversal no
+   tenga que reconstruirla por inferencia como hizo ésta.
+4. **Normalización de la escala de Esfuerzo del Roadmap** — acción de Data Governance recomendada, fuera
+   del alcance de esta revisión (que evalúa, no modifica). Ver Bloque III.
+
+**Próximo hito de revisión transversal:** no antes de acumular evidencia equivalente al resto del
+backlog (30 AR más, hasta 55/55) o al cierre completo del programa, lo que ocurra primero — mismo
+criterio de espaciado ya usado entre las revisiones de 7, 15 y 25 (hitos prácticos, no estadísticos).
+
+---
+
+## Informe Final de la Revisión Transversal 25/55
+
+**Conclusión única, respondiendo a la pregunta que abrió este documento — ¿qué demuestran empíricamente
+las primeras 25 remediaciones sobre la metodología utilizada?**
+
+1. **La ejecución es estable, medida, no supuesta** (Bloque I): 0 reaperturas, 0 excepciones al ciclo de
+   9 fases, 92% de continuidad de sesión, el único bloqueo real (AR-034) resuelto exactamente por el
+   mecanismo ya diseñado para ese caso (spin-off unidireccional), y una distinción explícita entre lo
+   que describe el programa y lo que evalúa el método.
+2. **La disciplina de promoción de conocimiento es conservadora por diseño, no por omisión** (Bloque
+   II): de 12 hipótesis acumuladas, 0 se promovieron — no por falta de repetición en los dos candidatos
+   más fuertes, sino porque ninguna ha sido sometida jamás a una búsqueda activa de contraejemplo, y
+   esta revisión fue la primera en intentarlo explícitamente en vez de darlo por hecho.
+3. **El filtro programático es lógicamente sólido; el riesgo real vive en los datos que consume, no en
+   su algoritmo** (Bloque III): 0 inversiones de prioridad sin justificar en 15 selecciones verificadas,
+   su primer enfrentamiento contra una expectativa humana explícita (AR-005 vs. AR-025) resuelto
+   correctamente, y un defecto de datos (8 variantes de Esfuerzo) cuantificado y reclasificado
+   explícitamente como Data Governance, no como falla del método.
+4. **Ningún cambio permanente a la metodología está justificado todavía por la evidencia disponible**
+   (Bloque IV) — el mismo criterio de evidencia suficiente que el programa exige a cada AR individual se
+   aplicó a sí mismo, y no lo superó ninguno de los candidatos identificados. Esto se registra como una
+   conclusión, no como una ausencia de resultados: **la Metodología de Remediación v1.0 sostiene su
+   propio peso frente al primer examen con una base empírica de 25 casos**, con 4 observaciones
+   explícitas registradas para vigilar en el próximo tramo, ninguna todavía convertida en regla.
+
+**Este documento cierra la primera mitad metodológica del programa (25/55) y queda como línea base para
+la siguiente revisión transversal, cuando corresponda.**
