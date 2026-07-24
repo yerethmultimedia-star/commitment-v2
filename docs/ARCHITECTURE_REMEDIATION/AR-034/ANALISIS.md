@@ -306,9 +306,12 @@ dejaría de ser una remediación XS y pasaría a ser otra cosa.
 **Hallazgo de la remediación, registrado explícitamente (no promovido todavía a principio
 metodológico — primer caso de este tipo):**
 
-> **Una Fase 4B puede descubrir una precondición técnica cuya ausencia impide materializar una
-> decisión previamente correcta. En ese caso, la decisión permanece válida y la precondición debe
-> resolverse mediante una remediación independiente antes de reanudar la implementación.**
+> **Una Fase 4B puede descubrir una precondición técnica no conocida durante las fases anteriores que
+> impide materializar una decisión ya validada, sin invalidar dicha decisión.**
+
+Formulación refinada por el usuario tras el registro inicial, para quedar más precisa y falsable — no
+dice "las Fase 4B descubren dependencias" en general, sino específicamente que la precondición no era
+conocida en fases previas y que no invalida la decisión ya congelada.
 
 A diferencia de la observación sobre los tests registrada en AR-022 (que el usuario decidió mantener
 solo "mentalmente", sin registrarla en ningún artefacto por tratarse de un único punto de dato), este
