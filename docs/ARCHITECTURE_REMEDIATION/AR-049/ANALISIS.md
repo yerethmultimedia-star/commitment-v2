@@ -300,12 +300,95 @@ alternativas de esta fase — pueden seguir evaluándose en remediaciones futura
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Mismo criterio que AR-045/AR-048/AR-050: materializar únicamente la responsabilidad arquitectónica
+congelada, sin anticipar comportamiento futuro.
+
+**Hallazgo central de esta fase: cero código nuevo requerido.** Verificado, no asumido:
+`apps/mobile/src/core/offline/synchronization-engine.ts` — construido por **AR-048**, una AR antes en
+esta misma sesión — ya es exactamente el `SynchronizationEngine` que la Alternativa A de esta AR
+describe:
+
+- **Constructor con inyección de `OfflineStorage` y `OperationQueue`** — ya presente
+  (`NoOpSynchronizationEngine`).
+- **Un método público definido por el contrato** (`synchronize(): Promise<void>`) — ya presente.
+- **Implementación `NoOp`** — el cuerpo de `synchronize()` ya está deliberadamente vacío, con un
+  comentario que ya anticipaba textualmente este momento: _"Deliberately empty: real reconciliation
+  against a canonical backend is out of AR-048's scope (see D-048.1, Fase 4A)."_
+- **Cero `BackendAdapter`/`Repository`/`HTTP Client`/`Supabase Client`/`Sync Strategy`** en todo el
+  repositorio — verificado, ninguno de esos conceptos existe todavía en `apps/mobile`.
+
+Este es un tercer caso del patrón "la propiedad que un hallazgo reclama puede ya existir de forma
+estructural" (README, hipótesis en observación post-AR-047) — con una particularidad nueva: aquí no
+es una propiedad general del sistema descubierta por casualidad, es un artefacto construido
+**deliberadamente un paso antes, en la misma secuencia de sesión**, con su propio comentario de código
+anticipando exactamente esta AR.
+
+**Verificación empírica, no solo estructural — evidencia direccional pedida explícitamente para esta
+AR (a diferencia de AR-048, cuya evidencia principal era estructural):**
+
+1. **Dependencias unidireccionales, re-verificadas por grep:** `storage.ts` → 0 imports;
+   `operation-queue.ts` → 0 imports; `synchronization-engine.ts` → exactamente 2 imports
+   (`./storage`, `./operation-queue`). Idéntico al estado verificado al cerrar AR-048 — nada cambió,
+   nada necesitaba cambiar.
+2. **Existe exactamente un punto de coordinación potencial, verificado por grep en todo
+   `apps/mobile/src`:** `grep -rniE "synchroniz|reconcil"` fuera de `core/offline/` produce una única
+   coincidencia — el mismo comentario de modelado de datos en `commitment.model.ts` ya citado por la
+   auditoría original (It.12) y por AR-049/Fase 1 — no código, no un segundo candidato a coordinador.
+   **Ningún otro componente empieza a apropiarse de la responsabilidad de sincronización.**
+
+**Explícitamente NO implementado, tal como fijó Fase 4A:** sincronización remota, persistencia, OCC,
+merge, CRDT, retries, polling, WebSockets, backoff, batching, conflictos, adaptadores de backend —
+todo pertenece a futuras remediaciones.
+
+**Validación real ejecutada (no solo lectura de código):**
+
+- `npx jest --config src/core/offline/jest.config.js` → 3 suites, **12/12 tests pasando**, incluidos
+  los 2 tests de `synchronization-engine.test.ts` que ya cubrían exactamente el comportamiento que
+  esta AR necesitaba validar (`NoOpSynchronizationEngine` no muta `storage` ni `queue`; resuelve con
+  storage/queue vacíos).
+- `pnpm --filter mobile exec tsc --noEmit` → limpio, cero errores.
+- Cero archivos modificados — `git status` confirma que este repositorio no cambió durante esta fase.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.**
+
+Las 5 preguntas de Fase 4A, respondidas con evidencia real:
+
+1. **¿Toda la coordinación pasa exclusivamente por `SynchronizationEngine`?** Sí — único componente
+   con acceso simultáneo a `OfflineStorage` y `OperationQueue` (grep-verificado).
+2. **¿`OfflineStorage` permanece como proveedor de datos locales, sin lógica de reconciliación?** Sí
+   — `storage.ts` sin imports, sin conocimiento de `SynchronizationEngine`.
+3. **¿`OperationQueue` permanece como proveedor de operaciones pendientes, sin lógica de
+   reconciliación?** Sí — `operation-queue.ts` sin imports, sin conocimiento de
+   `SynchronizationEngine`.
+4. **¿El futuro adaptador de persistencia puede sustituirse sin modificar `SynchronizationEngine`?**
+   Sí por construcción — `SynchronizationEngine` no referencia ningún adaptador concreto; su contrato
+   (`synchronize()`) no asume ningún transporte ni proveedor.
+5. **¿La incorporación posterior de protocolos, algoritmos o estrategias de sincronización requerirá
+   únicamente nuevas implementaciones, no un rediseño del modelo?** Sí por diseño — una futura
+   implementación real de `SynchronizationEngine` sustituiría a `NoOpSynchronizationEngine` detrás de
+   la misma interfaz, sin tocar `storage.ts`/`operation-queue.ts`.
+
+**Criterio de cierre de AR-049 (fijado en Fase 4A), verificado:** existe exactamente un coordinador
+potencial de la reconciliación; los demás componentes permanecen deliberadamente pasivos respecto a
+la sincronización (verificado por grep en todo `apps/mobile/src`, no solo en `core/offline/`). AR-049
+materializa D-049.1 sin invadir el trabajo de las futuras remediaciones encargadas de implementar el
+comportamiento real.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-049.1 aprobada; diseño técnico elegido:
-`SynchronizationEngine` como orquestador puro que consulta `OfflineStorage`/`OperationQueue` y delega
-en un futuro adaptador de persistencia (Alternativa A), sin estado interno propio ni lógica repartida
-entre componentes. Pendiente: **Fase 4B (Implementación)** — esqueleto mínimo del coordinador en
-`apps/mobile/src/core/offline/`, sin protocolo, algoritmo de reconciliación ni adaptador de
-persistencia todavía. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
-mantiene ✅ Decisión aprobada.
+**AR-049 CERRADA.** Fases 1, 2A, 2B, 4A, 4B y 5 completas. D-049.1 materializada — el
+`SynchronizationEngine` construido por AR-048 ya era, verificado por grep y tests, exactamente el
+orquestador puro que Fase 4A de esta AR describía; cero código nuevo requerido, solo validación
+adicional bajo el criterio direccional propio de AR-049 (un único coordinador potencial, cero
+apropiación de responsabilidad por otros componentes). Ningún hallazgo colateral. Estado: 🟦 → ✅
+Cerrada. Decisión: ✅ Decisión aprobada → ✔️ Validada.
