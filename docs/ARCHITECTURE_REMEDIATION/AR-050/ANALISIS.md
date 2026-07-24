@@ -422,15 +422,75 @@ cambios (este incremento tampoco toca backend, por diseño).
 
 ---
 
+### Incremento 3 — Contexto
+
+**Estado: ✅ Cerrado.**
+
+**Primera decisión de modelado relevante desde el Incremento 1.** El objetivo no es "construir Context
+Builder" — es definir qué representa el contexto para la plataforma. Se evita deliberadamente un
+agregador que conozca hábitos, objetivos, identidad, historial, memoria o recomendaciones (eso
+convertiría Context Builder en un nuevo centro del sistema).
+
+**Implementado — nuevo `packages/domain/src/ai-proposal/ai-context.ts`:**
+
+```ts
+export type AIContext = object;
+```
+
+Deliberadamente mínimo — no fija cómo se obtiene, quién lo construye, de dónde viene, cuánto dura ni
+cómo se cachea. Fija únicamente que el contexto es un concepto de dominio estructurado (un objeto), no
+un DTO de infraestructura ni un valor primitivo suelto. Un proveedor no debería poder distinguir si un
+contexto viene de base de datos, caché, agregación en memoria o un mock de test — solo recibe un valor
+con forma de `AIContext`.
+
+**`AIPlatform<TContext>` actualizado para acotar el genérico:**
+
+```ts
+export type AIPlatform<TContext extends AIContext = AIContext> = AIProposalSource<TContext>;
+```
+
+`AIProposalSource` (AR-047) **no se toca** — sigue exactamente como se congeló, con `TContext = unknown`
+sin acotar. La restricción `extends AIContext` vive únicamente en `AIPlatform`, el vocabulario que
+pertenece a AR-050 — mismo criterio ya aplicado en el Incremento 1 y 2 de no reabrir artefactos de ARs
+cerradas salvo necesidad real.
+
+**Validación del incremento:**
+
+1. **¿La plataforma sigue sin conocer consumidores?** Sí — `AIContext` no menciona Coach, Dashboard,
+   Mobile ni Backend.
+2. **¿La plataforma sigue sin conocer proveedores?** Sí — cero mención de proveedor/modelo/SDK,
+   verificado por grep.
+3. **¿El contexto se convierte en un concepto del dominio de la plataforma, no en un DTO de
+   infraestructura?** Sí — `AIContext` vive en `packages/domain/src/ai-proposal/`, no en ninguna capa
+   de infraestructura; un test confirma que un contexto concreto inventado (`HabitCoachingContext`) lo
+   satisface por estructura, y que un valor primitivo (`'not-a-context'`) es rechazado en tiempo de
+   compilación (`@ts-expect-error`).
+4. **¿El Incremento 4 (Coach) puede consumir exactamente ese contexto sin redefinirlo?** Sí — un
+   segundo test (`JournalReflectionContext`) demuestra que un tipo de contexto completamente nuevo se
+   conecta implementando `AIPlatform<TContext>` sin tocar `ai-context.ts` ni `ai-platform.ts`.
+5. **¿Memory sigue completamente fuera del diseño?** Sí — `AIContext` no fija persistencia, duración ni
+   caché; ningún campo ni comentario anticipa Memory.
+
+**Evidencia de ejecución:** `pnpm --filter @commitment/domain test` → 287/287 passing (2 nuevos: un
+contexto concreto satisface `AIContext` estructuralmente y un primitivo es rechazado en compilación; un
+tipo de contexto nuevo implementa `AIPlatform` sin modificar la plataforma); `eslint` limpio (la forma
+inicial, `interface AIContext {}`, disparó `@typescript-eslint/no-empty-object-type` — corregida a
+`type AIContext = object`, exactamente lo que el propio mensaje de lint recomienda); `pnpm --filter
+@commitment/domain build` limpio; `pnpm --filter backend test`/`build` → 143/143, sin cambios.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1 y 2 de 6 cerrados.** D-050.1
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1, 2 y 3 de 6 cerrados.** D-050.1
 aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incremento 1:** modelo
 conceptual `Recommendation ↔ AIProposal` estabilizado mediante transformación explícita. **Incremento 2:**
-el contrato principal de la plataforma (`AIPlatform<TContext>`) resultó ser, verificado explícitamente,
-el mismo contrato que AR-047 ya construyó (`AIProposalSource`) — un alias con nombre propio, no una
-interfaz nueva; cero código de proveedor, cero infraestructura anticipada. 285/285 tests de dominio,
-143/143 backend sin cambios. Quedan 4 incrementos (contexto, primer consumidor/Coach, proveedor LLM,
-Memory), cada uno debe limitarse a materializar capacidades técnicas sobre el modelo y el contrato ya
-decididos, sin reabrirlos. Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión
-aprobada. Pendiente: **Fase 4B — Incremento 3 (contexto)**.
+el contrato de la plataforma (`AIPlatform<TContext>`) resultó ser el mismo contrato que AR-047 ya
+construyó — alias, no interfaz nueva. **Incremento 3:** el contexto queda fijado como concepto de
+dominio mínimo (`AIContext = object`), sin fijar origen/duración/caché; `AIPlatform` acota su genérico a
+`extends AIContext` sin tocar el `AIProposalSource` de AR-047. Con estos 3 incrementos, los tres pilares
+de la plataforma (modelo, contrato, contexto) quedan definidos antes de introducir el primer consumidor.
+287/287 tests de dominio, 143/143 backend sin cambios. Quedan 3 incrementos (primer consumidor/Coach,
+proveedor LLM, Memory), que deben limitarse a conectar capacidades ya diseñadas, no a redefinirlas.
+Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada. Pendiente: **Fase
+4B — Incremento 4 (primer consumidor: Coach)**.
