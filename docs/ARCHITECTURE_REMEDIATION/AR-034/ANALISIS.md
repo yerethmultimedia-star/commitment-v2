@@ -137,11 +137,55 @@ duda, sino porque la estrategia de transición todavía no está decidida.
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-034.1 aprobada.**
+
+La hipótesis superviviente no deriva de una preferencia por la adopción gradual, sino de la evidencia
+disponible: existen 82 violaciones ya presentes; el punto de entrada arquitectónico ya existe
+(`@commitment/design-system`); el objetivo de la AR es prevenir nueva deuda, no bloquear la existente;
+existe un precedente de enforcement en el repositorio (AR-054). Se congela una decisión de política,
+no de implementación.
+
+**D-034.1:**
+
+> **`@commitment/design-system` constituye el único punto de entrada autorizado para los componentes
+> y APIs de Tamagui. A partir de la adopción de esta decisión, las nuevas importaciones directas
+> desde `tamagui` quedan prohibidas. Las importaciones históricas podrán mantenerse únicamente
+> mediante un mecanismo de transición explícito y temporal hasta su migración.**
+
+**4 propiedades congeladas:**
+
+1. **Unicidad del punto de entrada** — todo consumo futuro pasa por `@commitment/design-system`.
+2. **Prevención de nueva deuda** — no pueden aparecer nuevas importaciones directas de `tamagui`.
+3. **Compatibilidad con la deuda existente** — las 82 ocurrencias actuales no obligan a una migración
+   masiva inmediata.
+4. **Temporalidad** — el mecanismo de transición no forma parte de la arquitectura objetivo; existe
+   únicamente para facilitar la migración.
+
+**Deja deliberadamente abierto (Fase 4A):** `error` vs. `warn`, `no-restricted-imports` con
+excepciones, overrides por directorio, baseline, allowlist, estrategia de eliminación de las
+excepciones.
+
+**Consistencia con el programa:** Fase 2B congela qué política arquitectónica debe cumplirse; Fase 4A
+decide cómo implementarla con el menor coste de transición — la decisión permanece estable incluso si
+en el futuro cambian las capacidades de ESLint o se elige un mecanismo técnico distinto para hacer
+cumplir la misma política.
+
+**Eje Decisión reclasificado, mismo criterio que AR-054/AR-044/AR-002/AR-004/AR-030:** esto no es una
+excepción al proceso de 9 fases — es una excepción a quién suele ser el propietario habitual de las
+decisiones. D-034.1 no nació de una preferencia de diseño; nació porque la evidencia de Fase 1 dejó
+una propiedad de política arquitectónica concreta que decidir (varias implementaciones válidas con
+consecuencias distintas sobre el desarrollo). `Owner=Claude` sigue describiendo correctamente quién
+ejecuta la AR.
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado vigente y agravado en volumen (82
-archivos). H1 (adopción incremental) se espera que sobreviva sobre H2 (error inmediato total) y H3
-(solo warn), pero la decisión formal (Fase 2B) todavía no se ha congelado. Pendiente: **Fase 2B
-(Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene N/A (ejecución directa) —
-pendiente de re-evaluar si el eje Decisión debe pasar a Owner=Ambos, como ya ocurrió con
-AR-054/AR-044/AR-002/AR-004/AR-030, una vez el usuario congele D-034.1.
+**Fase 1, Fase 2A y Fase 2B cerradas.** D-034.1 aprobada: `@commitment/design-system` es el único
+punto de entrada autorizado para Tamagui; nuevas importaciones directas quedan prohibidas; las 82
+históricas se permiten solo bajo un mecanismo de transición explícito y temporal. Pendiente: **Fase
+4A (Diseño técnico)** — comparar alternativas concretas de mecanismo (severidad, exclusiones,
+overrides, baseline) sin reabrir ninguna de las 4 propiedades congeladas. Estado: se mantiene 🟦 En
+análisis. Decisión: N/A → ✅ Decisión aprobada.
