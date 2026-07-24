@@ -480,17 +480,74 @@ inicial, `interface AIContext {}`, disparó `@typescript-eslint/no-empty-object-
 
 ---
 
+### Incremento 4 — Primer consumidor (Coach)
+
+**Estado: ✅ Cerrado.**
+
+Primer incremento con comportamiento observable — y por eso, deliberadamente conservador. El objetivo
+no es "hacer inteligente al Coach": es demostrar que la plataforma puede ser consumida sin romper
+D-047.1 ni D-050.1. A diferencia de los Incrementos 1-3 (que consolidaron modelo/contrato/contexto),
+este consolida la **dirección de las dependencias**.
+
+**Coach no se toca todavía en producción.** `CoachRecommendationProvider.ts`/`RecommendationProvider.ts`
+(mobile) siguen exactamente igual — resolver su desajuste síncrono/asíncrono real es un refactor propio,
+separado, que la auditoría original ya advirtió como coste a presupuestar cuando exista un proveedor
+real (Incremento 5), no algo que deba resolverse solo para probar la conexión arquitectónica.
+
+**Implementado — nuevo `packages/domain/src/ai-proposal-transformation/consume-ai-platform.ts`:**
+
+```ts
+export async function consumeAIPlatform<TContext extends AIContext>(
+  platform: AIPlatform<TContext>,
+  context: TContext,
+  transform: AIProposalToRecommendationTransformer,
+): Promise<readonly Recommendation[]> {
+  const proposals = await platform.propose(context);
+  return proposals.map(transform);
+}
+```
+
+Es el único lugar donde un consumidor toca tanto la plataforma como `Recommendation` — fija la dirección
+`Consumidor → AIPlatform → AIProposal[] → Transformation → Recommendation[]`, nunca la inversa. Un
+consumidor real llamaría a esta función y solo vería `Recommendation`s de vuelta; nunca importa ni
+inspecciona un `AIProposal` directamente.
+
+**Demostrado en tests, no en producción:** se usa `DashboardContext` (dato de dominio real y ya
+existente) como el `CoachContext` de ejemplo — sin inventar un tipo nuevo solo para la demostración.
+
+**Validación del incremento:**
+
+1. **¿Coach depende únicamente de `AIPlatform`?** Sí, demostrado — un `FakeCoachPlatform` de prueba
+   implementa `AIPlatform<DashboardContext>`, y `consumeAIPlatform` es la única función que un
+   consumidor real necesitaría llamar.
+2. **¿Coach nunca conoce un proveedor?** Sí — cero mención de proveedor/modelo/SDK en
+   `consume-ai-platform.ts`, verificado por grep.
+3. **¿Coach sigue consumiendo `Recommendation`?** Sí — el tipo de retorno de `consumeAIPlatform` es
+   `Recommendation[]`, nunca `AIProposal[]`.
+4. **¿La transformación `AIProposal → Recommendation` ocurre exactamente una vez?** Sí, verificado con
+   un test que cuenta las invocaciones del transformador contra una plataforma que devuelve 2
+   propuestas — exactamente 2 llamadas, ni 0 ni más.
+5. **¿La plataforma continúa siendo reutilizable por futuros consumidores?** Sí, verificado con un
+   segundo consumidor de prueba (`JournalPlatform`, contexto `{ entryCount: number }` completamente
+   distinto de `DashboardContext`) que reutiliza `consumeAIPlatform` sin ningún cambio — nada
+   específico de Coach quedó filtrado en la función genérica.
+
+**Evidencia de ejecución:** `pnpm --filter @commitment/domain test` → 290/290 passing (3 nuevos);
+`eslint` limpio; `pnpm --filter @commitment/domain build` limpio; `pnpm --filter backend test`/`build`
+→ 143/143, sin cambios (Coach real en mobile no se tocó).
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1, 2 y 3 de 6 cerrados.** D-050.1
-aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incremento 1:** modelo
-conceptual `Recommendation ↔ AIProposal` estabilizado mediante transformación explícita. **Incremento 2:**
-el contrato de la plataforma (`AIPlatform<TContext>`) resultó ser el mismo contrato que AR-047 ya
-construyó — alias, no interfaz nueva. **Incremento 3:** el contexto queda fijado como concepto de
-dominio mínimo (`AIContext = object`), sin fijar origen/duración/caché; `AIPlatform` acota su genérico a
-`extends AIContext` sin tocar el `AIProposalSource` de AR-047. Con estos 3 incrementos, los tres pilares
-de la plataforma (modelo, contrato, contexto) quedan definidos antes de introducir el primer consumidor.
-287/287 tests de dominio, 143/143 backend sin cambios. Quedan 3 incrementos (primer consumidor/Coach,
-proveedor LLM, Memory), que deben limitarse a conectar capacidades ya diseñadas, no a redefinirlas.
-Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada. Pendiente: **Fase
-4B — Incremento 4 (primer consumidor: Coach)**.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1, 2, 3 y 4 de 6 cerrados.**
+D-050.1 aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incrementos 1-3:**
+modelo conceptual, contrato de plataforma y contexto, los tres pilares definidos antes del primer
+consumidor. **Incremento 4:** `consumeAIPlatform<TContext>` fija la dirección de dependencias
+(Consumidor → `AIPlatform` → `AIProposal[]` → Transformation → `Recommendation[]`), demostrado con un
+consumidor de prueba tipo Coach (usando `DashboardContext` real) y verificado reutilizable con un
+segundo consumidor completamente distinto — Coach real en mobile permanece sin tocar, por diseño.
+290/290 tests de dominio, 143/143 backend sin cambios. Quedan 2 incrementos (proveedor LLM, Memory), que
+ahora son adaptadores alrededor de una arquitectura ya cerrada, no elementos que la definan. Estado: se
+mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión aprobada. Pendiente: **Fase 4B —
+Incremento 5 (proveedor LLM)**.
