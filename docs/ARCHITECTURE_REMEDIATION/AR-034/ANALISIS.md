@@ -231,11 +231,56 @@ comentario por archivo), el proceso de eliminación de excepciones, plazos de mi
 
 ---
 
+## Fase 4B — Implementación (bloqueada, hallazgo real que requiere decisión del usuario)
+
+**Estado: 🟡 En progreso — bloqueada antes de cerrar, ver hallazgo abajo.**
+
+### Hallazgo bloqueante, verificado empíricamente, no asumido
+
+Al construir la regla (`no-restricted-imports` sobre `tamagui`, severidad `error`, con excepción para
+los 82 archivos históricos vía un segundo `overrides` en `.eslintrc.json`), la validación reveló un
+problema que cambia la viabilidad del mecanismo elegido en Fase 4A, no solo un detalle de
+implementación:
+
+**Los 82 archivos con imports crudos de `tamagui` son, sin excepción, archivos `.tsx` — y `expo lint`
+no lint-ea ningún archivo `.tsx` en este repositorio hoy.** Confirmado con tres experimentos
+controlados, revertidos cada uno inmediatamente:
+
+1. **Baseline sin ningún cambio** (`npx expo lint --no-cache`, ejecución completa): el reporte incluye
+   decenas de archivos `.ts`, **cero archivos `.tsx`** (verificado filtrando el output completo por
+   extensión).
+2. **Añadiendo únicamente la regla de restricción** (override `"files":
+["apps/mobile/src/**/*.ts", "apps/mobile/src/**/*.tsx"]`, sin tocar parser): el lint pasó de 48 a
+   149 problemas, casi todos errores de parseo (`Unexpected token <`) en archivos `.tsx` que nunca
+   antes habían aparecido en ningún reporte de lint.
+3. **Experimento de control, aislando la causa exacta:** un override trivial, sin ninguna regla real
+   (`{"files": ["apps/mobile/src/**/*.tsx"], "rules": {}}`), produjo el mismo resultado —
+   **125 archivos `.tsx` aparecen de golpe, 148 errores de parseo** — confirmando que el simple hecho
+   de que un patrón de `overrides` mencione `.tsx` hace que la herramienta subyacente empiece a
+   descubrir y analizar esos archivos (inspeccionado en el código fuente de `@expo/cli`,
+   `lint/lintAsync.js`: `expo lint` no pasa ningún `--ext` a ESLint si no se le pide explícitamente, y
+   ESLint infiere las extensiones adicionales a buscar a partir de los patrones de `overrides[].files`
+   ya configurados — hoy, ninguno menciona `.tsx`, así que ESLint nunca los busca).
+
+**Consecuencia:** el diseño de Fase 4A (regla `error` + excepciones temporales para las 82 violaciones
+históricas) es correcto como _política_, pero **no puede validarse contra los archivos reales que
+motivan esta AR** — los 82 archivos objetivo son exactamente los que hoy quedan fuera del alcance de
+`expo lint`. Intentar "arreglarlo" activando el lint de `.tsx` de forma general expondría de golpe
+~150 problemas de parseo/reglas preexistentes en todo `apps/mobile`, una ampliación de alcance muy
+superior a lo que D-034.1 congeló — exactamente el tipo de "migración masiva accidental" que la Fase
+4A descartó explícitamente (Alternativa C). Este hallazgo no se resuelve unilateralmente aquí; se
+presenta al usuario para decidir cómo proceder, sin haber tocado ningún archivo de producción (los 3
+experimentos de arriba fueron revertidos con `git checkout` inmediatamente después de cada prueba).
+
+---
+
 ## Estado
 
 **Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-034.1 aprobada; diseño técnico elegido: regla
 `no-restricted-imports` en severidad `error` con exclusiones explícitas y temporales para los 82
-archivos históricos (Alternativa A), todo archivo nuevo sujeto a la regla desde el primer día.
-Pendiente: **Fase 4B (Implementación)** — construir la regla de lint con las exclusiones concretas.
-Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión
-aprobada.
+archivos históricos (Alternativa A). **Fase 4B en progreso, bloqueada:** los 82 archivos objetivo son
+todos `.tsx`, y `expo lint` no analiza ningún archivo `.tsx` en este repositorio hoy — confirmado con
+3 experimentos controlados y revertidos. El mecanismo elegido no puede materializarse ni validarse
+contra los archivos reales sin antes resolver esa brecha, cuyo alcance excede lo que D-034.1 congeló.
+Pendiente: decisión del usuario sobre cómo proceder. Estado: se mantiene 🟦 En análisis. Decisión: se
+mantiene ✅ Decisión aprobada (D-034.1 no se reabre).
