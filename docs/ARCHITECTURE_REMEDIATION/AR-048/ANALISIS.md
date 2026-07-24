@@ -137,13 +137,77 @@ es precisamente la pregunta de framing que corresponde formalizar y decidir en F
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+A diferencia de varias remediaciones recientes, aquí **el problema sigue existiendo íntegramente** —
+no hay hallazgo absorbido ni propiedad ya implementada que reduzca el alcance. La pregunta pasa a ser
+si la recomendación original de la auditoría ("no construir esto todavía") sigue siendo la decisión
+arquitectónica correcta bajo el estado actual del sistema.
+
+**H1 (principal):** _"AR-048 debe introducir la arquitectura que haga posible una capacidad Offline
+First futura, pero sin implementar sincronización offline completa mientras la persistencia canónica
+del backend siga siendo insuficiente para soportarla de forma correcta."_ Explica toda la evidencia:
+no existe capacidad offline real; los flags permanecen inertes; `onMutate` sigue siendo un caso
+aislado; `PRODUCT_VISION.md` sigue sin alinearse; la auditoría condicionó expresamente la
+implementación completa a una persistencia adecuada; AR-028 añadió OCC, pero no convirtió el backend
+en una persistencia canónica completa.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — implementar Offline First completo ahora. Descartada: la propia auditoría estableció una
+  precondición técnica y la evidencia indica que sigue sin cumplirse; ignorarla significaría ignorar
+  una restricción todavía vigente.
+- **H3** — posponer AR-048 íntegramente hasta resolver persistencia. Descartada: impediría preparar
+  la arquitectura para una futura sincronización y mantendría el sistema sin separación conceptual
+  entre almacenamiento local, cola y sincronización — la ausencia de persistencia completa no impide
+  estabilizar contratos arquitectónicos.
+- **H4** — la separación storage/cola/sync que ya propone el Roadmap resuelve el problema por sí
+  sola. Descartada como hipótesis principal: en este momento es únicamente una posibilidad de diseño,
+  sin evidencia todavía de que esa separación satisfaga por sí sola el condicionamiento original de la
+  auditoría — corresponde a Fase 4, no a Fase 2.
+
+**H1 sobrevive**, formulada con mayor precisión: _"El objetivo de AR-048 no es entregar Offline First
+funcional, sino estabilizar una arquitectura Offline First que permanezca compatible con la futura
+persistencia real del sistema, sin introducir dependencias incorrectas entre almacenamiento local y
+sincronización."_
+
+**Tres conceptos distintos, separados explícitamente para no confundirlos:**
+
+1. **Capacidad Offline** — la propiedad arquitectónica final (offline funcional de extremo a
+   extremo). Todavía no existe.
+2. **Arquitectura Offline** — los límites entre almacenamiento local, cola, sincronización y
+   resolución de conflictos. Sí puede comenzar a estabilizarse.
+3. **Persistencia canónica** — la fuente de verdad del backend. Continúa siendo una dependencia
+   externa a AR-048; no debería resolverse aquí.
+
+**La tensión encontrada en Fase 1, reformulada como la pregunta real de Fase 2:** no es _"¿existe
+persistencia?"_ — es _"¿la separación propuesta permite construir la arquitectura Offline sin asumir
+que la sincronización ya puede funcionar correctamente?"_ La evidencia recogida hasta ahora no
+responde todavía a esa pregunta.
+
+**Expectativa registrada para Fase 2B, sin resolverla aquí:** si H1 se mantiene, D-048.1 debería
+congelar que la plataforma separe explícitamente las responsabilidades de almacenamiento local,
+gestión de operaciones pendientes y sincronización con el backend, de modo que la sincronización
+pueda incorporarse cuando exista una persistencia canónica suficiente, sin rediseñar la arquitectura
+Offline — dejando abiertas sincronización real, resolución de conflictos, políticas de reintento,
+almacenamiento físico y mecanismos de reconciliación para fases posteriores.
+
+**Observación registrada, no promovida:** AR-048 podría repetir el patrón de AR-050 en otro dominio —
+primero estabilizar la plataforma/arquitectura independiente (la plataforma de IA en AR-050, la
+arquitectura Offline storage/cola/sync aquí), dejando que la implementación dependiente (el proveedor
+LLM allí, la sincronización real aquí) se materialice cuando las condiciones lo permitan, sin reabrir
+la decisión ya congelada.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo original confirmado íntegramente vigente, sin reducción de alcance. Se
-identificó que la precondición de secuenciación de la auditoría (persistencia real decidida) sigue
-sin cumplirse, que su cita de respaldo no tiene reflejo en el documento citado (sustancia verificada
-de forma independiente, cita descartada), y que el propio Roadmap contiene una afirmación
-inconsistente en el encabezado de Wave 6 sobre si esa precondición ya fue satisfecha. Pendiente:
-**Fase 2 (Verificación del framing / Hipótesis)** — decidir si la separación storage/cola-vs-sync ya
-propuesta por el Roadmap resuelve legítimamente la tensión de secuenciación, o si redefine el alcance
-de AR-048. Estado: ⬜ → 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de análisis.
+**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado íntegramente vigente. H1 sobrevive:
+AR-048 debe estabilizar la arquitectura Offline (límites entre storage/cola/sincronización) sin
+implementar sincronización offline completa mientras la persistencia canónica del backend siga
+siendo insuficiente. H2/H3/H4 descartadas. 3 conceptos separados (Capacidad Offline / Arquitectura
+Offline / Persistencia canónica). Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En
+análisis. Decisión: se mantiene 💭 Pendiente de análisis (pendiente de que el usuario congele D-048.1
+en Fase 2B).
