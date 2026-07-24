@@ -119,12 +119,73 @@ está construido? — no se resuelve aquí; es la pregunta que corresponde a Fas
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+La evidencia de Fase 1 cambia significativamente el contexto respecto a la auditoría original.
+AR-049 ya no parte de un sistema sin arquitectura Offline — parte de un sistema donde **el punto de
+extensión ya existe** gracias a AR-048. La pregunta deja de ser "¿cómo construir un Sync Engine?" y
+pasa a ser "¿qué responsabilidad arquitectónica conserva AR-049 bajo las restricciones actuales?".
+
+**H1 (principal):** _"AR-049 debe estabilizar exclusivamente el contrato de reconciliación y
+coordinación del `SynchronizationEngine`, sin implementar sincronización efectiva mientras no exista
+una persistencia canónica suficiente."_ Consistente con toda la evidencia: AR-028 eliminó el riesgo de
+concurrencia (OCC); AR-048 creó el punto de extensión arquitectónico; la persistencia canónica sigue
+siendo una precondición no satisfecha; el `SynchronizationEngine` permanece deliberadamente vacío. El
+trabajo pendiente ya no es estructural, sino definir **qué hará** ese componente cuando pueda actuar.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — implementar sincronización completa ahora. Descartada: sería incoherente con la
+  restricción ya aceptada en AR-048 y con la propia recomendación de la auditoría.
+- **H3** — AR-049 ya no tiene objeto y debería cerrarse sin cambios. Descartada: aunque la estructura
+  exista, todavía falta estabilizar la responsabilidad arquitectónica del `SynchronizationEngine`;
+  confundir existencia del componente con definición de su comportamiento sería un salto lógico.
+- **H4** — AR-049 debe esperar completamente hasta resolver la persistencia. Descartada: el programa
+  ha demostrado varias veces (AR-045, AR-048, AR-050) que puede estabilizar contratos antes de
+  disponer de todas las dependencias de implementación — no hay evidencia de que este caso deba
+  tratarse de forma distinta.
+
+**H1 sobrevive**, formulada con mayor precisión: _"AR-049 define la responsabilidad arquitectónica de
+reconciliación del `SynchronizationEngine`, preservando el desacoplamiento establecido por AR-048 y
+posponiendo cualquier sincronización efectiva hasta que la plataforma disponga de persistencia
+canónica suficiente."_
+
+**Un refinamiento importante — tres niveles que ya no son los mismos que en AR-048:**
+
+1. **AR-048** define dónde vive la sincronización.
+2. **AR-049** define qué responsabilidad tiene la sincronización.
+3. **Futuras AR** implementarán cómo sincroniza realmente.
+
+Esa separación evita que AR-049 invada responsabilidades futuras.
+
+**La tensión abierta de Fase 1, resuelta como pregunta de Fase 2:** el punto de extensión ya existe;
+lo que aún no existe es el contexto arquitectónico que permita ejecutar reconciliación real. La
+pregunta correcta no es "¿podemos sincronizar?" sino **"¿qué contrato debe respetar cualquier
+sincronización futura?"** — esa sí pertenece plenamente a AR-049.
+
+**Expectativa registrada para Fase 2B, sin resolverla aquí:** si H1 se mantiene, D-049.1 debería
+congelar que el `SynchronizationEngine` sea el único componente responsable de coordinar la
+reconciliación entre `OfflineStorage`, `OperationQueue` y la persistencia canónica, permaneciendo
+independiente de cualquier mecanismo concreto de transporte, almacenamiento o resolución de
+conflictos — dejando abiertos HTTP/WebSockets/polling/push, OCC/CRDT/merge/retries, políticas de
+reconciliación y backend específico para implementación futura.
+
+**Observación registrada, no promovida:** AR-049 parece ser la continuación natural de AR-048. Si
+AR-048 respondió "dónde debe vivir la sincronización", AR-049 responde "qué responsabilidad exclusiva
+tendrá ese componente" — mismo patrón repetido en varias remediaciones: primero estabilizar la
+estructura, después el contrato, y solo posteriormente el comportamiento completo cuando las
+precondiciones arquitectónicas existan.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo original confirmado vigente, refinado por el cierre reciente de AR-028
-(riesgo de OCC ya resuelto), AR-003 (documento ya clasificado) y AR-048 (el punto de extensión —
-`SynchronizationEngine` — ya existe como contrato vacío). La precondición de la auditoría
-("no construir sync sin persistencia decidida") sigue sin cumplirse. Pendiente: **Fase 2
-(Verificación del framing / Hipótesis)** — decidir qué le corresponde hacer a AR-049 dado que su punto
-de extensión ya fue construido por AR-048 pero su precondición sigue sin resolverse. Estado: ⬜ → 🟦
-En análisis. Decisión: se mantiene 💭 Pendiente de análisis.
+**Fase 1 y Fase 2A cerradas.** Hallazgo original confirmado vigente, refinado por el cierre reciente
+de AR-028 (riesgo de OCC ya resuelto), AR-003 (documento ya clasificado) y AR-048 (el punto de
+extensión ya existe como contrato vacío). H1 sobrevive: AR-049 debe estabilizar exclusivamente el
+contrato de reconciliación del `SynchronizationEngine`, sin implementar sincronización efectiva
+mientras la persistencia canónica siga siendo insuficiente. H2/H3/H4 descartadas. Pendiente: **Fase
+2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de análisis
+(pendiente de que el usuario congele D-049.1 en Fase 2B).
