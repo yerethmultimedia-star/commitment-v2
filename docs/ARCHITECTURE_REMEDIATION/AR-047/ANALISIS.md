@@ -107,10 +107,68 @@ materializado** — un patrón distinto a los 14 casos previos.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**Matiz que gobierna el framing de esta fase, distinto a AR-004/AR-030:** en esas dos ARs el riesgo ya
+estaba materializado en el sistema. En AR-047, según la evidencia de Fase 1, el riesgo **todavía no
+existe operacionalmente** — no hay `CoachModule` en backend, Coach no puede ejecutar comandos, no existe
+acceso al `CommandBus`, y AR-050 aún no ha comenzado. La auditoría identifica una **propiedad
+arquitectónica futura**, no una vulnerabilidad presente.
+
+**H1 (principal):** _"La arquitectura debe garantizar que cualquier capacidad de IA conserve una
+separación estructural entre propuesta y ejecución, de forma que la IA no pueda producir efectos sobre
+el dominio sin mediación explícita del flujo de aplicación autorizado, independientemente de cuándo se
+implemente dicha capacidad."_ Respaldada por la evidencia: hoy ya se cumple de facto; la auditoría
+identifica una propiedad que debe seguir cumpliéndose; el riesgo aparece cuando AR-050 introduzca IA con
+capacidad operativa.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — debe implementarse inmediatamente un mecanismo de enforcement. Descartada: no hay
+  actualmente un consumidor que pueda violar la propiedad; construir infraestructura sin un punto de
+  integración concreto puede introducir complejidad innecesaria.
+- **H3** — basta con documentar el principio. Descartada: cuando AR-050 llegue, una regla puramente
+  documental será insuficiente para impedir regresiones.
+- **H4** — la separación propuesta/ejecución puede dejarse al criterio de futuras implementaciones.
+  Descartada: eso convertiría una propiedad arquitectónica en una convención — exactamente lo que la
+  auditoría intenta evitar.
+
+**H1 sobrevive.** El problema no es "la IA" — es preservar una propiedad arquitectónica antes de que
+aparezca el primer consumidor capaz de romperla.
+
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+Cuidado explícito de no convertir una decisión de arquitectura en una decisión temporal: no se decide
+"implementar ahora" ni "esperar a AR-050" — eso pertenece al diseño y a la planificación (Fase 4A). Se
+congela únicamente la propiedad.
+
+**D-047.1:** _"Toda capacidad de inteligencia artificial que genere recomendaciones o planes debe
+permanecer estructuralmente separada de la ejecución de comandos sobre el dominio, de modo que cualquier
+modificación del estado del sistema requiera atravesar los límites de aplicación autorizados,
+independientemente de la implementación concreta de la IA."_
+
+**No fija deliberadamente:** cuándo construir el enforcement, cómo implementarlo, ni si será mediante
+módulos, interfaces, políticas o validaciones — solo la propiedad arquitectónica. Mismo patrón que
+D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-030.1/D-043.1/D-054.1/D-044.1-3.
+
+**El matiz de Fase 1 (¿el enforcement debe existir antes del primer consumidor o puede introducirse
+junto con él?) no se resuelve aquí — pertenece a Fase 4A.** Ahí se compararán alternativas de diseño
+(enforcement preventivo vs. just-in-time con AR-050) con criterios de coste/simplicidad/riesgo de
+regresión, no con criterios arquitectónicos. Fase 2B mantiene la decisión al nivel de propiedad y deja
+que Fase 4A determine el momento y el mecanismo.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El hallazgo se confirma completamente vigente, sin cambios desde la auditoría —
-ni las 3 Sagas que lo evidencian ni el estado de Coach/IA se han modificado, y AR-050 (el trabajo que
-activaría el riesgo real) sigue sin empezar. Pendiente: **Fase 2A (Hipótesis)** — el usuario decide si
-continúa directamente. Estado: ⬜ → 🟦 En análisis. Decisión: 💭 Pendiente de análisis (Owner=Ambos,
-decisión de diseño).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma vigente como una propiedad
+arquitectónica futura, no una vulnerabilidad presente — ni las 3 Sagas que lo evidencian ni el estado de
+Coach/IA se han modificado, y AR-050 sigue sin empezar. D-047.1 aprobada: toda capacidad de IA que
+genere recomendaciones o planes debe permanecer estructuralmente separada de la ejecución de comandos,
+independientemente de cuándo o cómo se implemente. Momento y mecanismo de enforcement diferidos
+explícitamente a Fase 4A. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En análisis.
+Decisión: 💭 → ✅ Decisión aprobada.
