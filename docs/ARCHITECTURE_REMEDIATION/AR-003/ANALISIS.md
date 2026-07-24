@@ -154,13 +154,65 @@ documento entero, extraer secciones, crear anexos, mover contenido, o mantener r
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Decisión aprobada.**
+
+A partir de H1 (refinada), se congela una decisión que preserva el conocimiento sin comprometer
+todavía el mecanismo de preservación.
+
+**D-003.1:** _"La documentación histórica del dominio deberá clasificarse según el valor
+arquitectónico vigente del conocimiento que contiene, preservando explícitamente el contenido que
+continúe siendo evidencia arquitectónica o mantenga opciones arquitectónicas aprobadas, e
+identificando como histórico únicamente el contenido cuyo propósito haya sido reemplazado."_
+
+Congela 4 propiedades:
+
+1. **El conocimiento es la unidad de clasificación.** La arquitectura deja de operar sobre archivos
+   completos — opera sobre conocimiento arquitectónico. Un mismo documento puede contener
+   simultáneamente contenido histórico, evidencia vigente y opciones futuras, sin obligar a tratarlo
+   de forma uniforme.
+2. **La evidencia reutilizada debe preservarse.** El caso de `domain_state_machines.md`: si una
+   sección ya fue usada como evidencia en AR-047, deja de ser únicamente documentación histórica. La
+   decisión no obliga a conservar el documento entero, pero sí a preservar esa evidencia mediante el
+   mecanismo que después se elija.
+3. **Las opciones abiertas también forman parte del conocimiento vigente.** El caso de ADR-021: no es
+   evidencia histórica reutilizada, es una opción arquitectónica explícitamente reservada. Mientras esa
+   reserva siga vigente, el conocimiento que la soporta no puede clasificarse automáticamente como
+   obsoleto.
+4. **La clasificación es independiente de dependencias documentales incorrectas.** La dependencia
+   declarada con AR-001 ya fue refutada por evidencia (Fase 1) — D-003.1 no se apoya en relaciones
+   heredadas que no puedan demostrarse; depende del contenido, no de referencias heredadas.
+
+**Deja deliberadamente abierto (pertenece a Fase 4A):** archivar archivos completos, dividir
+documentos, extraer capítulos, crear anexos, mantener copias, convertir contenido en ADR, reorganizar
+carpetas.
+
+**Consistencia con el programa, sin ser la misma regla en cada caso:** AR-023 (preservar opciones
+arquitectónicas), AR-024 (la unidad correcta es la decisión, no la ADR), AR-047 (preservar propiedades
+estructurales existentes), AR-003 (preservar conocimiento arquitectónico, no documentos) — todas
+desplazan el foco del artefacto físico al elemento arquitectónico que realmente importa.
+
+**Criterio de validación para Fase 5** (registrado ahora, para responder cuando llegue):
+
+1. ¿Cada fragmento de conocimiento fue clasificado según su valor arquitectónico y no según el archivo
+   que lo contiene?
+2. ¿Toda evidencia reutilizada por remediaciones posteriores quedó preservada?
+3. ¿Las opciones arquitectónicas todavía abiertas permanecen identificadas como tales?
+4. ¿El contenido puramente histórico quedó claramente diferenciado del vigente?
+5. ¿La reorganización documental puede modificarse en el futuro sin alterar D-003.1?
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** El hallazgo se confirma vigente para los 7 documentos, sin ningún cambio
-desde la auditoría. La dependencia declarada con AR-001 no tiene respaldo real y se resuelve
-directamente en Fase 1 (la reserva normativa de ADR-021, no una decisión pendiente de AR-001). H1
-sobrevive, refinada: la unidad de decisión es el conocimiento arquitectónico que cada documento
-contiene, no el documento como bloque uniforme — mismo patrón que AR-024 estableció para las
-decisiones arquitectónicas frente a las ADRs que las formalizan. Pendiente: **Fase 2B (Decisión)**.
-Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de análisis (pendiente de que el
-usuario congele D-003.1 en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma vigente para los 7 documentos, sin
+ningún cambio desde la auditoría. La dependencia declarada con AR-001 no tiene respaldo real y se
+resuelve directamente en Fase 1. H1 sobrevive, refinada: la unidad de decisión es el conocimiento
+arquitectónico que cada documento contiene, no el documento como bloque uniforme. **D-003.1 aprobada:**
+la documentación histórica se clasifica según el valor arquitectónico vigente de su contenido,
+preservando evidencia reutilizada y opciones arquitectónicas abiertas, identificando como histórico
+solo lo que fue reemplazado — 4 propiedades congeladas, mecanismo de preservación diferido
+íntegramente a Fase 4A. Mismo patrón que D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-030.1/D-043.1/
+D-054.1/D-044.1-3/D-047.1/D-050.1. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En
+análisis. Decisión: 💭 → ✅ Decisión aprobada.
