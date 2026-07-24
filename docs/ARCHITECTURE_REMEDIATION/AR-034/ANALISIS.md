@@ -181,11 +181,61 @@ ejecuta la AR.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+D-034.1 ya congeló correctamente las 4 propiedades; Fase 4A no vuelve a discutir la política — se
+limita a comparar qué mecanismo técnico la implementa mejor.
+
+**Alternativa A — Error + excepciones temporales (elegida).** `no-restricted-imports` con severidad
+`error`; exclusiones explícitas únicamente para los archivos históricos afectados; todo archivo nuevo
+queda sujeto inmediatamente a la regla. Ventajas: cumple íntegramente D-034.1; impide nueva deuda
+desde el primer día; la deuda histórica queda visible y acotada; cada eliminación de una excepción
+representa progreso medible; sigue el precedente de AR-054. Desventaja reconocida: requiere mantener
+una lista temporal de excepciones.
+
+**Alternativa B — Warn global (descartada).** Misma regla, severidad `warn`. Descartada: no impide
+nueva deuda, depende de disciplina humana, debilita la 2ª propiedad congelada (prohibición de nuevas
+importaciones).
+
+**Alternativa C — Error global inmediato (descartada).** `error` sin excepciones. Descartada:
+bloquea inmediatamente 82 archivos, convierte una AR de prevención en una migración masiva, cambia
+artificialmente el alcance.
+
+**Alternativa D — Baseline automática (descartada por ahora).** Generar una baseline/snapshot de las
+violaciones actuales, fallar solo sobre nuevas. Descartada mientras el volumen siga siendo manejable:
+introduce infraestructura adicional, añade complejidad que la evidencia no exige, es menos
+transparente que una lista explícita de excepciones.
+
+**Comparación:**
+
+| Criterio                | A    | B       | C    | D       |
+| ----------------------- | ---- | ------- | ---- | ------- |
+| Evita nueva deuda       | ✅   | ❌      | ✅   | ✅      |
+| No rompe el repositorio | ✅   | ✅      | ❌   | ✅      |
+| Compatible con D-034.1  | ✅   | Parcial | ✅   | ✅      |
+| Complejidad             | Baja | Baja    | Baja | Media   |
+| Progreso medible        | ✅   | ❌      | N/A  | Parcial |
+
+**Alternativa elegida: A** — no por ser la más "estricta", sino por mantener equilibradas las 4
+propiedades de D-034.1 (único punto de entrada; prohibición inmediata de nueva deuda; compatibilidad
+con las 82 importaciones históricas; transición explícita y temporal). Deja abierta una evolución
+natural: conforme se migren archivos a `@commitment/design-system`, se eliminan excepciones hasta que
+la configuración pueda reducirse a una regla `error` sin excepciones — esa evolución no requiere
+modificar D-034.1, solo simplifica su implementación técnica.
+
+**Explícitamente fuera de alcance de Fase 4A** (mecanismos de implementación, no de esta fase): la
+lista exacta de los 82 archivos excluidos, el formato de la exclusión (`overrides`/`ignorePatterns`/
+comentario por archivo), el proceso de eliminación de excepciones, plazos de migración.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** D-034.1 aprobada: `@commitment/design-system` es el único
-punto de entrada autorizado para Tamagui; nuevas importaciones directas quedan prohibidas; las 82
-históricas se permiten solo bajo un mecanismo de transición explícito y temporal. Pendiente: **Fase
-4A (Diseño técnico)** — comparar alternativas concretas de mecanismo (severidad, exclusiones,
-overrides, baseline) sin reabrir ninguna de las 4 propiedades congeladas. Estado: se mantiene 🟦 En
-análisis. Decisión: N/A → ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-034.1 aprobada; diseño técnico elegido: regla
+`no-restricted-imports` en severidad `error` con exclusiones explícitas y temporales para los 82
+archivos históricos (Alternativa A), todo archivo nuevo sujeto a la regla desde el primer día.
+Pendiente: **Fase 4B (Implementación)** — construir la regla de lint con las exclusiones concretas.
+Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión
+aprobada.
