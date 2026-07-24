@@ -271,12 +271,106 @@ ninguna opción arquitectónica vigente.
 
 ---
 
+---
+
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Restricción explícita de esta fase: **no reorganizar documentos, materializar la clasificación.** El
+éxito no se mide por cuántos archivos se mueven, sino por si el conocimiento queda preservado y
+trazable.
+
+### Orden de implementación seguido
+
+1. **Clasificación explícita** — cada uno de los 7 documentos recibió exactamente una clasificación
+   (o, en un caso, una clasificación mixta explícita a nivel de sección), nunca implícita ni inferida
+   por la ubicación del archivo.
+2. **Materialización documental** — el mecanismo elegido para todos los casos fue el más conservador
+   disponible: banners in situ (no destructivos, el contenido original no se reescribe) más un
+   registro central. Ningún archivo se movió, dividió ni se archivó en una carpeta distinta — no había
+   evidencia que exigiera ese paso todavía (mismo criterio H-GOV-01 ya aplicado en el resto del
+   programa).
+3. **Preservación de trazabilidad** — verificada explícitamente para los dos casos más delicados (ver
+   más abajo).
+
+### Implementado
+
+- **Nuevo `docs/02-domain/CLASSIFICATION_STATUS.md`** — el registro central de clasificación. Es la
+  fuente de verdad: vive en la arquitectura, no en la estructura de carpetas. Cubre los 7 documentos,
+  con clasificación, justificación y trazabilidad para cada uno.
+- **7 banners in situ**, uno por documento (`CONCEPTS.md`, `bounded_contexts.md`,
+  `domain_state_machines.md`, `postgresql_physical_model.md`, `event_store_model.md`,
+  `read_models.md`, `offline_sync_engine.md`) — cada uno cita su clasificación y remite al registro.
+  Ninguno reescribe el contenido original (mismo principio ya usado en AR-001 con ADR-001-010: "banner
+  añadido, no reescritura").
+- **`CONCEPTS.md`: corrección puntual de `Status: Active` → `Status: Historical (Superseded)`** — el
+  único campo que activamente inducía a error; el resto del contenido no se tocó.
+- **`domain_state_machines.md`: marcador adicional directamente sobre la Sección 3.C ("AI Commands")**
+  — preservada explícitamente como Evidencia vigente, distinta del resto del documento (Histórico).
+  Localizable tanto desde el banner superior como desde el propio punto donde vive el fragmento.
+
+### Preservación de trazabilidad verificada
+
+- **La sección "AI Commands" sigue siendo localizable desde AR-047:** el registro
+  (`CLASSIFICATION_STATUS.md`) cita explícitamente `docs/ARCHITECTURE_REMEDIATION/AR-047/ANALISIS.md`
+  como el origen de su uso como evidencia; el propio fragmento lleva un marcador inline apuntando de
+  vuelta al registro — trazabilidad en ambas direcciones.
+- **La reserva respaldada por ADR-021 sigue siendo identificable como opción arquitectónica:** los 3
+  banners de `postgresql_physical_model.md`/`event_store_model.md`/`read_models.md` citan
+  explícitamente `adr_021_goal_backend_and_domain_history_infrastructure.md` y usan la fórmula
+  "Opción arquitectónica abierta, no arquitectura vigente" — nunca se presentan como implementación
+  actual.
+
+### Qué se evitó deliberadamente
+
+Ninguna "limpieza" por razones estéticas — ningún movimiento de archivo, ninguna carpeta nueva, ningún
+anexo. Todo cambio realizado responde directamente a una clasificación aprobada en Fase 2B/4A, no a un
+deseo de simplificar la estructura de `docs/02-domain/`.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+1. **¿Todo fragmento clasificado tiene exactamente un destino?** Sí — 6 documentos con un único
+   destino, 1 (`domain_state_machines.md`) con una clasificación mixta explícita a nivel de sección,
+   nunca ambigua.
+2. **¿Toda evidencia utilizada por remediaciones posteriores sigue siendo accesible?** Sí — la sección
+   "AI Commands" permanece en su ubicación original, con trazabilidad explícita hacia AR-047 en ambas
+   direcciones (registro ↔ fragmento).
+3. **¿Toda opción arquitectónica abierta permanece claramente diferenciada del estado vigente?** Sí —
+   los 3 documentos de persistencia llevan la fórmula explícita "no arquitectura vigente" citando
+   ADR-021, sin ambigüedad posible con la arquitectura in-memory realmente desplegada.
+4. **¿Todo contenido puramente histórico queda identificado como tal?** Sí — `CONCEPTS.md` (con su
+   campo `Status` corregido), `bounded_contexts.md`, `offline_sync_engine.md`, y el grueso de
+   `domain_state_machines.md`, todos con banner explícito.
+5. **¿Una reorganización futura de carpetas podría realizarse sin volver a clasificar el
+   conocimiento?** Sí — `CLASSIFICATION_STATUS.md` es la fuente de verdad, independiente de dónde
+   vivan físicamente los archivos; mover, archivar o extraer contenido en el futuro solo requeriría
+   actualizar las rutas del registro, no repetir el análisis de Fase 1-4A.
+
+**Criterio de cierre (verificado):** ningún conocimiento arquitectónico vigente depende de permanecer
+dentro de un documento histórico concreto (la sección "AI Commands" tiene trazabilidad independiente
+de dónde viva `domain_state_machines.md`); ninguna evidencia utilizada por AR posteriores se pierde;
+ninguna opción arquitectónica abierta desaparece; la estructura documental (sin cambios físicos)
+ya refleja la clasificación del conocimiento a través del registro, en lugar de definirla.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-003.1 aprobada. **Diseño técnico congelado (Fase
-4A):** Alternativa C — preservación selectiva por conocimiento, en 3 destinos posibles (histórico /
-evidencia vigente / opción arquitectónica abierta), clasificando primero el conocimiento y decidiendo
-el mecanismo documental después. Mover archivos, extraer secciones, crear anexos, convertir en ADR o
-reorganizar carpetas quedan deliberadamente diferidos a Fase 4B. Pendiente: **Fase 4B
-(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
-mantiene ✅ Decisión aprobada.
+**AR-003 CERRADA.** Las 7 fases aplicables completas: Fase 1 confirmó los 7 documentos vigentes,
+refutó la dependencia declarada con AR-001, e identificó 3 categorías reales dentro del hallazgo;
+Fase 2A estableció que la unidad de decisión es el conocimiento arquitectónico, no el documento
+(mismo patrón que AR-024); Fase 2B congeló D-003.1 (clasificar por valor arquitectónico vigente,
+preservando evidencia reutilizada y opciones abiertas); Fase 4A congeló el diseño (preservación
+selectiva por conocimiento, 3 destinos, clasificar antes que elegir mecanismo); Fase 4B materializó la
+clasificación mediante un registro central (`CLASSIFICATION_STATUS.md`) y banners in situ no
+destructivos, sin mover ni un solo archivo; Fase 5 validó las 5 preguntas directamente. **Decimoctava
+remediación del programa completada de principio a fin — la primera cuyo entregable principal es
+gobernanza del conocimiento, no código ni una decisión arquitectónica nueva, y la primera en demostrar
+que la arquitectura puede depender de una clasificación explícita del conocimiento documental en vez de
+la organización física de los archivos que lo contienen.** Estado: 🟦 → ✅ Cerrada. Decisión: ✅
+Decisión aprobada → ✔️ Validada.

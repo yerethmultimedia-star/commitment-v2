@@ -1,9 +1,17 @@
 # Core Domain Concepts (Ontología del Dominio)
 
 Version: 1.0.0
-Status: Active
+Status: Historical (Superseded)
 Owner: Architecture Review Board
 Last Updated: 2026-07-04
+
+---
+
+> **AR-003, D-003.1 — Clasificación: Histórico (íntegro).** El vocabulario de este documento
+> (Fricción, Momentum, Recuperación, "Social Context") fue reemplazado por
+> `docs/00-framework/THE_COMMITMENT_FRAMEWORK.md` y por el dominio realmente enviado (Task/Habit/Goal).
+> Corregido aquí el campo `Status` (decía "Active" de forma incorrecta) — el contenido original no se
+> reescribe. Ver `docs/02-domain/CLASSIFICATION_STATUS.md` para el registro completo de clasificación.
 
 ---
 
