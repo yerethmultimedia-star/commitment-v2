@@ -369,15 +369,68 @@ le correspondan); `pnpm --filter @commitment/domain build` limpio; `pnpm --filte
 
 ---
 
+### Incremento 2 — Contrato de plataforma
+
+**Estado: ✅ Cerrado.**
+
+Regla estricta de este incremento: **la plataforma debe quedar completamente utilizable sin que exista
+todavía un proveedor LLM.** El objetivo no es "hacer IA" — es construir la capacidad arquitectónica
+independiente que después podrá usar cualquier proveedor.
+
+**Hallazgo central del incremento, verificado antes de escribir código:** AR-047 ya construyó
+exactamente el contrato que D-050.1 exige de la plataforma — `AIProposalSource<TContext>` (contexto
+genérico como entrada, `AIProposal[]` como única salida posible, cero conocimiento de proveedor).
+Escribir una segunda interfaz paralela habría sido una duplicación innecesaria, exactamente el tipo de
+infraestructura anticipada que Fase 4A ya descartó (Alternativa B) para la AR completa. Se resuelve por
+**reconocimiento explícito, no por reinvención** — el mismo patrón que AR-024/AR-030/AR-047 ya
+establecieron y que quedó registrado como hipótesis en observación tras cerrar AR-047.
+
+**Implementado — un único archivo nuevo, `packages/domain/src/ai-proposal/ai-platform.ts`:**
+
+```ts
+export type AIPlatform<TContext = unknown> = AIProposalSource<TContext>;
+```
+
+Un alias explícito, no una interfaz paralela: le da a la plataforma un nombre que coincide con el
+vocabulario de D-050.1 ("la plataforma de IA"), searchable y documentado, sin duplicar el contrato que
+AR-047 ya congeló. `TContext` permanece genérico por la misma razón que en `AIProposalSource` — este
+incremento fija la frontera de la plataforma, no lo que contiene su contexto (eso es el Incremento 3).
+
+**Deliberadamente fuera de alcance:** SDKs, clientes HTTP, prompts, modelos, API keys, streaming,
+Context Builder concreto, Memory, Coach — nada de eso pertenece todavía a este incremento.
+
+**Validación del incremento:**
+
+1. **¿Existe una plataforma de IA identificable como capacidad independiente?** Sí — `AIPlatform`, en
+   `packages/domain/src/ai-proposal/`, sin pertenecer a ningún consumidor.
+2. **¿Su contrato devuelve únicamente `AIProposal`?** Sí — heredado sin cambios de `AIProposalSource`.
+3. **¿La plataforma no conoce ningún proveedor concreto?** Confirmado por grep: cero menciones de
+   `openai`/`anthropic`/`gemini`/`ollama`/`langchain`/`prompt`/`embedding`/`sdk`/`api.?key` en todo
+   `ai-proposal/`.
+4. **¿Los futuros adaptadores podrán implementarse sin modificar el contrato?** Sí, verificado con un
+   test: una clase de ejemplo (`FutureAdapter`) implementa `AIPlatform<FutureConcreteContext>` con un
+   contexto concreto inventado para la prueba, sin tocar `ai-platform.ts` ni `ai-proposal-source.ts`.
+5. **¿El siguiente incremento (Contexto) podrá comenzar reutilizando íntegramente ese contrato?** Sí —
+   el mismo test demuestra que un contexto concreto nuevo se conecta vía el parámetro genérico
+   `TContext`, sin ningún cambio en la plataforma.
+
+**Evidencia de ejecución:** `pnpm --filter @commitment/domain test` → 285/285 passing (2 nuevos:
+`AIPlatform` es estructuralmente idéntico a `AIProposalSource` — asignación cruzada verificada en tiempo
+de compilación —, y un adaptador futuro con contexto concreto satisface el contrato sin modificarlo);
+`pnpm --filter @commitment/domain build` limpio; `pnpm --filter backend test`/`build` → 143/143, sin
+cambios (este incremento tampoco toca backend, por diseño).
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incremento 1 de 6 cerrado.** D-050.1 aprobada;
-diseño técnico congelado (Alternativa C, plataforma incremental). **Incremento 1 completo:** el modelo
-conceptual `Recommendation ↔ AIProposal` queda estabilizado mediante una transformación explícita
-(`AIProposalToRecommendationTransformer`, `packages/domain/src/ai-proposal-transformation/`) — ningún
-tipo conoce al otro, verificado por grep (no estructuralmente forzado, a diferencia de D-047.1, por
-compartir paquete). 283/283 tests de dominio, 143/143 backend sin cambios. Los 5 incrementos restantes
-(contrato de plataforma, contexto, primer consumidor/Coach, proveedor LLM, Memory) deben limitarse a
-materializar capacidades técnicas sobre este modelo ya decidido, no a redefinirlo. Estado: se mantiene
-🟦 En análisis (no salta a 🟨 hasta cerrar Fase 4B en su totalidad). Decisión: se mantiene ✅ Decisión
-aprobada. Pendiente: **Fase 4B — Incremento 2 (contrato de plataforma)**.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incrementos 1 y 2 de 6 cerrados.** D-050.1
+aprobada; diseño técnico congelado (Alternativa C, plataforma incremental). **Incremento 1:** modelo
+conceptual `Recommendation ↔ AIProposal` estabilizado mediante transformación explícita. **Incremento 2:**
+el contrato principal de la plataforma (`AIPlatform<TContext>`) resultó ser, verificado explícitamente,
+el mismo contrato que AR-047 ya construyó (`AIProposalSource`) — un alias con nombre propio, no una
+interfaz nueva; cero código de proveedor, cero infraestructura anticipada. 285/285 tests de dominio,
+143/143 backend sin cambios. Quedan 4 incrementos (contexto, primer consumidor/Coach, proveedor LLM,
+Memory), cada uno debe limitarse a materializar capacidades técnicas sobre el modelo y el contrato ya
+decididos, sin reabrirlos. Estado: se mantiene 🟨 En implementación. Decisión: se mantiene ✅ Decisión
+aprobada. Pendiente: **Fase 4B — Incremento 3 (contexto)**.
