@@ -214,5 +214,69 @@ la documentación histórica se clasifica según el valor arquitectónico vigent
 preservando evidencia reutilizada y opciones arquitectónicas abiertas, identificando como histórico
 solo lo que fue reemplazado — 4 propiedades congeladas, mecanismo de preservación diferido
 íntegramente a Fase 4A. Mismo patrón que D-002.1/D-009.1/D-036.1/D-004.1/D-024.1/D-030.1/D-043.1/
-D-054.1/D-044.1-3/D-047.1/D-050.1. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En
-análisis. Decisión: 💭 → ✅ Decisión aprobada.
+D-054.1/D-044.1-3/D-047.1/D-050.1.
+
+---
+
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**Primer movimiento: olvidar que existen "7 documentos".** Esa ya no es la unidad de diseño — la
+unidad es el fragmento de conocimiento clasificado en Fase 2B.
+
+### Alternativas evaluadas
+
+- **A — Archivar documentos completos.** Descartada: la propia evidencia ya la refutó —
+  `domain_state_machines.md` contiene una sección ("AI Commands") reutilizada por AR-047, y algunos
+  documentos contienen conocimiento que sigue respaldando opciones abiertas (ADR-021). Archivar el
+  archivo completo destruiría la trazabilidad entre ese conocimiento y las AR posteriores.
+- **B — Mantener todos los documentos activos.** Descartada: mezclaría documentación normativa con
+  histórica y reintroduciría ambigüedad sobre cuál es la fuente vigente.
+- **C — Preservación selectiva por conocimiento (elegida).** No porque implique necesariamente extraer
+  secciones, sino porque es la única alternativa alineada con D-003.1. Secuencia conceptual, en este
+  orden: (1) clasificar cada fragmento de conocimiento; (2) determinar su destino; (3) solo entonces
+  decidir el mecanismo documental.
+
+### Destinos posibles (únicamente 3 categorías)
+
+1. **Histórico** — conocimiento sustituido; puede archivarse íntegramente.
+2. **Evidencia vigente** — conocimiento citado por AR posteriores; debe seguir siendo accesible, no
+   necesariamente en el documento original.
+3. **Opción arquitectónica abierta** — conocimiento cuya función es preservar alternativas futuras;
+   debe permanecer explícitamente identificado, no como implementación vigente sino como reserva
+   arquitectónica.
+
+### Qué queda deliberadamente sin decidir
+
+Mover archivos, dividir documentos, crear anexos, convertir contenido en ADR, reorganizar carpetas —
+todas son implementaciones posibles de la misma decisión, pertenecen a Fase 4B.
+
+### Criterio de validación para Fase 5
+
+1. ¿Cada fragmento clasificado tiene un destino claramente definido?
+2. ¿El destino depende del valor arquitectónico y no del documento físico?
+3. ¿La evidencia reutilizada permanece trazable hacia las AR que la utilizan?
+4. ¿Las opciones arquitectónicas abiertas siguen siendo identificables como tales?
+5. ¿Podría cambiarse el mecanismo documental (anexos, extracción, archivo) sin modificar D-003.1?
+
+### Observación registrada (no promovida)
+
+El proceso de archivado documental deja de ser una operación física (mover archivos de una carpeta a
+otra) y pasa a ser una decisión sobre qué conocimiento debe seguir formando parte de la arquitectura
+activa. El mecanismo (archivar, extraer, anotar, reorganizar) es un detalle de implementación
+documental; el activo arquitectónico real es la clasificación del conocimiento. Manteniendo esa
+separación en Fase 4B, la documentación debería poder reorganizarse sin perder ninguna evidencia ni
+ninguna opción arquitectónica vigente.
+
+---
+
+## Estado
+
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-003.1 aprobada. **Diseño técnico congelado (Fase
+4A):** Alternativa C — preservación selectiva por conocimiento, en 3 destinos posibles (histórico /
+evidencia vigente / opción arquitectónica abierta), clasificando primero el conocimiento y decidiendo
+el mecanismo documental después. Mover archivos, extraer secciones, crear anexos, convertir en ADR o
+reorganizar carpetas quedan deliberadamente diferidos a Fase 4B. Pendiente: **Fase 4B
+(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
+mantiene ✅ Decisión aprobada.
