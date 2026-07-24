@@ -260,11 +260,75 @@ preparó la plataforma de IA antes de incorporar capacidades completas.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+Restricción fundamental que gobierna toda la fase: ninguna alternativa puede mezclar las tres
+responsabilidades ya congeladas por D-048.1. La comparación se centra únicamente en **cómo
+organizarlas**, no en volver a decidir si deben existir.
+
+**Alternativa A — Tres capacidades independientes (elegida).** La arquitectura define tres
+componentes claramente separados: **Storage** (responsable únicamente del estado local),
+**Operation Queue** (responsable únicamente de registrar operaciones pendientes) y
+**Synchronization Engine** (responsable únicamente de reconciliar la cola con el backend). Cada
+componente tiene una interfaz propia y dependencias unidireccionales. Ventajas: coincide exactamente
+con las propiedades congeladas en D-048.1; permite evolucionar cada componente independientemente;
+facilita incorporar persistencia canónica futura sin modificar la estructura; hace posible sustituir
+cualquiera de las implementaciones sin afectar las otras dos. Limitación reconocida: introduce más
+componentes desde el principio, aunque cada uno tenga una responsabilidad muy reducida.
+
+**Alternativa B — Storage integrado con la cola (descartada).** El almacenamiento local también
+gestiona las operaciones pendientes. Descartada: aunque reduce el número de componentes, vuelve a
+mezclar dos responsabilidades que D-048.1 acaba de separar explícitamente; la futura sincronización
+quedaría acoplada al almacenamiento.
+
+**Alternativa C — Synchronization Engine como orquestador propietario (descartada).** El motor de
+sincronización controla directamente almacenamiento, cola y estado. Descartada: invierte las
+dependencias — la sincronización pasaría a ser el centro de la arquitectura, cuando precisamente debe
+ser la última capacidad en incorporarse.
+
+**Alternativa elegida: A.** Dependencia conceptual:
+
+```
+Application
+     │
+     ▼
+Storage        Queue
+     │            │
+     └─────► Synchronization
+```
+
+Con una precisión importante: Storage no conoce Synchronization; Queue no conoce Storage
+internamente; Synchronization consume ambos; ningún componente depende de la persistencia canónica
+futura. Esto preserva completamente D-048.1.
+
+**Explícitamente fuera de alcance de Fase 4A** (decisiones de implementación, no de esta fase):
+SQLite vs. MMKV, AsyncStorage, Realm, WatermelonDB, formato de la cola, OCC, CRDT, merge policies,
+retries, background sync, push/pull, WebSocket, polling.
+
+**Criterio de validación fijado antes de Fase 4B** (5 preguntas): cada responsabilidad pertenece
+exactamente a un componente; Synchronization depende de Storage y Queue, pero no al revés; Storage
+puede sustituirse sin modificar Queue; Queue puede sustituirse sin modificar Storage; la futura
+persistencia canónica podrá incorporarse únicamente modificando Synchronization y/o sus adaptadores,
+sin rediseñar los otros componentes.
+
+**Observación registrada, no promovida:** AR-048 repite la misma estructura de diseño que AR-050 en
+otro dominio — en AR-050 la plataforma de IA quedó organizada como contrato/contexto/proveedor; aquí
+la estructura equivalente es almacenamiento/operaciones pendientes/sincronización. En ambos casos, el
+componente que interactúa con el exterior (LLM en AR-050, backend en AR-048) queda deliberadamente
+aislado del resto de la arquitectura — esa simetría reduce el acoplamiento y facilita que futuras
+capacidades (persistencia canónica, resolución de conflictos, sincronización completa) se incorporen
+sin modificar las responsabilidades ya congeladas por D-048.1.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** D-048.1 aprobada: separación explícita de responsabilidades
-entre almacenamiento local, cola de operaciones pendientes y sincronización, de forma que la
-sincronización pueda incorporarse sobre una persistencia canónica futura sin rediseñar la
-arquitectura Offline. Pendiente: **Fase 4A (Diseño técnico)** — comparar alternativas concretas de
-organización de estas 3 responsabilidades sin reabrir ninguna de las 4 propiedades congeladas.
-Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-048.1 aprobada; diseño técnico elegido: tres
+capacidades independientes con dependencias unidireccionales (Storage, Operation Queue,
+Synchronization Engine — Alternativa A), mecanismos de implementación concretos diferidos a Fase 4B.
+Pendiente: **Fase 4B (Implementación)** — construir el esqueleto mínimo de las 3 interfaces/
+componentes en `packages/domain` o `apps/mobile` según corresponda, sin implementar sincronización
+real ni elegir tecnología de almacenamiento todavía. Estado: se mantiene 🟦 En análisis (no salta a
+🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
