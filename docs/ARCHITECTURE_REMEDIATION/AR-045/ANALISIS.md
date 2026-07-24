@@ -87,12 +87,61 @@ explícita en Fase 2A/4A, no como un hallazgo nuevo.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+**AR-045 vuelve a ser un caso donde conviene separar cuidadosamente los hallazgos originales.** La
+evidencia de Fase 1 indica que uno de los dos componentes ya no existe, mientras que el otro
+permanece intacto.
+
+**H1 (principal):** _"AR-045 ya no trata sobre una contradicción arquitectónica de gobernanza; el
+único problema arquitectónico vigente es la ausencia de una capacidad mínima de despliegue
+reproducible para la plataforma."_ Explica toda la evidencia disponible: la contradicción
+ADR-004↔ADR-011 fue absorbida y resuelta por AR-001 mediante ADR-024; el componente de despliegue
+permanece exactamente igual que en la auditoría (cero `Dockerfile`, `eas.json`, scripts de despliegue,
+pipeline de CI para despliegue); el riesgo de escalado horizontal no invalida el hallazgo — solo
+introduce una restricción para el diseño posterior.
+
+**Hipótesis alternativas descartadas:**
+
+- **H2** — la AR sigue teniendo dos objetivos independientes. Descartada: la evidencia demuestra que
+  uno de ellos desapareció; mantenerlo produciría una remediación artificialmente más grande de lo
+  necesario.
+- **H3** — la AR ya no es necesaria porque la contradicción principal fue resuelta. Descartada: el
+  segundo hallazgo sigue existiendo íntegramente; la auditoría identificó dos problemas, uno fue
+  absorbido, el otro no.
+- **H4** — el problema real es la falta de escalado horizontal. Descartada como hipótesis principal:
+  lo encontrado es una restricción arquitectónica, no el hallazgo auditado — la ausencia de despliegue
+  reproducible existe incluso con una única instancia.
+
+**H1 sobrevive**, formulada con mayor precisión: _"El alcance de AR-045 debe reducirse al
+establecimiento de una capacidad de despliegue reproducible acorde con el estado actual de la
+plataforma, eliminando del alcance cualquier contradicción de gobernanza ya resuelta por
+remediaciones anteriores."_
+
+**Tres conceptos distintos, registrados explícitamente para no confundirlos:**
+
+1. **Hallazgo resuelto** — gobernanza ADR-004↔ADR-011, cerrado por AR-001/ADR-024.
+2. **Hallazgo vigente** — no existe mecanismo de despliegue reproducible.
+3. **Restricción arquitectónica** — mientras el estado permanezca en memoria, cualquier despliegue
+   debe asumir una única instancia o un mecanismo equivalente de afinidad, hasta que otra AR modifique
+   esa propiedad. Esta categoría no amplía el alcance de AR-045, pero condicionará las alternativas de
+   Fase 4A.
+
+**Expectativa registrada para Fase 2B, sin resolverla aquí:** si H1 se mantiene, D-045.1 debería
+congelar propiedades como: la plataforma debe disponer de un proceso de despliegue reproducible; ese
+proceso debe reflejar la arquitectura vigente, no la originalmente auditada; el mecanismo debe respetar
+las limitaciones arquitectónicas actuales (el estado en memoria) sin intentar resolverlas dentro de
+esta AR — sin convertir AR-045 en una remediación de infraestructura distribuida.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** El componente de gobernanza (ADR-004↔ADR-011) del hallazgo original está
-completamente resuelto por AR-001 — verificado, no asumido. El componente de infraestructura (cero
-artefactos de despliegue) se confirma vigente sin ningún cambio. La dependencia declarada con AR-043
-no tiene respaldo explícito en el hallazgo original, aunque no afecta el resultado (ambas dependencias
-están cerradas). El riesgo de escalado horizontal sobre almacenamiento en memoria sigue vigente y debe
-condicionar el diseño. Pendiente: **Fase 2A (Hipótesis)**. Estado: ⬜ → 🟦 En análisis. Decisión: 💭
-Pendiente de análisis (Owner=Ambos).
+**Fase 1 y Fase 2A cerradas.** El componente de gobernanza (ADR-004↔ADR-011) del hallazgo original
+está completamente resuelto por AR-001. H1 sobrevive: el alcance se reduce a establecer una capacidad
+de despliegue reproducible acorde con la arquitectura vigente, sin reabrir la contradicción de
+gobernanza ya cerrada. La restricción del estado en memoria queda registrada para Fase 4A, sin ampliar
+el alcance. Pendiente: **Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se
+mantiene 💭 Pendiente de análisis (pendiente de que el usuario congele D-045.1 en Fase 2B).
