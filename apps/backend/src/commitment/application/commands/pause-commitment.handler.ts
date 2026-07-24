@@ -1,6 +1,5 @@
 import {
   CommitmentId,
-  CommitmentState,
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
   CommitmentCannotBePausedError,
@@ -49,17 +48,9 @@ export class PauseCommitmentCommandHandlerCore {
       throw new CommitmentNotFoundError(command.commitmentId);
     }
 
-    // 2. Idempotent – already Paused: return current version/state
-    if (commitment.state === CommitmentState.Paused) {
-      const currentVersion = await this.commitmentRepository.save(commitment);
-      return new PauseCommitmentResult(
-        commitment.id.value,
-        'Paused',
-        currentVersion,
-      );
-    }
-
-    // 3. Invoke domain behavior – let the Aggregate decide validity
+    // 2. Invoke domain behavior – let the Aggregate decide validity.
+    // Idempotency (already Paused) is the aggregate's own responsibility
+    // (Rule #77) — no handler-level pre-check (TD-003).
     try {
       commitment.pause();
     } catch (error: unknown) {
@@ -81,15 +72,15 @@ export class PauseCommitmentCommandHandlerCore {
       throw error;
     }
 
-    // 4. Persist – version is returned by repository
+    // 3. Persist – version is returned by repository
     const version = await this.commitmentRepository.save(commitment);
 
-    // 5. Dispatch events and clear buffer
+    // 4. Dispatch events and clear buffer
     const events = commitment.getUncommittedEvents();
     await this.eventDispatcher.dispatch(events);
     commitment.clearUncommittedEvents();
 
-    // 6. Return DTO built from aggregate (source of truth)
+    // 5. Return DTO built from aggregate (source of truth)
     return new PauseCommitmentResult(commitment.id.value, 'Paused', version);
   }
 }

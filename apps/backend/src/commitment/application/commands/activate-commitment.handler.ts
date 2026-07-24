@@ -1,6 +1,5 @@
 import {
   CommitmentId,
-  CommitmentState,
   CommitmentAlreadyCompletedError,
   CommitmentAlreadyCancelledError,
   InvalidCommitmentStateTransitionError,
@@ -52,19 +51,11 @@ export class ActivateCommitmentCommandHandlerCore {
       throw new CommitmentNotFoundError(command.commitmentId);
     }
 
-    // 2. Idempotency — already Active: return current state (Rule #77, Rule #87)
-    if (commitment.state === CommitmentState.Active) {
-      const currentVersion = await this.commitmentRepository.save(commitment);
-      return new ActivateCommitmentResult(
-        commitment.id.value,
-        'Active',
-        currentVersion,
-      );
-    }
-
-    // 2b. Resolve the one cross-aggregate fact the aggregate can't know on
+    // 2. Resolve the one cross-aggregate fact the aggregate can't know on
     // its own (ADR-022 §3.1, Command Preconditions) — the aggregate still
     // decides and throws (Rule #86), it just receives this as an input.
+    // Idempotency (already Active) is the aggregate's own responsibility
+    // (Rule #77) — no handler-level pre-check (TD-003).
     const hasExecutionPlan =
       await this.activationPreconditions.hasExecutionPlan(id);
 

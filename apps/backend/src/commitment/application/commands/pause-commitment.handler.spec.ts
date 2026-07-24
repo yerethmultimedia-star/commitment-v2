@@ -98,10 +98,13 @@ describe('PauseCommitmentCommandHandlerCore', () => {
 
     // No state change, no new events
     expect(commitment.getUncommittedEvents()).toHaveLength(0);
-    // Interactions: findById called, save called (as pattern), but dispatch not called
+    // Interactions: findById and save always called (TD-003: no handler-level
+    // idempotency branch); dispatch is still invoked, but with zero events —
+    // that's the actual observable behavior, not whether dispatch() itself
+    // was called.
     expect(findSpy).toHaveBeenCalledTimes(1);
     expect(saveSpy).toHaveBeenCalledTimes(1);
-    expect(dispatcher.dispatch).not.toHaveBeenCalled();
+    expect(dispatcher.dispatch).toHaveBeenCalledWith([]);
 
     // Result reflects current version and state
     expect(result.version).toBe(2);

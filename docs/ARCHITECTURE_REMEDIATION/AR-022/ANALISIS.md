@@ -97,10 +97,94 @@ usado en AR-008/AR-044/otras ARs con Owner=Claude y hallazgo ya completamente di
 
 ---
 
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Remediación de implementación, no de arquitectura — el dominio ya expresaba correctamente la regla
+(Regla #77); los handlers simplemente la duplicaban. Objetivo estricto: eliminar la redundancia,
+preservando exactamente el comportamiento observable.
+
+**Implementado — 2 archivos de producción modificados, ambos en `apps/backend/src/commitment/application/commands/`:**
+
+- **`activate-commitment.handler.ts`** — eliminado el bloque `if (commitment.state ===
+CommitmentState.Active) { ...return early... }` (incluida su llamada extra a
+  `commitmentRepository.save()`); eliminado el import ahora no usado de `CommitmentState`. La
+  secuencia queda: cargar aggregate → resolver `hasExecutionPlan` → `commitment.activate(...)` →
+  `save()` → `dispatch(events)`. Toda la lógica de idempotencia permanece exclusivamente dentro de
+  `Commitment.activate()`.
+- **`pause-commitment.handler.ts`** — mismo cambio exacto: eliminado el pre-check
+  `commitment.state === CommitmentState.Paused` (con su `save()` extra) e import no usado de
+  `CommitmentState`. Comentarios renumerados (1-5) para reflejar la secuencia real.
+
+**No modificado, tal como se acordó:** `Commitment.activate()`, `Commitment.pause()`, eventos de
+dominio, repositorios, contratos, casos de uso, excepciones, persistencia.
+
+**Un archivo de test ajustado, no de producción — hallazgo real encontrado al ejecutar la suite:**
+`pause-commitment.handler.spec.ts`'s test `"idempotent when already paused"` fallaba tras el cambio:
+afirmaba `expect(dispatcher.dispatch).not.toHaveBeenCalled()` — una aserción que codificaba el
+detalle de implementación exacto de la redundancia (el camino idempotente antiguo retornaba antes de
+llegar nunca a `dispatch()`), no comportamiento verdaderamente observable. Tras el fix,
+`dispatch()` se invoca igual que en el camino normal, pero con un array vacío de eventos — el mismo
+efecto observable neto (cero eventos entregados), exactamente el "sin cambio funcional observable"
+que fija el criterio de cierre de esta AR. Ajustada la aserción a
+`expect(dispatcher.dispatch).toHaveBeenCalledWith([])`, que verifica el comportamiento real (cero
+eventos) en vez de un detalle de invocación. El equivalente test de `activate` no necesitó cambios —
+usa un dispatcher-fake que acumula eventos en un array y verifica su longitud, no si `dispatch()` fue
+invocado, por lo que ya toleraba correctamente el nuevo camino.
+
+**Validación real ejecutada:**
+
+- `pnpm --filter backend test` → **34 suites, 148/148 tests pasando**, cero regresión.
+- `pnpm --filter backend exec tsc --noEmit` → mismos 2 errores preexistentes de siempre (verificado
+  con `git stash`, idénticos con y sin este cambio) — cero error nuevo.
+- `pnpm --filter backend exec eslint` sobre los 4 archivos tocados → limpio, cero problemas.
+- `git diff --stat` → exactamente 3 archivos (`activate-commitment.handler.ts`,
+  `pause-commitment.handler.ts`, `pause-commitment.handler.spec.ts`), ningún otro archivo afectado.
+
+**Verificaciones objetivas pedidas explícitamente para el cierre:**
+
+1. **Único punto de decisión:** `grep "commitment.state ==="` sobre
+   `apps/backend/src/commitment/application/commands/` → cero coincidencias. Solo
+   `Commitment.activate()`/`.pause()` deciden idempotencia.
+2. **Consistencia entre bounded contexts:** repetido el análisis de Fase 1 — `Commitment` (ahora),
+   `Task` (`CompleteTaskCommandHandlerCore`) y `Habit` (sus handlers) comparten el mismo patrón: cero
+   pre-check de estado en el handler, delegación total al aggregate.
+3. **Eliminación del `save()` redundante:** confirmado por conteo — exactamente 1 llamada a
+   `commitmentRepository.save()` por handler (antes: 2, una en el pre-check y otra en el camino
+   normal).
+4. **Regresiones:** 148/148 tests, `tsc --noEmit` sin errores nuevos, `eslint` limpio.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Cerrada.**
+
+Las 5 condiciones del criterio de cierre, verificadas con evidencia real:
+
+1. **¿La idempotencia se evalúa exclusivamente dentro del Aggregate?** Sí — grep-confirmado, cero
+   pre-checks de estado en los handlers.
+2. **¿Los handlers dejan de contener lógica de negocio duplicada?** Sí — la única lógica que queda en
+   los handlers es orquestación (cargar, invocar, persistir, despachar), ninguna decisión de estado.
+3. **¿Desaparece el `save()` redundante del camino idempotente?** Sí — verificado por conteo, 1 sola
+   llamada a `save()` por handler.
+4. **¿Commitment, Task y Habit siguen un patrón homogéneo de delegación al Aggregate?** Sí —
+   confirmado en los 3 bounded contexts.
+5. **¿No existe ningún cambio funcional observable más allá de eliminar la redundancia?** Sí — 148/148
+   tests pasando (incluida la suite de idempotencia de ambos handlers), la única modificación de test
+   necesaria corrigió una aserción que verificaba un detalle de invocación interno, no comportamiento
+   observable real; el resultado externo (versión sin cambios, estado correcto, cero eventos
+   efectivos) es idéntico al de antes del fix.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Hallazgo original (TD-003) confirmado íntegramente vigente, sin ningún cambio
-desde su diagnóstico original — mismas dos ubicaciones exactas, misma duplicación, misma corrección
-ya especificada. Precedente interno ampliado (Task y Habit, no solo Task). Pendiente: **Fase 4B
-(Implementación)** — eliminar los 2 pre-checks redundantes. Estado: ⬜ → 🟦 En análisis. Decisión: se
-mantiene N/A (ejecución directa).
+**AR-022 CERRADA.** TD-003 resuelto — la idempotencia de `Commitment.activate()`/`.pause()` ahora
+vive exclusivamente en el aggregate, igual que en `Task`/`Habit`. Cero cambio funcional observable
+más allá de eliminar la redundancia y el `save()` extra en el camino idempotente. Un hallazgo real de
+implementación (aserción de test acoplada al detalle de implementación de la redundancia) corregido
+sin reabrir ninguna decisión — mismo patrón que AR-028/AR-009 con bugs reales encontrados durante la
+implementación. Estado: 🟦 → ✅ Cerrada. Decisión: se mantiene N/A (ejecución directa) → ✅ N/A
+(ejecución directa, validada).
