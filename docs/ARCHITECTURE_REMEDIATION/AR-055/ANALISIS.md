@@ -178,10 +178,49 @@ hace posible implementarlo sin ampliar artificialmente su alcance.
 
 ---
 
+## Fase 2B — Decisión
+
+**Estado: ✅ Cerrada. D-055.1 aprobada.**
+
+Igual que en AR-034, la decisión fija la política, no el mecanismo concreto de ESLint.
+
+**D-055.1:**
+
+> **Los archivos `.tsx` forman parte del alcance normal del análisis estático del frontend. La
+> capacidad de analizarlos deberá permanecer habilitada de forma permanente. La deuda histórica
+> descubierta al activar dicha capacidad podrá gestionarse mediante un mecanismo explícito y temporal
+> de transición, sin excluir nuevamente la extensión `.tsx` del proceso de análisis.**
+
+**4 propiedades congeladas:**
+
+1. **Cobertura permanente** — los archivos `.tsx` son ciudadanos de primera clase del pipeline de
+   lint; no pueden quedar fuera del análisis por una limitación de configuración.
+2. **Separación entre capacidad y deuda** — la capacidad de analizar `.tsx` es independiente de la
+   cantidad de hallazgos existentes; la aparición de deuda histórica no justifica deshabilitar el
+   análisis.
+3. **Gestión explícita de la transición** — los 93 hallazgos podrán administrarse mediante un
+   mecanismo temporal de adopción; la transición es parte de la implementación, no de la arquitectura
+   objetivo.
+4. **No regresión de cobertura** — una vez habilitado el análisis de `.tsx`, futuras modificaciones de
+   la configuración no deberán volver a dejar esa extensión fuera del alcance de ESLint. Responde
+   directamente al hallazgo que originó esta AR.
+
+**Deja deliberadamente abierto (Fase 4A):** `warn` vs. `error`, baseline, allowlist, overrides, orden
+de migración de los 93 hallazgos, estrategia concreta de reducción de deuda, configuración específica
+de ESLint.
+
+**Relación con AR-034, explícitamente desacoplada:** D-034.1 responde "¿qué debe gobernarse?"
+(imports a Tamagui); D-055.1 responde "¿sobre qué universo de archivos debe ejercerse esa
+gobernanza?" — decisiones ortogonales y compatibles. Una vez implementada D-055.1, AR-034 podrá
+reanudarse sin necesidad de modificar su propia decisión, porque la capacidad de la que dependía
+habrá quedado institucionalizada.
+
+---
+
 ## Estado
 
-**Fase 1 y Fase 2A cerradas.** Causa raíz identificada, verificada y cerrada — no requiere más
-investigación. H1 sobrevive: activar `.tsx` inmediatamente, gestionar los 93 hallazgos mediante
-transición incremental. H2/H3 quedan como alternativas a descartar formalmente en Fase 2B. Pendiente:
-**Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de
-análisis (pendiente de que el usuario congele D-055.1 en Fase 2B).
+**Fase 1, Fase 2A y Fase 2B cerradas.** D-055.1 aprobada: los archivos `.tsx` forman parte permanente
+del alcance del análisis estático del frontend; la deuda histórica (93 hallazgos) se gestiona vía
+transición explícita, sin excluir la extensión. Pendiente: **Fase 4A (Diseño técnico)** — comparar
+alternativas concretas de mecanismo (severidad, baseline, allowlist, overrides) sin reabrir ninguna de
+las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión aprobada.
