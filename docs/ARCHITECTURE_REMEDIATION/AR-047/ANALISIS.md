@@ -251,6 +251,118 @@ Regla de interacción congelada: toda capacidad de IA termina su responsabilidad
 propuesta; la transición a ejecución pertenece exclusivamente a un flujo de aplicación explícito ajeno
 al componente de IA. Tres actores separados (IA propone / Aplicación decide / Dominio ejecuta).
 Implementación esperada en Fase 4B: deliberadamente pequeña (contrato de entrada/salida, límite
-documentado, punto de integración preparado — sin consumidor todavía). Pendiente: **Fase 4B
-(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
-mantiene ✅ Decisión aprobada.
+documentado, punto de integración preparado — sin consumidor todavía).
+
+---
+
+## Fase 4B — Implementación
+
+**Estado: ✅ Cerrada.**
+
+Implementación mínima e irreversible: el límite queda materializado, sin infraestructura especulativa.
+
+### 1. El contrato arquitectónico (nuevo, `packages/domain/src/ai-proposal/`)
+
+- **`ai-proposal.ts`** — `AIProposal`: una interfaz puramente de datos (`type`, `targetId`,
+  `rationale`, `metadata`), sin ningún método. No hay nada invocable en su forma — un método
+  ejecutable no puede colarse a través de este contrato porque no existe nada que invocar.
+- **`ai-proposal-source.ts`** — `AIProposalSource<TContext = unknown>`: el único punto de
+  integración. Un solo método, `propose(context: TContext): Promise<readonly AIProposal[]>`.
+  `TContext` es deliberadamente genérico — el contrato fija la frontera (proponer, nunca ejecutar),
+  no de qué trata una propuesta concreta; eso pertenece a quien implemente el contrato, no a esta
+  capa. El tipo de retorno es el enforcement: solo puede ser `AIProposal[]`, nunca un Command, un
+  repositorio, ni nada capaz de mutar estado de dominio directamente.
+- **`index.ts`** + export añadido a `packages/domain/src/index.ts`.
+
+### 2. Por qué la prohibición es estructural y no una validación en tiempo de ejecución
+
+`packages/domain` (`package.json`) **no declara `@nestjs/cqrs` como dependencia — nunca lo ha
+hecho**. Verificado empíricamente, no asumido: `node -e "require.resolve('@nestjs/cqrs')"` ejecutado
+dentro de `packages/domain` falla con `MODULE_NOT_FOUND`; un intento de `import('@nestjs/cqrs')`
+estático dentro de un archivo de este paquete **ni siquiera compila** (`tsc`/`ts-jest`: _"Cannot find
+module '@nestjs/cqrs' or its corresponding type declarations"_). Colocar el contrato aquí no es una
+convención que alguien podría romper por descuido — es estructuralmente imposible que código dentro
+de este paquete llame a `CommandBus`, porque el paquete ni siquiera tiene ese módulo instalado en su
+árbol de dependencias (aislamiento estricto de pnpm, sin dependencias fantasma). No se añadió ningún
+lint ni regla nueva — la propiedad ya existía en la arquitectura del monorepo; AR-047 solo la
+aprovecha deliberadamente.
+
+### 3. Preparado para AR-050, sin introducir un consumidor
+
+No se creó ningún `CoachModule`, ningún proveedor de IA, ningún caso de uso concreto. `AIProposalSource`
+no tiene ninguna implementación todavía — solo el contrato. Cuando AR-050 introduzca el primer
+componente de IA real, implementará esta interfaz y quedará, por construcción, dentro del límite.
+
+### 4. Exclusiones respetadas
+
+Cero proveedores LLM, prompts, embeddings, modelos, agentes, herramientas o reglas específicas de
+Coach. Verificado explícitamente: el `Recommendation` ya existente en
+`packages/domain/src/dashboard/Recommendation.ts` (consumido por `DashboardLayoutEngine`) es un
+concepto distinto y deliberadamente no tocado — está acoplado al vocabulario de UI/dashboard
+(`PROMOTE_WIDGET`, `COACH_TIP`, etc.), mientras que `AIProposal` es el contrato general de frontera
+dominio/aplicación para cualquier futura capacidad de IA, no solo Coach. Fusionarlos habría acoplado
+el contrato general a reglas específicas de Coach — justo lo excluido.
+
+### 5. Regla de implementación verificada
+
+_"Todo artefacto creado en AR-047 debe seguir siendo válido aunque el proveedor de IA cambie
+completamente en el futuro."_ Cumplida: cero dependencias externas nuevas (`ai-proposal/` no importa
+nada fuera de TypeScript puro), cero acoplamiento a ningún proveedor, modelo o tecnología.
+
+---
+
+## Fase 5 — Validación
+
+**Estado: ✅ Validada.**
+
+### Validación estructural
+
+- Existe exactamente un punto previsto de integración IA → aplicación: `AIProposalSource`.
+- Ese punto devuelve `AIProposal[]`, nunca un Command — verificado por el tipo de retorno y por el
+  test `AIProposalSource.propose can only ever return AIProposal[]`.
+- No aparece ninguna dependencia desde `ai-proposal/` hacia mecanismos de ejecución del dominio —
+  grep confirma cero imports de `CommandBus`, `EventBus`, comandos o repositorios en todo el módulo.
+
+### Validación de dependencias
+
+Camino `IA → CommandBus` (o equivalente funcional): **no existe, y no puede existir** — probado
+empíricamente (test `packages/domain cannot resolve @nestjs/cqrs`, 2 formas: `require.resolve` en
+runtime y `import` estático rechazado en compilación). El flujo previsto termina conceptualmente en
+`IA → Propuesta → Flujo de aplicación → Dominio`, con la transición propuesta→ejecución fuera del
+componente de IA (ninguna interfaz de `ai-proposal/` expone un método que la realice).
+
+### Validación de preparación (5 preguntas de Fase 4A)
+
+1. **¿Existe un único contrato de integración para futuras capacidades de IA?** Sí — `AIProposalSource`.
+2. **¿Ese contrato solo permite producir propuestas?** Sí — su único método retorna `AIProposal[]`,
+   un tipo sin comportamiento.
+3. **¿La ejecución sigue dependiendo exclusivamente de la aplicación?** Sí — nada en `ai-proposal/`
+   puede alcanzar `CommandBus`; la mutación de dominio sigue exclusivamente en manos de los handlers
+   de aplicación existentes.
+4. **¿Podrá AR-050 reutilizar este contrato sin redefinir la arquitectura?** Sí — implementar
+   `AIProposalSource<TContext>` con el `TContext` que ese trabajo necesite es la única integración
+   requerida.
+5. **¿No se introdujo ninguna dependencia hacia proveedores o tecnologías concretas?** Confirmado —
+   cero dependencias nuevas en `package.json`, cero imports de librerías de IA.
+
+### Evidencia de ejecución (no solo inspección)
+
+- `pnpm --filter @commitment/domain test` → **282/282 passing** (279 previos + 3 nuevos: shape de
+  `AIProposal` sin métodos, `AIProposalSource` devuelve solo `AIProposal[]`, `@nestjs/cqrs`
+  irresoluble desde este paquete).
+- `pnpm --filter @commitment/domain build` → limpio.
+- `pnpm --filter backend build` / `test` → **143/143 passing**, sin cambios (backend no consume
+  todavía este contrato, por diseño — nada que romper).
+
+---
+
+## Estado
+
+**Fase 1, Fase 2A, Fase 2B, Fase 4A, Fase 4B y Fase 5 cerradas. AR-047 cerrada.** El límite
+arquitectónico queda materializado (`AIProposal`/`AIProposalSource` en `packages/domain`); no existe
+ningún camino estructural desde IA hasta la ejecución de dominio, probado empíricamente, no solo
+argumentado; el mecanismo es independiente de cualquier proveedor de IA; AR-050 podrá implementarse
+íntegramente dentro de este límite, sin necesidad de modificar D-047.1. Primera remediación del
+programa cuyo entregable principal no es código funcional, sino una restricción arquitectónica
+reutilizable. 282/282 tests de dominio y 143/143 de backend passing, cero regresión. Decisión: ✅
+Decisión aprobada → ✔️ Validada.
