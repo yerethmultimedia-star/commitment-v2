@@ -293,16 +293,91 @@ reabrir D-050.1.
 
 ---
 
+---
+
+## Fase 4B — Implementación
+
+### Incremento 1 — Modelo conceptual `Recommendation ↔ AIProposal`
+
+**Estado: ✅ Cerrado.**
+
+Regla estricta de este incremento: **todavía no construir plataforma.** El único objetivo es eliminar
+la ambigüedad conceptual pendiente entre `Recommendation` (producto) y `AIProposal` (capacidad de IA).
+
+**Alternativas evaluadas:**
+
+- **A — `Recommendation` implementa `AIProposal`.** Descartada: acopla un concepto de producto ya
+  existente a uno introducido por la plataforma de IA, y condiciona la evolución de `Recommendation` a
+  decisiones futuras de la plataforma.
+- **B — `AIProposal` implementa `Recommendation`.** Descartada: invertiría la dependencia — la
+  plataforma terminaría conociendo un concepto específico del producto, contradiciendo D-050.1
+  (neutralidad/independencia de la capacidad).
+- **C — Transformación explícita (elegida).** Ambos conceptos permanecen independientes; la plataforma
+  produce `AIProposal`, el producto consume `Recommendation`, y entre ambos existe una transformación
+  explícita — no herencia, no coincidencia estructural, no reutilización implícita.
+
+**Implementado — nuevo `packages/domain/src/ai-proposal-transformation/`:**
+
+- `ai-proposal-to-recommendation.ts` — exporta únicamente el tipo
+  `AIProposalToRecommendationTransformer = (proposal: AIProposal) => Recommendation`. Es la definición
+  formal del punto de transformación: vive en un módulo propio, distinto de `ai-proposal/` y de
+  `dashboard/`, precisamente para que ninguno de los dos tenga que importar al otro — este es el único
+  módulo del dominio con permiso de importar ambos tipos.
+- `index.ts` + export añadido a `packages/domain/src/index.ts`.
+- **Deliberadamente no implementado todavía** (fuera del alcance de este incremento): prompts, contexto,
+  LLM, memoria, consumidores nuevos, ni una función de transformación concreta enviada a producción —
+  solo el contrato formal. Los tests ejercitan un transformador de ejemplo únicamente dentro del propio
+  test, no como código de producción.
+
+**Propiedades congeladas por este incremento:**
+
+1. `AIProposal` pertenece exclusivamente a la plataforma — nunca al producto.
+2. `Recommendation` pertenece exclusivamente al producto — nunca a la plataforma.
+3. Ningún tipo conoce al otro — la dependencia directa desaparece.
+4. La conversión constituye un límite arquitectónico propio (`AI Platform → AIProposal →
+Transformation → Recommendation → UI/Coach`), que permite que ambos modelos evolucionen
+   independientemente.
+
+**Precisión honesta sobre el tipo de garantía (distinta de D-047.1):** a diferencia del límite
+Authentication↔Identity (AR-030) o IA↔`CommandBus` (AR-047), que son estructuralmente imposibles de
+romper por vivir en paquetes distintos sin la dependencia necesaria, `AIProposal` y `Recommendation`
+viven en el **mismo paquete** (`packages/domain`) — no hay aislamiento de pnpm que lo haga físicamente
+imposible. Hoy la separación es **verificada, no estructuralmente forzada**: `grep` confirma que
+`ai-proposal/*.ts` no menciona `Recommendation`/`dashboard`, y que `dashboard/Recommendation.ts` no
+menciona `AIProposal`/`ai-proposal`. Si en el futuro esta convención necesitara una garantía más fuerte
+(p. ej. una regla de lint `no-restricted-imports`, como AR-054 hizo para `BullModule`), ese paso se
+tomaría entonces, con evidencia de violación repetida — no ahora, sin ningún caso real que lo justifique
+(mismo principio H-GOV-01 que ya gobierna el resto de esta AR).
+
+**Validación del incremento (criterio fijado por el usuario):**
+
+1. **¿`AIProposal` puede evolucionar sin modificar `Recommendation`?** Sí — ningún tipo referencia al
+   otro; solo el transformador (que no existe todavía como implementación real) los conectaría.
+2. **¿`Recommendation` puede cambiar sin alterar la plataforma IA?** Sí, misma razón.
+3. **¿Existe un único punto de transformación entre ambos modelos?** Sí —
+   `AIProposalToRecommendationTransformer`, en un módulo propio.
+4. **¿No aparece ninguna dependencia circular?** Confirmado por grep — cero referencias cruzadas en
+   ambas direcciones.
+5. **¿El siguiente incremento (contrato de plataforma) puede comenzar sin volver a discutir este
+   modelo?** Sí — el tipo del transformador ya fija la forma de la interacción; el Incremento 2 no
+   necesita reabrir esta decisión.
+
+**Evidencia de ejecución:** `pnpm --filter @commitment/domain test` → 283/283 passing (1 nuevo: el
+transformador de ejemplo satisface el tipo, y `Recommendation` no hereda campos de `AIProposal` que no
+le correspondan); `pnpm --filter @commitment/domain build` limpio; `pnpm --filter backend test`/`build`
+→ 143/143, sin cambios (este incremento no toca backend, por diseño).
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-050.1 aprobada. **Diseño técnico congelado (Fase
-4A):** Alternativa C — plataforma incremental alrededor del contrato, 6 incrementos ordenados (modelo
-conceptual → contrato de plataforma → contexto → primer consumidor/Coach → proveedor LLM → Memory), cada
-uno una capacidad reutilizable y verificable sin reabrir D-050.1. `Recommendation`↔`AIProposal` resuelto
-como propiedad ("transformación o unificación explícita, nunca equivalencia implícita"), mecanismo
-diferido al Incremento 1. Regla de neutralidad tecnológica ("la plataforma conoce capacidades; los
-adaptadores conocen proveedores") fijada para toda la implementación. Pendiente: **Fase 4B
-(Implementación)** — dado el Esfuerzo XL, se espera que Fase 4B se ejecute ella misma como una
-secuencia de sub-entregas, cada una con su propia validación, no como un solo paso. Estado: se mantiene
-🟦 En análisis (no salta a 🟨 hasta que arranque el primer incremento de Fase 4B). Decisión: se
-mantiene ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B — Incremento 1 de 6 cerrado.** D-050.1 aprobada;
+diseño técnico congelado (Alternativa C, plataforma incremental). **Incremento 1 completo:** el modelo
+conceptual `Recommendation ↔ AIProposal` queda estabilizado mediante una transformación explícita
+(`AIProposalToRecommendationTransformer`, `packages/domain/src/ai-proposal-transformation/`) — ningún
+tipo conoce al otro, verificado por grep (no estructuralmente forzado, a diferencia de D-047.1, por
+compartir paquete). 283/283 tests de dominio, 143/143 backend sin cambios. Los 5 incrementos restantes
+(contrato de plataforma, contexto, primer consumidor/Coach, proveedor LLM, Memory) deben limitarse a
+materializar capacidades técnicas sobre este modelo ya decidido, no a redefinirlo. Estado: se mantiene
+🟦 En análisis (no salta a 🟨 hasta cerrar Fase 4B en su totalidad). Decisión: se mantiene ✅ Decisión
+aprobada. Pendiente: **Fase 4B — Incremento 2 (contrato de plataforma)**.

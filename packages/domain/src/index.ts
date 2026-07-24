@@ -13,6 +13,7 @@ export * from './task/index.js';
 export * from './credential/index.js';
 export * from './session/index.js';
 export * from './ai-proposal/index.js';
+export * from './ai-proposal-transformation/index.js';
 
 // Dashboard
 export * from './dashboard/WidgetCapabilities.js';
