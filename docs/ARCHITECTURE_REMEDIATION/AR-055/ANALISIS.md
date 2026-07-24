@@ -217,10 +217,64 @@ habrá quedado institucionalizada.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+D-055.1 ya congeló correctamente las 4 propiedades; Fase 4A no vuelve a discutir la política, se
+limita a comparar qué mecanismo técnico las satisface con el menor coste de transición.
+
+**Alternativa A — Capacidad inmediata + transición explícita (elegida).** Habilitar permanentemente
+el análisis de `.tsx` (parser + `parserOptions`); configurar las reglas con severidad `error`;
+introducir un mecanismo explícito y temporal (overrides, allowlist o equivalente) para gestionar
+únicamente los 93 hallazgos históricos; todo archivo nuevo queda sujeto al conjunto completo de reglas
+desde el primer día. Ventajas: materializa íntegramente D-055.1; la cobertura de `.tsx` deja de
+depender de una omisión de configuración; la deuda histórica queda identificada y medible; la
+transición es explícita y reversible. Desventaja reconocida: requiere mantener temporalmente un
+mecanismo de transición.
+
+**Alternativa B — Activar `.tsx` con `warn` (descartada).** Misma cobertura, hallazgos como
+advertencias. Descartada: no garantiza que la nueva deuda no aumente, debilita la gobernanza del
+análisis estático, convierte la transición en una práctica voluntaria.
+
+**Alternativa C — Corregir los 93 hallazgos antes de habilitar `.tsx` (descartada).** Descartada:
+cambia completamente el alcance, convierte AR-055 en una migración masiva, retrasa la obtención de la
+capacidad que precisamente originó la AR.
+
+**Alternativa D — Mantener `.tsx` fuera del análisis hasta una futura migración (descartada).**
+Debe descartarse: contradice directamente D-055.1 ya aprobada, mantiene la brecha de gobernanza
+descubierta en Fase 1.
+
+**Comparación:**
+
+| Criterio                       | A     | B       | C             | D    |
+| ------------------------------ | ----- | ------- | ------------- | ---- |
+| Cobertura permanente de `.tsx` | ✅    | ✅      | ❌ (diferida) | ❌   |
+| Previene nueva deuda           | ✅    | Parcial | ✅            | ❌   |
+| Respeta el alcance de la AR    | ✅    | ✅      | ❌            | ❌   |
+| Compatible con D-055.1         | ✅    | Parcial | Parcial       | ❌   |
+| Complejidad                    | Media | Baja    | Alta          | Baja |
+
+**Alternativa elegida: A** — no por ser la más estricta, sino por ser la única que mantiene
+simultáneamente las 4 propiedades congeladas (cobertura permanente, separación capacidad/deuda,
+transición explícita, no regresión de cobertura).
+
+**Simetría registrada con AR-034, no promovida a principio metodológico:** en AR-034 la capacidad ya
+existía y faltaba el enforcement; en AR-055 el enforcement existía y faltaba ampliar correctamente la
+capacidad. En ambos casos la solución elegida es una adopción incremental con transición explícita,
+cada AR resolviendo una dimensión distinta — esa consistencia facilita que, una vez implementada
+AR-055, AR-034 pueda desbloquearse sin necesidad de revisar ni D-034.1 ni D-055.1.
+
+**Explícitamente fuera de alcance de Fase 4A:** la lista exacta de los 93 archivos con excepción
+temporal, el formato concreto de la exclusión, el proceso de eliminación de excepciones, plazos de
+migración.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** D-055.1 aprobada: los archivos `.tsx` forman parte permanente
-del alcance del análisis estático del frontend; la deuda histórica (93 hallazgos) se gestiona vía
-transición explícita, sin excluir la extensión. Pendiente: **Fase 4A (Diseño técnico)** — comparar
-alternativas concretas de mecanismo (severidad, baseline, allowlist, overrides) sin reabrir ninguna de
-las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-055.1 aprobada; diseño técnico elegido: habilitar
+permanentemente `.tsx` (parser + parserOptions), severidad `error`, con un mecanismo temporal de
+transición para los 93 hallazgos históricos (Alternativa A). Pendiente: **Fase 4B (Implementación)** —
+construir el `overrides` concreto con las exclusiones. Estado: se mantiene 🟦 En análisis (no salta a
+🟨 hasta Fase 4B). Decisión: se mantiene ✅ Decisión aprobada.
