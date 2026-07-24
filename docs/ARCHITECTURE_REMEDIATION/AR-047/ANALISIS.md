@@ -163,12 +163,94 @@ que Fase 4A determine el momento y el mecanismo.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+**AR-047 tiene una característica distinta a casi todas las anteriores: la decisión arquitectónica ya
+define qué propiedad debe preservarse, pero todavía no existe un consumidor capaz de violarla.** Esto
+convierte el diseño en un ejercicio de **preparación arquitectónica**, no de corrección.
+
+**Pregunta que gobierna esta fase (deliberadamente no formulada como "¿cómo impedimos que la IA ejecute
+comandos hoy?"):**
+
+> **¿Cuál es el mecanismo que hará imposible romper D-047.1 cuando AR-050 introduzca IA real?**
+
+### Alternativas evaluadas
+
+- **A — Enforcement inmediato (construir ahora toda la infraestructura).** Descartada: la evidencia de
+  Fase 1 confirma que hoy no existe ningún camino que permita a la IA ejecutar comandos — introducir
+  infraestructura sin un consumidor concreto aumenta complejidad y superficie de mantenimiento sin
+  aportar protección efectiva adicional en el estado actual.
+- **B — Esperar completamente a AR-050 (no diseñar nada ahora).** Descartada: el riesgo es que el
+  primer diseño de IA llegue sin una restricción arquitectónica previamente pensada, y el mecanismo
+  termine condicionado por la implementación en lugar de por la arquitectura.
+- **C — Contrato arquitectónico ahora, implementación con el primer consumidor (elegida).** Se congela
+  el **punto de integración**, no el mecanismo concreto: queda definido hoy el único lugar por el que
+  una IA podrá interactuar con el sistema; el enforcement se materializa cuando exista el primer
+  consumidor real (AR-050). Así, la primera implementación de IA nace ya dentro del límite correcto.
+
+### Diseño congelado
+
+No se congelan clases, interfaces ni tecnologías — se congela una regla de interacción:
+
+> **Toda capacidad de IA debe terminar su responsabilidad en la generación de una propuesta. La
+> transición desde propuesta a ejecución pertenece exclusivamente a un flujo de aplicación explícito y
+> ajeno al componente de IA.**
+
+Esto preserva D-047.1 independientemente de si en el futuro se utilizan LLMs, motores de reglas,
+modelos locales o proveedores externos.
+
+### Separación de responsabilidades
+
+Tres actores claramente diferenciados, ninguno absorbe la responsabilidad del otro:
+
+- **IA** → propone.
+- **Aplicación** → decide si una propuesta puede convertirse en acción.
+- **Dominio** → ejecuta únicamente comandos válidos.
+
+### Expectativa fijada para Fase 4B
+
+Implementación deliberadamente pequeña — no un framework de IA. Únicamente lo necesario para que AR-050
+no pueda introducir un camino alternativo de ejecución: definir el contrato de entrada/salida del
+componente de IA, documentar el límite arquitectónico, preparar el punto de integración — sin introducir
+todavía un consumidor inexistente.
+
+### Criterio de validación para Fase 5
+
+No se valida que "la IA no ejecuta" (hoy no existe IA con capacidad de hacerlo) — se valida la
+arquitectura:
+
+1. ¿Existe un único límite arquitectónico previsto para la interacción entre IA y la aplicación?
+2. ¿Ese límite termina siempre en una propuesta y nunca en una ejecución?
+3. ¿La ejecución continúa dependiendo exclusivamente de los flujos de aplicación autorizados?
+4. ¿Podrá AR-050 reutilizar ese límite sin redefinir la arquitectura?
+5. ¿No se introdujo infraestructura cuyo único propósito sea anticipar un consumidor todavía
+   inexistente?
+
+Si las cinco respuestas son afirmativas, D-047.1 queda preparada para materializarse cuando aparezca el
+primer consumidor real.
+
+### Observación registrada (no promovida)
+
+AR-047 cambia el momento en que se toma una decisión arquitectónica. En las AR anteriores, la
+arquitectura respondía a una realidad ya existente. Aquí la arquitectura establece una restricción antes
+de que exista el riesgo. Si esa disciplina se mantiene, AR-050 no debería preguntarse cómo evitar que la
+IA ejecute comandos — debería encontrar esa respuesta ya incorporada en la arquitectura y limitarse a
+implementarla dentro de ese marco.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** El hallazgo se confirma vigente como una propiedad
-arquitectónica futura, no una vulnerabilidad presente — ni las 3 Sagas que lo evidencian ni el estado de
-Coach/IA se han modificado, y AR-050 sigue sin empezar. D-047.1 aprobada: toda capacidad de IA que
-genere recomendaciones o planes debe permanecer estructuralmente separada de la ejecución de comandos,
-independientemente de cuándo o cómo se implemente. Momento y mecanismo de enforcement diferidos
-explícitamente a Fase 4A. Pendiente: **Fase 4A (Diseño técnico)**. Estado: se mantiene 🟦 En análisis.
-Decisión: 💭 → ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** El hallazgo se confirma vigente como una propiedad
+arquitectónica futura, no una vulnerabilidad presente. D-047.1 aprobada. **Diseño técnico congelado
+(Fase 4A):** contrato arquitectónico ahora (punto único de integración IA↔aplicación, terminando
+siempre en una propuesta), implementación diferida al primer consumidor real (AR-050) — Alternativa C.
+Regla de interacción congelada: toda capacidad de IA termina su responsabilidad en generar una
+propuesta; la transición a ejecución pertenece exclusivamente a un flujo de aplicación explícito ajeno
+al componente de IA. Tres actores separados (IA propone / Aplicación decide / Dominio ejecuta).
+Implementación esperada en Fase 4B: deliberadamente pequeña (contrato de entrada/salida, límite
+documentado, punto de integración preparado — sin consumidor todavía). Pendiente: **Fase 4B
+(Implementación)**. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
+mantiene ✅ Decisión aprobada.
