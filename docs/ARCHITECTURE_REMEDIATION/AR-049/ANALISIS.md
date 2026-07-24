@@ -237,12 +237,75 @@ propiedades ya estabilizadas por las anteriores.
 
 ---
 
+## Fase 4A — Diseño técnico
+
+**Estado: ✅ Cerrada.**
+
+Con D-049.1 ya congelada, Fase 4A responde únicamente **cómo se organiza la coordinación**, no **qué
+responsabilidad tiene** el `SynchronizationEngine`. Las 4 propiedades ya aprobadas no vuelven a
+discutirse.
+
+**Alternativa A — Orquestador puro (elegida).** El `SynchronizationEngine` actúa únicamente como
+coordinador: consulta `OfflineStorage`, consulta `OperationQueue`, aplica política de reconciliación
+y delega en futuros adaptadores de persistencia. No almacena estado permanente, no implementa
+transporte, no conoce detalles de almacenamiento — coordina llamadas entre componentes
+especializados. Ventajas: máxima coherencia con D-049.1; mantiene una única responsabilidad; facilita
+sustituir Storage, Queue o Backend sin modificar el motor; permite añadir adaptadores posteriormente.
+
+**Alternativa B — Motor con estado interno (descartada).** El `SynchronizationEngine` mantiene
+operaciones pendientes, snapshots y estado de sincronización propios. Descartada: empieza a absorber
+responsabilidades propias de `OfflineStorage` y `OperationQueue` — la coordinación deja de ser su
+responsabilidad exclusiva.
+
+**Alternativa C — Pipeline distribuido (descartada).** Cada componente participa parcialmente en la
+reconciliación (Storage decide qué sincronizar, Queue decide conflictos, BackendAdapter decide
+reconciliación). Descartada: la responsabilidad exclusiva deja de existir, la lógica termina
+repartida entre varios componentes — contradice directamente D-049.1.
+
+**Alternativa elegida: A.** Modelo conceptual:
+
+```
+Application
+        │
+        ▼
+SynchronizationEngine
+     │           │
+     ▼           ▼
+OfflineStorage   OperationQueue
+        │
+        ▼
+Future Persistence Adapter
+```
+
+El adaptador de persistencia todavía no existe; el `SynchronizationEngine` únicamente conoce su
+contrato futuro; ningún componente lateral contiene lógica de reconciliación.
+
+**Explícitamente fuera de alcance de Fase 4A:** push/pull, sincronización incremental, eventos,
+WebSockets, HTTP, gRPC, OCC, CRDT, retries, backoff, batching, compresión, prioridades, sincronización
+parcial — todos mecanismos de implementación futura.
+
+**Criterio de validación fijado antes de Fase 4B** (5 preguntas): toda la coordinación pasa
+exclusivamente por `SynchronizationEngine`; `OfflineStorage` permanece como proveedor de datos
+locales, sin lógica de reconciliación; `OperationQueue` permanece como proveedor de operaciones
+pendientes, sin lógica de reconciliación; el futuro adaptador de persistencia sustituible sin
+modificar `SynchronizationEngine`; incorporación posterior de protocolos/algoritmos/estrategias
+requiere solo nuevas implementaciones, no rediseño del modelo.
+
+**Observación registrada, no promovida:** la progresión AR-048 (topología de la arquitectura Offline)
+→ AR-049 (responsabilidad exclusiva de coordinación) → Fase 4A (patrón de organización que la
+materializa) → Fase 4B (esqueleto del coordinador) forma una secuencia consistente donde cada paso
+introduce exactamente una decisión nueva y reutiliza todas las anteriores. Variantes habituales de
+coordinación (State Machine, Saga, Event Bus, Workflow Engine) son implementaciones/mecanismos, no
+alternativas de esta fase — pueden seguir evaluándose en remediaciones futuras sin afectar D-049.1.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A y Fase 2B cerradas.** D-049.1 aprobada: el `SynchronizationEngine` es el único
-componente responsable de coordinar la reconciliación entre `OfflineStorage`, `OperationQueue` y la
-futura persistencia canónica, independiente de mecanismo concreto de sincronización/transporte/
-almacenamiento/resolución de conflictos. Pendiente: **Fase 4A (Diseño técnico)** — comparar
-alternativas concretas de cómo el `SynchronizationEngine` coordina esa reconciliación sin reabrir
-ninguna de las 4 propiedades congeladas. Estado: se mantiene 🟦 En análisis. Decisión: 💭 → ✅
-Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas.** D-049.1 aprobada; diseño técnico elegido:
+`SynchronizationEngine` como orquestador puro que consulta `OfflineStorage`/`OperationQueue` y delega
+en un futuro adaptador de persistencia (Alternativa A), sin estado interno propio ni lógica repartida
+entre componentes. Pendiente: **Fase 4B (Implementación)** — esqueleto mínimo del coordinador en
+`apps/mobile/src/core/offline/`, sin protocolo, algoritmo de reconciliación ni adaptador de
+persistencia todavía. Estado: se mantiene 🟦 En análisis (no salta a 🟨 hasta Fase 4B). Decisión: se
+mantiene ✅ Decisión aprobada.
