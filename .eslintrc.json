@@ -71,6 +71,111 @@
         "no-empty": "off",
         "no-undef": "off"
       }
+    },
+    {
+      "files": ["apps/mobile/src/**/*.ts", "apps/mobile/src/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "tamagui",
+                "message": "Import Tamagui components/APIs only via '@commitment/design-system' (the sole authorized entry point — see AR-034/ANALISIS.md, D-034.1)."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/mobile/src/app/(auth)/login.tsx",
+        "apps/mobile/src/app/(auth)/onboarding.tsx",
+        "apps/mobile/src/app/(tabs)/coach.tsx",
+        "apps/mobile/src/app/(tabs)/insights.tsx",
+        "apps/mobile/src/app/(tabs)/profile.tsx",
+        "apps/mobile/src/app/+not-found.tsx",
+        "apps/mobile/src/app/_layout.tsx",
+        "apps/mobile/src/app/calendar.tsx",
+        "apps/mobile/src/core/auth/auth-provider.tsx",
+        "apps/mobile/src/core/components/QuickActionMenu.tsx",
+        "apps/mobile/src/features/appearance/providers/AppearanceProvider.tsx",
+        "apps/mobile/src/features/appearance/screens/AppearanceSettingsScreen.tsx",
+        "apps/mobile/src/features/appearance/screens/LanguageSettingsScreen.tsx",
+        "apps/mobile/src/features/appearance/screens/SettingsScreen.tsx",
+        "apps/mobile/src/features/commitments/components/CommitmentActionBar.tsx",
+        "apps/mobile/src/features/commitments/components/CommitmentMetadata.tsx",
+        "apps/mobile/src/features/commitments/components/forms/CommitmentForm.tsx",
+        "apps/mobile/src/features/commitments/components/history/ActivityRenderer.tsx",
+        "apps/mobile/src/features/commitments/components/history/CommitmentHistory.tsx",
+        "apps/mobile/src/features/commitments/screens/CreateCommitmentScreen.tsx",
+        "apps/mobile/src/features/commitments/screens/EditCommitmentScreen.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/DashboardHeader.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/DashboardHeroCard.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/WidgetRenderer.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/empty-states/DashboardEmptyState.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/skeletons/DashboardSkeleton.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/CoachMessageWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/CompletionRateWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/DailyConsistencyWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/MotivationWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/QuickActionsWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/RecentActivityWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/TodayAgendaWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/TodayHabitsWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/TodayWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/UpcomingTasksWidget.tsx",
+        "apps/mobile/src/features/dashboard/ui/components/widgets/WeeklyProgressWidget.tsx",
+        "apps/mobile/src/features/goals/components/GoalCard.tsx",
+        "apps/mobile/src/features/goals/components/GoalCommitmentsTab.tsx",
+        "apps/mobile/src/features/goals/components/GoalProgressBar.tsx",
+        "apps/mobile/src/features/goals/components/GoalTabStrip.tsx",
+        "apps/mobile/src/features/goals/components/GoalTasksFlatTab.tsx",
+        "apps/mobile/src/features/goals/components/HabitsTab.tsx",
+        "apps/mobile/src/features/goals/components/ObjectivesTab.tsx",
+        "apps/mobile/src/features/goals/screens/GoalWorkspaceScreen.tsx",
+        "apps/mobile/src/features/goals/screens/GoalsScreen.tsx",
+        "apps/mobile/src/features/habits/components/HabitCard.tsx",
+        "apps/mobile/src/features/habits/components/HabitsHero.tsx",
+        "apps/mobile/src/features/habits/components/PostponeSheet.tsx",
+        "apps/mobile/src/features/habits/components/forms/HabitForm.tsx",
+        "apps/mobile/src/features/habits/components/forms/WeekdayPicker.tsx",
+        "apps/mobile/src/features/habits/screens/CreateHabitScreen.tsx",
+        "apps/mobile/src/features/habits/screens/EditHabitScreen.tsx",
+        "apps/mobile/src/features/habits/screens/HabitDetailScreen.tsx",
+        "apps/mobile/src/features/habits/screens/TodayHabitsScreen.tsx",
+        "apps/mobile/src/features/insights/ui/components/FocusDayBarChart.tsx",
+        "apps/mobile/src/features/insights/ui/components/FocusStatsSummary.tsx",
+        "apps/mobile/src/features/insights/ui/components/GoalProgressInsight.tsx",
+        "apps/mobile/src/features/insights/ui/components/HabitConsistencyInsight.tsx",
+        "apps/mobile/src/features/insights/ui/components/Sparkline.tsx",
+        "apps/mobile/src/features/insights/ui/components/TimeRangeTabs.tsx",
+        "apps/mobile/src/features/insights/ui/components/TopConsistencyInsight.tsx",
+        "apps/mobile/src/features/insights/ui/components/WeekActivityRow.tsx",
+        "apps/mobile/src/features/insights/ui/screens/FocusDetailScreen.tsx",
+        "apps/mobile/src/features/tasks/components/FilterChip.tsx",
+        "apps/mobile/src/features/tasks/components/ReminderSection.tsx",
+        "apps/mobile/src/features/tasks/components/TaskCard.tsx",
+        "apps/mobile/src/features/tasks/components/TaskForm.tsx",
+        "apps/mobile/src/features/tasks/screens/EditTaskScreen.tsx",
+        "apps/mobile/src/features/tasks/screens/TaskDetailScreen.tsx",
+        "apps/mobile/src/shared/forms/ControlledDatePicker.tsx",
+        "apps/mobile/src/shared/forms/ControlledInput.tsx",
+        "apps/mobile/src/shared/forms/ControlledSelect.tsx",
+        "apps/mobile/src/shared/forms/PlainDateTimePicker.tsx",
+        "apps/mobile/src/shared/ui/FloatingTabBar.tsx",
+        "apps/mobile/src/shared/ui/FullScreenCenter.tsx",
+        "apps/mobile/src/shared/ui/feedback/ErrorState.tsx",
+        "apps/mobile/src/shared/ui/feedback/LoadingState.tsx",
+        "apps/mobile/src/shared/ui/timeline/Timeline.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineDate.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineIcon.tsx",
+        "apps/mobile/src/shared/ui/timeline/TimelineItem.tsx"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
     }
   ]
 }

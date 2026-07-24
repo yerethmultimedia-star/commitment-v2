@@ -321,11 +321,93 @@ encuentren una brecha similar.
 
 ---
 
+## Fase 4B — Implementación (reanudada tras el cierre de AR-055)
+
+**Estado: ✅ Cerrada.**
+
+### Precondición resuelta
+
+AR-055 cerró el 2026-07-24, habilitando permanentemente el análisis de `.tsx` en `expo lint`
+(parser+`parserOptions`, ver `AR-055/ANALISIS.md`). La restricción que bloqueaba esta fase —"el
+mecanismo de validación ni siquiera analiza los archivos donde existen las 82 importaciones"— ya no
+existe. La reanudación retoma exactamente el diseño ya congelado en Fase 4A (Alternativa A), sin
+reabrir Fase 2B ni Fase 4A.
+
+### Verificación previa: la cifra de 82 archivos sigue vigente
+
+Antes de construir la regla, se repitió el grep de Fase 1 sobre el estado actual del repositorio:
+**82 archivos** en `apps/mobile/src` siguen importando directamente de `'tamagui'`, todos `.tsx`, sin
+excepción — mismo conjunto exacto que Fase 1 documentó (ninguno se resolvió ni se añadió entre
+entonces y ahora).
+
+### Cambios realizados, exactamente los que Fase 4A autorizó
+
+1. **Override de enforcement** (`.eslintrc.json`) — `"files": ["apps/mobile/src/**/*.ts",
+"apps/mobile/src/**/*.tsx"]` con `no-restricted-imports` en severidad `error`, restringiendo el
+   path `tamagui` con un mensaje explícito que cita `AR-034/ANALISIS.md`/D-034.1 (mismo estilo que el
+   precedente de AR-054 en `apps/backend/eslint.config.mjs`).
+2. **Override de excepción temporal** (`.eslintrc.json`) — lista explícita de los 82 archivos
+   históricos, con `no-restricted-imports: "off"` únicamente para esos archivos. Cualquier archivo
+   nuevo o no listado queda sujeto a la regla desde el primer día.
+
+Sin tocar ningún componente, ningún archivo de `@commitment/design-system`, ninguna migración de
+imports existentes.
+
+### Validaciones ejecutadas, con evidencia real
+
+1. **Las 82 importaciones históricas siguen funcionando** — `expo lint --no-cache` reporta
+   exactamente los mismos 47 problemas que la línea base de AR-055 (100% en `.ts`, 0 en `.tsx`,
+   0 relacionados con `no-restricted-imports`); ninguno de los 82 archivos históricos genera un nuevo
+   error.
+2. **Una importación nueva de `tamagui` produce el error esperado** — archivo de prueba temporal
+   (`__ar034_temp_probe.tsx`, fuera de la lista de excepción) con `import { Button } from 'tamagui'`:
+   `expo lint` reportó `error 'tamagui' import is restricted from being used. Import Tamagui
+components/APIs only via '@commitment/design-system'...`. Archivo eliminado inmediatamente después
+   de la prueba.
+3. **La importación equivalente desde `@commitment/design-system` permanece permitida** — el mismo
+   archivo de prueba importaba `Card` desde `@commitment/design-system` en la línea siguiente; cero
+   errores sobre esa línea.
+4. **La regla afecta también a `.tsx`** — el propio archivo de prueba era `.tsx`, y el error se
+   reportó con normalidad. Esta es la validación que originalmente no pudo ejecutarse (Fase 4B quedó
+   bloqueada antes de llegar a probarla) — su éxito ahora es la evidencia directa de que la
+   precondición resuelta por AR-055 era exactamente la que impedía materializar D-034.1, y ninguna
+   otra.
+5. **`git diff` limitado exclusivamente a `.eslintrc.json`** — `git status --short`/`git diff --stat`:
+   un único archivo modificado, 126 inserciones (los 2 overrides nuevos), 5 eliminaciones (cierre de
+   llaves reformateado por el `overrides` anterior). Cero archivos de componentes, cero cambios en
+   `packages/design-system`, cero migración de imports existentes.
+
+### Confirmación del desacoplamiento AR-034/AR-055
+
+La reanudación completa de esta fase **no requirió reabrir D-034.1 ni modificar el diseño de Fase
+4A** — el único cambio fue construir exactamente el mecanismo ya elegido, ahora contra archivos que sí
+pueden analizarse. Esto confirma empíricamente, de extremo a extremo, que la dependencia entre ambas
+AR era unidireccional y estaba correctamente delimitada: AR-055 resolvió exactamente la precondición
+necesaria (capacidad de analizar `.tsx`) y nada más — ninguna decisión de AR-034 tuvo que ajustarse a
+consecuencia del trabajo de AR-055.
+
+---
+
+## Fase 5 — Cierre
+
+**Estado: ✅ Cerrada.**
+
+Los 5 puntos de validación de Fase 4B quedan satisfechos con evidencia real, no inferida. Las 4
+propiedades de D-034.1 (unicidad del punto de entrada, prevención de nueva deuda, compatibilidad con
+la deuda existente, temporalidad del mecanismo de transición) quedan materializadas sin excepción.
+
+**Primer caso completo del programa de una AR bloqueada por una precondición técnica, desbloqueada por
+una AR spin-off independiente, y cerrada sin reabrir ninguna decisión propia.** Confirma la hipótesis
+registrada en `README.md` ("una Fase 4B puede descubrir una precondición técnica no conocida durante
+las fases anteriores que impide materializar una decisión ya validada, sin invalidar dicha decisión")
+con su primer caso íntegramente cerrado de principio a fin.
+
+---
+
 ## Estado
 
-**Fase 1, Fase 2A, Fase 2B y Fase 4A cerradas. Fase 4B abierta y formalmente bloqueada, dependiente de
-AR-055.** D-034.1 aprobada y no reabierta; diseño técnico elegido (Alternativa A) sigue vigente. El
-bloqueo descubierto en Fase 4B (82 archivos objetivo son `.tsx`, `expo lint` no analiza ningún `.tsx`
-hoy) se resuelve mediante una AR independiente (AR-055), no mediante ampliar el alcance de esta AR.
-Pendiente: cierre de AR-055 antes de reanudar Fase 4B. Estado: se mantiene 🟦 En análisis. Decisión: se
-mantiene ✅ Decisión aprobada.
+**Fase 1, Fase 2A, Fase 2B, Fase 4A, Fase 4B y Fase 5 cerradas. AR-034 CERRADA.** D-034.1 aprobada e
+implementada: `@commitment/design-system` como único punto de entrada autorizado para Tamagui,
+`no-restricted-imports` en `error` para todo archivo nuevo, mecanismo temporal de excepción para los
+82 archivos históricos. Precondición resuelta por AR-055 (cerrada 2026-07-24). Ninguna decisión
+reabierta. Segunda remediación consecutiva completada de principio a fin en la misma sesión.
