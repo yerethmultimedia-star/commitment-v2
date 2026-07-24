@@ -138,14 +138,50 @@ paralelismo que corresponde explorar en la Fase 2 de esta AR, no aquí.
 
 ---
 
+## Fase 2A — Hipótesis
+
+**Estado: ✅ Cerrada.**
+
+La Fase 1 ya cambió el tipo de problema — la búsqueda de causa está terminada; la evidencia es
+suficientemente específica y falsable como para no seguir investigando esa dimensión. La tensión real
+pasa a ser otra: **¿cuál es la política de adopción una vez que el bloqueo técnico desaparece?** Las
+hipótesis giran alrededor de los 93 hallazgos reales, no del parser.
+
+**H1 (principal, la que se espera que sobreviva):** activar el soporte para `.tsx` inmediatamente y
+gestionar los 93 hallazgos mediante una estrategia incremental de transición. Se espera que sobreviva
+porque: la causa técnica mínima ya está demostrada; el parser deja de ser un problema; los 93
+hallazgos son deuda preexistente, no regresiones introducidas por AR-055; posponer indefinidamente el
+análisis mantendría una brecha objetiva en la gobernanza del repositorio.
+
+**Hipótesis alternativas:**
+
+- **H2** — corregir primero los 93 problemas y solo después habilitar el análisis de `.tsx`.
+- **H3** — mantener `.tsx` fuera del alcance de ESLint hasta una futura migración del frontend.
+
+**Separación explícita de dos conceptos que la evidencia ya distingue, para no mezclarlos:**
+
+1. **Capacidad** — ESLint puede analizar correctamente `.tsx`. AR-055 debe garantizar esto.
+2. **Resultado** — al hacerlo aparecen 93 problemas históricos. Esto condicionará la estrategia de
+   adopción, pero no invalida la necesidad de adquirir la capacidad.
+
+**Expectativa registrada para Fase 2B, sin resolverla aquí:** si H1 sobrevive, la decisión
+probablemente no debería decir "corregir los 93 problemas", sino algo más cercano a: _"el análisis de
+archivos `.tsx` forma parte del alcance normal de ESLint. La deuda histórica descubierta durante su
+activación podrá gestionarse mediante un mecanismo explícito de transición sin excluir permanentemente
+esta extensión del proceso de análisis."_ Esa formulación congelaría la política, no la herramienta.
+
+**Observación registrada, no promovida:** AR-055 empieza a parecer el complemento natural de AR-034 —
+AR-034 define **qué** debe gobernarse (imports a Tamagui); AR-055 define **sobre qué universo de
+archivos** puede ejercerse esa gobernanza. Son decisiones ortogonales, y precisamente por eso la
+dependencia introducida tiene sentido: resolver AR-055 no resuelve D-034.1 por sí solo, únicamente
+hace posible implementarlo sin ampliar artificialmente su alcance.
+
+---
+
 ## Estado
 
-**Fase 1 cerrada.** Causa raíz identificada y verificada con evidencia de código fuente (ESLint
-8.57.1) y experimentos controlados y revertidos, no inferencia: ausencia de un patrón `overrides`
-para `.tsx` con parser JSX+TS, un comportamiento documentado de ESLint 8.x, no una limitación de Expo.
-Dos causas independientes aisladas (descubrimiento de archivos vs. configuración de parser); cambio
-mínimo suficiente ya verificado (agregar un único `overrides` sin `extends` ni `rules`); resultado neto
-cuantificado (93 problemas reales en 28 de 126 archivos, 78% ya limpio). Pendiente: **Fase 2
-(Hipótesis/Decisión)** — qué hacer con los 93 problemas reales expuestos y cómo prevenir la misma
-brecha para futuras extensiones de archivo. Estado: ⬜ → 🟦 En análisis. Decisión: pendiente Fase 2
-(Owner=Ambos).
+**Fase 1 y Fase 2A cerradas.** Causa raíz identificada, verificada y cerrada — no requiere más
+investigación. H1 sobrevive: activar `.tsx` inmediatamente, gestionar los 93 hallazgos mediante
+transición incremental. H2/H3 quedan como alternativas a descartar formalmente en Fase 2B. Pendiente:
+**Fase 2B (Decisión)**. Estado: se mantiene 🟦 En análisis. Decisión: se mantiene 💭 Pendiente de
+análisis (pendiente de que el usuario congele D-055.1 en Fase 2B).
